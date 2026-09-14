@@ -4,7 +4,7 @@
 
 **Coordinator:** @v2-pm, Codex
 
-**Standing:** bounded overnight execution closed September14,13:29UTC. Start with the [[morning-handoff-20260914|morning handoff]] and latest Coordinator checkpoint. Compact B is the conditional MVP recommendation; no permanent requirements or protocol bytes are frozen, and production repositories/deployment remain out of scope. Earlier launch instructions and checkpoints below are historical, not standing authority to restart runs.
+**Standing:** James's separately authorized September 14 compact completion pass now has a [[compact-prototype-results-20260914|working compact Files browser and measured live index]] and [[compact-mvp-build-plan-20260914|concrete MVP build plan]]. Start there. The earlier overnight execution closed at13:29UTC; its heartbeat remains deleted. Compact B is the implementation recommendation, not a permanent freeze or authorization for production repositories/deployment. Earlier launch instructions and checkpoints below are historical, not standing authority to restart runs.
 
 **Outcome:** recommend an architecture we can begin building, with its costs, actual sacrifices and remaining gates plainly visible. Not a claim that a century-scale foundation can be proved in two days.
 
@@ -111,6 +111,20 @@ Codex is the default heavy-run operator. Before anyone builds or starts a chain,
 Publish consolidated owner checkpoints at the first shortlist, 24-hour recommendation and final handoff—not every cross-agent message. The Codex thread heartbeat `coordinate-efs-engineering-war-room` checks hourly through September 14 at **14:00 UTC/09:00Chicago**, per James's later morning cutoff, to resume useful work and coordinate returned results. It stays quiet on unchanged state and stops at the final handoff/deadline or sooner if the productivity gate fails. This is a follow-up mechanism, not evidence that every worker or laptop process runs continuously.
 
 ### Coordinator checkpoint
+
+**September 14 follow-on: compact browser, app and live-index pass complete.**
+James authorized scoped Astra High/Extra High workers under the v2 PM, with no
+Fable/Opus or dedicated production Dev task. Source `67f92c5` connects cold names,
+selected bytes, atomic file lifecycle and a real third-party approval/publication
+app. Final checks:217 Solidity executions and41 Node tests pass. Five live files
+after128 renames require five candidates rather than135; the fresh41-byte named
+create is1,626,233 gas, with the measured live inventory adding4.74%. Read the
+[[compact-prototype-results-20260914|qualified results]],
+[[compact-evidence-20260914/README|retained evidence]] and
+[[compact-mvp-build-plan-20260914|next build sequence]]. No production freeze,
+full native-proof portability, populated compact-upgrade or large-scale claim.
+Planning documentation is on main; the existing prototype code branch stays in
+place. Earlier checkpoints below retain their original evidence dates.
 
 **September14,13:29UTC /08:29Chicago: overnight work closed; heartbeat deleted.**
 

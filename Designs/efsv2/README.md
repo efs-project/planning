@@ -10,12 +10,15 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
-**Next decision:** [[../../Reviews/2026-09-12-efs-path-decision/README|The 24–48 hour Codex / Claude comparison]]
-evaluates fuller-model optimization, a compact EFS foundation and MUD reuse
-against the same important outcomes. James excluded an EAS implementation.
-Codex has begun source preflight; the strengthened overhead protocol requires
-matched feature costs and one integrated finalist. Two Claude conversations
-are recommended; no requirement waiver or permanent freeze is implied.
+**September 14 — current build direction:** the
+[[../../Reviews/2026-09-12-efs-path-decision/compact-prototype-results-20260914|compact Files browser is connected and measured]].
+It exercises real named Files, Lenses, lifecycle operations, a third-party
+contract and a separate mandatory live-folder index. Start with the
+[[../../Reviews/2026-09-12-efs-path-decision/compact-mvp-build-plan-20260914|concrete MVP build plan]]:
+stable identity/execution-version and atomic dependency gates, then the
+Directory/carrier/read/SDK/SPA vertical. Compact B is the recommendation, not
+a permanent freeze. The [[../../Reviews/2026-09-12-efs-path-decision/README|three-road comparison]]
+is retained evidence, not authority to restart Claude work or another tournament.
 
 **2026-09-12:** [[../../Reviews/2026-09-11-efs21-overnight|EFS2.1 cost experiments]]
 compare physical reductions in the fuller model with a narrower working native

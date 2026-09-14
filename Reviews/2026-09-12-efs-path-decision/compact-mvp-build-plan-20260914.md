@@ -1,0 +1,153 @@
+# From the compact prototype to real EFS code
+
+September 14, 2026 · v2 PM recommendation · no repository/deployment authority implied.
+
+**One path: compact Ledger + separate required index + explicit Files profiles
++ qualified SDK + static SPA.** The [[compact-prototype-results-20260914|working
+prototype and measurements]] now support that choice. Keep the fuller prototype
+and MUD comparison as reference evidence; stop maintaining parallel product roads.
+
+We do not need another hundred design pages before implementation. We need two
+small foundation changes tested before copying Core into the production repo,
+then a sequenced vertical build. “Ready to code” is not “freeze for 100 years.”
+
+## 1. Close two foundation gates in the existing prototype
+
+### A. Stable identity, honest execution versions
+
+**Problem:** current native contract identity depends on `chainId + Ledger
+codehash`; a new implementation can change whose binding history a reader sees.
+Conversely, putting this Ledger behind a proxy and continuing to hash only the
+proxy runtime would fail to identify implementation changes. A constructor-time
+caller has no runtime code yet. The narrow EIP-7702 marker fix solves none of
+those general cases.
+
+**Engineering proposal to validate, not frozen bytes:** give a Realm instance
+a stable origin identity; store explicit principal kind/identity with authored
+evidence; keep a separately versioned execution-set commitment for signing and
+reader expectations. Do not infer historical identity from today's account code.
+Reject ambiguous constructor-time native ingress initially unless a specific
+safe classification is demonstrated. Recovery/delegation must change authority
+under an explicit profile, not silently rewrite old authorship.
+
+**Done when:** populate signed/native Files, tags, masks and history; upgrade
+the test deployment; keep identities and old reads; refuse stale signed plans;
+exercise delegation install/change/clear and constructor calls; make a clean
+reader distinguish old and new execution context. Run at least one real
+Prague-compatible 7702 authorization fixture. Select the testnet upgrade
+mechanism against these invariants; a diamond/UUPS proxy is not the invariant.
+
+Also test mutable acceptor dependencies: exact Type code identity, immutable
+parameters, activation policy and admission basis must not be conflated.
+Admission validity may depend on current game state, but old evidence must say
+what was checked then. Do not market codehash as a proof of the whole dependency graph.
+
+### B. Transaction-time dependencies, not only browser preflight
+
+**Problem:** a user can sign an edit/move while looking at Bob's revision or
+placement. Bob can change it after preflight but before inclusion. Own authored
+HEAD CAS does not necessarily guard the selected source.
+
+**Engineering proposal to validate:** include bounded read/precondition
+assertions in the authorized atomic operation. Pin exact expected authored
+heads/selection domain, destination placement expectation, policy and required
+execution obligations. Check them during execution before effects. Keep native
+helper contracts authored by the calling application, not a shared proxy identity.
+
+**Done when:** queue two competing transactions, mine them in either order,
+prove intended success or explicit stale-plan refusal with no partial effects;
+test destination-name races, mask changes and profile activation. Recovery
+reconciles the original signed operation and never silently re-signs it.
+Measure additional gas. The current app's same-transaction read/check/write is
+useful precedent, not proof that the EOA flow already has these assertions.
+
+These are bounded engineering work, not questions James must answer unaided.
+If either experiment forces a real requirement sacrifice, return one concise
+decision with an example and measured tradeoff. Otherwise keep moving to the
+next approved implementation slice.
+
+## 2. Establish the real code layout after owner approval
+
+Keep **planning/main** as the design/coordination vault; existing code experiments
+stay in their current location until their work is finished. Production repo
+names should be confirmed rather than created speculatively. Do not overwrite
+the deployed v1 contracts or old SDK/client repositories.
+
+| Boundary | Initial contents / responsibilities |
+| --- | --- |
+| Contracts repository | `src/core/` Ledger/TypeRegistry/identity and execution context; `src/index/` mandatory inventories, coverage and optional extension hooks; `src/readers/` bounded Lens/Files readers; `src/profiles/` Files, Directory, Name and carrier descriptors; `test/{unit,integration,invariant,gas}/`; deployment/upgrade scripts and machine-readable manifests. |
+| SDK repository/package | TypeScript transport/read context; discriminated qualified results; Files/Directory operations; prepare/authorize/submit/reconcile; durable journal and wallet adapters; exact Type/profile codecs; imported evidence verification. Separate Solidity-facing helpers/read interfaces preserve caller identity. |
+| Web Client / OS SPA | Static build with config and optional RPC selection; browser-only cache; permissions/wallet/connectivity; shared pending-operation lifecycle. No required EFS-hosted data API. |
+| Data Explorer / Files app | Navigation, listing/filtering, inspector/history, tags and carrier/opaque presentation over the SDK. Modular views/extensions later; no private reimplementation of Lens or validity semantics. |
+| Arcade first slice | One tiny app reads typed items, checks a policy such as compatible outfit equipment, and publishes/rejects a state transition. Use it to attack the same public API, not invent Arcade-specific Core nouns. |
+
+Use the existing PM responsibilities and small handoff documents. A dedicated
+production Contracts/Dev task is useful once real repositories exist; no new
+permanent agent orchestration system is needed for this prototype.
+
+## 3. Build one vertical, in this order
+
+1. **Port the tested kernel/index contracts and the two gate fixes.** Preserve
+   exact rejection, rollback, masking and evidence tests; add populated testnet
+   upgrades and storage-layout checks from the start. Mandatory index failure
+   rejects the write. Optional index failure reports its coverage honestly.
+2. **Finish ordinary Directory/Name/Carrier profiles.** Create a folder, nest it,
+   rename/move it, reuse an old path, detect cycles/invalid parents and preserve
+   stable File identity. Pin name/normalization policy. Keep body identity separate
+   from current locations. Small onchain bytes are one carrier, not the universal
+   payload store. Add an external content-addressed carrier, unavailable/corrupt
+   bytes, and an encrypted/opaque case with no false empty result. Tag labels and
+   concept identity need retained public meaning, not only this demo's hashed text.
+3. **Deliver bounded joined read pages.** Return names, selected revision/header,
+   provenance and requested tag assessments at one basis. The live candidate
+   inventory already exists; optimize expensive joins/transport before inventing
+   another storage model. Benchmark 1,000 live files, 10,000 lifetime names and
+   1/8/32/64 authors, including a selected-revision tag filter. Define operation
+   budgets from measurements; budget exhaustion returns PARTIAL/continuation.
+   Global tag/author discovery needs an explicit domain and index coverage.
+4. **Turn the adapter into the elegant SDK.** `read → qualified result` and
+   `prepare → authorize → submit → reconcile`; hosts should not juggle internal
+   Record/Admission/Binding rows. Keep value, provenance and completeness in one
+   result object; type-narrow before access. Test cross-tab journal concurrency,
+   response loss, reorgs, pruning, nonce/CAS/policy drift and transaction replacement.
+   Add a Note v1/v1.1 compatible reader example and an intentionally breaking v2
+   with an explicit adapter; do not infer safety from version numbers.
+5. **Complete the SPA Files journey with a real wallet.** Guest cold-open, create
+   directory/file, edit, rename, move, remove/restore, Lens switch, tags/filter,
+   content/history and portability export/import. Instrument actual approvals;
+   support one visible authorization where the selected wallet/relayer path can
+   honestly provide it. Failure/unknown outcomes must remain visible and recoverable.
+6. **Price and demonstrate a public testnet slice.** Whole transactions, calldata,
+   L1-data/operator charges, latency and RPC work, not local execution models alone.
+   Add the small Arcade or contract-backed live-value use case after Files works.
+   Show source-preserving signed import into a second fresh deployment, separately
+   from native source proofs and destination permission. Ship a clean static artifact
+   without demo keys. No mainnet permanence until the explicit freeze review.
+
+This sequence can overlap SDK/Explorer work with contract gate tests because
+the qualified API boundaries are already clear. It should not spawn another
+broad parallel architecture exercise. Compiler/Anvil work remains serialized
+and disk-bounded; scoped Astra High/Extra High workers handle implementation,
+with Max reserved for architecture/integration judgments.
+
+## 4. What is a product decision, and what is not?
+
+**No new decision blocks the two disposable engineering gates.** The preferred
+boundary is durable interoperable shared data, plus separately qualified live
+contract views for high-frequency state. That does not waive historical records.
+
+James must eventually approve repository creation, the first public testnet and
+its admin/upgrade posture, the launch feature scope and permanent guarantees.
+One consequential portability choice is whether an initial public testnet can
+clearly expose native contract provenance as RPC-observed while stronger
+cross-chain native proof support remains a separately tracked requirement.
+Do not treat that as permission to call native data fully proof-portable.
+
+Before asking for a sacrifice, measure the direct alternative. Keep private
+data, arbitrary application types, contract utility and independent access on
+the requirements list even when a first demo has an honest narrower scope.
+
+**Exit criterion:** one integrated Files/SDK/contracts build with stated limits,
+adversarial controls and real transaction prices; no unresolved identity or
+atomic-write ambiguity hidden under an MVP-ready label. That is a concrete
+starting foundation, not a promise that future applications cannot find new bugs.

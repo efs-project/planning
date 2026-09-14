@@ -1,0 +1,50 @@
+✔ a missing Name preserves the positive member and resumable PARTIAL coverage (29.846291ms)
+✔ corrupt names are integrity failures, never fixture labels or omitted members (16.128333ms)
+✔ a terminal caller cursor cannot certify that the folder is empty (11.78675ms)
+✔ mixed block/index contexts and forged context copies fail closed (11.478334ms)
+✔ a higher author mask never falls through to a lower live HEAD (11.84325ms)
+✔ File and selected revision tags retain their subjects and independent provenance (16.614125ms)
+✔ no-tiebreak conflicts expose candidates without an overall selected revision (14.080709ms)
+✔ oversized bodies are rejected before authorization (11.227375ms)
+✔ create encodes File then document, retains Name reuse, and publishes atomically (16.122417ms)
+✔ a new higher-author removal mask binds then unbinds using own CAS zero (15.900792ms)
+✔ historical restore creates a child of current selection from historical bytes (16.069792ms)
+✔ a stale own CAS is refused before send without automatic resigning (25.929333ms)
+✔ response loss retains the exact pre-send journal and stays BROADCAST_UNKNOWN (33.591209ms)
+✔ a successful receipt without canonical effects is not semantic success (34.854833ms)
+✔ an unrelated receipt is not attributed to the authorized action or its cost (315.06325ms)
+✔ edit uses the explicit manifest Lens, not merely the writing author (14.9455ms)
+✔ selected HEAD drift requires fresh authorization even when own CAS stays zero (22.994ms)
+✔ lower-author source placement drift is checked before removal broadcast (22.278917ms)
+✔ concurrent submit calls share one broadcast within the SDK instance (29.132291ms)
+✔ unavailable no-tiebreak body preserves the known conflict and both authors (17.618417ms)
+✔ an unavailable content response retains selected HEAD as UNKNOWN, never ABSENT (11.261875ms)
+✔ a corrupt selected body is INVALID, not a verified document or absence (13.390875ms)
+✔ durable journal failure prevents the external send (26.634083ms)
+✔ response loss reconciles exact canonical admissions and heads after reload (56.864875ms)
+✔ journal tampering cannot redirect reconciliation to a different publication (24.102209ms)
+✔ first use publishes the exact Name bytes in the same atomic create batch (13.775583ms)
+✔ move removes only the requested source and binds the named destination in one batch (14.416709ms)
+✔ restoring placement binds the retained File without republishing its history or Name (16.549334ms)
+✔ tag writes bind the exact File or selected revision subject (36.569125ms)
+✔ a public direct Name read verifies a preimage without claiming membership (10.484333ms)
+✔ code/index/profile mismatch fails closed instead of producing an empty read (23.810209ms)
+✔ unknown and partial zero-row observations never become empty folders (0.688458ms)
+✔ known members survive unavailable or invalid names (0.104625ms)
+✔ tag filter distinguishes File from revision and retains unevaluated subjects (0.646541ms)
+✔ only qualified selected bytes can be opened or downloaded (0.064709ms)
+✔ network estimate uses measured gas, gwei, ETH USD and explicit extra fee only (0.082ms)
+✔ cost totals deduplicate receipts, include reverted gas, and retain unknown costs (0.253ms)
+✔ contradictory receipts for one hash do not become a fabricated total (0.056292ms)
+✔ parseable damaged journal hashes become unknown cost without breaking the screen (0.047833ms)
+Report: final integration retained separately as integration.json
+✔ fresh compact chain: retained names, revisions, author selection and placement lifecycle (2172.38375ms)
+✔ two valid HEAD updates in one block retain success of the superseded first publication (404.303416ms)
+ℹ tests 41
+ℹ suites 0
+ℹ pass 41
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7018.439041

@@ -1,0 +1,1501 @@
+{
+  "sourceCommit": "67f92c5b000e63569eb0011a3688eb59ccb51893",
+  "node": "24.11.0",
+  "ethers": "6.15.0",
+  "foundry": "1.7.1 (4072e48705af9d93e3c0f6e29e93b5e9a40caed8)",
+  "solidityExecutions": 217,
+  "suites": [
+    {
+      "name": "test/Falsify.t.sol:FalsifyTest",
+      "tests": [
+        {
+          "name": "test_F1a_grade0_import_is_unsupported_and_mints_nothing()",
+          "status": "Success"
+        },
+        {
+          "name": "test_F1b_grade0_import_by_contract_is_unsupported_and_mints_nothing()",
+          "status": "Success"
+        },
+        {
+          "name": "test_F2_signed_source_packet_authorizes_nothing_at_the_destination()",
+          "status": "Success"
+        },
+        {
+          "name": "test_F3_type_identity_is_exact_and_immutable()",
+          "status": "Success"
+        },
+        {
+          "name": "test_F4_policy_activation_is_separate_from_identity_and_basis_is_recorded()",
+          "status": "Success"
+        },
+        {
+          "name": "test_F5a_activate_zero_keeps_the_mandatory_rule()",
+          "status": "Success"
+        },
+        {
+          "name": "test_F5b_permissive_policy_keeps_the_mandatory_rule()",
+          "status": "Success"
+        },
+        {
+          "name": "test_F5c_policy_adds_constraints_but_cannot_remove_them()",
+          "status": "Success"
+        },
+        {
+          "name": "test_F5d_mutable_mandatory_acceptor_is_a_documented_gap_not_detected()",
+          "status": "Success"
+        },
+        {
+          "name": "test_R3_import_reruns_destination_policy_and_retains_source_basis()",
+          "status": "Success"
+        },
+        {
+          "name": "test_R3_signature_under_epoch_N_rejected_after_activation_old_evidence_reconstructs()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/FilesApplication.t.sol:FilesApplicationTest",
+      "tests": [
+        {
+          "name": "test_absent_masked_and_wrong_target_tags_remain_qualified()",
+          "status": "Success"
+        },
+        {
+          "name": "test_app_actual_foreign_file_selection_rejected_without_effects()",
+          "status": "Success"
+        },
+        {
+          "name": "test_app_adopts_verified_revision_under_its_own_author()",
+          "status": "Success"
+        },
+        {
+          "name": "test_app_current_policy_refusal_rolls_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_app_file_tag_does_not_authorize_selected_revision()",
+          "status": "Success"
+        },
+        {
+          "name": "test_app_required_index_failure_rolls_back_every_effect()",
+          "status": "Success"
+        },
+        {
+          "name": "test_app_root_fits_but_child_prefix_exceeds_body_limit_and_rolls_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_app_stale_basis_rolls_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_app_stale_own_cas_rolls_back_child_and_app_state()",
+          "status": "Success"
+        },
+        {
+          "name": "test_app_unauthorized_caller_has_no_effect()",
+          "status": "Success"
+        },
+        {
+          "name": "test_app_withdrawn_parent_still_readable()",
+          "status": "Success"
+        },
+        {
+          "name": "test_app_wrong_approval_author_has_no_effect()",
+          "status": "Success"
+        },
+        {
+          "name": "test_app_wrong_selected_revision_has_no_effect()",
+          "status": "Success"
+        },
+        {
+          "name": "test_cold_large_root_and_child_headers_accept()",
+          "status": "Success"
+        },
+        {
+          "name": "test_complete_one_page_folder_tag_join_is_not_point_evidence()",
+          "status": "Success"
+        },
+        {
+          "name": "test_conflict_preserves_both_exact_revisions()",
+          "status": "Success"
+        },
+        {
+          "name": "test_index_constructor_pins_exact_reviewed_profile()",
+          "status": "Success"
+        },
+        {
+          "name": "test_missing_unrelated_and_wrong_file_parents_roll_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_partial_stale_and_wrong_index_reads_fail_closed()",
+          "status": "Success"
+        },
+        {
+          "name": "test_point_selection_applies_revision_tag_after_head()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reader_rechecks_parent_and_scope_coverage()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reader_rejects_nonprofile_and_wrong_file_selected_records()",
+          "status": "Success"
+        },
+        {
+          "name": "test_real_files_move_reuse_whiteout_restore()",
+          "status": "Success"
+        },
+        {
+          "name": "test_real_files_two_name_churn_requires_four_scans()",
+          "status": "Success"
+        },
+        {
+          "name": "test_required_parent_callback_failure_rolls_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reuse_does_not_duplicate_parent_membership()",
+          "status": "Success"
+        },
+        {
+          "name": "test_revision_acceptance_history()",
+          "status": "Success"
+        },
+        {
+          "name": "test_revision_acceptance_history_and_parent_backlinks()",
+          "status": "Success"
+        },
+        {
+          "name": "test_root_requires_existing_nonzero_file_and_shape()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/FilesJoined.t.sol:FilesJoinedTest",
+      "tests": [
+        {
+          "name": "test_absent_masked_and_wrong_target_tags_remain_qualified()",
+          "status": "Success"
+        },
+        {
+          "name": "test_cold_large_root_and_child_headers_accept()",
+          "status": "Success"
+        },
+        {
+          "name": "test_complete_one_page_folder_tag_join_is_not_point_evidence()",
+          "status": "Success"
+        },
+        {
+          "name": "test_conflict_preserves_both_exact_revisions()",
+          "status": "Success"
+        },
+        {
+          "name": "test_index_constructor_pins_exact_reviewed_profile()",
+          "status": "Success"
+        },
+        {
+          "name": "test_missing_unrelated_and_wrong_file_parents_roll_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_partial_stale_and_wrong_index_reads_fail_closed()",
+          "status": "Success"
+        },
+        {
+          "name": "test_point_selection_applies_revision_tag_after_head()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reader_rechecks_parent_and_scope_coverage()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reader_rejects_nonprofile_and_wrong_file_selected_records()",
+          "status": "Success"
+        },
+        {
+          "name": "test_real_files_move_reuse_whiteout_restore()",
+          "status": "Success"
+        },
+        {
+          "name": "test_real_files_two_name_churn_requires_four_scans()",
+          "status": "Success"
+        },
+        {
+          "name": "test_required_parent_callback_failure_rolls_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reuse_does_not_duplicate_parent_membership()",
+          "status": "Success"
+        },
+        {
+          "name": "test_revision_acceptance_history()",
+          "status": "Success"
+        },
+        {
+          "name": "test_revision_acceptance_history_and_parent_backlinks()",
+          "status": "Success"
+        },
+        {
+          "name": "test_root_requires_existing_nonzero_file_and_shape()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/FilesLiveIndex.t.sol:FilesLiveIndexTest",
+      "tests": [
+        {
+          "name": "test_live_32_renames_scan_one_not_33()",
+          "status": "Success"
+        },
+        {
+          "name": "test_live_higher_mask_still_suppresses_lower_positive_candidate()",
+          "status": "Success"
+        },
+        {
+          "name": "test_live_late_attachment_never_claims_complete_empty()",
+          "status": "Success"
+        },
+        {
+          "name": "test_live_rebind_is_not_duplicate_and_restore_readds_once()",
+          "status": "Success"
+        },
+        {
+          "name": "test_live_removal_swaps_dense_candidate_without_erasing_audit()",
+          "status": "Success"
+        },
+        {
+          "name": "test_live_swap_removal_invalidates_unpinned_continuation()",
+          "status": "Success"
+        },
+        {
+          "name": "test_names_ascii_grammar_refuses_unsupported_bytes_without_normalizing()",
+          "status": "Success"
+        },
+        {
+          "name": "test_names_forged_earlier_metadata_refuses_without_membership_change()",
+          "status": "Success"
+        },
+        {
+          "name": "test_names_last_occurrence_withdrawal_preserves_name_membership_and_contents()",
+          "status": "Success"
+        },
+        {
+          "name": "test_names_missing_signed_and_generic_ingress_roll_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_names_multiple_positions_and_reused_name_without_republication()",
+          "status": "Success"
+        },
+        {
+          "name": "test_names_response_faults_preserve_membership_and_reject_mixed_basis()",
+          "status": "Success"
+        },
+        {
+          "name": "test_names_signed_name_after_bind_and_parent_maintenance()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/FilesNames.t.sol:FilesNamesTest",
+      "tests": [
+        {
+          "name": "test_names_ascii_grammar_refuses_unsupported_bytes_without_normalizing()",
+          "status": "Success"
+        },
+        {
+          "name": "test_names_forged_earlier_metadata_refuses_without_membership_change()",
+          "status": "Success"
+        },
+        {
+          "name": "test_names_last_occurrence_withdrawal_preserves_name_membership_and_contents()",
+          "status": "Success"
+        },
+        {
+          "name": "test_names_missing_signed_and_generic_ingress_roll_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_names_multiple_positions_and_reused_name_without_republication()",
+          "status": "Success"
+        },
+        {
+          "name": "test_names_response_faults_preserve_membership_and_reject_mixed_basis()",
+          "status": "Success"
+        },
+        {
+          "name": "test_names_signed_name_after_bind_and_parent_maintenance()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/FilesPaidRead.t.sol:FilesPaidReadTest",
+      "tests": [
+        {
+          "name": "test_absent_masked_and_wrong_target_tags_remain_qualified()",
+          "status": "Success"
+        },
+        {
+          "name": "test_cold_large_root_and_child_headers_accept()",
+          "status": "Success"
+        },
+        {
+          "name": "test_complete_one_page_folder_tag_join_is_not_point_evidence()",
+          "status": "Success"
+        },
+        {
+          "name": "test_conflict_preserves_both_exact_revisions()",
+          "status": "Success"
+        },
+        {
+          "name": "test_index_constructor_pins_exact_reviewed_profile()",
+          "status": "Success"
+        },
+        {
+          "name": "test_missing_unrelated_and_wrong_file_parents_roll_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_paid_files_emits_six_exact_real_results_without_storage()",
+          "status": "Success"
+        },
+        {
+          "name": "test_partial_stale_and_wrong_index_reads_fail_closed()",
+          "status": "Success"
+        },
+        {
+          "name": "test_point_selection_applies_revision_tag_after_head()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reader_rechecks_parent_and_scope_coverage()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reader_rejects_nonprofile_and_wrong_file_selected_records()",
+          "status": "Success"
+        },
+        {
+          "name": "test_real_files_move_reuse_whiteout_restore()",
+          "status": "Success"
+        },
+        {
+          "name": "test_real_files_two_name_churn_requires_four_scans()",
+          "status": "Success"
+        },
+        {
+          "name": "test_required_parent_callback_failure_rolls_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reuse_does_not_duplicate_parent_membership()",
+          "status": "Success"
+        },
+        {
+          "name": "test_revision_acceptance_history()",
+          "status": "Success"
+        },
+        {
+          "name": "test_revision_acceptance_history_and_parent_backlinks()",
+          "status": "Success"
+        },
+        {
+          "name": "test_root_requires_existing_nonzero_file_and_shape()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/FilesParentBudget.t.sol:ColdParentReadBudgetTest",
+      "tests": [
+        {
+          "name": "test_cold_64_parent_permits_valid_child()",
+          "status": "Success"
+        },
+        {
+          "name": "test_cold_8192_extsload_same_file_accepts_and_indexes()",
+          "status": "Success"
+        },
+        {
+          "name": "test_cold_8192_extsload_wrong_file_rejects_and_rolls_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_cold_8192_parent_refuses_exactly_and_rolls_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_cold_short_extsload_matching_padded_word_still_rejects_and_rolls_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_warm_fresh_8192_parent_permits_valid_child()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/FilesWithdrawal.t.sol:FilesWithdrawalTest",
+      "tests": [
+        {
+          "name": "test_absent_masked_and_wrong_target_tags_remain_qualified()",
+          "status": "Success"
+        },
+        {
+          "name": "test_cold_large_root_and_child_headers_accept()",
+          "status": "Success"
+        },
+        {
+          "name": "test_complete_one_page_folder_tag_join_is_not_point_evidence()",
+          "status": "Success"
+        },
+        {
+          "name": "test_conflict_preserves_both_exact_revisions()",
+          "status": "Success"
+        },
+        {
+          "name": "test_index_constructor_pins_exact_reviewed_profile()",
+          "status": "Success"
+        },
+        {
+          "name": "test_missing_unrelated_and_wrong_file_parents_roll_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_partial_stale_and_wrong_index_reads_fail_closed()",
+          "status": "Success"
+        },
+        {
+          "name": "test_point_selection_applies_revision_tag_after_head()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reader_rechecks_parent_and_scope_coverage()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reader_rejects_nonprofile_and_wrong_file_selected_records()",
+          "status": "Success"
+        },
+        {
+          "name": "test_real_files_move_reuse_whiteout_restore()",
+          "status": "Success"
+        },
+        {
+          "name": "test_real_files_two_name_churn_requires_four_scans()",
+          "status": "Success"
+        },
+        {
+          "name": "test_required_parent_callback_failure_rolls_back()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reuse_does_not_duplicate_parent_membership()",
+          "status": "Success"
+        },
+        {
+          "name": "test_revision_acceptance_history()",
+          "status": "Success"
+        },
+        {
+          "name": "test_revision_acceptance_history_and_parent_backlinks()",
+          "status": "Success"
+        },
+        {
+          "name": "test_root_requires_existing_nonzero_file_and_shape()",
+          "status": "Success"
+        },
+        {
+          "name": "test_withdraw_other_author_reuse_does_not_toggle_selected_reads()",
+          "status": "Success"
+        },
+        {
+          "name": "test_withdraw_parent_keeps_descendants_and_new_child_admissible()",
+          "status": "Success"
+        },
+        {
+          "name": "test_withdraw_selected_revision_retained_and_readable()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/IdentityTransition.t.sol:IdentityTransitionTest",
+      "tests": [
+        {
+          "name": "test_delegate_replacement_clear_and_reinstall_preserve_key_namespace()",
+          "status": "Success"
+        },
+        {
+          "name": "test_native_delegated_ingress_keeps_native_evidence_not_action_signature()",
+          "status": "Success"
+        },
+        {
+          "name": "test_only_exact_delegation_indicator_is_key_identity()",
+          "status": "Success"
+        },
+        {
+          "name": "test_signed_head_survives_account_code_transition()",
+          "status": "Success"
+        },
+        {
+          "name": "test_signed_removal_mask_does_not_fall_through_after_account_code_transition()",
+          "status": "Success"
+        },
+        {
+          "name": "test_withdrawal_releases_original_authors_occurrence_count()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/IncomingQuotes.t.sol:IncomingQuotesTest",
+      "tests": [
+        {
+          "name": "test_64_returned_ids_fit_Page_4096_bound()",
+          "status": "Success"
+        },
+        {
+          "name": "test_B_only_auxiliary_zero_occurrence_record_still_returned()",
+          "status": "Success"
+        },
+        {
+          "name": "test_binding_backlink_rebind_unbind_preserved_and_retained_membership_unchanged()",
+          "status": "Success"
+        },
+        {
+          "name": "test_each_cursor_commitment_mutation_and_same_graph_cross_mode_replay_rejected()",
+          "status": "Success"
+        },
+        {
+          "name": "test_exactly_one_pair_reference_and_reciprocal_ledger_required()",
+          "status": "Success"
+        },
+        {
+          "name": "test_full_signed_schedule_old_and_current_against_current_tail()",
+          "status": "Success"
+        },
+        {
+          "name": "test_gapped_and_optional_family_never_complete()",
+          "status": "Success"
+        },
+        {
+          "name": "test_generation_invalidation_and_changed_attachment_rejected()",
+          "status": "Success"
+        },
+        {
+          "name": "test_invalid_budget_basis_absent_or_wrong_target_rejected()",
+          "status": "Success"
+        },
+        {
+          "name": "test_late_attachment_exhausted_partial_never_complete()",
+          "status": "Success"
+        },
+        {
+          "name": "test_max64_action_distinct_quote_targets_existing_callback_allowance()",
+          "status": "Success"
+        },
+        {
+          "name": "test_required_family_downgrades_refuse_and_queries_remain_complete()",
+          "status": "Success"
+        },
+        {
+          "name": "test_retained_revisions_and_cross_page_reuse_both_readers()",
+          "status": "Success"
+        },
+        {
+          "name": "test_runtime_pins_rechecked_for_ledger_index_and_rule()",
+          "status": "Success"
+        },
+        {
+          "name": "test_scan_works_with_original_nonselective_index()",
+          "status": "Success"
+        },
+        {
+          "name": "test_wrong_source_ordinal_rule_shape_and_code_constructor_rejected()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/IndexConfigExpectation.t.sol:IndexConfigExpectationTest",
+      "tests": [
+        {
+          "name": "test_actual_module_replacement_rejects_old_signature()",
+          "status": "Success"
+        },
+        {
+          "name": "test_default_unset_index_keeps_zero_obligation_and_unknown_listing()",
+          "status": "Success"
+        },
+        {
+          "name": "test_internal_required_declarations_are_constructor_only()",
+          "status": "Success"
+        },
+        {
+          "name": "test_required_downgrade_refuses_without_invalidating_signed_publication()",
+          "status": "Success"
+        },
+        {
+          "name": "test_signed_write_survives_other_author_optional_and_generation_progress()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/JoinedConsumer.t.sol:JoinedConsumerTest",
+      "tests": [
+        {
+          "name": "test_consumer_exposes_no_quote_on_absent_masked_wrong_type_or_unknown_page()",
+          "status": "Success"
+        },
+        {
+          "name": "test_faulty_actual_reply_admission_not_a_bind_is_refused()",
+          "status": "Success"
+        },
+        {
+          "name": "test_faulty_actual_reply_admission_outside_its_publication_range_is_refused()",
+          "status": "Success"
+        },
+        {
+          "name": "test_faulty_actual_reply_cursor_generation_epoch_core_scope_and_packed_lens_context_are_refused()",
+          "status": "Success"
+        },
+        {
+          "name": "test_faulty_actual_reply_imported_signed_and_native_publications_are_refused_as_local_fixture_evidence()",
+          "status": "Success"
+        },
+        {
+          "name": "test_faulty_actual_reply_mismatched_or_wrapping_admission_revision_is_refused()",
+          "status": "Success"
+        },
+        {
+          "name": "test_faulty_actual_reply_missing_pair_is_refused()",
+          "status": "Success"
+        },
+        {
+          "name": "test_faulty_actual_reply_partial_page_claiming_ended_is_refused()",
+          "status": "Success"
+        },
+        {
+          "name": "test_faulty_actual_reply_same_author_and_target_at_wrong_head_or_folder_coordinate_is_refused()",
+          "status": "Success"
+        },
+        {
+          "name": "test_faulty_actual_reply_short_evidence_fails_closed()",
+          "status": "Success"
+        },
+        {
+          "name": "test_faulty_actual_reply_wrong_selected_revision_is_refused()",
+          "status": "Success"
+        },
+        {
+          "name": "test_faulty_actual_reply_wrong_type_item_is_refused()",
+          "status": "Success"
+        },
+        {
+          "name": "test_faulty_actual_reply_zero_or_future_record_first_admission_is_refused_for_quote_pair_and_both_items()",
+          "status": "Success"
+        },
+        {
+          "name": "test_faulty_actual_reply_zero_or_future_selected_and_placement_admissions_are_refused()",
+          "status": "Success"
+        },
+        {
+          "name": "test_joined_step_6_move_replace_remove_restore_keeps_identity()",
+          "status": "Success"
+        },
+        {
+          "name": "test_joined_steps_1_to_5_point_list_tag_history()",
+          "status": "Success"
+        },
+        {
+          "name": "test_paid_slice_point_and_list_agree_under_both_lenses_with_A_placement_provenance()",
+          "status": "Success"
+        },
+        {
+          "name": "test_paid_slice_refuses_extra_placement_wrong_provenance_and_incomplete_coverage()",
+          "status": "Success"
+        },
+        {
+          "name": "test_paid_slice_refuses_wrong_author_proof_category_pair_items_and_mantissa()",
+          "status": "Success"
+        },
+        {
+          "name": "test_quote_acceptor_pins_shape_scale_bounds_and_pair_reference()",
+          "status": "Success"
+        },
+        {
+          "name": "test_stateless_twin_commits_exactly_what_the_storing_consumer_stores()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/LabelType.t.sol:LabelTypeTest",
+      "tests": [
+        {
+          "name": "test_label_acceptor_is_a_lab_convention_utf8_1_to_255()",
+          "status": "Success"
+        },
+        {
+          "name": "test_label_admission_rejects_non_utf8_empty_and_over_255()",
+          "status": "Success"
+        },
+        {
+          "name": "test_label_fresh_republished_omitted_and_hash_only_retrieval()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/LedgerEvidence.t.sol:LedgerEvidenceTest",
+      "tests": [
+        {
+          "name": "test_exact_native_retry_is_noop()",
+          "status": "Success"
+        },
+        {
+          "name": "test_page_across_mutation_cursor_law()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reconstruction_from_state_only_all_kinds()",
+          "status": "Success"
+        },
+        {
+          "name": "test_rename_move_recreate_old_path_keeps_identity()",
+          "status": "Success"
+        },
+        {
+          "name": "test_same_batch_typed_reference_and_wrong_type()",
+          "status": "Success"
+        },
+        {
+          "name": "test_signature_binds_every_field()",
+          "status": "Success"
+        },
+        {
+          "name": "test_subject_id_portable_across_fresh_deployment()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/LedgerImport.t.sol:LedgerImportTest",
+      "tests": [
+        {
+          "name": "test_contract_principal_is_origin_qualified()",
+          "status": "Success"
+        },
+        {
+          "name": "test_cursor_rejects_stale_basis_and_dedupes_names()",
+          "status": "Success"
+        },
+        {
+          "name": "test_fresh_reader_reconstructs_identical_digest_with_negatives()",
+          "status": "Success"
+        },
+        {
+          "name": "test_import_of_native_source_is_unsupported_and_fails_closed()",
+          "status": "Success"
+        },
+        {
+          "name": "test_import_requires_destination_authorization_and_keeps_identity()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/LedgerMatrix.t.sol:LedgerMatrixTest",
+      "tests": [
+        {
+          "name": "test_binding_role_demands_target_type()",
+          "status": "Success"
+        },
+        {
+          "name": "test_checked_references_direct_batch_dedup_reuse()",
+          "status": "Success"
+        },
+        {
+          "name": "test_failed_acceptance_rolls_back_publication()",
+          "status": "Success"
+        },
+        {
+          "name": "test_failed_index_module_reverts_and_coverage_is_honest()",
+          "status": "Success"
+        },
+        {
+          "name": "test_folder_listing_mask_count_and_paging()",
+          "status": "Success"
+        },
+        {
+          "name": "test_history_as_of_tombstone_and_rebind()",
+          "status": "Success"
+        },
+        {
+          "name": "test_native_single_author_lifecycle()",
+          "status": "Success"
+        },
+        {
+          "name": "test_native_two_authors_lens_mask_fallthrough()",
+          "status": "Success"
+        },
+        {
+          "name": "test_signed_single_author()",
+          "status": "Success"
+        },
+        {
+          "name": "test_signed_two_authors_and_reconstruction()",
+          "status": "Success"
+        },
+        {
+          "name": "test_stale_cas_and_not_live()",
+          "status": "Success"
+        },
+        {
+          "name": "test_two_authors_identical_record_and_withdraw()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/MatchedRollback.t.sol:MatchedRollbackTest",
+      "tests": [
+        {
+          "name": "test_direct_late_index_call_remains_ledger_only()",
+          "status": "Success"
+        },
+        {
+          "name": "test_scale_seven_complete_a1_reverts_with_full_mandatory_error_and_s0()",
+          "status": "Success"
+        },
+        {
+          "name": "test_scale_six_complete_a1_late_tag_refusal_rolls_back_full_prefix()",
+          "status": "Success"
+        },
+        {
+          "name": "test_scale_six_complete_a1_zero_poison_calibrates_full_state()",
+          "status": "Success"
+        }
+      ]
+    },
+    {
+      "name": "test/SignedClaimArchive.t.sol:SignedClaimArchiveTest",
+      "tests": [
+        {
+          "name": "test_any_account_can_complete_claim_without_changing_first_importer()",
+          "status": "Success"
+        },
+        {
+          "name": "test_arbitrary_signed_tuples_and_unknown_type_are_claims_not_admissions()",
+          "status": "Success"
+        },
+        {
+          "name": "test_claim_local_coverage_requires_explicit_attachment_after_global_cache_hit()",
+          "status": "Success"
+        },
+        {
+          "name": "test_codeblob_retry_preserves_event_location_codehash_and_creation_nonce()",
+          "status": "Success"
+        },
+        {
+          "name": "test_conflicting_same_nonce_signed_claims_remain_distinct()",
+          "status": "Success"
+        },
+        {
+          "name": "test_joined_diverged_cas_current_rejection_and_missing_body()",
+          "status": "Success"
+        },
+        {
+          "name": "test_leaf_63_round_trips_and_wrong_leaf_reverts()",
+          "status": "Success"
+        },
+        {
+          "name": "test_maximum_vector_and_exact_calldata_ceilings()",
+          "status": "Success"
+        },
+        {
+          "name": "test_packed_and_codeblob_reconstruct_identical_1_2_64_vectors()",
+          "status": "Success"
+        },
+        {
+          "name": "test_paid_consumer_emits_exact_first_last_action_hash_without_storage()",
+          "status": "Success"
+        },
+        {
+          "name": "test_record_postings_are_per_leaf_even_for_repeated_record_id()",
+          "status": "Success"
+        },
+        {
+          "name": "test_rejects_zero_actions_65_actions_65_bodies_duplicate_body_leaf_and_8193_bytes()",
+          "status": "Success"
+        },
+        {
+          "name": "test_retry_keeps_first_importer_vector_and_posting_counts()",
+          "status": "Success"
+        },
+        {
+          "name": "test_reuse_rejects_conflicting_type_or_body()",
+          "status": "Success"
+        },
+        {
+          "name": "test_signature_rejects_empty_bad_v_high_s_wrong_author_and_expired_is_archivable()",
+          "status": "Success"
+        },
+        {
+          "name": "test_staged_attachments_only_set_requested_bits()",
+          "status": "Success"
+        },
+        {
+          "name": "test_valid_empty_body_is_present_and_attached()",
+          "status": "Success"
+        }
+      ]
+    }
+  ],
+  "artifacts": {
+    "ledger": {
+      "file": "Ledger.sol",
+      "name": "Ledger",
+      "artifactSha256": "a55484f5cf9062e1ffc440257b0b991798fb3b5569ef766747f931f706f33b6d",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/Ledger.sol": "Ledger"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sources": {
+        "src/Interfaces.sol": {
+          "keccak256": "0xf09dc4ca64f0e3b150dbcea5c1e8fc7f590b10c5f6a4c626898e1a293d8bd8a2",
+          "urls": [
+            "bzz-raw://9983508fb2d38d415580c37fad6ac7f9f6809dd5a2eb154ad8c9f41d81d8ff9f",
+            "dweb:/ipfs/QmXXjjvR45qjo7qwPrVQ2kGEkj5FjYsVtPtXaijyKA5n2W"
+          ],
+          "license": "MIT"
+        },
+        "src/Keys.sol": {
+          "keccak256": "0xeb514ffef7dc8fbaecc1c850a0420dc9dd2b17840b7794f7342408bff107a02d",
+          "urls": [
+            "bzz-raw://7df1e6b570d45c7ef483a5037c27267ec4d14972fcd227e1d5a43aa956ae91fa",
+            "dweb:/ipfs/QmQ2NsxMhrAm1JdKDeyAyGnJgj3LbbQUSCyJ6EkcLHQQg4"
+          ],
+          "license": "MIT"
+        },
+        "src/Ledger.sol": {
+          "keccak256": "0xd8b5ff4ceca64bcd8c60cee1224750aa0a0278287f77c104ca0a1277cf85b99e",
+          "urls": [
+            "bzz-raw://90515221d680110dd83194fe481fecec2254456e1347a6f1f2fd5135162c1005",
+            "dweb:/ipfs/QmdZCZtY8BDGzTcdd54vZGG1rxVd8Y4kQjdKYLvxJ98LXX"
+          ],
+          "license": "MIT"
+        }
+      },
+      "templateBytes": 17333
+    },
+    "index": {
+      "file": "FilesLiveIndex.sol",
+      "name": "FilesLiveNamesIndex",
+      "artifactSha256": "b5951f7d84c771be0bbac5f22df440e563629ebc81924a4e7f67f4b1cd0046e4",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/FilesLiveIndex.sol": "FilesLiveNamesIndex"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sources": {
+        "src/IndexModule.sol": {
+          "keccak256": "0x6d4fe649d9c5ce574eb59f6ef3a75ea1d5d83f14fef976640f17c35d88a3ed90",
+          "urls": [
+            "bzz-raw://fedef67fe20b12878fc8a97085a4ca5a46ca9d396787340e587d8a640f2670c6",
+            "dweb:/ipfs/QmZVARfQ6cE3A3SivGLtipyeS5xzVZQVd4KNGdorUkAWzU"
+          ],
+          "license": "MIT"
+        },
+        "src/Interfaces.sol": {
+          "keccak256": "0xf09dc4ca64f0e3b150dbcea5c1e8fc7f590b10c5f6a4c626898e1a293d8bd8a2",
+          "urls": [
+            "bzz-raw://9983508fb2d38d415580c37fad6ac7f9f6809dd5a2eb154ad8c9f41d81d8ff9f",
+            "dweb:/ipfs/QmXXjjvR45qjo7qwPrVQ2kGEkj5FjYsVtPtXaijyKA5n2W"
+          ],
+          "license": "MIT"
+        },
+        "src/Keys.sol": {
+          "keccak256": "0xeb514ffef7dc8fbaecc1c850a0420dc9dd2b17840b7794f7342408bff107a02d",
+          "urls": [
+            "bzz-raw://7df1e6b570d45c7ef483a5037c27267ec4d14972fcd227e1d5a43aa956ae91fa",
+            "dweb:/ipfs/QmQ2NsxMhrAm1JdKDeyAyGnJgj3LbbQUSCyJ6EkcLHQQg4"
+          ],
+          "license": "MIT"
+        },
+        "src/Ledger.sol": {
+          "keccak256": "0xd8b5ff4ceca64bcd8c60cee1224750aa0a0278287f77c104ca0a1277cf85b99e",
+          "urls": [
+            "bzz-raw://90515221d680110dd83194fe481fecec2254456e1347a6f1f2fd5135162c1005",
+            "dweb:/ipfs/QmdZCZtY8BDGzTcdd54vZGG1rxVd8Y4kQjdKYLvxJ98LXX"
+          ],
+          "license": "MIT"
+        },
+        "src/LensReader.sol": {
+          "keccak256": "0x159bd2fa3e5f013c41f6f722faee9cb4b0b1fe138191c716a3d6829ff202a033",
+          "urls": [
+            "bzz-raw://351e80eb5c4444056a1832e82a4c0b3c538eed3d91054eef2ef206e841c0d076",
+            "dweb:/ipfs/Qmc9RuHYmR4umDe4oHqSP9GigY96mQheNwB78QjxpWatHh"
+          ],
+          "license": "MIT"
+        },
+        "src/TypeRegistry.sol": {
+          "keccak256": "0xf8de1adb162a6727f560a3274f8662f373a633d34e68814c9a92da97dd7c12b5",
+          "urls": [
+            "bzz-raw://2bce9a179611e622ad1a770c9c1974deb2dd45f206b8be3533150116ce934cc1",
+            "dweb:/ipfs/QmcwutUQ9boErMxHenL26peoQxXZhgUQbF6yVEgS9opYNA"
+          ],
+          "license": "MIT"
+        },
+        "test/FilesJoinedProfile.sol": {
+          "keccak256": "0x7b3e6aa840425720c2b9672bc38c0ed93212a02e835d48ab2db58edf547b62fb",
+          "urls": [
+            "bzz-raw://12034c974ac6452fbacb367a67ad735cdca58622589d170e64299b6040371d3a",
+            "dweb:/ipfs/Qmc4HcP8soSjeeB7xMEt6BhHXDNpTrihEouM2EjzxECe5U"
+          ],
+          "license": "MIT"
+        },
+        "test/FilesLiveIndex.sol": {
+          "keccak256": "0xa03a5343d2c342860d82463ecafd76cd9aa024ee1521348729f356958e9a7ff8",
+          "urls": [
+            "bzz-raw://d3303881832e24810c5380435f9047cb00f8db0a9de4a73580dc2d06fbc69742",
+            "dweb:/ipfs/QmPS31nL5nfGWTDeiLH3fr2WxfBjn6aUqSFk9P3s6B595Y"
+          ],
+          "license": "MIT"
+        },
+        "test/FilesNamesProfile.sol": {
+          "keccak256": "0x15bafb9c7d8a1114701d17d2392bcb6c15fca027a6cece27452695173e8b08db",
+          "urls": [
+            "bzz-raw://25be0320096669a49e432cc8c5ea5a81282f289eed0482a3e6a05e83ccf83c10",
+            "dweb:/ipfs/QmSn97AY3eoYd4qKJtvQuM1TtBJMk3gxh4fpa4a4aqN8aL"
+          ],
+          "license": "MIT"
+        }
+      },
+      "templateBytes": 9387
+    },
+    "lens": {
+      "file": "FilesLiveIndex.sol",
+      "name": "FilesLiveLens",
+      "artifactSha256": "721124604ab5d5de31341f370bae50846adb0592afe3b605da045481a8b64444",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/FilesLiveIndex.sol": "FilesLiveLens"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sources": {
+        "src/IndexModule.sol": {
+          "keccak256": "0x6d4fe649d9c5ce574eb59f6ef3a75ea1d5d83f14fef976640f17c35d88a3ed90",
+          "urls": [
+            "bzz-raw://fedef67fe20b12878fc8a97085a4ca5a46ca9d396787340e587d8a640f2670c6",
+            "dweb:/ipfs/QmZVARfQ6cE3A3SivGLtipyeS5xzVZQVd4KNGdorUkAWzU"
+          ],
+          "license": "MIT"
+        },
+        "src/Interfaces.sol": {
+          "keccak256": "0xf09dc4ca64f0e3b150dbcea5c1e8fc7f590b10c5f6a4c626898e1a293d8bd8a2",
+          "urls": [
+            "bzz-raw://9983508fb2d38d415580c37fad6ac7f9f6809dd5a2eb154ad8c9f41d81d8ff9f",
+            "dweb:/ipfs/QmXXjjvR45qjo7qwPrVQ2kGEkj5FjYsVtPtXaijyKA5n2W"
+          ],
+          "license": "MIT"
+        },
+        "src/Keys.sol": {
+          "keccak256": "0xeb514ffef7dc8fbaecc1c850a0420dc9dd2b17840b7794f7342408bff107a02d",
+          "urls": [
+            "bzz-raw://7df1e6b570d45c7ef483a5037c27267ec4d14972fcd227e1d5a43aa956ae91fa",
+            "dweb:/ipfs/QmQ2NsxMhrAm1JdKDeyAyGnJgj3LbbQUSCyJ6EkcLHQQg4"
+          ],
+          "license": "MIT"
+        },
+        "src/Ledger.sol": {
+          "keccak256": "0xd8b5ff4ceca64bcd8c60cee1224750aa0a0278287f77c104ca0a1277cf85b99e",
+          "urls": [
+            "bzz-raw://90515221d680110dd83194fe481fecec2254456e1347a6f1f2fd5135162c1005",
+            "dweb:/ipfs/QmdZCZtY8BDGzTcdd54vZGG1rxVd8Y4kQjdKYLvxJ98LXX"
+          ],
+          "license": "MIT"
+        },
+        "src/LensReader.sol": {
+          "keccak256": "0x159bd2fa3e5f013c41f6f722faee9cb4b0b1fe138191c716a3d6829ff202a033",
+          "urls": [
+            "bzz-raw://351e80eb5c4444056a1832e82a4c0b3c538eed3d91054eef2ef206e841c0d076",
+            "dweb:/ipfs/Qmc9RuHYmR4umDe4oHqSP9GigY96mQheNwB78QjxpWatHh"
+          ],
+          "license": "MIT"
+        },
+        "src/TypeRegistry.sol": {
+          "keccak256": "0xf8de1adb162a6727f560a3274f8662f373a633d34e68814c9a92da97dd7c12b5",
+          "urls": [
+            "bzz-raw://2bce9a179611e622ad1a770c9c1974deb2dd45f206b8be3533150116ce934cc1",
+            "dweb:/ipfs/QmcwutUQ9boErMxHenL26peoQxXZhgUQbF6yVEgS9opYNA"
+          ],
+          "license": "MIT"
+        },
+        "test/FilesJoinedProfile.sol": {
+          "keccak256": "0x7b3e6aa840425720c2b9672bc38c0ed93212a02e835d48ab2db58edf547b62fb",
+          "urls": [
+            "bzz-raw://12034c974ac6452fbacb367a67ad735cdca58622589d170e64299b6040371d3a",
+            "dweb:/ipfs/Qmc4HcP8soSjeeB7xMEt6BhHXDNpTrihEouM2EjzxECe5U"
+          ],
+          "license": "MIT"
+        },
+        "test/FilesLiveIndex.sol": {
+          "keccak256": "0xa03a5343d2c342860d82463ecafd76cd9aa024ee1521348729f356958e9a7ff8",
+          "urls": [
+            "bzz-raw://d3303881832e24810c5380435f9047cb00f8db0a9de4a73580dc2d06fbc69742",
+            "dweb:/ipfs/QmPS31nL5nfGWTDeiLH3fr2WxfBjn6aUqSFk9P3s6B595Y"
+          ],
+          "license": "MIT"
+        },
+        "test/FilesNamesProfile.sol": {
+          "keccak256": "0x15bafb9c7d8a1114701d17d2392bcb6c15fca027a6cece27452695173e8b08db",
+          "urls": [
+            "bzz-raw://25be0320096669a49e432cc8c5ea5a81282f289eed0482a3e6a05e83ccf83c10",
+            "dweb:/ipfs/QmSn97AY3eoYd4qKJtvQuM1TtBJMk3gxh4fpa4a4aqN8aL"
+          ],
+          "license": "MIT"
+        }
+      },
+      "templateBytes": 10173
+    },
+    "files": {
+      "file": "FilesJoinedConsumer.sol",
+      "name": "FilesJoinedConsumer",
+      "artifactSha256": "a1534af0e9284b3e4c33389566a0f39b81b15785b20b257f41cfcd4c48d8d1e4",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/FilesJoinedConsumer.sol": "FilesJoinedConsumer"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sources": {
+        "src/IndexModule.sol": {
+          "keccak256": "0x6d4fe649d9c5ce574eb59f6ef3a75ea1d5d83f14fef976640f17c35d88a3ed90",
+          "urls": [
+            "bzz-raw://fedef67fe20b12878fc8a97085a4ca5a46ca9d396787340e587d8a640f2670c6",
+            "dweb:/ipfs/QmZVARfQ6cE3A3SivGLtipyeS5xzVZQVd4KNGdorUkAWzU"
+          ],
+          "license": "MIT"
+        },
+        "src/Interfaces.sol": {
+          "keccak256": "0xf09dc4ca64f0e3b150dbcea5c1e8fc7f590b10c5f6a4c626898e1a293d8bd8a2",
+          "urls": [
+            "bzz-raw://9983508fb2d38d415580c37fad6ac7f9f6809dd5a2eb154ad8c9f41d81d8ff9f",
+            "dweb:/ipfs/QmXXjjvR45qjo7qwPrVQ2kGEkj5FjYsVtPtXaijyKA5n2W"
+          ],
+          "license": "MIT"
+        },
+        "src/Keys.sol": {
+          "keccak256": "0xeb514ffef7dc8fbaecc1c850a0420dc9dd2b17840b7794f7342408bff107a02d",
+          "urls": [
+            "bzz-raw://7df1e6b570d45c7ef483a5037c27267ec4d14972fcd227e1d5a43aa956ae91fa",
+            "dweb:/ipfs/QmQ2NsxMhrAm1JdKDeyAyGnJgj3LbbQUSCyJ6EkcLHQQg4"
+          ],
+          "license": "MIT"
+        },
+        "src/Ledger.sol": {
+          "keccak256": "0xd8b5ff4ceca64bcd8c60cee1224750aa0a0278287f77c104ca0a1277cf85b99e",
+          "urls": [
+            "bzz-raw://90515221d680110dd83194fe481fecec2254456e1347a6f1f2fd5135162c1005",
+            "dweb:/ipfs/QmdZCZtY8BDGzTcdd54vZGG1rxVd8Y4kQjdKYLvxJ98LXX"
+          ],
+          "license": "MIT"
+        },
+        "src/LensReader.sol": {
+          "keccak256": "0x159bd2fa3e5f013c41f6f722faee9cb4b0b1fe138191c716a3d6829ff202a033",
+          "urls": [
+            "bzz-raw://351e80eb5c4444056a1832e82a4c0b3c538eed3d91054eef2ef206e841c0d076",
+            "dweb:/ipfs/Qmc9RuHYmR4umDe4oHqSP9GigY96mQheNwB78QjxpWatHh"
+          ],
+          "license": "MIT"
+        },
+        "src/TypeRegistry.sol": {
+          "keccak256": "0xf8de1adb162a6727f560a3274f8662f373a633d34e68814c9a92da97dd7c12b5",
+          "urls": [
+            "bzz-raw://2bce9a179611e622ad1a770c9c1974deb2dd45f206b8be3533150116ce934cc1",
+            "dweb:/ipfs/QmcwutUQ9boErMxHenL26peoQxXZhgUQbF6yVEgS9opYNA"
+          ],
+          "license": "MIT"
+        },
+        "test/FilesJoinedConsumer.sol": {
+          "keccak256": "0xc24f2497cf6184d150996d46d34035ebb5fde850b2af7c0252e05bcf17b4db3c",
+          "urls": [
+            "bzz-raw://010d45f16eef73e97626c89175e1b005915aea6c3b6ac350e680bdc078dbe083",
+            "dweb:/ipfs/QmNwbfcKPc5w92dNtNHEApF7Yp9LEN4sNbxHiW6fX3R9Jt"
+          ],
+          "license": "MIT"
+        },
+        "test/FilesJoinedProfile.sol": {
+          "keccak256": "0x7b3e6aa840425720c2b9672bc38c0ed93212a02e835d48ab2db58edf547b62fb",
+          "urls": [
+            "bzz-raw://12034c974ac6452fbacb367a67ad735cdca58622589d170e64299b6040371d3a",
+            "dweb:/ipfs/Qmc4HcP8soSjeeB7xMEt6BhHXDNpTrihEouM2EjzxECe5U"
+          ],
+          "license": "MIT"
+        }
+      },
+      "templateBytes": 15865
+    },
+    "names": {
+      "file": "FilesNamesProfile.sol",
+      "name": "FilesNameReader",
+      "artifactSha256": "93e1662af28393bd579621bcab90a40d0a65cc34e1ec7be6c099b2429c0f8213",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/FilesNamesProfile.sol": "FilesNameReader"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sources": {
+        "src/IndexModule.sol": {
+          "keccak256": "0x6d4fe649d9c5ce574eb59f6ef3a75ea1d5d83f14fef976640f17c35d88a3ed90",
+          "urls": [
+            "bzz-raw://fedef67fe20b12878fc8a97085a4ca5a46ca9d396787340e587d8a640f2670c6",
+            "dweb:/ipfs/QmZVARfQ6cE3A3SivGLtipyeS5xzVZQVd4KNGdorUkAWzU"
+          ],
+          "license": "MIT"
+        },
+        "src/Interfaces.sol": {
+          "keccak256": "0xf09dc4ca64f0e3b150dbcea5c1e8fc7f590b10c5f6a4c626898e1a293d8bd8a2",
+          "urls": [
+            "bzz-raw://9983508fb2d38d415580c37fad6ac7f9f6809dd5a2eb154ad8c9f41d81d8ff9f",
+            "dweb:/ipfs/QmXXjjvR45qjo7qwPrVQ2kGEkj5FjYsVtPtXaijyKA5n2W"
+          ],
+          "license": "MIT"
+        },
+        "src/Keys.sol": {
+          "keccak256": "0xeb514ffef7dc8fbaecc1c850a0420dc9dd2b17840b7794f7342408bff107a02d",
+          "urls": [
+            "bzz-raw://7df1e6b570d45c7ef483a5037c27267ec4d14972fcd227e1d5a43aa956ae91fa",
+            "dweb:/ipfs/QmQ2NsxMhrAm1JdKDeyAyGnJgj3LbbQUSCyJ6EkcLHQQg4"
+          ],
+          "license": "MIT"
+        },
+        "src/Ledger.sol": {
+          "keccak256": "0xd8b5ff4ceca64bcd8c60cee1224750aa0a0278287f77c104ca0a1277cf85b99e",
+          "urls": [
+            "bzz-raw://90515221d680110dd83194fe481fecec2254456e1347a6f1f2fd5135162c1005",
+            "dweb:/ipfs/QmdZCZtY8BDGzTcdd54vZGG1rxVd8Y4kQjdKYLvxJ98LXX"
+          ],
+          "license": "MIT"
+        },
+        "src/TypeRegistry.sol": {
+          "keccak256": "0xf8de1adb162a6727f560a3274f8662f373a633d34e68814c9a92da97dd7c12b5",
+          "urls": [
+            "bzz-raw://2bce9a179611e622ad1a770c9c1974deb2dd45f206b8be3533150116ce934cc1",
+            "dweb:/ipfs/QmcwutUQ9boErMxHenL26peoQxXZhgUQbF6yVEgS9opYNA"
+          ],
+          "license": "MIT"
+        },
+        "test/FilesJoinedProfile.sol": {
+          "keccak256": "0x7b3e6aa840425720c2b9672bc38c0ed93212a02e835d48ab2db58edf547b62fb",
+          "urls": [
+            "bzz-raw://12034c974ac6452fbacb367a67ad735cdca58622589d170e64299b6040371d3a",
+            "dweb:/ipfs/Qmc4HcP8soSjeeB7xMEt6BhHXDNpTrihEouM2EjzxECe5U"
+          ],
+          "license": "MIT"
+        },
+        "test/FilesNamesProfile.sol": {
+          "keccak256": "0x15bafb9c7d8a1114701d17d2392bcb6c15fca027a6cece27452695173e8b08db",
+          "urls": [
+            "bzz-raw://25be0320096669a49e432cc8c5ea5a81282f289eed0482a3e6a05e83ccf83c10",
+            "dweb:/ipfs/QmSn97AY3eoYd4qKJtvQuM1TtBJMk3gxh4fpa4a4aqN8aL"
+          ],
+          "license": "MIT"
+        }
+      },
+      "templateBytes": 4845
+    },
+    "application": {
+      "file": "FilesApplication.sol",
+      "name": "FilesApplication",
+      "artifactSha256": "286032a34da659eb4a256d569b4a8404c31dbf1590ce1eff8326936a14a51343",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/FilesApplication.sol": "FilesApplication"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sources": {
+        "src/IndexModule.sol": {
+          "keccak256": "0x6d4fe649d9c5ce574eb59f6ef3a75ea1d5d83f14fef976640f17c35d88a3ed90",
+          "urls": [
+            "bzz-raw://fedef67fe20b12878fc8a97085a4ca5a46ca9d396787340e587d8a640f2670c6",
+            "dweb:/ipfs/QmZVARfQ6cE3A3SivGLtipyeS5xzVZQVd4KNGdorUkAWzU"
+          ],
+          "license": "MIT"
+        },
+        "src/Interfaces.sol": {
+          "keccak256": "0xf09dc4ca64f0e3b150dbcea5c1e8fc7f590b10c5f6a4c626898e1a293d8bd8a2",
+          "urls": [
+            "bzz-raw://9983508fb2d38d415580c37fad6ac7f9f6809dd5a2eb154ad8c9f41d81d8ff9f",
+            "dweb:/ipfs/QmXXjjvR45qjo7qwPrVQ2kGEkj5FjYsVtPtXaijyKA5n2W"
+          ],
+          "license": "MIT"
+        },
+        "src/Keys.sol": {
+          "keccak256": "0xeb514ffef7dc8fbaecc1c850a0420dc9dd2b17840b7794f7342408bff107a02d",
+          "urls": [
+            "bzz-raw://7df1e6b570d45c7ef483a5037c27267ec4d14972fcd227e1d5a43aa956ae91fa",
+            "dweb:/ipfs/QmQ2NsxMhrAm1JdKDeyAyGnJgj3LbbQUSCyJ6EkcLHQQg4"
+          ],
+          "license": "MIT"
+        },
+        "src/Ledger.sol": {
+          "keccak256": "0xd8b5ff4ceca64bcd8c60cee1224750aa0a0278287f77c104ca0a1277cf85b99e",
+          "urls": [
+            "bzz-raw://90515221d680110dd83194fe481fecec2254456e1347a6f1f2fd5135162c1005",
+            "dweb:/ipfs/QmdZCZtY8BDGzTcdd54vZGG1rxVd8Y4kQjdKYLvxJ98LXX"
+          ],
+          "license": "MIT"
+        },
+        "src/LensReader.sol": {
+          "keccak256": "0x159bd2fa3e5f013c41f6f722faee9cb4b0b1fe138191c716a3d6829ff202a033",
+          "urls": [
+            "bzz-raw://351e80eb5c4444056a1832e82a4c0b3c538eed3d91054eef2ef206e841c0d076",
+            "dweb:/ipfs/Qmc9RuHYmR4umDe4oHqSP9GigY96mQheNwB78QjxpWatHh"
+          ],
+          "license": "MIT"
+        },
+        "src/TypeRegistry.sol": {
+          "keccak256": "0xf8de1adb162a6727f560a3274f8662f373a633d34e68814c9a92da97dd7c12b5",
+          "urls": [
+            "bzz-raw://2bce9a179611e622ad1a770c9c1974deb2dd45f206b8be3533150116ce934cc1",
+            "dweb:/ipfs/QmcwutUQ9boErMxHenL26peoQxXZhgUQbF6yVEgS9opYNA"
+          ],
+          "license": "MIT"
+        },
+        "test/FilesApplication.sol": {
+          "keccak256": "0x3ad39aa9492138cbe00bb8d5a02dbfab1c439c76d0663766db37be9217b5c7b7",
+          "urls": [
+            "bzz-raw://b0eaf086580948641387acf3dd0b889683eacb1a95b66dce81d848d09000e4d8",
+            "dweb:/ipfs/QmZpZfmrqL9sFsbQEZPXg3Yskf3o3vv1yYKH5Bw5oNg92i"
+          ],
+          "license": "MIT"
+        },
+        "test/FilesJoinedConsumer.sol": {
+          "keccak256": "0xc24f2497cf6184d150996d46d34035ebb5fde850b2af7c0252e05bcf17b4db3c",
+          "urls": [
+            "bzz-raw://010d45f16eef73e97626c89175e1b005915aea6c3b6ac350e680bdc078dbe083",
+            "dweb:/ipfs/QmNwbfcKPc5w92dNtNHEApF7Yp9LEN4sNbxHiW6fX3R9Jt"
+          ],
+          "license": "MIT"
+        },
+        "test/FilesJoinedProfile.sol": {
+          "keccak256": "0x7b3e6aa840425720c2b9672bc38c0ed93212a02e835d48ab2db58edf547b62fb",
+          "urls": [
+            "bzz-raw://12034c974ac6452fbacb367a67ad735cdca58622589d170e64299b6040371d3a",
+            "dweb:/ipfs/Qmc4HcP8soSjeeB7xMEt6BhHXDNpTrihEouM2EjzxECe5U"
+          ],
+          "license": "MIT"
+        }
+      },
+      "templateBytes": 4166
+    }
+  },
+  "nodeTests": {
+    "passed": 41,
+    "failed": 0,
+    "subsets": {
+      "sdk": 31,
+      "presentation": 8,
+      "realChain": 2
+    },
+    "log": "node-tests.txt"
+  }
+}
