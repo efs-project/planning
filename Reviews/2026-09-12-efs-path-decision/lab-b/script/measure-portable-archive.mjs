@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // DISPOSABLE LAB. Root-owned launch only. No compilation, installation or external RPC.
-// Usage: EFS_ETHERS_PATH=... FOUNDRY_OUT=... EFS_LAB_SCRATCH=... 
-// EFS_ARCHIVE_COMPILER_INPUT=<exact build-info or standard-JSON input> 
+// Usage: EFS_ETHERS_PATH=... FOUNDRY_OUT=... EFS_LAB_SCRATCH=...
+// EFS_ARCHIVE_COMPILER_INPUT=<exact build-info or standard-JSON input>
 // node script/measure-portable-archive.mjs --anvil --out /tmp/<owned-run>/archive.json
 // Summary is only an index into the raw sidecar. Root must independently check it.
 import assert from 'node:assert/strict';
