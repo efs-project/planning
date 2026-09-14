@@ -112,6 +112,23 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September14,04:14: paid-query inputs independently reviewed; runner preparation.**
+Root reproduced17/17 offline input tests and the exact input SHA256; independent
+review checked21 runtimes,25 app signatures,82 signed transactions and25 complete
+Pages with no blocking finding. See [[required-query-input-review-20260914]] and
+the [[required-query-paid-plan-20260914|two-task runner plan]]. No paid execution
+or new price is claimed. B/C source and previous unit/control results stay pinned.
+
+The [[required-query-state-recipe-20260914|raw-state recipe]] makes two unequal
+features explicit: C synthesizes coverage from Ledger high-water rather than
+storing an independent processed frontier, and its Record backlinks are not B's
+binding-target live counters. The matched query can still be priced; it does not
+make those schemas or all guarantees equivalent. One shared runner will check
+actual rows and charge complete writes/pages in three fresh graphs. Root alone
+will authorize a finite chain lease after source review. No heavy slot is active;
+original Claude workspaces remain untouched and no new Fable execution is claimed.
+Final or conditional owner handoff remains September14,23:10 UTC.
+
 **September14,03:31: both required-query readers published; paid fixture next.**
 B `d547890` and C `3f5702f` passed individual and combined source/unit review;
 see [[required-query-source-review-20260914]]. Existing prototype branches are
