@@ -1,0 +1,98 @@
+{
+  "kind": "DISPOSABLE_FILES_CURRENT_POINT_CONFLICT_AND_TAGGED_FOLDER",
+  "sourceCommit": "d54a1208b3e014f0eede9697992ce12e3620b638",
+  "sourceDigest": "fa835e9bd780d3ab627d57fdc86d375d3b70adcda8fad09f4fce8c7234cbbc11",
+  "tests": {
+    "full": 118,
+    "files": 15,
+    "new": 7,
+    "failures": 0,
+    "skipped": 0
+  },
+  "consumerRuntimeInitBytes": [
+    15896,
+    20007
+  ],
+  "explicitTestCorrection": "ONLY_PARENT_COVERAGE_PORTION: EXACT_POINT_DOES_NOT_CONSUME_REVERSE_PARENT_ENUMERATION; ORIGINAL_WRONG_SUBJECT_ASSERTION_UNCHANGED",
+  "limits": "CURRENT_EXHAUSTED_WINDOW_NOT_HISTORICAL_PAGINATION; NO_PAID_COST_OR_BROWSER; TRUSTED_PINNED_PROFILE; LIFECYCLE_TASK3_NOT_YET_EARNED",
+  "files": {
+    "files-task2-red.json.gz": {
+      "rawBytes": 6293,
+      "rawSha256": "259406fa895242b7b1c647e5fdffacc98df1674132a327f3875b675dc82759a2",
+      "gzipBytes": 2924,
+      "gzipSha256": "e8722325a35876d88d006d02d20f28cd03ab338140ef1b2ab84321cdf6e1b252"
+    },
+    "files-task2-red.log.gz": {
+      "rawBytes": 5014,
+      "rawSha256": "7e232451b4fe2e41c4cb37b3715d873980c0c978dd03e660a81abe52658394c2",
+      "gzipBytes": 1426,
+      "gzipSha256": "122291cce159bf6c77c7fedc532fb8d6b5dfa8ee820ac2323facb7beaab8ce75"
+    },
+    "files-task2-green.json.gz": {
+      "rawBytes": 6254,
+      "rawSha256": "9919284a131700f1410d7db5539372e44e9a17aed916e8fef905d57df891af56",
+      "gzipBytes": 2906,
+      "gzipSha256": "2df4511a9d381b88eaa6ea0811db3b472f7f89f9be18c42e958ac625d4d35797"
+    },
+    "files-task2-green.log.gz": {
+      "rawBytes": 19744,
+      "rawSha256": "e154a7875d8fc72926514c66ccb7d18abce3357c5485f01538a58074a82740a8",
+      "gzipBytes": 4933,
+      "gzipSha256": "1a765c6744a7f3012484b904a47ff9c8f0f52aaf4990c3651dd6dcb4bfa77d77"
+    },
+    "files-task2-size.json.gz": {
+      "rawBytes": 6253,
+      "rawSha256": "c7854397b22ebd05c950eed08fa651528e84cfb3809cfc276cc9238d81d0920e",
+      "gzipBytes": 2909,
+      "gzipSha256": "30454cf949d1d783758c1a5cfe047311bcf380a945a6f68fd758170cd446513a"
+    },
+    "files-task2-size.log.gz": {
+      "rawBytes": 53563,
+      "rawSha256": "d26fd1ae5d906b207ff7c5bcb2e074da42e1d5bc084325af8352b7dc926537a5",
+      "gzipBytes": 4904,
+      "gzipSha256": "0d42423445548005ebd189b7d381b01a40d71b71c3e679eacf325a7011e498a2"
+    },
+    "full-compiler-info.json.gz": {
+      "rawBytes": 23052205,
+      "rawSha256": "5e40f7ec78e3165f9e10509375ca69c840f624b5ee35e7e1883928f904f772f2",
+      "gzipBytes": 2877340,
+      "gzipSha256": "ffab15f2c4f3caccbcee955bd515479a253ddff6b566fb99340b11b292e4f63d"
+    },
+    "task-brief.md.gz": {
+      "rawBytes": 12776,
+      "rawSha256": "f4906fad452ec9281da54a349d56f1e9b8081c8b0c9f8ad20f9315212d1fcf48",
+      "gzipBytes": 5790,
+      "gzipSha256": "0795fdfceff8b7c533f73f2208d2e64e019f2a17609e65c698771993d8b86e81"
+    },
+    "task-report.md.gz": {
+      "rawBytes": 13037,
+      "rawSha256": "d2ce19a745c10998f5886199af6e670ff875d777693500af0fcfe542b4cb9b43",
+      "gzipBytes": 5646,
+      "gzipSha256": "2f99bed6f82a563978433ada775aa608aee3e6cbbab2aea9575f28506e2afec5"
+    },
+    "independent-review.md.gz": {
+      "rawBytes": 6294,
+      "rawSha256": "4d23d1b5fc93ce8b584e5532a3cc229efcc966e2b4d855622b048900da3696a4",
+      "gzipBytes": 2802,
+      "gzipSha256": "744c7a3a2c321151998bf9a4c6f81b7afee3f482acbdf8e3a71243cb9d2c1a38"
+    },
+    "review.diff.gz": {
+      "rawBytes": 30963,
+      "rawSha256": "19590152ec5c63fe578ab36c552a69737b4c7d57b14de6d36f022c6907de9246",
+      "gzipBytes": 6934,
+      "gzipSha256": "bc7fcae62bd166ba372baaad8daa11a659c49f49c4e575ccf4958e8270d98c29"
+    },
+    "red-consumer.sol.gz": {
+      "rawBytes": 5915,
+      "rawSha256": "bc9063f950f96d4797cb94e579d67cd1edad026ff7c265240caee257de1f4c78",
+      "gzipBytes": 1726,
+      "gzipSha256": "8ab50bf451f550e2be2b37b7f58e59b5d5bc16ad45032263b48052ac863fc021"
+    },
+    "red-test.sol.gz": {
+      "rawBytes": 33214,
+      "rawSha256": "f51fd9aaccd9edbf4d4d48e03e53a73826bed5b7036efbf182f75c5b3117a547",
+      "gzipBytes": 6980,
+      "gzipSha256": "af44f80521469ce975781e2136e779daf0140a8f424b12266399dd062eb70262"
+    }
+  }
+}
