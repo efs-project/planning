@@ -112,6 +112,17 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September14,09:38: archive Task1 published; Task2 behavioral gate authorized.**
+[[b-portable-archive-task1-results-20260914|Task1 result and evidence]] are published
+(source `02c34a9`, packet `0d28b0f`). One existing Task2 worker has frozen only
+the new equivalence tests and codeblob stub. Root compiler-only lease09:38–09:58UTC
+uses the same reviewed wrapper/run/atomic slot and guardrails; no Anvil/RPC.
+Approved RED manifest is
+`5e35cda0a210a62e9f366c066ff8b37a91b4114a45010f00d1d6fa5b7e3858e3`.
+Run the full suite once: the two new representation tests must fail behaviorally
+while the14 archive tests remain passing. Only then implement that representation.
+The separate cold-parent probe is test-only preparation outside live B sources.
+
 **September14,09:31: archive semantics pass; independent task review running.**
 Root observed the intended behavioral RED, then all93 B tests passed, including
 14 new archive tests. The archive runtime is6,098bytes (initcode6,299), and all

@@ -1,11 +1,14 @@
 # B-first portable evidence seam (design preparation only)
 
-Status: **PROPOSED / UNMEASURED**; query-first, not a B selection or feature waiver. Source basis: B HEAD `acbfaf70339b73cd03e937158dd015eb37491b21`; cited files had no concurrent diff.
+Status: **TASK1 IMPLEMENTED / TASK1 REVIEW PASSED / COST UNMEASURED**;
+not permanent B selection or a feature waiver. Original design source basis:
+B `acbfaf70339b73cd03e937158dd015eb37491b21`; original anchors below remain dated.
 
 September14: the [[required-query-paid-results-20260914|required-query gate]] is
 complete and independently reviewed; B remains the engineering priority.
-This archive is now the next bounded implementation/test step, still unimplemented
-and unmeasured. Its existing semantic/proof limits are unchanged.
+The [[b-portable-archive-task1-results-20260914|packed semantic archive now passes]]
+93/93 full B tests and independent Task1 review. Representation comparison and
+paid cost remain unmeasured; the semantic/proof limits below are unchanged.
 
 ## Smallest coherent seam and proof level
 
@@ -84,6 +87,10 @@ The `10,176` term is the maximum padded body sum when 64 body lengths total 8,19
 
 Primary anchors: gate `portable-evidence-next-gate.md:6-23,29-58`; signatures/digest `Ledger.sol:229-257,735-807` and `LedgerEvidence.t.sol:31-82`; whole-batch import `Ledger.sol:260-329` and `LedgerImport.t.sol:75-137`; identity/body `Keys.sol:74-80`, `Ledger.sol:479-572,833-845`; native limit `Ledger.sol:267-297`, `LedgerImport.t.sol:139-161`.
 
-Next executable step, only after required-query selection: the joined test plus the one packed-vs-codeblob representation/cost comparison.
+Next executable step: the packed-versus-codeblob representation/cost comparison;
+the required-query and joined archive semantic gates are complete.
 
-Root disposition, September14: independent scoped design re-review marked all three important findings and the physical-storage caution addressed. Exact ABI/return ceilings independently checked. This proposal remains unimplemented/unmeasured and follows the required-query comparison; no stronger portability guarantee or permanent profile is adopted.
+Root disposition, September14: independent design and Task1 implementation
+reviews passed. Exact ABI/return ceilings were checked. The packed archive is
+implemented and tested, but cost remains unmeasured; no stronger portability
+guarantee or permanent profile is adopted.
