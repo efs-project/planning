@@ -5,6 +5,7 @@ import {Keys} from "../src/Keys.sol";
 import {Ledger} from "../src/Ledger.sol";
 import {LabBase} from "./LabBase.sol";
 import {LensReader} from "../src/LensReader.sol";
+import {FilesJoinedConsumer} from "./FilesJoinedConsumer.sol";
 import {FilesLayout, FilesRootRule, FilesChildRule, FilesParentIndex, FilesFailingParentIndex} from "./FilesJoinedProfile.sol";
 
 interface VmFilesCold { function cool(address target) external; }
@@ -314,5 +315,219 @@ contract FilesJoinedTest is LabBase {
         badChild = registry.register(FilesLayout.CHILD_SHAPE, address(wrongConfiguration), refs);
         _expectProfileReject(rootType, badChild, rootHash, address(wrongConfiguration).codehash);
         _expectProfileReject(rootType, childType, childHash, rootHash);
+    }
+
+    function _filesReader() internal returns (FilesJoinedConsumer) {
+        return new FilesJoinedConsumer(ledger, lens, filesIndex, rootType, childType,
+            address(rootRule).codehash, address(childRule).codehash);
+    }
+
+    function _basis() internal view returns (FilesJoinedConsumer.Basis memory) {
+        return FilesJoinedConsumer.Basis(admissions(), filesIndex.generation(), registry.epoch(), address(ledger).codehash);
+    }
+
+    function _assertRevision(FilesJoinedConsumer.Revision memory revision, bytes32 id, bytes32 t,
+        bytes32 parent, string memory document) internal view
+    {
+        require(revision.recordId == id && revision.typeId == t && revision.parent == parent && revision.file == file,
+            "exact selected revision identity and parent");
+        require(keccak256(revision.document) == keccak256(bytes(document))
+            && revision.documentHash == keccak256(bytes(document)), "exact document bytes and hash");
+    }
+
+    // Catches evaluating approved at File F instead of the selected revision, or inheriting RA's tag after RR.
+    function test_point_selection_applies_revision_tag_after_head() public {
+        _createRoot();
+        _publishBranches();
+        FilesJoinedConsumer reader = _filesReader();
+        address[] memory la = lensOf(eoaA, address(bob));
+        address[] memory lb = lensOf(address(bob), eoaA);
+        FilesJoinedConsumer.FilePoint memory a = reader.readFilePoint(file, la, APPROVED, _basis());
+        require(a.status == 1 && a.file == file, "Alice point FOUND");
+        _assertRevision(a.revision, ra, childType, r0, "Meeting at 11:00.\n");
+        require(a.revisionTag.present, "approved belongs to selected RA, not File F");
+        require(a.revisionTag.evaluated && a.revisionTag.status == 1 && a.revisionTag.subject == ra
+            && a.revisionTag.target == file, "qualified RA approved assessment");
+        require(a.fileTag.evaluated && a.fileTag.subject == file && a.fileTag.status == 0 && !a.fileTag.present,
+            "approved is absent on File itself");
+        FilesJoinedConsumer.FilePoint memory b = reader.readFilePoint(file, lb, APPROVED, _basis());
+        _assertRevision(b.revision, rb, childType, r0, "Meeting at 09:00.\n");
+        require(b.status == 1 && b.revisionTag.evaluated && b.revisionTag.subject == rb
+            && b.revisionTag.status == 0 && !b.revisionTag.present, "RB does not inherit RA approved");
+        a = reader.readFilePoint(file, la, PROJECT_EFS, _basis());
+        b = reader.readFilePoint(file, lb, PROJECT_EFS, _basis());
+        require(a.fileTag.present && b.fileTag.present && a.fileTag.subject == file && b.fileTag.subject == file,
+            "File project tag survives both lenses");
+        require(!a.revisionTag.present && !b.revisionTag.present, "File project tag is not a revision tag");
+        _publishGrandchild();
+        a = reader.readFilePoint(file, la, APPROVED, _basis());
+        _assertRevision(a.revision, rr, childType, ra, "Meeting at 10:00.\n");
+        require(a.revisionTag.evaluated && a.revisionTag.subject == rr && a.revisionTag.status == 0
+            && !a.revisionTag.present, "RR has no inherited approval");
+        a = reader.readFilePoint(file, la, PROJECT_EFS, _basis());
+        require(a.fileTag.present && a.fileTag.subject == file, "File project tag survives RR");
+    }
+
+    // Catches selecting an incidental winner or dropping a conflict candidate's binding provenance/bytes.
+    function test_conflict_preserves_both_exact_revisions() public {
+        _createRoot();
+        _publishBranches();
+        FilesJoinedConsumer reader = _filesReader();
+        FilesJoinedConsumer.ConflictResult memory result =
+            reader.readFileConflict(file, lensOf(eoaA, address(bob)), PROJECT_EFS, _basis());
+        require(result.status == 3 && result.file == file && result.candidates.length == 2, "retained conflict, no winner");
+        require(result.fileTag.evaluated && result.fileTag.subject == file && result.fileTag.present, "qualified File tag");
+        _assertRevision(result.candidates[0].revision, ra, childType, r0, "Meeting at 11:00.\n");
+        _assertRevision(result.candidates[1].revision, rb, childType, r0, "Meeting at 09:00.\n");
+        require(result.candidates[0].binding.author == eoaA && result.candidates[0].binding.target == ra
+            && result.candidates[0].binding.revision == 2 && result.candidates[0].binding.admission != 0,
+            "Alice candidate binding retained");
+        require(result.candidates[1].binding.author == address(bob) && result.candidates[1].binding.target == rb
+            && result.candidates[1].binding.revision == 1 && result.candidates[1].binding.admission != 0,
+            "Bob candidate binding retained");
+        result = reader.readFileConflict(file, lensOf(address(bob), eoaA), APPROVED, _basis());
+        require(result.status == 3 && result.candidates.length == 2 && result.candidates[0].revision.recordId == rb
+            && result.candidates[1].revision.recordId == ra, "reversing lens preserves both candidates");
+    }
+
+    function _folder(FilesJoinedConsumer reader, address[] memory authors, bytes32 concept,
+        FilesJoinedConsumer.TagScope scope) internal view returns (FilesJoinedConsumer.FolderResult memory result)
+    {
+        result = reader.readFolderTaggedOnce(DRAFTS, authors, concept, scope, 8, _basis());
+        require(result.status == 2 && !result.mutated && result.next.lensIndex == authors.length && result.next.rawIndex == 0,
+            "complete exhausted single folder window");
+        require(result.next.basisAdmission == admissions() && result.next.indexGeneration == filesIndex.generation()
+            && result.next.rulesEpoch == registry.epoch() && result.next.coreCodeCommitment == address(ledger).codehash
+            && result.next.lensHash == keccak256(abi.encodePacked(authors))
+            && result.next.scopeKey == keccak256(abi.encode(FOLDER, DRAFTS)), "exact folder context");
+    }
+
+    // Catches using point proof as folder completeness or filtering a revision tag before selecting each HEAD.
+    function test_complete_one_page_folder_tag_join_is_not_point_evidence() public {
+        _createRoot();
+        _publishBranches();
+        FilesJoinedConsumer reader = _filesReader();
+        address[] memory la = lensOf(eoaA, address(bob));
+        address[] memory lb = lensOf(address(bob), eoaA);
+        FilesJoinedConsumer.FolderResult memory result = _folder(reader, la, PROJECT_EFS, FilesJoinedConsumer.TagScope.File);
+        require(result.files.length == 1 && result.files[0].file == file, "File project join Alice");
+        _assertRevision(result.files[0].revision, ra, childType, r0, "Meeting at 11:00.\n");
+        result = _folder(reader, lb, PROJECT_EFS, FilesJoinedConsumer.TagScope.File);
+        require(result.files.length == 1 && result.files[0].file == file, "File project join Bob");
+        _assertRevision(result.files[0].revision, rb, childType, r0, "Meeting at 09:00.\n");
+        result = _folder(reader, la, APPROVED, FilesJoinedConsumer.TagScope.SelectedRevision);
+        require(result.files.length == 1 && result.files[0].revision.recordId == ra, "Alice approved folder joins RA");
+        result = _folder(reader, lb, APPROVED, FilesJoinedConsumer.TagScope.SelectedRevision);
+        require(result.files.length == 0, "complete Bob approved join proves no matches");
+        _publishGrandchild();
+        result = _folder(reader, la, APPROVED, FilesJoinedConsumer.TagScope.SelectedRevision);
+        require(result.files.length == 0, "complete RR approved join proves no matches");
+        result = _folder(reader, la, PROJECT_EFS, FilesJoinedConsumer.TagScope.File);
+        require(result.files.length == 1 && result.files[0].revision.recordId == rr, "project join retains current RR");
+    }
+
+    function _rejectRead(FilesJoinedConsumer reader, bytes memory callData, bytes4 expected) internal view {
+        (bool ok, bytes memory result) = address(reader).staticcall(callData);
+        require(!ok && sel(result) == expected, "exact fail-closed reader error");
+    }
+
+    function _rejectPointBasis(FilesJoinedConsumer reader, FilesJoinedConsumer.Basis memory basis) internal view {
+        _rejectRead(reader, abi.encodeCall(reader.readFilePoint, (file, lensOf(eoaA, address(bob)), APPROVED, basis)),
+            FilesJoinedConsumer.E_BASIS.selector);
+    }
+
+    // Catches empty-on-PARTIAL, accepting historical point bases, and immutable Lens detached from Core's index.
+    function test_partial_stale_and_wrong_index_reads_fail_closed() public {
+        _createRoot();
+        _publishBranches();
+        FilesJoinedConsumer reader = _filesReader();
+        FilesJoinedConsumer.Basis memory basis = _basis();
+        address[] memory authors = lensOf(eoaA, address(bob));
+        _rejectRead(reader, abi.encodeCall(reader.readFolderTaggedOnce,
+            (DRAFTS, authors, PROJECT_EFS, FilesJoinedConsumer.TagScope.File, 0, basis)), FilesJoinedConsumer.E_INCOMPLETE.selector);
+        --basis.admission;
+        _rejectPointBasis(reader, basis);
+        _rejectRead(reader, abi.encodeCall(reader.readFileConflict, (file, authors, APPROVED, basis)), FilesJoinedConsumer.E_BASIS.selector);
+        _rejectRead(reader, abi.encodeCall(reader.readFolderTaggedOnce,
+            (DRAFTS, authors, PROJECT_EFS, FilesJoinedConsumer.TagScope.File, 8, basis)), FilesJoinedConsumer.E_BASIS.selector);
+        basis = _basis();
+        ++basis.generation;
+        _rejectPointBasis(reader, basis);
+        basis = _basis();
+        ++basis.epoch;
+        _rejectPointBasis(reader, basis);
+        basis = _basis();
+        basis.core = keccak256("wrong Core");
+        _rejectPointBasis(reader, basis);
+        basis = _basis();
+        ledger.setIndexModule(address(0));
+        _rejectPointBasis(reader, basis);
+        _rejectRead(reader, abi.encodeCall(reader.readFolderTaggedOnce,
+            (DRAFTS, authors, PROJECT_EFS, FilesJoinedConsumer.TagScope.File, 8, basis)), FilesJoinedConsumer.E_BASIS.selector);
+        FilesParentIndex replacement = new FilesParentIndex(address(ledger), rootType, childType,
+            address(rootRule).codehash, address(childRule).codehash);
+        ledger.setIndexModule(address(replacement));
+        _rejectPointBasis(reader, basis);
+    }
+
+    // Catches incomplete folder success and coupling exact point reads to unused reverse-parent coverage.
+    function test_reader_rechecks_parent_and_scope_coverage() public {
+        _createRoot();
+        _publishBranches();
+        FilesJoinedConsumer reader = _filesReader();
+        FilesJoinedConsumer.Basis memory basis = _basis();
+        filesIndex.declareOptional(filesIndex.FAMILY_SCOPE(), 1);
+        _rejectRead(reader, abi.encodeCall(reader.readFolderTaggedOnce,
+            (DRAFTS, lensOf(eoaA, address(bob)), PROJECT_EFS, FilesJoinedConsumer.TagScope.File, 8, basis)),
+            FilesJoinedConsumer.E_INCOMPLETE.selector);
+        FilesJoinedConsumer.FilePoint memory before = reader.readFilePoint(file, lensOf(eoaA), APPROVED, basis);
+        require(before.status == 1 && before.revision.recordId == ra && before.revisionTag.present,
+            "exact point control does not consume scope enumeration");
+        filesIndex.declareOptional(filesIndex.FAMILY_FILES_PARENT(), 1);
+        (uint8 status, uint64 from, uint64 through) =
+            filesIndex.coverage(filesIndex.FAMILY_FILES_PARENT(), Keys.referenceList(childType, 0, r0));
+        require(status == 1 && from == 1 && through == admissions(), "parent enumeration coverage is honestly PARTIAL");
+        FilesJoinedConsumer.FilePoint memory afterDowngrade = reader.readFilePoint(file, lensOf(eoaA), APPROVED, basis);
+        require(keccak256(abi.encode(afterDowngrade)) == keccak256(abi.encode(before)),
+            "exact point remains unchanged without reverse-parent enumeration");
+    }
+
+    // Catches a false revision-tag assessment when HEAD is absent/masked, and treating FOUND wrong-target as yes.
+    function test_absent_masked_and_wrong_target_tags_remain_qualified() public {
+        _createRoot();
+        FilesJoinedConsumer reader = _filesReader();
+        FilesJoinedConsumer.FilePoint memory result = reader.readFilePoint(file, lensOf(eoaA), DRAFT, _basis());
+        _assertRevision(result.revision, r0, rootType, 0, "Meeting at 10:00.\n");
+        require(result.revisionTag.present && result.revisionTag.subject == r0, "root draft selected");
+        result = reader.readFilePoint(file, lensOf(address(bob)), APPROVED, _basis());
+        require(result.status == 0 && result.revision.recordId == 0 && !result.revisionTag.evaluated
+            && result.revisionTag.subject == 0, "absent HEAD has no evaluated revision tag");
+        _signedActions(one(aBind(TAG, file, PROJECT_EFS, r0, 1)), new bytes[](1));
+        result = reader.readFilePoint(file, lensOf(eoaA), PROJECT_EFS, _basis());
+        require(result.fileTag.evaluated && result.fileTag.status == 1 && result.fileTag.target == r0
+            && !result.fileTag.present, "FOUND wrong target is not a positive File tag");
+        _signedActions(one(aUnbind(TAG, r0, DRAFT, 1)), new bytes[](1));
+        result = reader.readFilePoint(file, lensOf(eoaA), DRAFT, _basis());
+        require(result.revisionTag.evaluated && result.revisionTag.status == 2 && !result.revisionTag.present,
+            "masked revision tag is not absence or yes");
+        _signedActions(one(aUnbind(HEAD, file, NO_ROLE, 1)), new bytes[](1));
+        result = reader.readFilePoint(file, lensOf(eoaA, address(bob)), DRAFT, _basis());
+        require(result.status == 2 && result.revision.recordId == 0 && !result.revisionTag.evaluated
+            && result.revisionTag.subject == 0, "masked HEAD has no evaluated revision tag");
+    }
+
+    // Catches accepting arbitrary admitted bytes or a different File's revision as this File's HEAD.
+    function test_reader_rejects_nonprofile_and_wrong_file_selected_records() public {
+        _createRoot();
+        FilesJoinedConsumer reader = _filesReader();
+        bytes32 unrelated = bob.publish(BINARY, _rootBody(file, bytes("looks like a root")));
+        _signedActions(one(aBind(HEAD, file, NO_ROLE, unrelated, 1)), new bytes[](1));
+        _rejectRead(reader, abi.encodeCall(reader.readFilePoint, (file, lensOf(eoaA), APPROVED, _basis())),
+            FilesJoinedConsumer.E_PROFILE.selector);
+        bytes32 otherFile = bob.create(bytes32(uint256(403)));
+        bytes32 otherRoot = bob.publish(rootType, _rootBody(otherFile, bytes("other File")));
+        _signedActions(one(aBind(HEAD, file, NO_ROLE, otherRoot, 2)), new bytes[](1));
+        _rejectRead(reader, abi.encodeCall(reader.readFilePoint, (file, lensOf(eoaA), APPROVED, _basis())),
+            FilesJoinedConsumer.E_PROFILE.selector);
     }
 }
