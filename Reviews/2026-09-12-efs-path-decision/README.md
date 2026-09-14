@@ -4,7 +4,7 @@
 
 **Coordinator:** @v2-pm, Codex
 
-**Standing:** active engineering war room, launched by James on September 12. Codex coordinates its agents; James's existing Claude **EFS v2 Dev** task has received and acknowledged the kickoff and is asked to coordinate the Claude lanes. No permanent requirements or protocol bytes are frozen; production repositories/deployment remain out of scope.
+**Standing:** bounded overnight execution closed September14,13:29UTC. Start with the [[morning-handoff-20260914|morning handoff]] and latest Coordinator checkpoint. Compact B is the conditional MVP recommendation; no permanent requirements or protocol bytes are frozen, and production repositories/deployment remain out of scope. Earlier launch instructions and checkpoints below are historical, not standing authority to restart runs.
 
 **Outcome:** recommend an architecture we can begin building, with its costs, actual sacrifices and remaining gates plainly visible. Not a claim that a century-scale foundation can be proved in two days.
 
@@ -111,6 +111,60 @@ Codex is the default heavy-run operator. Before anyone builds or starts a chain,
 Publish consolidated owner checkpoints at the first shortlist, 24-hour recommendation and final handoff—not every cross-agent message. The Codex thread heartbeat `coordinate-efs-engineering-war-room` checks hourly through September 14 at **14:00 UTC/09:00Chicago**, per James's later morning cutoff, to resume useful work and coordinate returned results. It stays quiet on unchanged state and stops at the final handoff/deadline or sooner if the productivity gate fails. This is a follow-up mechanism, not evidence that every worker or laptop process runs continuously.
 
 ### Coordinator checkpoint
+
+**September14,13:29UTC /08:29Chicago: overnight work closed; heartbeat deleted.**
+
+The useful bounded work finished before the09:00Chicago cutoff. The actual
+`coordinate-efs-engineering-war-room` heartbeat was deleted through the app;
+there is no promised automatic continuation. All three current internal workers
+are completed and the last compiler group/slot are stopped/released. Claude's
+quota block was not bypassed. No new experiment or paid run is queued.
+
+Read [[morning-handoff-20260914|the concise build recommendation]]. Compact B
+remains primary; MUD is a comparison/fallback, not another active build.
+The joined Files lifecycle, sole actual paid Files run, withdrawal correction,
+required-index configuration repair, archive choice and query comparison are
+complete at their separately retained source pins. The live-placement model's
+13/13 result is pushed at `3e8df4e`; it is not yet an onchain index or gas saving.
+
+The last [[files-name-retention-results-20260914|required Names gate]] passed
+all169 executions (135 distinct plus34 inherited), including seven standalone
+Names cases. Same-input normal-size build and independent review are Approved.
+Original6-case RED/GREEN and separately observed seventh metadata falsifier are
+preserved; correct name bytes no longer hide forged admission metadata. Source
+`a3fb54e0c362ff59fdffd00254ca08b82172a69f` and evidence
+`1829dad1b2172aea4931864c538429e030361c94` are pushed on the existing authorized
+B prototype branch. Root verified all47 compressed payloads against raw hashes:
+88,581,907raw →11,739,009gzip bytes. No existing Core source or earlier prices
+were relabelled by this gate.
+
+**Next build gate:** one cold guest Files adapter using real retained names,
+qualified placement/HEAD provenance, explicit tag subjects and canonical write
+reconciliation. The existing clickable browser is not demonstrated B-backed.
+Price the complete named action separately; preserve the live-index experiment
+as a later performance task. See [[sdk-explorer-build-boundary-20260914]] and
+[[live-placement-model-results-20260914]]. No permanent owner choice was made.
+All earlier running/pending/lease text below is superseded by this closure.
+
+**September14,13:22: final source frozen; full regression/size lease13:21–13:45UTC.**
+Names source digest is
+`b0ba64c292576b615a7193c07728643a96d81f55cd1b8c831a38abaf12567140`.
+Original six tests passed after behavioral RED. A separately disclosed seventh
+review falsifier reproduced correct bytes with fabricated earlier admission;
+the reader now compares the actual Ledger header before FOUND. Original six
+test bodies are unchanged. Root runs `files-names-final-test` and then normal
+`files-names-final-size` from this source. No new paid run. Final review and
+compact retention must finish before14:00UTC; the heartbeat stops at the
+morning handoff, not another experiment. Prior checkpoints below are historical.
+
+**September14,13:05: final root-only compiler lease13:05–13:25UTC.**
+Names RED is frozen at `77c1d6248d7d7bcd91ade828f835d818d926ea216e7580b8fdad0a7d22c0b37a`.
+Exactly six standalone tests; expected one rollback control PASS and five
+behavior FAILs. Root runs the existing finite snapshot/normal-config compiler
+gate with a six-test/nonempty check. No Anvil, paid costs, browser claim or
+change to existing Core/Index/Files modules. Only after actual behavioral RED
+may the new profile helpers change. Private caches, watchdog/process cleanup,
+15GiB aggregate scratch/50GiB free reserve and14:00hard stop remain.
 
 **September 14, 12:45: actual Files prices published; two practical defects repaired.**
 

@@ -50,6 +50,12 @@ The SDK PM recommends three surfaces, with illustrative names only:
   The current disposable consumer drops some selection provenance that its
   tests check separately; an adapter can retain it without a new Core getter.
   Exact point reads need not depend on unrelated enumeration being COMPLETE.
+  **Coordinator clarification after the live-model review:** a terminal COMPLETE
+  page is not proof that a caller traversed the omitted prefix. A complete-result
+  helper must own a fresh traversal and validate every continuation, or consume
+  an independently authenticated coverage argument. Do not turn an arbitrary
+  caller-supplied cursor plus a final page into “the folder is empty.” The model's
+  cursor context detects stale snapshots, not forged traversal offsets.
 - **Separate maintenance:** expose aggregate occurrence count and attributed
   withdrawal evidence separately from application validity, availability and
   selection. Policy-based validity needs its own evidence; the SDK cannot infer

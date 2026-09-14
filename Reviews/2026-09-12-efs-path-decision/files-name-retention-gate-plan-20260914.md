@@ -70,3 +70,17 @@ size only if time permits; no paid Anvil run or new performance extrapolation.
 Independent review must distinguish mandatory name retention, byte recovery and
 the **still-unimplemented cold browser/SDK path**. Stop with a useful failure or
 explicit remainder rather than crossing the cutoff or weakening requirements.
+
+## Review-driven seventh falsifier (13:19UTC)
+
+The original six tests reached behavioral RED (1 pass/5 intended failures), then
+GREEN (6/6) with their source unchanged. Independent review found that correct
+name bytes with an earlier fabricated admission ordinal could pass the helper
+when supplied by a facade. Add one separate seventh test, preserving all six
+original test bodies, and first run it against that original GREEN helper.
+Then compare returned Type/admission/length against the real Ledger header
+before returning FOUND. This is an onchain consistency check, not an RPC or
+header/state-root proof. MISSING means this source did not supply the name; it
+does not prove authoritative absence or remove known placement membership.
+Retain both original focused gates and the new falsifier before final full
+regression/normal size. No additional Core API, paid run or browser claim.
