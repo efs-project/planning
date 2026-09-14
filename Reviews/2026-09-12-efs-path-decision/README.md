@@ -112,6 +112,18 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September14,09:20: finite archive compiler gate authorized.** Root alone owns
+the compiler slot from09:20 through09:40UTC; no Anvil/RPC run is authorized.
+The reviewed operational wrapper uses one atomic lock, an immutable source
+snapshot, offline installed Solidity0.8.30, a ten-minute process watchdog,
+15GiB scratch cap and50GiB free reserve. Local run is
+`/tmp/efs-b-archive-task1.OXPOfb`; slot is
+`/tmp/efs-b-archive-heavy-slot.lock`. The exact RED handoff manifest digest is
+`9f4e1e35515c1be66a06c01d19a1e5383f8fe6a678a419e856dcd547bd94c26c`.
+First run only the joined archive test against the compiling stub; an actual
+behavioral failure, not a compiler failure, unlocks implementation. A changed
+source handoff needs a newly checked digest. No query comparison rerun.
+
 **September14,08:56: B archive implementation started; query gate stays closed.**
 The [[b-portable-archive-implementation-plan-20260914|two-task implementation plan]]
 preserves the reviewed signature-only archive boundary. Independent preflight

@@ -313,6 +313,19 @@ Model it on the existing lab runner's safe mechanics, but keep it independent an
 
 After deploying both candidates plus `ArchiveReadConsumer`, take one `evm_snapshot`. For each vector size `1`, `2`, `64`, revert/re-snapshot before each candidate so both start from the identical post-deployment state; require each revert/snapshot succeeds. Pin the same explicit retention timestamp for each candidate and record it, so `retainedAt` comparisons are meaningful. Capture every branch-local observation **before** its revert and identify it by branch/cell plus block hash, not a reused block number. Use the same signed intent, action bytes, no bodies, and caller for both. The summary below is an index into the raw evidence, never the evidence itself:
 
+Freeze the small comparison's **shape** before observing gas: N PUBLISH actions,
+one synthetic Type `keccak256(UTF8("archive/measure/type/1"))`, per-leaf body hash
+`keccak256(UTF8("archive-body-" + N + "-" + i))` for zero-based i, and every other
+Action field zero. No bodies or repeated Record IDs. Use the existing PK_A test
+author and the same independent local importer for both candidates. Intent nonce
+is N, deadline is 1, and realm/core/acceptance/index claim fields are respectively
+the keccak256 UTF-8 strings `archive/measure/realm/1`, `archive/measure/core/1`,
+`archive/measure/acceptance/1`, `archive/measure/index/1`. These are synthetic signed
+context claims, not an assertion that a source Ledger exists or admitted them.
+Use the exact B domain/typehash and encode/sign these fixtures before sending any
+measurement transaction. The rich nonzero-field vector is an equivalence test,
+not a gas workload substituted after seeing which representation wins.
+
 ```json
 {
   "source": {"commit":"b94b57c405ef18b7f259cbd636d685ff96738ce7","dirtyDiffSha256":"..."},
