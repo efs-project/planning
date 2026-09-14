@@ -1,0 +1,56 @@
+{
+  "kind": "DISPOSABLE_SIGNED_INDEX_CONFIGURATION_CHARACTERIZATION",
+  "sourceCommit": "f05cf59f188061ec33f5e2fb8cb005d0f2ba51d4",
+  "sourceDigest": "2f3166aed720a12afbee6af89199432bf09dc40d6dac7bcea89ee1acf5ea8a78",
+  "tests": {
+    "focused": 1,
+    "failures": 0,
+    "skipped": 0
+  },
+  "claim": "ADMIN_COVERAGE_DOWNGRADE_LEAVES_OLD_SIGNATURE_VALID_WITH_NORMAL_ADMISSION_AND_POSTINGS",
+  "limits": "NO_CORE_FIX; NO_FORGERY_OR_DATA_LOSS; TEST_GAS_NOT_PAID_COST; CONSUMER_REFUSAL_NOT_RUN",
+  "files": {
+    "index-config-characterization-2.json.gz": {
+      "rawBytes": 6296,
+      "rawSha256": "6ef6f9d8e0f7e5d000540aeb5feecb67c4d5788ce1324f538e29a7325cb53a09",
+      "gzipBytes": 2887,
+      "gzipSha256": "f5c8500a9b478ffeaa5d4fff15dab17aac7fd2406069e22234cf9392a8256e14"
+    },
+    "index-config-characterization-2.log.gz": {
+      "rawBytes": 2939,
+      "rawSha256": "94cc0d5fab5cdacb2d93bd782ca85995515b1a98e3a706ab7cc180dad428ae95",
+      "gzipBytes": 841,
+      "gzipSha256": "62787e58e748d73980a8bce41964c7141d7e181e5c95434e647042e11c85a166"
+    },
+    "refused-future-lease.json.gz": {
+      "rawBytes": 874,
+      "rawSha256": "507ee4f628949c5eacd0b4f1a64395da8a8892eb7a9ce65d0d89e52f6518bbe6",
+      "gzipBytes": 481,
+      "gzipSha256": "99024e44a02b05d2b72095280f52b43332f038a561f87807759c311f3e9ec7fd"
+    },
+    "full-compiler-info.json.gz": {
+      "rawBytes": 5866619,
+      "rawSha256": "87a22cbe9054728942d7e6b35e2c2f59bb2204742aec40d0d2d42bcb3526ec90",
+      "gzipBytes": 667425,
+      "gzipSha256": "f85758792552a492e0447b7d12cb8e9bc29b78a744c7120e879102bf8c5e9c27"
+    },
+    "actual-report.md.gz": {
+      "rawBytes": 2619,
+      "rawSha256": "05af54bd10206a8a6b4d00a104a98f753a3fdee0d87316edd546312c3f85340f",
+      "gzipBytes": 1368,
+      "gzipSha256": "6244df54bb60fbb888fb5dea48f7956b2f2a46c7ab2412faf8a4b301950e74f9"
+    },
+    "independent-review.md.gz": {
+      "rawBytes": 5604,
+      "rawSha256": "ac019c4cce40266ea43563dcae204396a4d35152ff4ea56a9e760e9fa2546895",
+      "gzipBytes": 2584,
+      "gzipSha256": "8fc57367b3f753ea6187d3e61e0c81fa422a6135cdefc2ea51a802e2c74a1a2b"
+    },
+    "review.diff.gz": {
+      "rawBytes": 6602,
+      "rawSha256": "8dc9f859ed678d495aaf88317de80c46f53a3eff44c42d4638c90237133a0bc4",
+      "gzipBytes": 2182,
+      "gzipSha256": "9838609472c3e4a6f2a7e3078df7618126428d4dd34d848400edc37ab226a2e5"
+    }
+  }
+}
