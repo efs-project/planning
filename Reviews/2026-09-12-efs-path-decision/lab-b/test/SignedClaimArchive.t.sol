@@ -4,7 +4,9 @@ pragma solidity 0.8.30;
 import {LabBase} from "./LabBase.sol";
 import {Ledger} from "../src/Ledger.sol";
 import {Keys} from "../src/Keys.sol";
-import {SignedClaimArchive, SignedClaimArchiveBase as Archive} from "../src/SignedClaimArchive.sol";
+import {ArchiveReadConsumer} from "./ArchiveReadConsumer.sol";
+import {SignedClaimArchive, SignedClaimArchivePacked, SignedClaimArchiveCodeBlob,
+    SignedClaimArchiveBase as Archive} from "../src/SignedClaimArchive.sol";
 
 interface ArchiveVm {
     struct Log { bytes32[] topics; bytes data; address emitter; }
@@ -12,6 +14,7 @@ interface ArchiveVm {
     function accesses(address target) external returns (bytes32[] memory reads, bytes32[] memory writes);
     function recordLogs() external;
     function getRecordedLogs() external returns (Log[] memory);
+    function getNonce(address account) external view returns (uint64);
 }
 
 contract ArchiveActor {
@@ -419,5 +422,176 @@ contract SignedClaimArchiveTest is LabBase {
         (bool ok,) = address(archive).staticcall(abi.encodeCall(archive.signedRecordClaimAt, (recordId, uint64(3))));
         require(!ok, "posting ordinal equal to count rejects");
         require(archive.signedRecordClaimCount(bytes32(uint256(0xdead))) == 0, "unknown record has no signed postings");
+    }
+
+    function representationBody(uint16 leaf) internal pure returns (bytes memory) {
+        return leaf < 2 ? bytes("") : abi.encode(uint256(leaf / 2));
+    }
+
+    function representationVector(uint16 n) internal pure returns (Ledger.Action[] memory actions) {
+        actions = new Ledger.Action[](n);
+        for (uint16 i; i < n; ++i) {
+            bytes32 t = keccak256("archive/equivalence/unknown-type");
+            bytes memory body = representationBody(i);
+            actions[i] = Ledger.Action(i % 2 == 0 ? 1 : 2, t,
+                i % 2 == 0 ? keccak256(body) : rid(t, body),
+                bytes32(uint256(0x100 + i)), bytes32(uint256(0x200 + i)),
+                bytes32(uint256(0x300 + i)), bytes32(uint256(0x400 + i)),
+                uint32(0x80000000 + i), bytes32(uint256(0x500 + i)));
+        }
+    }
+
+    function representationClaim(Archive target, bytes32 id) internal view returns (ClaimView memory c) {
+        (bool ok, bytes memory raw) = address(target).staticcall(abi.encodeCall(target.claim, (id)));
+        require(ok && raw.length == 512, "representation claim has bounded ABI");
+        c = abi.decode(raw, (ClaimView));
+    }
+
+    function retainedLocation(ArchiveVm.Log[] memory logs, address emitter, bytes32 id, uint16 n)
+        internal pure returns (address location) {
+        uint256 matches;
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter != emitter) continue;
+            require(logs[i].topics.length == 2 &&
+                logs[i].topics[0] == keccak256("ClaimRetained(bytes32,address,uint16)") &&
+                logs[i].topics[1] == id, "neutral retention event matches claim and emitter");
+            uint16 count;
+            (location, count) = abi.decode(logs[i].data, (address, uint16));
+            require(count == n, "retention event observes complete vector length");
+            ++matches;
+        }
+        require(matches == 1, "one neutral event per first retention");
+    }
+
+    function assertRepresentationRecords(Archive target, bytes32 id, Ledger.Action[] memory actions, bool covered)
+        internal view {
+        for (uint16 i; i < actions.length; ++i) {
+            bytes memory expectedBody = representationBody(i);
+            bytes32 expectedId = rid(actions[i].typeId, expectedBody);
+            (bytes32 recordId, bytes32 typeId, bool attached, bytes memory body) = target.selectedRecord(id, i);
+            require(recordId == expectedId && typeId == actions[i].typeId && attached == covered,
+                "selected identity and claim-local coverage match fixture");
+            require(covered ? keccak256(body) == keccak256(expectedBody) : body.length == 0,
+                "selected bytes distinguish missing from attached empty body");
+            uint64 expectedCount = actions.length == 1 ? 1 : 2;
+            require(target.signedRecordClaimCount(expectedId) == expectedCount, "repeated record preserves each leaf posting");
+            for (uint64 j; j < expectedCount; ++j) {
+                (bytes32 posted, uint16 leaf) = target.signedRecordClaimAt(expectedId, j);
+                require(posted == id && leaf == (i / 2) * 2 + j, "posting claim and leaf order match fixture");
+            }
+        }
+    }
+
+    // Catches missing/truncated vectors, shifted decoding, changed headers and representation-dependent body/posting semantics.
+    function test_packed_and_codeblob_reconstruct_identical_1_2_64_vectors() public {
+        uint16[3] memory sizes = [uint16(1), uint16(2), uint16(64)];
+        for (uint256 cell; cell < sizes.length; ++cell) {
+            uint16 n = sizes[cell];
+            Archive packed = new SignedClaimArchivePacked();
+            Archive blob = new SignedClaimArchiveCodeBlob();
+            Ledger.Action[] memory actions = representationVector(n);
+            Ledger.Intent memory intent = arbitraryIntent(n);
+            bytes memory signature = signIntent(PK_A, ledger, intent, actions);
+            bytes32 expectedId = ledger.intentDigest(intent, keccak256(abi.encode(actions)));
+            avm.recordLogs();
+            require(importer.retain(packed, intent, actions, signature, noBodies()) == expectedId, "packed exact digest");
+            require(importer.retain(blob, intent, actions, signature, noBodies()) == expectedId, "codeblob exact digest");
+            ArchiveVm.Log[] memory logs = avm.getRecordedLogs();
+            Ledger.Action[] memory rebuiltPacked = new Ledger.Action[](n);
+            Ledger.Action[] memory rebuiltBlob = new Ledger.Action[](n);
+            for (uint16 leaf; leaf < n; ++leaf) {
+                rebuiltPacked[leaf] = packed.actionAt(expectedId, leaf);
+                rebuiltBlob[leaf] = blob.actionAt(expectedId, leaf);
+                sameAction(rebuiltPacked[leaf], actions[leaf]);
+                sameAction(rebuiltBlob[leaf], actions[leaf]);
+            }
+            bytes32 vectorHash = keccak256(abi.encode(actions));
+            require(keccak256(abi.encode(rebuiltPacked)) == vectorHash &&
+                keccak256(abi.encode(rebuiltBlob)) == vectorHash, "both complete vectors reconstruct signed hash");
+            ClaimView memory pc = representationClaim(packed, expectedId);
+            ClaimView memory bc = representationClaim(blob, expectedId);
+            require(keccak256(abi.encode(pc)) == keccak256(abi.encode(bc)), "all header fields identical");
+            require(keccak256(abi.encode(pc.source)) == keccak256(abi.encode(intent)) && pc.actionsHash == vectorHash &&
+                pc.leafCount == n && pc.coverage == 0 && pc.firstImporter == address(importer) &&
+                pc.retainedAt == block.timestamp && pc.proof == Archive.ProofLevel.AUTHOR_SIGNATURE_VERIFIED &&
+                keccak256(abi.encodePacked(pc.r, pc.s, pc.v)) == keccak256(signature), "header matches independent signed fixture");
+            require(retainedLocation(logs, address(packed), expectedId, n) == address(0), "packed has no code location");
+            address location = retainedLocation(logs, address(blob), expectedId, n);
+            require(location != address(0) && location.code.length == 65 + 288 * uint256(n), "exact bounded code size");
+            if (n == 64) require(location.code.length == 18_497, "bound fits EIP-170");
+            require(keccak256(location.code) == keccak256(bytes.concat(hex"00", abi.encode(actions))), "STOP plus exact vector bytes");
+            assertRepresentationRecords(packed, expectedId, actions, false);
+            assertRepresentationRecords(blob, expectedId, actions, false);
+            Archive.BodyInput[] memory bodies = new Archive.BodyInput[](n);
+            for (uint16 leaf; leaf < n; ++leaf) bodies[leaf] = Archive.BodyInput(leaf, representationBody(leaf));
+            packed.attachBodies(expectedId, bodies);
+            blob.attachBodies(expectedId, bodies);
+            pc = representationClaim(packed, expectedId);
+            bc = representationClaim(blob, expectedId);
+            uint64 expectedCoverage = n == 64 ? type(uint64).max : uint64((uint256(1) << n) - 1);
+            require(pc.coverage == expectedCoverage && keccak256(abi.encode(pc)) == keccak256(abi.encode(bc)),
+                "identical claim-local coverage including high bit");
+            assertRepresentationRecords(packed, expectedId, actions, true);
+            assertRepresentationRecords(blob, expectedId, actions, true);
+        }
+    }
+
+    // Catches retries redeploying CREATE carriers, emitting duplicate retention observations or rewriting state.
+    function test_codeblob_retry_preserves_event_location_codehash_and_creation_nonce() public {
+        Archive blob = new SignedClaimArchiveCodeBlob();
+        Ledger.Action[] memory actions = representationVector(2);
+        Ledger.Intent memory intent = arbitraryIntent(200);
+        bytes memory signature = signIntent(PK_A, ledger, intent, actions);
+        avm.recordLogs();
+        bytes32 id = blob.retainSignedClaim(intent, actions, signature, bodyAt(0, hex""));
+        address location = retainedLocation(avm.getRecordedLogs(), address(blob), id, 2);
+        bytes32 codehash = location.codehash;
+        uint64 creationNonce = avm.getNonce(address(blob));
+        bytes32 header = keccak256(abi.encode(representationClaim(blob, id)));
+        vm.warp(block.timestamp + 99);
+        avm.record();
+        avm.recordLogs();
+        require(importer.retain(blob, intent, actions, signature, bodyAt(0, hex"")) == id, "retry exact digest");
+        (, bytes32[] memory writes) = avm.accesses(address(blob));
+        require(writes.length == 0 && avm.getRecordedLogs().length == 0, "retry has no archive writes or new retention event");
+        require(avm.getNonce(address(blob)) == creationNonce && location.codehash == codehash &&
+            codehash == keccak256(bytes.concat(hex"00", abi.encode(actions))), "retry preserves original carrier and creates no replacement");
+        require(keccak256(abi.encode(representationClaim(blob, id))) == header, "retry preserves all header fields");
+        for (uint16 leaf; leaf < 2; ++leaf) sameAction(blob.actionAt(id, leaf), actions[leaf]);
+        require(blob.signedRecordClaimCount(rid(actions[0].typeId, hex"")) == 2, "retry appends no duplicate posting");
+    }
+
+    // Catches hashing a partial/wrong tuple, ignoring the leaf, swallowing archive errors, or storing read results.
+    function test_paid_consumer_emits_exact_first_last_action_hash_without_storage() public {
+        ArchiveReadConsumer paid = new ArchiveReadConsumer();
+        Archive[2] memory targets = [Archive(new SignedClaimArchivePacked()), Archive(new SignedClaimArchiveCodeBlob())];
+        Ledger.Action[] memory actions = representationVector(64);
+        Ledger.Intent memory intent = arbitraryIntent(201);
+        bytes memory signature = signIntent(PK_A, ledger, intent, actions);
+        for (uint256 candidate; candidate < targets.length; ++candidate) {
+            Archive target = targets[candidate];
+            bytes32 id = target.retainSignedClaim(intent, actions, signature, noBodies());
+            uint16[2] memory leaves = [uint16(0), uint16(63)];
+            for (uint256 i; i < leaves.length; ++i) {
+                uint16 leaf = leaves[i];
+                avm.record();
+                avm.recordLogs();
+                paid.readAction(address(target), id, leaf);
+                ArchiveVm.Log[] memory logs = avm.getRecordedLogs();
+                require(logs.length == 1, "one paid action observation");
+                require(logs[0].emitter == address(paid) && logs[0].topics.length == 3 &&
+                    logs[0].topics[0] == keccak256("ActionRead(bytes32,uint16,bytes32)") &&
+                    logs[0].topics[1] == id && logs[0].topics[2] == bytes32(uint256(leaf)) &&
+                    abi.decode(logs[0].data, (bytes32)) == keccak256(abi.encode(actions[leaf])),
+                    "paid event binds intended claim leaf and complete action hash");
+                (, bytes32[] memory writes) = avm.accesses(address(paid));
+                require(writes.length == 0, "paid consumer writes no storage");
+                (, writes) = avm.accesses(address(target));
+                require(writes.length == 0, "paid read leaves archive unchanged");
+            }
+            (bool ok, bytes memory err) = address(paid).call(abi.encodeCall(paid.readAction, (address(target), id, uint16(64))));
+            require(!ok && keccak256(err) == keccak256(abi.encodeWithSelector(Archive.E_LEAF.selector, uint16(64))),
+                "paid consumer preserves bounded archive errors");
+        }
     }
 }

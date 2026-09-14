@@ -31,6 +31,9 @@ abstract contract SignedClaimArchiveBase {
     error E_BODY_LEAF(uint16 leaf);
     error E_BODY_MISMATCH(uint16 leaf, bytes32 expected, bytes32 actual);
 
+    /// Representation observation only; not an admission or authority proof.
+    event ClaimRetained(bytes32 indexed claimId, address vectorLocation, uint16 leafCount);
+
     uint256 public constant MAX_ACTIONS = 64;
     uint256 public constant MAX_BODY_INPUTS = 64;
     uint256 public constant MAX_BODY_BYTES_PER_CALL = 8192;
@@ -93,6 +96,7 @@ abstract contract SignedClaimArchiveBase {
                     _recordClaims[_recordId(a)].push(Posting(claimId, i));
                 }
             }
+            emit ClaimRetained(claimId, _vectorLocation(claimId), c.leafCount);
         }
         _attachValidated(c, bodies, recordIds);
     }
@@ -229,6 +233,7 @@ abstract contract SignedClaimArchiveBase {
 
     function _storeVector(bytes32 claimId, Ledger.Action[] calldata actions) internal virtual;
     function _loadAction(bytes32 claimId, uint16 leaf) internal view virtual returns (Ledger.Action memory);
+    function _vectorLocation(bytes32) internal view virtual returns (address) { return address(0); }
 }
 
 contract SignedClaimArchivePacked is SignedClaimArchiveBase {
@@ -259,6 +264,33 @@ contract SignedClaimArchivePacked is SignedClaimArchiveBase {
         PackedAction storage a = _vectors[claimId][leaf];
         return Ledger.Action(uint8(a.meta), a.typeId, a.bodyHashOrRecordId, a.purpose,
             a.subject, a.role, a.target, uint32(a.meta >> 8), a.salt);
+    }
+}
+
+/// Private data carrier: runtime is a STOP byte followed by the immutable ABI vector.
+contract ActionCodeBlob {
+    constructor(bytes memory encodedActions) {
+        bytes memory runtime = bytes.concat(hex"00", encodedActions);
+        assembly ("memory-safe") { return(add(runtime, 32), mload(runtime)) }
+    }
+}
+
+contract SignedClaimArchiveCodeBlob is SignedClaimArchiveBase {
+    mapping(bytes32 => address) private _vector;
+
+    function _storeVector(bytes32 claimId, Ledger.Action[] calldata actions) internal override {
+        _vector[claimId] = address(new ActionCodeBlob(abi.encode(actions)));
+    }
+
+    function _loadAction(bytes32 claimId, uint16 leaf) internal view override returns (Ledger.Action memory x) {
+        bytes memory raw = new bytes(288);
+        address blob = _vector[claimId];
+        assembly ("memory-safe") { extcodecopy(blob, add(raw, 32), add(65, mul(leaf, 288)), 288) }
+        x = abi.decode(raw, (Ledger.Action));
+    }
+
+    function _vectorLocation(bytes32 claimId) internal view override returns (address) {
+        return _vector[claimId];
     }
 }
 
