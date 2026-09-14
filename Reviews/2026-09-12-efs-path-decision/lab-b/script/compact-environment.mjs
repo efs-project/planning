@@ -22,11 +22,16 @@ async function freePort() {
   const server = createServer(); await new Promise((ok,no) => {server.once('error',no);server.listen(0,'127.0.0.1',ok);});
   const port = server.address().port; await new Promise(ok => server.close(ok)); return port;
 }
-export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_OUT ?? join(lab,'out'),useLive=process.env.EFS_LISTING_MODE!=='audit'}={}) {
+export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_OUT ?? join(lab,'out'),useLive=process.env.EFS_LISTING_MODE!=='audit',
+  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun'}={}) {
+  assert(['compact-legacy-v1','compact-guarded-v2'].includes(protocol),'supported fixture protocol');
+  assert(['direct','proxy'].includes(deployment),'supported fixture deployment');
+  assert(['cancun','prague'].includes(hardfork),'supported fixture hardfork');
+  assert(deployment==='direct'||protocol==='compact-guarded-v2','proxy refuses legacy signed ingress');
   const e = await loadEthers(), dir = await mkdtemp(join(tmpdir(),'efs-compact-demo-'));
   const port = await freePort(), rpcUrl = `http://127.0.0.1:${port}`;
   const child = spawn(process.env.ANVIL_BIN ?? 'anvil',[
-    '--host','127.0.0.1','--port',String(port),'--chain-id','31337','--hardfork','cancun',
+    '--host','127.0.0.1','--port',String(port),'--chain-id','31337','--hardfork',hardfork,
     '--gas-limit','30000000','--gas-price','2000000000','--prune-history','256',
     '--transaction-block-keeper','512','--cache-path',join(dir,'anvil-cache'),'--quiet',
   ],{stdio:['ignore','ignore','pipe']});
@@ -59,13 +64,25 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
       catch(error) {if(Date.now()>until || child.exitCode !== null)throw new Error(`Anvil did not start: ${nodeError || error.message}`); await delay(50);}
     }
     const wallets=Object.fromEntries(['deployer','alice','bob'].map((name,index)=>[name,e.HDNodeWallet.fromPhrase(mnemonic,undefined,`m/44'/60'/0'/0/${index}`)]));
-    const transactions=[], contracts={};
-    const send = async (label,tx,who='deployer') => {
+    const transactions=[], contracts={}, pending=new Map();
+    // Enqueue never waits for success: ordering/type-4 tests must observe actual
+    // mined receipts independently, including transactions that revert.
+    const enqueue = async (label,tx,who='deployer') => {
       const wallet=wallets[who]; assert(wallet,'known disposable signer');
-      const nonce=Number(BigInt(await rpc('eth_getTransactionCount',[wallet.address,'pending'])));
-      const raw=await wallet.signTransaction({to:tx.to??null,data:tx.data,value:BigInt(tx.value??0),
-        nonce,chainId:31337,type:0,gasPrice:2_000_000_000n,gasLimit:tx.gasLimit??15_000_000n});
+      const gasLimit=BigInt(tx.gasLimit??15_000_000n);
+      assert(gasLimit>0n&&gasLimit<=16_777_216n,'target-compatible transaction gasLimit <= 16777216');
+      const nonce=tx.nonce??Number(BigInt(await rpc('eth_getTransactionCount',[wallet.address,'pending'])));
+      const type=tx.type??0;
+      const raw=await wallet.signTransaction({to:tx.to??null,data:tx.data??'0x',value:BigInt(tx.value??0),
+        nonce,chainId:31337,type,gasLimit,
+        ...(type===4?{authorizationList:tx.authorizationList,maxFeePerGas:2_000_000_000n,maxPriorityFeePerGas:1_000_000_000n}
+          :{gasPrice:2_000_000_000n})});
       const hash=e.keccak256(raw), observed=await rpc('eth_sendRawTransaction',[raw]); assert.equal(observed,hash);
+      pending.set(hash,{label,tx:{...tx,data:tx.data??'0x'},who,raw}); return hash;
+    };
+    const observe = async hash => {
+      const already=transactions.find(row=>row.transactionHash===hash); if(already)return already;
+      const {label,tx,who,raw}=pending.get(hash)??{}; assert(tx,'owned enqueued transaction');
       let receipt; const deadline=Date.now()+20_000;
       while(!(receipt=await rpc('eth_getTransactionReceipt',[hash]))) {assert(Date.now()<deadline,'receipt timeout');await delay(20);}
       const [block,chainTx]=await Promise.all([rpc('eth_getBlockByHash',[receipt.blockHash,false]),rpc('eth_getTransactionByHash',[hash])]);
@@ -73,9 +90,15 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
       assert.equal(block.transactions[Number(BigInt(receipt.transactionIndex))],hash);assert.equal(chainTx.input,tx.data);
       const row={label,signer:who,transactionHash:hash,blockHash:receipt.blockHash,blockNumber:BigInt(receipt.blockNumber).toString(),
         gasUsed:BigInt(receipt.gasUsed).toString(),effectiveGasPriceWei:BigInt(receipt.effectiveGasPrice).toString(),
-        calldataBytes:e.getBytes(tx.data).length,status:BigInt(receipt.status)===1n?'SUCCESS':'REVERTED',receipt};
+        calldataBytes:e.getBytes(tx.data).length,type:Number(BigInt(chainTx.type)),gasLimit:BigInt(chainTx.gas).toString(),rawTransaction:raw,
+        status:BigInt(receipt.status)===1n?'SUCCESS':'REVERTED',receipt};
       transactions.push(row); await writeFile(join(dir,'transactions.json'),json(transactions));
-      assert.equal(row.status,'SUCCESS',label); return hash;
+      assert(BigInt(row.gasUsed)<=BigInt(row.gasLimit)&&BigInt(row.gasLimit)<=16_777_216n,'receipt gas within target transaction cap');
+      return row;
+    };
+    const send = async (label,tx,who='deployer') => {
+      const hash=await enqueue(label,tx,who),row=await observe(hash);
+      assert.equal(row.status,'SUCCESS',label);return hash;
     };
     const artifact = async (file,name) => JSON.parse(await readFile(join(artifactDirectory,file,`${name}.json`),'utf8'));
     const call = async (name,fn,args=[],block='latest') => {
@@ -101,7 +124,14 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
       return address;
     };
     const registry=await deploy('registry','TypeRegistry.sol','TypeRegistry');
-    const ledger=await deploy('ledger','Ledger.sol','Ledger',[registry,e.id('compact-browser-local/20260914')]);
+    const realm=e.id('compact-browser-local/20260914');
+    let ledger;
+    if(deployment==='proxy') {
+      const v1=await deploy('implementationV1','Ledger.sol','Ledger',[registry,realm]);
+      await deploy('implementationV2','Ledger.sol','Ledger',[registry,realm]);
+      ledger=await deploy('proxy','UpgradeProxy.sol','UpgradeProxy',[v1]);
+      contracts.ledger={...contracts.proxy,abi:contracts.implementationV1.abi};
+    } else ledger=await deploy('ledger','Ledger.sol','Ledger',[registry,realm]);
     const rootRule=await deploy('rootRule','FilesJoinedProfile.sol','FilesRootRule');
     const rootShape=e.id('lab/type/files-joined-root/1');
     const root=(await call('registry','typeIdOf',[rootShape,rootRule,[]]))[0];
@@ -125,6 +155,13 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
     const manifest={chainId:'31337',listing:useLive?'live-positive':'audit',folder,folders:[folder,archive],authors:{alice:wallets.alice.address,bob:wallets.bob.address},
       contracts:Object.fromEntries(['ledger','index','lens','registry','files','names'].map(k=>[k,contracts[k]])),
       types:{root,child:childType,name},ruleHashes};
+    if(protocol==='compact-guarded-v2') {
+      manifest.protocol=protocol;
+      manifest.executionFamily={origin:(await call('ledger','realmOrigin'))[0],realmId:realm,
+        layoutId:(await call('ledger','layoutId'))[0],domainSeparator:(await call('ledger','domainSeparator'))[0],
+        guardedDomainSeparator:(await call('ledger','guardedDomainSeparator'))[0],
+        implementations:(deployment==='proxy'?['implementationV1','implementationV2']:['ledger']).map(k=>({address:contracts[k].address,codeHash:contracts[k].codeHash}))};
+    }
     await writeFile(join(dir,'manifest.json'),json(manifest));
     const createJournal=async key=>{
       assert(/^[a-z0-9-]+$/.test(key));const base=join(dir,`journal-${key}`);await mkdir(base,{recursive:true});
@@ -134,6 +171,6 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
     };
     const writeReport=async (name,value)=>{assert(/^[a-z0-9-]+$/.test(name));const path=join(dir,`${name}.json`);
       await writeFile(path,json({...value,sourceArtifacts:resolve(artifactDirectory),contracts,evidence:'LOCAL_RPC_OBSERVED_NOT_STATE_PROOF'}));console.log(`Report: ${path}`);return path;};
-    return {ethers:e,dir,port,rpcUrl,rpc,metrics,manifest,contracts,wallets,transactions,send,call,transact,deploy,close,createJournal,writeReport};
+    return {ethers:e,dir,port,rpcUrl,rpc,metrics,manifest,contracts,wallets,transactions,send,enqueue,observe,call,transact,deploy,close,createJournal,writeReport};
   } catch(error) {await close();throw error;}
 }

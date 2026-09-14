@@ -5,7 +5,14 @@
  * Journal entries are JSON-safe and must be durably stored by put() before it
  * resolves. Reconcile works after reload from that journal, without re-signing.
  */
-export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
+export function createCompactSdk(options) {
+  if (options.manifest.protocol && options.manifest.protocol !== 'compact-legacy-v1') throw new Error('COMPACT_PROTOCOL');
+  return createCompactEngine(options);
+}
+
+// Additive seam: guarded fixtures import this engine. Live-served legacy assets
+// never import a new module (the existing server has a closed asset allowlist).
+export function createCompactEngine({ethers: e, rpc, manifest, journal}, protocolFactory) {
   const Z = e.ZeroHash, coder = e.AbiCoder.defaultAbiCoder();
   const fail = (code) => {throw new Error(`COMPACT_${code}`);};
   const check = (condition, code) => {if (!condition) fail(code);};
@@ -41,9 +48,33 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
     check((config.folders ?? [config.folder]).some(x => eq(x,f)),'UNMOUNTED_FOLDER');
     return f;
   };
+  const legacy = {
+    selectors:async (args) => authorsOf(args.authors),
+    lensHash:authors => e.keccak256(e.concat(authors.map(a => e.zeroPadValue(a,32)))),
+    lensFields:authors=>({authors}), readContext:async()=>{},revisionEvidence:async()=>({}),watchPositions:false,unavailable:()=>false,
+    signedPrincipal:async(author,context)=>{check(await code(author,context)==='0x','SIGNED_EOA_ONLY');return e.zeroPadValue(author,32);},
+    resolve:(authors,p,s,r,c)=>call('lens','resolve',[authors,p,s,r],c),
+    conflicts:(authors,p,s,r,c)=>call('lens','resolveNoTiebreak',[authors,p,s,r],c),
+    list:(authors,p,s,cursor,budget,c)=>scalar('lens','list',[authors,p,s,cursor,budget],c),
+    cursorMatches:(cursor,c)=>eq(cursor.coreCodeCommitment,c.core),
+    name:(position,folder,role,c)=>scalar('names','readName',[position,folder,role,[c.admission,c.epoch,c.core]],c),
+    authorization:async({intent,actionsHash,context})=>({intent,digest:await scalar('ledger','intentDigest',[intent,actionsHash],context),
+      publicationId:hash(['address','uint64','bytes32'],[intent.author,intent.nonce,actionsHash])}),
+    encode:(plan,signature)=>interfaces.ledger.encodeFunctionData('executeSigned',[plan.intent,plan.actions,plan.bodies,signature]),
+    preflight:async()=>{},
+    verifyJournal:(entry,id)=>{
+      const p=entry.plan, pub=hash(['address','uint64','bytes32'],[p.intent.author,p.intent.nonce,p.actionsHash]);
+      check(eq(pub,p.publicationId)&&eq(id,hash(['uint256','address','bytes32'],[p.basis.chainId,addresses.ledger,pub])),'JOURNAL_INTEGRITY');
+    },
+    verifyRetained:async(plan,publication,retained,c)=>eq(await scalar('ledger','intentDigest',[plan.intent,plan.actionsHash],c),plan.digest),
+    history:(plan,expected,asOf,c)=>call('lens','history',[plan.intent.author,expected.position,asOf],c),
+    principal:plan=>e.zeroPadValue(plan.intent.author,32),
+    recoveryError:null,capabilities:{protocol:'compact-legacy-v1',guardedWrites:false},
+  };
+  const protocol = {...legacy,...protocolFactory?.({e,rpc,config,hash,eq,check,fail,plain,freeze,call,scalar,code,addresses,interfaces,blockArg,positionOf,recordOf,bindingOf})};
   const basisFor = (context,authors,policy='ordered') => ({...context,
     lens:{address:addresses.lens,codeHash:config.contracts.lens.codeHash,policy,
-      authors:authors ?? [], hash:authors ? e.keccak256(e.concat(authors.map(a => e.zeroPadValue(a,32)))) : null},
+      ...protocol.lensFields(authors ?? []), hash:authors ? protocol.lensHash(authors) : null},
   });
   const result = (context,knowledge,coverage,value,extra={}) => ({basis:context,knowledge,coverage,value,...extra});
 
@@ -94,6 +125,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
       scalar('ledger','counts',[],context),scalar('index','generation',[],context),scalar('registry','epoch',[],context),
     ])).map(String);
     await validateProfile(context);
+    await protocol.readContext(context);
     freeze(context); contexts.add(context);
     return context;
   }
@@ -120,7 +152,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
     check(eq(cell[0],purpose.folder) && eq(cell[1],folder) && eq(cell[2],role)
       && eq(position,positionOf(purpose.folder,folder,role)),'POSITION');
     let record;
-    try {record = await scalar('names','readName',[position,folder,role,[context.admission,context.epoch,context.core]],context);}
+    try {record = await protocol.name(position,folder,role,context);}
     catch (error) {return result(basisFor(context),'UNKNOWN','PARTIAL',null,{reason:'NAME_UNAVAILABLE'});}
     const [status,id,first,bytes] = record;
     if (Number(status) !== 1) return result(basisFor(context),Number(status) === 3 ? 'INVALID' : 'UNKNOWN','PARTIAL',null,
@@ -134,7 +166,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
   }
   async function readName(args) {
     await guard(args.context);
-    return nameAt({...args,folder:mounted(args.folder)});
+    return freeze(await nameAt({...args,folder:mounted(args.folder)}));
   }
   function selection(values) {
     const [status,target,revision,author,admission] = values;
@@ -142,7 +174,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
     return {status:Number(status),target,revision:Number(revision),author,admission:String(admission)};
   }
   async function resolve(authors,p,subject,role,context) {
-    const s = selection(await call('lens','resolve',[authors,p,subject,role],context));
+    const s = selection(await protocol.resolve(authors,p,subject,role,context));
     check(BigInt(s.admission) <= BigInt(context.admission)
       && (s.status === 0 || (BigInt(s.admission) > 0n && authors.some(a => eq(a,s.author)))),'SELECTION');
     return s;
@@ -166,7 +198,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
         && eq(recordOf(pt,e.keccak256(pb)),parent) && eq(e.hexlify(pbytes.slice(pp-32,pp)),file),'FILE_PARENT');
     }
     const document = e.hexlify(bytes.slice(prefix));
-    return {recordId,typeId,file,parent,document,documentHash:e.keccak256(document),
+    return {recordId,typeId,file,parent,document,documentHash:e.keccak256(document),...await protocol.revisionEvidence(admission[2],context),
       firstAdmission:String(first),occurrences:String(occurrences),maintenance:'RETAINED_OCCURRENCE_COUNT',validity:'NOT_ASSESSED'};
   }
   async function tagAt(authors,subject,concept,file,context) {
@@ -178,7 +210,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
     let s, candidates = [];
     if (policy === 'ordered') s = await resolve(authors,purpose.head,file,Z,context);
     else {
-      const [status,entries] = await call('lens','resolveNoTiebreak',[authors,purpose.head,file,Z],context);
+      const [status,entries] = await protocol.conflicts(authors,purpose.head,file,Z,context);
       s = {status:Number(status),target:Z,revision:0,author:e.ZeroAddress,admission:'0'};
       for (const entry of entries) {
         check(eq(entry.position,positionOf(purpose.head,file,Z)) && entry.admission > 0n
@@ -186,7 +218,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
         const candidateSelection = selection([1,entry.target,entry.revision,entry.author,entry.admission]);
         let revision=null,knowledge='PRESENT';
         try {revision=await revisionAt(entry.target,file,context);}
-        catch(error) {knowledge=String(error?.message).startsWith('COMPACT_')?'INVALID':'UNKNOWN';}
+        catch(error) {knowledge=String(error?.message).startsWith('COMPACT_')&&!protocol.unavailable(error)?'INVALID':'UNKNOWN';}
         candidates.push({selection:candidateSelection,revision,knowledge});
       }
       if (s.status === 1) {check(candidates.length === 1,'SELECTION'); s = candidates[0].selection;}
@@ -195,7 +227,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
     if (s.status === 1) {
       try {revision = await revisionAt(s.target,file,context);}
       catch (error) {
-        const invalid = String(error?.message).startsWith('COMPACT_');
+        const invalid = String(error?.message).startsWith('COMPACT_')&&!protocol.unavailable(error);
         revisionFailure = {knowledge:invalid ? 'INVALID' : 'UNKNOWN',reason:invalid ? 'FILE_INTEGRITY' : 'BYTES_UNAVAILABLE'};
       }
     }
@@ -208,14 +240,15 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
   }
   async function readFile(args) {
     await guard(args.context);
-    return fileAt({...args,authors:authorsOf(args.authors)});
+    return freeze(await fileAt({...args,authors:await protocol.selectors(args,args.context)}));
   }
 
   const emptyCursor = () => [0,0,0,Z,Z,Z,Z,0,0,0];
   async function listFolder(args={}) {
-    const {context,continuation} = args, folder = mounted(args.folder), authors = authorsOf(args.authors);
+    const {context,continuation} = args, folder = mounted(args.folder);
     check(!('cursor' in args),'CURSOR_NOT_ACCEPTED');
     await guard(context);
+    const authors = await protocol.selectors(args,context);
     const budget = args.budget ?? 64;
     check(Number.isInteger(budget) && budget >= 1 && budget <= 256,'BUDGET');
     const basis = basisFor(context,authors), scope = hash(['bytes32','bytes32'],[purpose.folder,folder]);
@@ -231,10 +264,10 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
       || await scalar('index','attachedFrom',[],context) !== 1n) {
       return result(basis,'UNKNOWN','UNKNOWN',walk.rows,{nameCoverage:'PARTIAL',reason:'INDEX_COVERAGE'});
     }
-    const page = await scalar('lens','list',[authors,purpose.folder,folder,walk.cursor,budget],context);
+    const page = await protocol.list(authors,purpose.folder,folder,walk.cursor,budget,context);
     const next = page.next, scanned = walk.scanned + page.scanned;
     check(!page.mutated && String(next.basisAdmission) === context.admission && String(next.indexGeneration) === context.generation
-      && String(next.rulesEpoch) === context.epoch && eq(next.coreCodeCommitment,context.core)
+      && String(next.rulesEpoch) === context.epoch && protocol.cursorMatches(next,context)
       && eq(next.scopeKey,scope) && eq(next.lensHash,basis.lens.hash),'BASIS');
     check(page.scanned <= BigInt(budget) && scanned <= page.rawTotal
       && (walk.rawTotal === null || page.rawTotal === walk.rawTotal),'PAGE');
@@ -269,9 +302,16 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
   const bytesOf = input => typeof input === 'string' ? e.toUtf8Bytes(input) : e.getBytes(input);
   async function prepare(args) {
     const context = args.context ?? await pin(); await guard(context);
-    const author = e.getAddress(args.author), authors = authorsOf(args.authors);
-    check(await code(author,context) === '0x','SIGNED_EOA_ONLY');
+    const author = e.getAddress(args.author), authors = await protocol.selectors(args,context);
+    const principalId = await protocol.signedPrincipal(author,context);
     const actions = [], bodies = [], expectedHeads = new Map(), startingHeads = new Map(), retainedNames = new Set(), selectionDependencies = [];
+    const guardPositions = new Map();
+    const watch = async(p,s,r,meaning,selected) => {
+      if(!protocol.watchPositions)return;
+      const position=positionOf(p,s,r);
+      if(!guardPositions.has(position))guardPositions.set(position,{position,purpose:p,subject:s,role:r,meaning,
+        selection:selected??await resolve(authors,p,s,r,context)});
+    };
     let file = args.file, newRevision = null;
     const push = (fields,body='0x') => {actions.push(action(fields)); bodies.push(e.hexlify(body));};
     const ownHead = async (p,s,r) => {
@@ -314,6 +354,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
       const point = await fileAt({file,authors,context});
       check(point.knowledge === 'PRESENT','NO_SELECTED_REVISION');
       selectionDependencies.push({purpose:purpose.head,subject:file,role:Z,selection:point.value.selection});
+      await watch(purpose.head,file,Z,'selected-head',point.value.selection);
       return point.value.revision;
     };
     const operation = args.operation;
@@ -324,6 +365,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
       push({kind:5,salt:args.salt});
       publishRevision(bytesOf(args.document),null);
       const role = await retainName(args.name);
+      await watch(purpose.folder,mounted(args.folder),role,'destination');
       await binding(purpose.head,file,Z,newRevision);
       await binding(purpose.folder,mounted(args.folder),role,file);
     } else {
@@ -343,6 +385,8 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
         const source = await resolve(authors,purpose.folder,from,fromRole,context);
         check(source.status === 1 && eq(source.target,file),'SOURCE_PLACEMENT');
         selectionDependencies.push({purpose:purpose.folder,subject:from,role:fromRole,selection:source});
+        await watch(purpose.folder,from,fromRole,'source',source);
+        await watch(purpose.folder,to,toRole,'destination');
         await binding(purpose.folder,from,fromRole,file,true);
         await binding(purpose.folder,to,toRole,file);
       } else if (operation === 'remove' || operation === 'restorePlacement') {
@@ -351,6 +395,9 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
           const source = await resolve(authors,purpose.folder,folder,role,context);
           check(source.status === 1 && eq(source.target,file),'SOURCE_PLACEMENT');
           selectionDependencies.push({purpose:purpose.folder,subject:folder,role,selection:source});
+          await watch(purpose.folder,folder,role,'source',source);
+        } else {
+          await watch(purpose.folder,folder,role,'destination');
         }
         await binding(purpose.folder,folder,role,file,operation === 'remove');
       } else if (operation === 'addTag' || operation === 'removeTag') {
@@ -365,10 +412,10 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
       nonce:String(await scalar('ledger','nonces',[author],context)),deadline:String(args.deadline ?? BigInt(context.timestamp)+3600n),
       acceptanceProfile:await scalar('ledger','acceptanceProfileOf',[actions],context),indexObligations:await scalar('ledger','indexObligations',[],context)};
     check(BigInt(intent.deadline) > BigInt(context.timestamp),'EXPIRED');
-    const digest = await scalar('ledger','intentDigest',[intent,actionsHash],context);
-    const publicationId = hash(['address','uint64','bytes32'],[author,intent.nonce,actionsHash]);
+    const authorization = await protocol.authorization({intent,actionsHash,actions,authors,principalId,context,guardPositions:[...guardPositions.values()]});
+    const {publicationId} = authorization;
     const id = hash(['uint256','address','bytes32'],[context.chainId,addresses.ledger,publicationId]);
-    const plan = freeze(plain({id,operation,file,newRevision,authors,basis:context,intent,actions,bodies,actionsHash,digest,publicationId,
+    const plan = freeze(plain({id,operation,file,newRevision,authors,basis:context,intent,actions,bodies,actionsHash,...authorization,
       startingHeads:[...startingHeads.values()],expectedHeads:[...expectedHeads.values()],selectionDependencies}));
     plans.add(plan); return plan;
   }
@@ -376,7 +423,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
     check(plans.has(plan),'PLAN');
     const signature = e.Signature.from(await signDigest(plan.digest,plan)).serialized;
     check(eq(e.recoverAddress(plan.digest,signature),plan.intent.author),'SIGNER');
-    const transaction = {to:addresses.ledger,data:interfaces.ledger.encodeFunctionData('executeSigned',[plan.intent,plan.actions,plan.bodies,signature]),value:'0x0'};
+    const transaction = {to:addresses.ledger,data:protocol.encode(plan,signature),value:'0x0'};
     const signed = freeze({id:plan.id,plan,signature,transaction});
     signedPlans.add(signed); return signed;
   }
@@ -394,6 +441,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
     if (prior) return reconcile(signed.id); // no accidental duplicate broadcast
     const context = await pin(), {plan} = signed;
     check(context.chainId === plan.basis.chainId && eq(context.core,plan.basis.core),'BASIS');
+    await protocol.preflight(plan,context);
     check(String(await scalar('ledger','nonces',[plan.intent.author],context)) === plan.intent.nonce,'NONCE_DRIFT');
     check(BigInt(context.timestamp) <= BigInt(plan.intent.deadline),'EXPIRED');
     check(eq(await scalar('ledger','acceptanceProfileOf',[plan.actions],context),plan.intent.acceptanceProfile),'POLICY_DRIFT');
@@ -422,15 +470,24 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
     return entry;
   }
   async function reconcile(id) {
+    try{return await reconcileEntry(id);}
+    catch(error){
+      if(!protocol.recoveryError)throw error;
+      const qualification=protocol.recoveryError(error);if(!qualification)throw error;
+      const entry=await journal.get(id),outcome={...entry,...qualification,knowledge:'UNKNOWN',coverage:'PARTIAL',evidence:null,
+        receipt:null,receiptObservation:null,receiptAttribution:'UNKNOWN'};
+      await journal.put(plain(outcome));return outcome;
+    }
+  }
+  async function reconcileEntry(id) {
     check(journal?.get && journal?.put,'DURABLE_JOURNAL_REQUIRED');
     const entry = await journal.get(id); check(entry && entry.id === id,'JOURNAL_NOT_FOUND');
     const {plan} = entry;
     check(eq(entry.transaction.to,addresses.ledger) && String(plan.basis.chainId) === String(config.chainId),'JOURNAL_REALM');
     check(eq(hash([interfaces.ledger.getFunction('execute').inputs[0]],[plan.actions]),plan.actionsHash),'JOURNAL_INTEGRITY');
-    const publicationId = hash(['address','uint64','bytes32'],[plan.intent.author,plan.intent.nonce,plan.actionsHash]);
-    check(eq(publicationId,plan.publicationId) && eq(id,hash(['uint256','address','bytes32'],[plan.basis.chainId,addresses.ledger,publicationId])),'JOURNAL_INTEGRITY');
+    protocol.verifyJournal(entry,id);
     check(eq(e.recoverAddress(plan.digest,entry.signature),plan.intent.author),'JOURNAL_SIGNATURE');
-    check(eq(entry.transaction.data,interfaces.ledger.encodeFunctionData('executeSigned',[plan.intent,plan.actions,plan.bodies,entry.signature])),'JOURNAL_INTEGRITY');
+    check(eq(entry.transaction.data,protocol.encode(plan,entry.signature)),'JOURNAL_INTEGRITY');
     let context = await pin();
     // The wallet's returned hash is a hint, not evidence that its receipt belongs
     // to this plan. Economic attribution is separate from canonical EFS effects.
@@ -459,8 +516,9 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
         }
       } catch {receiptAttribution='UNKNOWN';}
     }
+    let status, evidence = null, reason;
+    try {
     const publication = await scalar('ledger','publicationOf',[plan.publicationId],context);
-    let status, evidence = null;
     if (publication === 0n) status = receipt ? (BigInt(receipt.status) === 0n ? 'REVERTED' : 'EFFECTS_MISMATCH') : 'BROADCAST_UNKNOWN';
     else {
       const currentEvidence = await call('ledger','evidence',[publication],context);
@@ -471,7 +529,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
         && Number(retained[3]) === plan.actions.length && String(retained[7]) === plan.intent.nonce
         && String(retained[8]) === plan.intent.deadline && eq(retained[10],plan.intent.acceptanceProfile)
         && eq(retained[11],plan.intent.indexObligations) && eq(retained[12],plan.actionsHash)
-        && eq(await scalar('ledger','intentDigest',[plan.intent,plan.actionsHash],context),plan.digest)
+        && await protocol.verifyRetained(plan,publication,retained,context)
         && await scalar('ledger','publicationOf',[plan.publicationId],context) === publication;
       const first = retained[4];
       for (let i=0; i<plan.actions.length; i++) {
@@ -485,19 +543,20 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
           matches &&= eq(await scalar('ledger','bindingPosition',[row[3]],context),positionOf(a.purpose,a.subject,a.role));
           matches &&= eq(row[6],a.target);
         } else if (a.kind === 5) {
-          matches &&= eq(row[6],a.salt) && await scalar('ledger','subjectCreatedAt',[plan.file],context) === ordinal;
+          const subject=hash(['bytes32','bytes32','bytes32'],[e.id('efs2/subject/1'),protocol.principal(plan),a.salt]);
+          matches &&= eq(row[6],a.salt) && await scalar('ledger','subjectCreatedAt',[subject],context) === ordinal;
         }
       }
       // Rebuild effect obligations from the signed actions, never unsigned journal
       // hints (which could otherwise drop a head check after a browser reload).
       const finalHeads = new Map();
       for (const a of plan.actions) if (a.kind === 3 || a.kind === 4) {
-        const position = positionOf(a.purpose,a.subject,a.role), key = bindingOf(plan.intent.author,position);
-        finalHeads.set(key,{key,position,state:a.kind === 3 ? 1 : 2,revision:a.expectedRevision+1,target:a.target});
+        const position = positionOf(a.purpose,a.subject,a.role), key = bindingOf(protocol.principal(plan),position);
+        finalHeads.set(key,{key,position,state:Number(a.kind) === 3 ? 1 : 2,revision:Number(a.expectedRevision)+1,target:a.target});
       }
       let supersededAtPublicationBlock=false;
       for (const expected of finalHeads.values()) {
-        const historical=await call('lens','history',[plan.intent.author,expected.position,first+BigInt(plan.actions.length)-1n],context);
+        const historical=await protocol.history(plan,expected,first+BigInt(plan.actions.length)-1n,context);
         matches &&= Number(historical[0])===2 && historical[1]===(expected.state===1)
           && eq(historical[2],expected.target) && Number(historical[3])===expected.revision
           && historical[4]>=first && historical[4]<first+BigInt(plan.actions.length);
@@ -507,10 +566,14 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
       status = matches ? 'EFFECTS_VERIFIED' : 'EFFECTS_MISMATCH';
       evidence = {publication:String(publication),firstAdmission:String(first),leafCount:plan.actions.length,supersededAtPublicationBlock};
     }
+    } catch(error) {
+      const qualification=protocol.recoveryError?.(error);if(!qualification)throw error;
+      ({status,reason}=qualification);
+    }
     const outcome = {...entry,status,knowledge:status === 'EFFECTS_VERIFIED' ? 'VERIFIED' : 'UNKNOWN',
       coverage:status === 'EFFECTS_VERIFIED' ? 'COMPLETE' : 'PARTIAL',basis:basisFor(context,plan.authors),evidence,
-      receipt,receiptObservation,receiptAttribution};
+      receipt,receiptObservation,receiptAttribution,...(reason?{reason}:{})};
     await journal.put(plain(outcome)); return outcome;
   }
-  return Object.freeze({pin,listFolder,readFile,readName,prepare,authorize,submit,reconcile});
+  return Object.freeze({pin,listFolder,readFile,readName,prepare,authorize,submit,reconcile,capabilities:()=>freeze(plain(protocol.capabilities))});
 }

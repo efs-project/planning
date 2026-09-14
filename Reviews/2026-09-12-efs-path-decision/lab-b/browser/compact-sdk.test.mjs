@@ -52,6 +52,10 @@ const manifest = {chainId:'31337', folder, authors:{alice:A,bob:B}, contracts, t
   ruleHashes:Object.fromEntries(Object.entries(rules).map(([k,r]) => [k,ethers.keccak256(r.code)])),
 };
 
+test('legacy factory refuses a guarded manifest instead of silently signing the legacy format', () => {
+  assert.throws(() => createCompactSdk({ethers,manifest:{...manifest,protocol:'compact-guarded-v2'}}),/PROTOCOL/);
+});
+
 function fixture(overrides = {}) {
   const journal = new Map(), calls = [], ownHeads = new Map();
   const state = {generation:7n, admission:20n, epoch:3n, nonce:0n, publication:0n, ...overrides};
