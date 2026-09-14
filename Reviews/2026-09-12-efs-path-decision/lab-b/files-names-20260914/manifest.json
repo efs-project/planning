@@ -1,0 +1,794 @@
+{
+  "kind": "DISPOSABLE_REQUIRED_RETAINED_FILES_NAMES",
+  "sourceCommit": "a3fb54e0c362ff59fdffd00254ca08b82172a69f",
+  "sourceCommitAuthority": "ROOT_REPORTED_NO_WORKER_GIT",
+  "sourceDigests": {
+    "red": "77c1d6248d7d7bcd91ade828f835d818d926ea216e7580b8fdad0a7d22c0b37a",
+    "green": "7ced9701e99217703456d1d80cb54a8b107ab5472dfc3687432be8abca051f51",
+    "metadataRed": "036ba4ac1c02f6673674c0ce52aa9d55e49cdc0408d328099302e511db4d787c",
+    "final": "b0ba64c292576b615a7193c07728643a96d81f55cd1b8c831a38abaf12567140"
+  },
+  "history": {
+    "originalSixRed": {
+      "passed": 1,
+      "failed": 5,
+      "skipped": 0,
+      "names": [
+        "test_names_missing_signed_and_generic_ingress_roll_back()",
+        "test_names_ascii_grammar_refuses_unsupported_bytes_without_normalizing()",
+        "test_names_last_occurrence_withdrawal_preserves_name_membership_and_contents()",
+        "test_names_multiple_positions_and_reused_name_without_republication()",
+        "test_names_response_faults_preserve_membership_and_reject_mixed_basis()",
+        "test_names_signed_name_after_bind_and_parent_maintenance()"
+      ]
+    },
+    "originalSixGreen": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "names": [
+        "test_names_ascii_grammar_refuses_unsupported_bytes_without_normalizing()",
+        "test_names_last_occurrence_withdrawal_preserves_name_membership_and_contents()",
+        "test_names_missing_signed_and_generic_ingress_roll_back()",
+        "test_names_multiple_positions_and_reused_name_without_republication()",
+        "test_names_response_faults_preserve_membership_and_reject_mixed_basis()",
+        "test_names_signed_name_after_bind_and_parent_maintenance()"
+      ]
+    },
+    "reviewDrivenSeventhRed": {
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "names": [
+        "test_names_forged_earlier_metadata_refuses_without_membership_change()"
+      ]
+    },
+    "finalFull": {
+      "passed": 169,
+      "failed": 0,
+      "skipped": 0,
+      "names": [
+        "test_cold_64_parent_permits_valid_child()",
+        "test_cold_8192_extsload_same_file_accepts_and_indexes()",
+        "test_cold_8192_extsload_wrong_file_rejects_and_rolls_back()",
+        "test_cold_8192_parent_refuses_exactly_and_rolls_back()",
+        "test_cold_short_extsload_matching_padded_word_still_rejects_and_rolls_back()",
+        "test_warm_fresh_8192_parent_permits_valid_child()",
+        "test_actual_module_replacement_rejects_old_signature()",
+        "test_default_unset_index_keeps_zero_obligation_and_unknown_listing()",
+        "test_internal_required_declarations_are_constructor_only()",
+        "test_required_downgrade_refuses_without_invalidating_signed_publication()",
+        "test_signed_write_survives_other_author_optional_and_generation_progress()",
+        "test_F1a_grade0_import_is_unsupported_and_mints_nothing()",
+        "test_F1b_grade0_import_by_contract_is_unsupported_and_mints_nothing()",
+        "test_F2_signed_source_packet_authorizes_nothing_at_the_destination()",
+        "test_F3_type_identity_is_exact_and_immutable()",
+        "test_F4_policy_activation_is_separate_from_identity_and_basis_is_recorded()",
+        "test_F5a_activate_zero_keeps_the_mandatory_rule()",
+        "test_F5b_permissive_policy_keeps_the_mandatory_rule()",
+        "test_F5c_policy_adds_constraints_but_cannot_remove_them()",
+        "test_F5d_mutable_mandatory_acceptor_is_a_documented_gap_not_detected()",
+        "test_R3_import_reruns_destination_policy_and_retains_source_basis()",
+        "test_R3_signature_under_epoch_N_rejected_after_activation_old_evidence_reconstructs()",
+        "test_label_acceptor_is_a_lab_convention_utf8_1_to_255()",
+        "test_label_admission_rejects_non_utf8_empty_and_over_255()",
+        "test_label_fresh_republished_omitted_and_hash_only_retrieval()",
+        "test_contract_principal_is_origin_qualified()",
+        "test_cursor_rejects_stale_basis_and_dedupes_names()",
+        "test_fresh_reader_reconstructs_identical_digest_with_negatives()",
+        "test_import_of_native_source_is_unsupported_and_fails_closed()",
+        "test_import_requires_destination_authorization_and_keeps_identity()",
+        "test_direct_late_index_call_remains_ledger_only()",
+        "test_scale_seven_complete_a1_reverts_with_full_mandatory_error_and_s0()",
+        "test_scale_six_complete_a1_late_tag_refusal_rolls_back_full_prefix()",
+        "test_scale_six_complete_a1_zero_poison_calibrates_full_state()",
+        "test_exact_native_retry_is_noop()",
+        "test_page_across_mutation_cursor_law()",
+        "test_reconstruction_from_state_only_all_kinds()",
+        "test_rename_move_recreate_old_path_keeps_identity()",
+        "test_same_batch_typed_reference_and_wrong_type()",
+        "test_signature_binds_every_field()",
+        "test_subject_id_portable_across_fresh_deployment()",
+        "test_binding_role_demands_target_type()",
+        "test_checked_references_direct_batch_dedup_reuse()",
+        "test_failed_acceptance_rolls_back_publication()",
+        "test_failed_index_module_reverts_and_coverage_is_honest()",
+        "test_folder_listing_mask_count_and_paging()",
+        "test_history_as_of_tombstone_and_rebind()",
+        "test_native_single_author_lifecycle()",
+        "test_native_two_authors_lens_mask_fallthrough()",
+        "test_signed_single_author()",
+        "test_signed_two_authors_and_reconstruction()",
+        "test_stale_cas_and_not_live()",
+        "test_two_authors_identical_record_and_withdraw()",
+        "test_any_account_can_complete_claim_without_changing_first_importer()",
+        "test_arbitrary_signed_tuples_and_unknown_type_are_claims_not_admissions()",
+        "test_claim_local_coverage_requires_explicit_attachment_after_global_cache_hit()",
+        "test_codeblob_retry_preserves_event_location_codehash_and_creation_nonce()",
+        "test_conflicting_same_nonce_signed_claims_remain_distinct()",
+        "test_joined_diverged_cas_current_rejection_and_missing_body()",
+        "test_leaf_63_round_trips_and_wrong_leaf_reverts()",
+        "test_maximum_vector_and_exact_calldata_ceilings()",
+        "test_packed_and_codeblob_reconstruct_identical_1_2_64_vectors()",
+        "test_paid_consumer_emits_exact_first_last_action_hash_without_storage()",
+        "test_record_postings_are_per_leaf_even_for_repeated_record_id()",
+        "test_rejects_zero_actions_65_actions_65_bodies_duplicate_body_leaf_and_8193_bytes()",
+        "test_retry_keeps_first_importer_vector_and_posting_counts()",
+        "test_reuse_rejects_conflicting_type_or_body()",
+        "test_signature_rejects_empty_bad_v_high_s_wrong_author_and_expired_is_archivable()",
+        "test_staged_attachments_only_set_requested_bits()",
+        "test_valid_empty_body_is_present_and_attached()",
+        "test_names_ascii_grammar_refuses_unsupported_bytes_without_normalizing()",
+        "test_names_forged_earlier_metadata_refuses_without_membership_change()",
+        "test_names_last_occurrence_withdrawal_preserves_name_membership_and_contents()",
+        "test_names_missing_signed_and_generic_ingress_roll_back()",
+        "test_names_multiple_positions_and_reused_name_without_republication()",
+        "test_names_response_faults_preserve_membership_and_reject_mixed_basis()",
+        "test_names_signed_name_after_bind_and_parent_maintenance()",
+        "test_consumer_exposes_no_quote_on_absent_masked_wrong_type_or_unknown_page()",
+        "test_faulty_actual_reply_admission_not_a_bind_is_refused()",
+        "test_faulty_actual_reply_admission_outside_its_publication_range_is_refused()",
+        "test_faulty_actual_reply_cursor_generation_epoch_core_scope_and_packed_lens_context_are_refused()",
+        "test_faulty_actual_reply_imported_signed_and_native_publications_are_refused_as_local_fixture_evidence()",
+        "test_faulty_actual_reply_mismatched_or_wrapping_admission_revision_is_refused()",
+        "test_faulty_actual_reply_missing_pair_is_refused()",
+        "test_faulty_actual_reply_partial_page_claiming_ended_is_refused()",
+        "test_faulty_actual_reply_same_author_and_target_at_wrong_head_or_folder_coordinate_is_refused()",
+        "test_faulty_actual_reply_short_evidence_fails_closed()",
+        "test_faulty_actual_reply_wrong_selected_revision_is_refused()",
+        "test_faulty_actual_reply_wrong_type_item_is_refused()",
+        "test_faulty_actual_reply_zero_or_future_record_first_admission_is_refused_for_quote_pair_and_both_items()",
+        "test_faulty_actual_reply_zero_or_future_selected_and_placement_admissions_are_refused()",
+        "test_joined_step_6_move_replace_remove_restore_keeps_identity()",
+        "test_joined_steps_1_to_5_point_list_tag_history()",
+        "test_paid_slice_point_and_list_agree_under_both_lenses_with_A_placement_provenance()",
+        "test_paid_slice_refuses_extra_placement_wrong_provenance_and_incomplete_coverage()",
+        "test_paid_slice_refuses_wrong_author_proof_category_pair_items_and_mantissa()",
+        "test_quote_acceptor_pins_shape_scale_bounds_and_pair_reference()",
+        "test_stateless_twin_commits_exactly_what_the_storing_consumer_stores()",
+        "test_64_returned_ids_fit_Page_4096_bound()",
+        "test_B_only_auxiliary_zero_occurrence_record_still_returned()",
+        "test_binding_backlink_rebind_unbind_preserved_and_retained_membership_unchanged()",
+        "test_each_cursor_commitment_mutation_and_same_graph_cross_mode_replay_rejected()",
+        "test_exactly_one_pair_reference_and_reciprocal_ledger_required()",
+        "test_full_signed_schedule_old_and_current_against_current_tail()",
+        "test_gapped_and_optional_family_never_complete()",
+        "test_generation_invalidation_and_changed_attachment_rejected()",
+        "test_invalid_budget_basis_absent_or_wrong_target_rejected()",
+        "test_late_attachment_exhausted_partial_never_complete()",
+        "test_max64_action_distinct_quote_targets_existing_callback_allowance()",
+        "test_required_family_downgrades_refuse_and_queries_remain_complete()",
+        "test_retained_revisions_and_cross_page_reuse_both_readers()",
+        "test_runtime_pins_rechecked_for_ledger_index_and_rule()",
+        "test_scan_works_with_original_nonselective_index()",
+        "test_wrong_source_ordinal_rule_shape_and_code_constructor_rejected()",
+        "test_absent_masked_and_wrong_target_tags_remain_qualified()",
+        "test_cold_large_root_and_child_headers_accept()",
+        "test_complete_one_page_folder_tag_join_is_not_point_evidence()",
+        "test_conflict_preserves_both_exact_revisions()",
+        "test_index_constructor_pins_exact_reviewed_profile()",
+        "test_missing_unrelated_and_wrong_file_parents_roll_back()",
+        "test_partial_stale_and_wrong_index_reads_fail_closed()",
+        "test_point_selection_applies_revision_tag_after_head()",
+        "test_reader_rechecks_parent_and_scope_coverage()",
+        "test_reader_rejects_nonprofile_and_wrong_file_selected_records()",
+        "test_real_files_move_reuse_whiteout_restore()",
+        "test_real_files_two_name_churn_requires_four_scans()",
+        "test_required_parent_callback_failure_rolls_back()",
+        "test_reuse_does_not_duplicate_parent_membership()",
+        "test_revision_acceptance_history()",
+        "test_revision_acceptance_history_and_parent_backlinks()",
+        "test_root_requires_existing_nonzero_file_and_shape()",
+        "test_withdraw_other_author_reuse_does_not_toggle_selected_reads()",
+        "test_withdraw_parent_keeps_descendants_and_new_child_admissible()",
+        "test_withdraw_selected_revision_retained_and_readable()",
+        "test_absent_masked_and_wrong_target_tags_remain_qualified()",
+        "test_cold_large_root_and_child_headers_accept()",
+        "test_complete_one_page_folder_tag_join_is_not_point_evidence()",
+        "test_conflict_preserves_both_exact_revisions()",
+        "test_index_constructor_pins_exact_reviewed_profile()",
+        "test_missing_unrelated_and_wrong_file_parents_roll_back()",
+        "test_partial_stale_and_wrong_index_reads_fail_closed()",
+        "test_point_selection_applies_revision_tag_after_head()",
+        "test_reader_rechecks_parent_and_scope_coverage()",
+        "test_reader_rejects_nonprofile_and_wrong_file_selected_records()",
+        "test_real_files_move_reuse_whiteout_restore()",
+        "test_real_files_two_name_churn_requires_four_scans()",
+        "test_required_parent_callback_failure_rolls_back()",
+        "test_reuse_does_not_duplicate_parent_membership()",
+        "test_revision_acceptance_history()",
+        "test_revision_acceptance_history_and_parent_backlinks()",
+        "test_root_requires_existing_nonzero_file_and_shape()",
+        "test_absent_masked_and_wrong_target_tags_remain_qualified()",
+        "test_cold_large_root_and_child_headers_accept()",
+        "test_complete_one_page_folder_tag_join_is_not_point_evidence()",
+        "test_conflict_preserves_both_exact_revisions()",
+        "test_index_constructor_pins_exact_reviewed_profile()",
+        "test_missing_unrelated_and_wrong_file_parents_roll_back()",
+        "test_paid_files_emits_six_exact_real_results_without_storage()",
+        "test_partial_stale_and_wrong_index_reads_fail_closed()",
+        "test_point_selection_applies_revision_tag_after_head()",
+        "test_reader_rechecks_parent_and_scope_coverage()",
+        "test_reader_rejects_nonprofile_and_wrong_file_selected_records()",
+        "test_real_files_move_reuse_whiteout_restore()",
+        "test_real_files_two_name_churn_requires_four_scans()",
+        "test_required_parent_callback_failure_rolls_back()",
+        "test_reuse_does_not_duplicate_parent_membership()",
+        "test_revision_acceptance_history()",
+        "test_revision_acceptance_history_and_parent_backlinks()",
+        "test_root_requires_existing_nonzero_file_and_shape()"
+      ],
+      "distinctNamedCases": 135
+    },
+    "originalSixTestBodiesPreserved": true,
+    "sevenTestsFrozenFromMetadataRedThroughFinal": true
+  },
+  "stages": [
+    {
+      "role": "red",
+      "label": "files-names-red",
+      "evidence": "ACTUAL_CHILD_EXECUTION",
+      "startedAt": "2026-09-14T13:05:49.490Z",
+      "finishedAt": "2026-09-14T13:05:59.884Z",
+      "sourceDigest": "77c1d6248d7d7bcd91ade828f835d818d926ea216e7580b8fdad0a7d22c0b37a",
+      "outcome": {
+        "code": 1,
+        "signal": null
+      },
+      "ownedProcessesStopped": true,
+      "slotReleased": true
+    },
+    {
+      "role": "green",
+      "label": "files-names-green",
+      "evidence": "ACTUAL_CHILD_EXECUTION",
+      "startedAt": "2026-09-14T13:13:27.645Z",
+      "finishedAt": "2026-09-14T13:13:38.243Z",
+      "sourceDigest": "7ced9701e99217703456d1d80cb54a8b107ab5472dfc3687432be8abca051f51",
+      "outcome": {
+        "code": 0,
+        "signal": null
+      },
+      "ownedProcessesStopped": true,
+      "slotReleased": true
+    },
+    {
+      "role": "metadataRed",
+      "label": "files-names-metadata-red",
+      "evidence": "ACTUAL_CHILD_EXECUTION",
+      "startedAt": "2026-09-14T13:20:22.591Z",
+      "finishedAt": "2026-09-14T13:20:33.592Z",
+      "sourceDigest": "036ba4ac1c02f6673674c0ce52aa9d55e49cdc0408d328099302e511db4d787c",
+      "outcome": {
+        "code": 1,
+        "signal": null
+      },
+      "ownedProcessesStopped": true,
+      "slotReleased": true
+    },
+    {
+      "role": "full",
+      "label": "files-names-final-test",
+      "evidence": "ACTUAL_CHILD_EXECUTION",
+      "startedAt": "2026-09-14T13:21:41.814Z",
+      "finishedAt": "2026-09-14T13:22:38.052Z",
+      "sourceDigest": "b0ba64c292576b615a7193c07728643a96d81f55cd1b8c831a38abaf12567140",
+      "outcome": {
+        "code": 0,
+        "signal": null
+      },
+      "ownedProcessesStopped": true,
+      "slotReleased": true
+    },
+    {
+      "role": "size",
+      "label": "files-names-final-size",
+      "evidence": "ACTUAL_CHILD_EXECUTION",
+      "startedAt": "2026-09-14T13:22:58.454Z",
+      "finishedAt": "2026-09-14T13:23:55.334Z",
+      "sourceDigest": "b0ba64c292576b615a7193c07728643a96d81f55cd1b8c831a38abaf12567140",
+      "outcome": {
+        "code": 0,
+        "signal": null
+      },
+      "ownedProcessesStopped": true,
+      "slotReleased": true
+    }
+  ],
+  "pins": [
+    {
+      "label": "files-names-red-pin",
+      "evidence": "PIN_NO_CHILD_NOT_TEST_EXECUTION",
+      "sourceDigest": "77c1d6248d7d7bcd91ade828f835d818d926ea216e7580b8fdad0a7d22c0b37a",
+      "outcome": {
+        "code": 0,
+        "signal": null,
+        "noChild": true
+      }
+    },
+    {
+      "label": "files-names-green-pin",
+      "evidence": "PIN_NO_CHILD_NOT_TEST_EXECUTION",
+      "sourceDigest": "7ced9701e99217703456d1d80cb54a8b107ab5472dfc3687432be8abca051f51",
+      "outcome": {
+        "code": 0,
+        "signal": null,
+        "noChild": true
+      }
+    },
+    {
+      "label": "files-names-metadata-red-pin",
+      "evidence": "PIN_NO_CHILD_NOT_TEST_EXECUTION",
+      "sourceDigest": "036ba4ac1c02f6673674c0ce52aa9d55e49cdc0408d328099302e511db4d787c",
+      "outcome": {
+        "code": 0,
+        "signal": null,
+        "noChild": true
+      }
+    },
+    {
+      "label": "files-names-final-pin",
+      "evidence": "PIN_NO_CHILD_NOT_TEST_EXECUTION",
+      "sourceDigest": "b0ba64c292576b615a7193c07728643a96d81f55cd1b8c831a38abaf12567140",
+      "outcome": {
+        "code": 0,
+        "signal": null,
+        "noChild": true
+      }
+    }
+  ],
+  "compilerRecords": [
+    {
+      "role": "red",
+      "originalFile": "ffcfbe68b3cd74d0.json",
+      "retainedFile": "files-names-red-compiler-0.json.gz",
+      "sourceDigest": "77c1d6248d7d7bcd91ade828f835d818d926ea216e7580b8fdad0a7d22c0b37a"
+    },
+    {
+      "role": "green",
+      "originalFile": "a295966b1ff6bf28.json",
+      "retainedFile": "files-names-green-compiler-0.json.gz",
+      "sourceDigest": "7ced9701e99217703456d1d80cb54a8b107ab5472dfc3687432be8abca051f51"
+    },
+    {
+      "role": "metadataRed",
+      "originalFile": "04cb3a25dc25cfab.json",
+      "retainedFile": "files-names-metadata-red-compiler-0.json.gz",
+      "sourceDigest": "036ba4ac1c02f6673674c0ce52aa9d55e49cdc0408d328099302e511db4d787c"
+    },
+    {
+      "role": "full",
+      "originalFile": "278b5366bc0cce0b.json",
+      "retainedFile": "files-names-final-test-compiler-0.json.gz",
+      "sourceDigest": "b0ba64c292576b615a7193c07728643a96d81f55cd1b8c831a38abaf12567140"
+    },
+    {
+      "role": "size",
+      "originalFile": "85e3b383efec235e.json",
+      "retainedFile": "files-names-final-size-compiler-0.json.gz",
+      "sourceDigest": "b0ba64c292576b615a7193c07728643a96d81f55cd1b8c831a38abaf12567140"
+    }
+  ],
+  "sizes": {
+    "FilesNameLayout": {
+      "source": "test/FilesNamesProfile.sol",
+      "runtimeBytes": 57,
+      "compilerInitcodeBytes": 85
+    },
+    "FilesNameReader": {
+      "source": "test/FilesNamesProfile.sol",
+      "runtimeBytes": 4845,
+      "compilerInitcodeBytes": 6122
+    },
+    "FilesNameRule": {
+      "source": "test/FilesNamesProfile.sol",
+      "runtimeBytes": 741,
+      "compilerInitcodeBytes": 767
+    },
+    "FilesNamesIndex": {
+      "source": "test/FilesNamesProfile.sol",
+      "runtimeBytes": 8341,
+      "compilerInitcodeBytes": 12562
+    },
+    "FilesNameResponseFacade": {
+      "source": "test/FilesNames.t.sol",
+      "runtimeBytes": 1239,
+      "compilerInitcodeBytes": 1437
+    },
+    "FilesNamesTest": {
+      "source": "test/FilesNames.t.sol",
+      "runtimeBytes": 117096,
+      "compilerInitcodeBytes": 117124
+    }
+  },
+  "compilerInitcodeExcludesConstructorArguments": true,
+  "review": {
+    "path": "/tmp/efs-b-files-names-review-20260914.md",
+    "sha256": "5cf4275a8c98bbee9b0463d9dbb597a928679466abda1ebef6039d8139487524",
+    "verdict": "SPEC_COMPLIANT_QUALITY_APPROVED"
+  },
+  "limits": "ASCII_SUBSET_RAW_HASH_ROLE_ONLY; NAME_RECOVERY_IS_NOT_LENS_MEMBERSHIP_OR_HEADER_STATE_PROOF; METADATA_CHECK_IS_LEDGER_CONSISTENCY; NO_COLD_BROWSER_SDK_PATH_OR_COMPLETE_ANCESTRY; NO_PAID_GAS_OR_PRODUCTION_CLAIM",
+  "files": {
+    "files-names-red.json.gz": {
+      "rawBytes": 6963,
+      "rawSha256": "2f3f4b33f0c594abfab9c97d357367dd1954173549e0e06846d22d65ec1ad6fd",
+      "gzipBytes": 3243,
+      "gzipSha256": "05752790953bb9cb42e105eb6974a11ca6ebbe11a1fdf84e4a79d292dab76f1a",
+      "roundtripVerified": true,
+      "description": "Complete original executed gate report or unabridged log."
+    },
+    "files-names-red.log.gz": {
+      "rawBytes": 6108,
+      "rawSha256": "46c28abb5a4136adb0b1eea8e884915e4950927882b44dddcc64cb91bd64cdec",
+      "gzipBytes": 1424,
+      "gzipSha256": "874909a6e2659dc2c27fe1e68f1b4fd5aaa84b1446ff9459175fb901e6e61cc5",
+      "roundtripVerified": true,
+      "description": "Complete original executed gate report or unabridged log."
+    },
+    "files-names-green.json.gz": {
+      "rawBytes": 6975,
+      "rawSha256": "bd8fc1e8f9e28c6c07a8e5df38a1200e827a032ea0058e80daabfd896d842ae5",
+      "gzipBytes": 3240,
+      "gzipSha256": "952d0366865b908c3f676de447e0321a73caf4a84be1568fce6be11d22b6754e",
+      "roundtripVerified": true,
+      "description": "Complete original executed gate report or unabridged log."
+    },
+    "files-names-green.log.gz": {
+      "rawBytes": 4350,
+      "rawSha256": "3acc80cb221e194a2551f861bd4ac10804720d5612f94a863563c13a151494fd",
+      "gzipBytes": 1158,
+      "gzipSha256": "407b1b716a5f429ff4c8e180b28364218a3a2a9387e6099b4378c793c16d6aab",
+      "roundtripVerified": true,
+      "description": "Complete original executed gate report or unabridged log."
+    },
+    "files-names-metadata-red.json.gz": {
+      "rawBytes": 7131,
+      "rawSha256": "bb4e8f57ddf83dc1f2aeddadc0507b661d98d74b3626b8ba3253005d9994b60f",
+      "gzipBytes": 3292,
+      "gzipSha256": "dac7dea06ee2cde4a21bc4373a52d15a5897f757fc4f538aef5273e8010334ee",
+      "roundtripVerified": true,
+      "description": "Complete original executed gate report or unabridged log."
+    },
+    "files-names-metadata-red.log.gz": {
+      "rawBytes": 4326,
+      "rawSha256": "d6cf4a41ec977124e8bc430feb30ddb1c4c7c6562b4133d0f9961463dafbdf37",
+      "gzipBytes": 1077,
+      "gzipSha256": "6de52a7d2a448c65b57de8bfe716e28666ec5a1238f1031f419c87564060ced8",
+      "roundtripVerified": true,
+      "description": "Complete original executed gate report or unabridged log."
+    },
+    "files-names-final-test.json.gz": {
+      "rawBytes": 6959,
+      "rawSha256": "9b8fe460c97f6b6ca5db5513c20abcf2c3095b29b6152cb96f972263e3b7f87f",
+      "gzipBytes": 3224,
+      "gzipSha256": "e0daff59d2a6cbf6c82e26a6add6f115a9de966c4a5db3ab6dc779dfe31a036c",
+      "roundtripVerified": true,
+      "description": "Complete original executed gate report or unabridged log."
+    },
+    "files-names-final-test.log.gz": {
+      "rawBytes": 28992,
+      "rawSha256": "2b1071f654cfcc87fecacef270c12c8eab6c9195c6f3cd76ae1f8685a20ff826",
+      "gzipBytes": 6140,
+      "gzipSha256": "0f38136c3dd728806a88f3c44a069a7d60ddc197ca7fed6b05f190615ae7b58b",
+      "roundtripVerified": true,
+      "description": "Complete original executed gate report or unabridged log."
+    },
+    "files-names-final-size.json.gz": {
+      "rawBytes": 6893,
+      "rawSha256": "052f9ccbaa098f4b568814f2c4934c60b56c1320a528d5b6a36c3e59db3afbe7",
+      "gzipBytes": 3203,
+      "gzipSha256": "569cf65a0364dac1f1d5815df61f01f33d320078544716a406205af4782224a1",
+      "roundtripVerified": true,
+      "description": "Complete original executed gate report or unabridged log."
+    },
+    "files-names-final-size.log.gz": {
+      "rawBytes": 63696,
+      "rawSha256": "5d6b1db4b0fcefd7fef59132df8c6261cd028f80bd99f91657f3d3db28f91b4c",
+      "gzipBytes": 5813,
+      "gzipSha256": "8d96ea7f861a6ee60330b65deef322a1ee3d3c8cb816ddf700ff81c12f0eed8f",
+      "roundtripVerified": true,
+      "description": "Complete original executed gate report or unabridged log."
+    },
+    "files-names-red-pin.json.gz": {
+      "rawBytes": 5726,
+      "rawSha256": "0ef8b0d0eeff97f074e87aa28a7dd97850154d6d25989e3e358306d2a20a541b",
+      "gzipBytes": 2840,
+      "gzipSha256": "9521063d24b565430d1f654af096a5ca3566a0f9c3618d293366c4d1c35e250a",
+      "roundtripVerified": true,
+      "description": "Original pin/no-child record; not compiler/test/size execution evidence."
+    },
+    "files-names-red-pin.log.gz": {
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "roundtripVerified": true,
+      "description": "Original pin/no-child record; not compiler/test/size execution evidence."
+    },
+    "files-names-green-pin.json.gz": {
+      "rawBytes": 5732,
+      "rawSha256": "6b3bd8b492e95a3ec3648cdf80a99b3507a271bf62a7785f0cdc80cdfc056466",
+      "gzipBytes": 2843,
+      "gzipSha256": "8406fc9223c4d3774e10aa640128cc2c2319fe59e7000fc82ca018af9d504f98",
+      "roundtripVerified": true,
+      "description": "Original pin/no-child record; not compiler/test/size execution evidence."
+    },
+    "files-names-green-pin.log.gz": {
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "roundtripVerified": true,
+      "description": "Original pin/no-child record; not compiler/test/size execution evidence."
+    },
+    "files-names-metadata-red-pin.json.gz": {
+      "rawBytes": 5753,
+      "rawSha256": "45e799ea8ff8cfbe75fc7b4b589ac7dc7622bfd63b2bb5486aca7d8bf9e1d578",
+      "gzipBytes": 2845,
+      "gzipSha256": "edb7ce1648865de51b7d51a74717236f9b5b26dabac7dea0c98d7f017a7022b1",
+      "roundtripVerified": true,
+      "description": "Original pin/no-child record; not compiler/test/size execution evidence."
+    },
+    "files-names-metadata-red-pin.log.gz": {
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "roundtripVerified": true,
+      "description": "Original pin/no-child record; not compiler/test/size execution evidence."
+    },
+    "files-names-final-pin.json.gz": {
+      "rawBytes": 5732,
+      "rawSha256": "60aeabb8f6418ed0afb918518125fdc0c2da9fe2bd005cb50368c5e287c4e320",
+      "gzipBytes": 2840,
+      "gzipSha256": "e32290b13b01367ef00d4d36e7c0a48d67f5f770cf9963447ef33854c860061a",
+      "roundtripVerified": true,
+      "description": "Original pin/no-child record; not compiler/test/size execution evidence."
+    },
+    "files-names-final-pin.log.gz": {
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "roundtripVerified": true,
+      "description": "Original pin/no-child record; not compiler/test/size execution evidence."
+    },
+    "files-names-red-compiler-0.json.gz": {
+      "rawBytes": 7423832,
+      "rawSha256": "b8f858f1f8af31735511398c78582074b94297d86cdb1bc3178b0d1a7d2cd52d",
+      "gzipBytes": 855911,
+      "gzipSha256": "286c657c667a998911cbead9ba5046c48702cc3e75098e04b73f00c5a73c6701",
+      "roundtripVerified": true,
+      "description": "Complete original compiler input/output, source contents, settings, AST, ABI, metadata and bytecode; not a rebuild."
+    },
+    "files-names-red-source-inventory.json.gz": {
+      "rawBytes": 1115677,
+      "rawSha256": "97e5856661eb05d0fb6ac84c67771da6e63bfe9d4a2c4cbcb23ebeb84969b216",
+      "gzipBytes": 259639,
+      "gzipSha256": "c537b57a57596c287051f2e50185635c2dc61c362c84014e0c6a7802b0d46e40",
+      "roundtripVerified": true,
+      "description": "Complete gate-inventoried source/config/script contents, not only the two Names files."
+    },
+    "files-names-red-FilesNames.t.sol.gz": {
+      "rawBytes": 23501,
+      "rawSha256": "b6fb0aafa2b4cccb1eb5801d90626a9b6f612382fe1dfbc7d802c264ed51ce69",
+      "gzipBytes": 5867,
+      "gzipSha256": "120c45b16652e74b15110962d5d8f783193fb14fb2cf22cbf94c8d828471c713",
+      "roundtripVerified": true,
+      "description": "Exact Names source at this historical stage; original six versus review-driven seventh test history is retained."
+    },
+    "files-names-red-FilesNamesProfile.sol.gz": {
+      "rawBytes": 4188,
+      "rawSha256": "f841a9f499d0ab58f2669a143010c088a894ecaca93cd51e7a4fce6fcb9c6ed4",
+      "gzipBytes": 1574,
+      "gzipSha256": "4b2c8d7f4f420400e40e4bf335a20dcb615bd55e72a2358539af20876eb596d9",
+      "roundtripVerified": true,
+      "description": "Exact Names source at this historical stage; original six versus review-driven seventh test history is retained."
+    },
+    "files-names-green-compiler-0.json.gz": {
+      "rawBytes": 7658190,
+      "rawSha256": "88eac5a5d3a0600156d26266073c5574da72068be86547862cad907a301e1ed9",
+      "gzipBytes": 884387,
+      "gzipSha256": "3344d5618c4c28084e3d9fdfff30f5af8a420c53b1a23dce62b39de3918b5a1c",
+      "roundtripVerified": true,
+      "description": "Complete original compiler input/output, source contents, settings, AST, ABI, metadata and bytecode; not a rebuild."
+    },
+    "files-names-green-source-inventory.json.gz": {
+      "rawBytes": 1119843,
+      "rawSha256": "33bcc809183c4445a046c2def05121618fc86861476f75de908269230dafc1e3",
+      "gzipBytes": 260516,
+      "gzipSha256": "d4ac6124e073db64b8921fb77ca1d63b5710f1f56c7400f0eb14a374463c91dc",
+      "roundtripVerified": true,
+      "description": "Complete gate-inventoried source/config/script contents, not only the two Names files."
+    },
+    "files-names-green-FilesNames.t.sol.gz": {
+      "rawBytes": 23501,
+      "rawSha256": "b6fb0aafa2b4cccb1eb5801d90626a9b6f612382fe1dfbc7d802c264ed51ce69",
+      "gzipBytes": 5867,
+      "gzipSha256": "120c45b16652e74b15110962d5d8f783193fb14fb2cf22cbf94c8d828471c713",
+      "roundtripVerified": true,
+      "description": "Exact Names source at this historical stage; original six versus review-driven seventh test history is retained."
+    },
+    "files-names-green-FilesNamesProfile.sol.gz": {
+      "rawBytes": 8276,
+      "rawSha256": "68908993e22d36ada2928730fdbd74a2d351cabd5c0b039347f34ee1c3a10c06",
+      "gzipBytes": 2572,
+      "gzipSha256": "2f71669aa53e923dee1faf1e3a4f8a888e448223cff3eba55740c382a4d089e8",
+      "roundtripVerified": true,
+      "description": "Exact Names source at this historical stage; original six versus review-driven seventh test history is retained."
+    },
+    "files-names-metadata-red-compiler-0.json.gz": {
+      "rawBytes": 7734620,
+      "rawSha256": "30ea93b360911a99a22ed3e5295714eb9c7574d8e04e48dc266643da244e2996",
+      "gzipBytes": 891655,
+      "gzipSha256": "8a12df31f92997235b2f3ffbb5c5acf810739cd319946e0ab3168b8965e8df33",
+      "roundtripVerified": true,
+      "description": "Complete original compiler input/output, source contents, settings, AST, ABI, metadata and bytecode; not a rebuild."
+    },
+    "files-names-metadata-red-source-inventory.json.gz": {
+      "rawBytes": 1122138,
+      "rawSha256": "60e659e713332ba4a369904af7fb146386959e8f558597f0a7ae5b5d63ee332d",
+      "gzipBytes": 261012,
+      "gzipSha256": "eb4c099b20a203258f5bc7fffd08469fa9623346b64910a00dee0b59da062fa9",
+      "roundtripVerified": true,
+      "description": "Complete gate-inventoried source/config/script contents, not only the two Names files."
+    },
+    "files-names-metadata-red-FilesNames.t.sol.gz": {
+      "rawBytes": 25748,
+      "rawSha256": "7e89b47991e49a51344fd4ab00f202927133afa48fbffe4df2afd47658b0e616",
+      "gzipBytes": 6276,
+      "gzipSha256": "7b0695e33d2b559dfba61242090a78bfd6543947099730f864f248826ba93b79",
+      "roundtripVerified": true,
+      "description": "Exact Names source at this historical stage; original six versus review-driven seventh test history is retained."
+    },
+    "files-names-metadata-red-FilesNamesProfile.sol.gz": {
+      "rawBytes": 8276,
+      "rawSha256": "68908993e22d36ada2928730fdbd74a2d351cabd5c0b039347f34ee1c3a10c06",
+      "gzipBytes": 2572,
+      "gzipSha256": "2f71669aa53e923dee1faf1e3a4f8a888e448223cff3eba55740c382a4d089e8",
+      "roundtripVerified": true,
+      "description": "Exact Names source at this historical stage; original six versus review-driven seventh test history is retained."
+    },
+    "files-names-final-test-compiler-0.json.gz": {
+      "rawBytes": 29870966,
+      "rawSha256": "bdcb6f86c9dad9d7610e7470dbad574c849abe89e4df9dcd7a6fcaef407867ce",
+      "gzipBytes": 3840108,
+      "gzipSha256": "c7f8894fb948080f9b897f0ded51eb8feb46c771dbd36e91d61d4418c7e66e4b",
+      "roundtripVerified": true,
+      "description": "Complete original compiler input/output, source contents, settings, AST, ABI, metadata and bytecode; not a rebuild."
+    },
+    "files-names-final-test-source-inventory.json.gz": {
+      "rawBytes": 1122504,
+      "rawSha256": "8b56bbb7971c772c06e300ba577d67dc9a5c705f1f3f00acf6692b3731ab55bd",
+      "gzipBytes": 261061,
+      "gzipSha256": "8eec11c8b25544ea8fb17b40037ecc718a8ee4ffc304a7017cf2edc1b35baf97",
+      "roundtripVerified": true,
+      "description": "Complete gate-inventoried source/config/script contents, not only the two Names files."
+    },
+    "files-names-final-test-FilesNames.t.sol.gz": {
+      "rawBytes": 25748,
+      "rawSha256": "7e89b47991e49a51344fd4ab00f202927133afa48fbffe4df2afd47658b0e616",
+      "gzipBytes": 6276,
+      "gzipSha256": "7b0695e33d2b559dfba61242090a78bfd6543947099730f864f248826ba93b79",
+      "roundtripVerified": true,
+      "description": "Exact Names source at this historical stage; original six versus review-driven seventh test history is retained."
+    },
+    "files-names-final-test-FilesNamesProfile.sol.gz": {
+      "rawBytes": 8637,
+      "rawSha256": "4201fd5908180c5f95d836563a8deae908d7208179b4fe3b211c73ff323ac48e",
+      "gzipBytes": 2672,
+      "gzipSha256": "6ed0b06a51e599652dfbaeb755c512fda574161d2c0cab0cc42604c0250ffc29",
+      "roundtripVerified": true,
+      "description": "Exact Names source at this historical stage; original six versus review-driven seventh test history is retained."
+    },
+    "files-names-final-size-compiler-0.json.gz": {
+      "rawBytes": 29870966,
+      "rawSha256": "1f95e756f8f0aa69cc81a64949ef6de8fbe75c48fe7ee24cf3aa89012c630b48",
+      "gzipBytes": 3840108,
+      "gzipSha256": "1c277ad0d7942f81fe3d138a8b2e9fc5208957e0135fb200277cb86f8403fa3f",
+      "roundtripVerified": true,
+      "description": "Complete original compiler input/output, source contents, settings, AST, ABI, metadata and bytecode; not a rebuild."
+    },
+    "files-names-final-size-source-inventory.json.gz": {
+      "rawBytes": 1122504,
+      "rawSha256": "8b56bbb7971c772c06e300ba577d67dc9a5c705f1f3f00acf6692b3731ab55bd",
+      "gzipBytes": 261061,
+      "gzipSha256": "8eec11c8b25544ea8fb17b40037ecc718a8ee4ffc304a7017cf2edc1b35baf97",
+      "roundtripVerified": true,
+      "description": "Complete gate-inventoried source/config/script contents, not only the two Names files."
+    },
+    "files-names-final-size-FilesNames.t.sol.gz": {
+      "rawBytes": 25748,
+      "rawSha256": "7e89b47991e49a51344fd4ab00f202927133afa48fbffe4df2afd47658b0e616",
+      "gzipBytes": 6276,
+      "gzipSha256": "7b0695e33d2b559dfba61242090a78bfd6543947099730f864f248826ba93b79",
+      "roundtripVerified": true,
+      "description": "Exact Names source at this historical stage; original six versus review-driven seventh test history is retained."
+    },
+    "files-names-final-size-FilesNamesProfile.sol.gz": {
+      "rawBytes": 8637,
+      "rawSha256": "4201fd5908180c5f95d836563a8deae908d7208179b4fe3b211c73ff323ac48e",
+      "gzipBytes": 2672,
+      "gzipSha256": "6ed0b06a51e599652dfbaeb755c512fda574161d2c0cab0cc42604c0250ffc29",
+      "roundtripVerified": true,
+      "description": "Exact Names source at this historical stage; original six versus review-driven seventh test history is retained."
+    },
+    "cold-name-preflight.md.gz": {
+      "rawBytes": 16056,
+      "rawSha256": "a0172fff40a54fd414bd5cd2788841ec8b02861c712185fd2b6210cd1cb9180d",
+      "gzipBytes": 6872,
+      "gzipSha256": "1a1c0c97f4d02d20fad1e8d69663c9215a50846aa3be6a1f75abc8cf6de2c883",
+      "roundtripVerified": true,
+      "description": "Complete original preflight; exact root-pinned artifact."
+    },
+    "approved-plan.md.gz": {
+      "rawBytes": 5627,
+      "rawSha256": "016add9d2bbbfc7e174dd17e2cff73367bdcb413c5d36c90adb4fa9df4acf93e",
+      "gzipBytes": 2743,
+      "gzipSha256": "8a3760b87d8c037be8b13784b79b221db91a23b20ab02fe4bfb2d03e94d70219",
+      "roundtripVerified": true,
+      "description": "Complete original plan; exact root-pinned artifact."
+    },
+    "task-report.md.gz": {
+      "rawBytes": 14666,
+      "rawSha256": "ac1ca3c5a45d4419da5e08a4e9205c9a4c686195427e73d1206a9730609ae3c4",
+      "gzipBytes": 6308,
+      "gzipSha256": "bd353ef310bc7a46375c6b50965928cf0d7c228f31818ce5b58188bcaac0a542",
+      "roundtripVerified": true,
+      "description": "Complete original taskReport; exact root-pinned artifact."
+    },
+    "independent-final-review.md.gz": {
+      "rawBytes": 12177,
+      "rawSha256": "5cf4275a8c98bbee9b0463d9dbb597a928679466abda1ebef6039d8139487524",
+      "gzipBytes": 5489,
+      "gzipSha256": "755a746e353e6f8f757adf2a100f83b2017ccc29f91bc22ab1ec26cd145e523b",
+      "roundtripVerified": true,
+      "description": "Complete original finalReview; exact root-pinned artifact."
+    },
+    "outer-forge-gate-at-retention.mjs.gz": {
+      "rawBytes": 17090,
+      "rawSha256": "16f1668622f268b29c3366e9b5da39d4b7e31b2542f4491d5d20074d1bfb6975",
+      "gzipBytes": 6365,
+      "gzipSha256": "72a785c49fd6228830e80e5fd568e798097161a867a7d5efd8cc83023e43cd6b",
+      "roundtripVerified": true,
+      "description": "Root gate at retention; not misrepresented as exact historical harness bytes for every attempt."
+    },
+    "outer-forge-gate-at-retention.test.mjs.gz": {
+      "rawBytes": 8753,
+      "rawSha256": "e9044bf5351063015a4748f3b34fc992ae3a49f732e8cb18fbb38ce49fc334cf",
+      "gzipBytes": 2712,
+      "gzipSha256": "3b990366660e19a832622e0155a443b935da28cbadcb8a628dc054ad0196cf7e",
+      "roundtripVerified": true,
+      "description": "Root gate test source at retention; not executed by packager."
+    },
+    "frozen-foundry.toml.gz": {
+      "rawBytes": 460,
+      "rawSha256": "6ea7c7198bc697f74b6286ec830edbefc20e7c549eafda2343c863702055bf2c",
+      "gzipBytes": 332,
+      "gzipSha256": "41e2fcc2533d23c95ebbd8db590bb69e505ba2e6cf25497175846c55f5ac0b40",
+      "roundtripVerified": true,
+      "description": "Exact normal-settings configuration."
+    },
+    "retention-inputs.json.gz": {
+      "rawBytes": 2338,
+      "rawSha256": "8477c619e4790f27ed384eade48ce6f3a81d8f39203ac1c4a17742c6db406f88",
+      "gzipBytes": 1150,
+      "gzipSha256": "c74e0374ded0fa6c7e5fbd029e6a6dbeec1273ed5f3bd0aa390382fdd42e8913",
+      "roundtripVerified": true,
+      "description": "Root-finalized exact retention inputs and expected outcomes."
+    },
+    "retain-files-names-20260914.mjs.gz": {
+      "rawBytes": 15904,
+      "rawSha256": "549b170b4d9a832297d07f839c4b677fa5459d274557209f9c502b3b6703779e",
+      "gzipBytes": 5694,
+      "gzipSha256": "6b4fbc621c2daa82465223d7d1bbb4f1bf2c99677fcaf795a75facad29e16199",
+      "roundtripVerified": true,
+      "description": "This mechanical packager; no execution replay."
+    }
+  },
+  "totals": {
+    "files": 47,
+    "rawBytes": 88581907,
+    "gzipBytes": 11739009
+  }
+}
