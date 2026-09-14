@@ -1,9 +1,11 @@
 # Matched paid-slice rollback control
 
-**Standing:** coordinator-selected disposable control supplement, September 13,
-2026. Independently source-reviewed; not implemented or executed as a matched
-pair. It supplements the seven-row [[paid-neutral-expectations]] without
-changing that file's seal, any old report, or a permanent EFS requirement.
+**Standing:** both candidates' specified logical refusal/calibration controls
+are implemented, mined and independently checked as of September14. Evidence
+is RPC_OBSERVED, not authenticated state proof or complete feature parity.
+This supplement preserves the seven-row [[paid-neutral-expectations]] seal,
+old reports, normal price rows and all permanent requirements. The original
+September13 specification is followed by dated execution records below.
 
 The existing rows are not equivalents: B's failure cell rejects an additional
 policy and a standalone Quote's index callback; C's measured cell rejects an
@@ -253,3 +255,47 @@ can conceal backing data beyond declared dynamic length, so seal read-only
 rows. Slot derivation was checked against the pinned StoreCore source; the
 complete physical expectation map and candidate runner still need independent
 review before any root-owned run. This preparation closes no C execution gate.
+
+## September14, 01:08: C matched controls independently verified
+
+One fresh root-owned run completed01:08:48.307–01:08:51.569UTC with normal
+30M Cancun blocks and explicit5M identical static/mined attempts. Both refusal
+arms preserve all126 logical and261 physical S0 observations, including hidden
+backing words and the genuine Producer Types/Items/Pair prefix. The positive
+calibration commits the independently prepared Subject/Quote/HEAD/folder/tag
+state and advances admission high-water6→11.
+
+| Complete A1 control | Pre → post block | Receipt gas | Observed result |
+| --- | --- | ---: | --- |
+| Mandatory Quote scale7 refusal | 8 → 9 | 366,020 | Exact100-byte rule error; prescribed S0 unchanged |
+| Final market-tag index refusal | 17 → 18 | 2,246,568 | Exact36-byte Index error; prescribed S0 unchanged |
+| Zero-poison calibration | 26 → 27 | 2,400,648 | Exact prepared S1 and required index maintenance |
+
+Frozen independent audit:2,518 raw envelopes,756 logical plus1,566 physical
+fixed-block replies,27 signed transaction/receipt/header joins,18 full deployed
+runtimes and28 contiguous headers. A separate supplement reconciles all27 gas
+summaries and72 sealed files, including6 compiler artifacts/49 source files.
+The post-run reviewer independently reproduces both checks and rejects altered
+orphan backing-state words and full-error bytes. Source tests93/93, independent
+preparation18/18 and actual-packet/summary tests61/61 pass with no final skips.
+
+Runner/source checkout `84e1081`; unchanged compiled C source `2ca7349`.
+Evidence-only commit `12dc73aeab4a0dc997024ccfead4070dd69b8d8b` is pushed on the
+existing C exception branch:
+[exact C control packet](https://github.com/efs-project/planning/tree/12dc73aeab4a0dc997024ccfead4070dd69b8d8b/Reviews/2026-09-12-efs-path-decision/lab-c/evidence/rollback-paid-20260914T010848Z).
+29 unchanged evidence files are inventoried (about5.7MiB), plus README and
+inventory. The archived frozen auditor reproduces byte-for-byte. Original raw
+Anvil whitespace is retained; other whitespace checks pass. No compiler cache
+or chain database was published. Owned processes stopped and the lease released.
+
+Known tooling limitation: the sealed supplementary CLI can no-op when invoked
+through macOS's `/tmp` alias; canonical `/private/tmp` invocation and its exported
+checker both ran successfully. Empty output was not treated as passing; no
+sealed code was rewritten after the run. This repeat-command caveat is retained
+in the packet, separate from the observed contract result.
+
+**This closes the matched rollback-control step, not the architecture decision.**
+Neither transcript authenticates source-chain state; neither proves import,
+historical contract authority, full Files or equal query obligations. No normal
+product price is replaced. Next: price the complete incoming-Quote query and
+its maintenance before deciding whether B's current cost advantage survives.

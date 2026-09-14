@@ -112,8 +112,20 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September14: matched B/C rollback controls complete; heavy slot free.**
+C's single01:08 run and independent packet review passed; evidence `12dc73a`
+is pushed in the preserved C successor. See [[paid-rollback-control]] for exact
+source/input/receipt/raw-state qualifications. Both mandatory-rule and late
+required-index failures leave the specified state unchanged; positive controls
+commit it. This is not authenticated chain proof, full parity or a normal-cost
+reprice. Do not rerun completed controls. The strongest remaining discriminator
+is [[required-index-gap-20260913|complete incoming-Quote discovery and maintenance]].
+Its bounded source plan is under review; no query implementation/run is claimed
+yet. Final or conditional handoff remains September14 at23:10 UTC; no owner
+decision or Fable execution is assumed. Original Claude B/C pins remain unchanged.
+
 **September 14, 01:05–01:25 UTC: root-only C control lease.** Start no later
-than01:15; no automatic extension. One fresh loopback Anvil, no compiler,
+than01:15; **completed and released early at01:08:51**. One fresh loopback Anvil, no compiler,
 normal Cancun/chain31337/30M blocks, timestamp1800000000, prune256 and
 run-owned cache. Runner source `84e1081`, unchanged compiled C source `2ca7349`.
 Full source/quality review and93/93 Node pass; independent preparation18/18
