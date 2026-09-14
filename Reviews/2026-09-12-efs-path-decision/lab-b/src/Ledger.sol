@@ -2,6 +2,7 @@
 pragma solidity 0.8.30;
 
 import {Keys} from "./Keys.sol";
+import {ExecutionSlots} from "./ExecutionSlots.sol";
 import {IAcceptor, IIndexModule, ITypeRegistry} from "./Interfaces.sol";
 
 /// @title Ledger — Road B single-pass ingestion kernel
@@ -57,6 +58,41 @@ contract Ledger {
         bytes32 indexObligations; // must equal indexObligations()
     }
 
+    /// Versioned guarded ABI. Never reinterpret a legacy coreCodeCommitment as executionSet.
+    struct IntentV2 {
+        bytes32 realmId;
+        bytes32 realmOrigin;
+        bytes32 executionSet;
+        address author;
+        uint64 nonce;
+        uint64 deadline;
+        bytes32 acceptanceProfile;
+        bytes32 indexObligations;
+        bytes32 readSetHash;
+    }
+    struct ReadSetV2 { bytes32[] principalIds; bytes32[] positions; bytes32[] expectedHeads; }
+    struct PublicationContext {
+        bytes32 principalId;
+        bytes32 executionSet;
+        bytes32 readSetHash;
+        bytes32 intentDigest;
+        uint8 principalKind; // 1 signing-key namespace, 2 instance-qualified contract
+        uint8 authorizationProfile; // 1 EVM call, 2 ECDSA per-intent signature
+        uint8 intentFormat; // 1 legacy, 2 guarded; source import context is separate
+    }
+    struct ExecutionInfo {
+        bytes32 origin;
+        uint256 revision;
+        bytes32 shellCodeHash;
+        address implementation;
+        bytes32 implementationCodeHash;
+        address registryAddress;
+        bytes32 registryCodeHash;
+        address indexAddress;
+        bytes32 indexCodeHash;
+        uint64 indexGeneration;
+    }
+
     // Publication-scoped values threaded through the ordered apply (memory, by reference).
     struct Pub {
         address author;
@@ -78,6 +114,11 @@ contract Ledger {
         uint64 bindings;
         bytes32 publicationId; // set by _beginPublication (kept off the batch loop's stack)
         uint64 first; // first admission ordinal of this publication (idem)
+        bytes32 execution;
+        bytes32 intentHash;
+        bytes32 readsHash;
+        bytes readBytes;
+        uint8 format;
     }
 
     // What one admission reads from the registry (memory struct: one pointer on the stack; the
@@ -148,6 +189,12 @@ contract Ledger {
     /// same signed publication can be imported into a second deployment with the same realm
     /// and code (delta B). Replay within one deployment is stopped by the nonce.
     bytes32 public immutable domainSeparator;
+    bytes32 public immutable guardedDomainSeparator;
+    address public immutable implementationSelf;
+    bytes32 public constant LAYOUT_ID = keccak256("efs.lab.ledger-layout/2:roots-0-12-preserved:context-13:execution-14:readsets-15");
+    bytes32 public constant GUARDED_INTENT_TYPEHASH = keccak256("IntentV2(bytes32 realmId,bytes32 realmOrigin,bytes32 executionSet,address author,uint64 nonce,uint64 deadline,bytes32 acceptanceProfile,bytes32 indexObligations,bytes32 readSetHash,bytes32 actionsHash)");
+    bytes32 public constant HEAD_SNAPSHOT_V2 = keccak256("efs.lab.head-snapshot/2");
+    bytes32 public constant READ_SET_V2 = keccak256("efs.lab.read-set/2:ordered-first-binding");
 
     // ------------------------------------------------------------------------ storage (slot numbers ESTIMATED; verify with `forge inspect Ledger storage-layout`)
     address public indexModule; // 0
@@ -163,10 +210,15 @@ contract Ledger {
     mapping(bytes32 => PositionCell) private _position; // 10
     mapping(address => uint64) public nonces; // 11
     mapping(uint64 => SourceEvidence) private _source; // 12: publication ordinal => source evidence (imports only)
+    mapping(uint64 => PublicationContext) private _context; // 13, never infer old principals from account code
+    mapping(bytes32 => ExecutionInfo) private _execution; // 14, first publication records exact components
+    mapping(bytes32 => bytes) private _readSets; // 15, complete immutable ABI-encoded preimages, deduplicated
 
     event Admitted(bytes32 indexed author, bytes32 indexed scope, bytes32 recordId, uint64 admission);
     event Published(uint64 indexed publication, bytes32 indexed publicationId, address indexed author, uint8 proofKind, uint64 firstAdmission, uint16 leafCount);
     event IndexModuleSet(address module);
+    event ExecutionChanged(bytes32 indexed executionSet, uint256 revision);
+    event ReadSetChecked(uint64 indexed publication, bytes32 indexed readSetHash);
 
     error E_ADMIN();
     error E_BOUNDS(uint256 code);
@@ -197,17 +249,112 @@ contract Ledger {
     error E_DESTINATION_AUTH();
     error E_SOURCE_UNSUPPORTED(); // native (contract-author) source packet: no verifiable witness here — fail closed
     error E_NO_BASIS(uint64 ordinal); // acceptanceBasis asked for a row that is not a publish/reuse admission
+    error E_NATIVE_AMBIGUOUS();
+    error E_CHAIN();
+    error E_READSET_SHAPE();
+    error E_READSET_STALE(uint256 positionIndex, uint256 principalIndex);
+    error E_GUARDED_IMPORT_UNSUPPORTED();
+    error E_LEGACY_UNSUPPORTED();
 
     constructor(ITypeRegistry registry_, bytes32 realmId_) {
+        ExecutionSlots.initialize();
+        implementationSelf = address(this);
         registry = registry_;
         realmId = realmId_;
         admin = msg.sender;
         domainSeparator = keccak256(
             abi.encode(keccak256("EIP712Domain(string name,string version)"), keccak256("EFS2-RoadB-Lab"), keccak256("1"))
         );
+        guardedDomainSeparator = keccak256(abi.encode(keccak256("EIP712Domain(string name,string version)"), keccak256("EFS2-RoadB-Lab"), keccak256("2")));
     }
 
     // ------------------------------------------------------------------------ ingress
+    function executeGuardedSigned(IntentV2 memory intent, Action[] memory actions, bytes[] memory bodies,
+        ReadSetV2 memory readSet, bytes memory sig) external returns (uint64, uint64)
+    {
+        if (block.timestamp > intent.deadline) revert E_EXPIRED(intent.deadline);
+        Pub memory p = _guarded(intent, actions, readSet);
+        p.proofKind = PROOF_SIGNED;
+        p.author32 = Keys.principal(intent.author);
+        p.creator = p.author32;
+        (p.r, p.s, p.v) = _split(sig);
+        address signer = ecrecover(p.intentHash, p.v, p.r, p.s);
+        if (signer == address(0) || signer != p.author) revert E_SIGNATURE();
+        return _run(p, actions, bodies);
+    }
+
+    /// Same-call checked application flow: actual caller remains the author.
+    function executeGuarded(Action[] memory actions, bytes[] memory bodies, uint64 nonce,
+        bytes32 expectedExecution, ReadSetV2 memory readSet) external returns (uint64, uint64)
+    {
+        IntentV2 memory i = IntentV2(realmId, realmOrigin(), expectedExecution, msg.sender, nonce, 0,
+            acceptanceProfileOf(actions), indexObligations(), readSetHash(readSet));
+        Pub memory p = _guarded(i, actions, readSet);
+        p.proofKind = PROOF_NATIVE;
+        p.author32 = principalOf(msg.sender);
+        p.creator = p.author32;
+        return _run(p, actions, bodies);
+    }
+
+    function _guarded(IntentV2 memory i, Action[] memory actions, ReadSetV2 memory rs) private view returns (Pub memory p) {
+        if (i.realmId != realmId || i.realmOrigin != realmOrigin()) revert E_INTENT(1);
+        p.execution = executionSet();
+        if (i.executionSet != p.execution) revert E_INTENT(2);
+        p.acceptanceProfile = acceptanceProfileOf(actions);
+        if (i.acceptanceProfile != p.acceptanceProfile) revert E_INTENT(3);
+        p.indexObligations = indexObligations();
+        if (i.indexObligations != p.indexObligations) revert E_INTENT(4);
+        p.readsHash = readSetHash(rs);
+        if (i.readSetHash != p.readsHash) revert E_INTENT(5);
+        for (uint256 x; x < rs.positions.length; ++x) {
+            for (uint256 y; y < rs.principalIds.length; ++y) {
+                if (headSnapshot(rs.principalIds[y], rs.positions[x]) != rs.expectedHeads[x * rs.principalIds.length + y])
+                    revert E_READSET_STALE(x, y);
+            }
+        }
+        p.readBytes = abi.encode(rs);
+        p.author = i.author;
+        p.nonce = i.nonce;
+        p.deadline = i.deadline;
+        p.actionsHash = keccak256(abi.encode(actions));
+        p.intentHash = guardedIntentDigest(i, p.actionsHash);
+        p.format = 2;
+    }
+
+    /// Canonical empty means all three arrays empty. Principal order is significant;
+    /// duplicate principals or coordinates and non-Cartesian vectors are ambiguous.
+    function readSetHash(ReadSetV2 memory rs) public pure returns (bytes32) {
+        uint256 n = rs.principalIds.length;
+        uint256 m = rs.positions.length;
+        if (n > 64 || m > 4 || rs.expectedHeads.length != n * m || (n == 0) != (m == 0)) revert E_READSET_SHAPE();
+        for (uint256 i; i < n; ++i) {
+            if (rs.principalIds[i] == 0) revert E_READSET_SHAPE();
+            for (uint256 j; j < i; ++j) if (rs.principalIds[i] == rs.principalIds[j]) revert E_READSET_SHAPE();
+        }
+        for (uint256 i; i < m; ++i) {
+            if (rs.positions[i] == 0) revert E_READSET_SHAPE();
+            for (uint256 j; j < i; ++j) if (rs.positions[i] == rs.positions[j]) revert E_READSET_SHAPE();
+        }
+        return keccak256(abi.encode(READ_SET_V2, rs));
+    }
+
+    function headSnapshot(bytes32 principalId, bytes32 position) public view returns (bytes32) {
+        HeadRow storage h = _head[Keys.binding(principalId, position)];
+        uint256 meta = h.meta;
+        return keccak256(abi.encode(HEAD_SNAPSHOT_V2, uint8(meta), uint32(meta >> 8), uint64((meta >> 40) & GUARD), h.target));
+    }
+
+    function guardedIntentDigest(IntentV2 memory intent, bytes32 actionsHash) public view returns (bytes32) {
+        return keccak256(abi.encodePacked(hex"1901", guardedDomainSeparator, keccak256(abi.encode(GUARDED_INTENT_TYPEHASH, intent, actionsHash))));
+    }
+
+    function guardedPublicationId(bytes32 principalId, bytes32 digest) public pure returns (bytes32) {
+        return keccak256(abi.encode(keccak256("efs.lab.publication/2"), principalId, digest));
+    }
+
+    /// The v1 import envelope cannot represent guarded context. No reinterpretation.
+    function importGuardedPublication(bytes calldata) external pure { revert E_GUARDED_IMPORT_UNSUPPORTED(); }
+
     /// Native batch. Author = msg.sender (EOA or contract). `nonce` must equal nonces[author];
     /// an exact retry (same author, nonce, actions) reverts AlreadyAdmitted with no new rows.
     function execute(Action[] memory actions, bytes[] memory bodies, uint64 nonce)
@@ -233,6 +380,7 @@ contract Ledger {
         external
         returns (uint64 publication, uint64 firstAdmission)
     {
+        if (address(this) != implementationSelf) revert E_LEGACY_UNSUPPORTED();
         if (intent.realmId != realmId) revert E_INTENT(1);
         if (intent.coreCodeCommitment != address(this).codehash) revert E_INTENT(2);
         if (block.timestamp > intent.deadline) revert E_EXPIRED(intent.deadline);
@@ -279,6 +427,7 @@ contract Ledger {
         Intent memory dst,
         bytes memory dstSig
     ) external returns (uint64 publication, uint64 firstAdmission) {
+        if (address(this) != implementationSelf) revert E_LEGACY_UNSUPPORTED();
         bytes32 hash = keccak256(abi.encode(actions));
         if (src.v != 0) {
             if (uint256(src.s) > SECP256K1_N_HALF || (src.v != 27 && src.v != 28)) revert E_SOURCE_SIGNATURE();
@@ -407,6 +556,8 @@ contract Ledger {
         private
         returns (uint64, uint64)
     {
+        if (block.chainid != ExecutionSlots.read(ExecutionSlots.GENESIS)) revert E_CHAIN();
+        if (p.proofKind == PROOF_NATIVE && msg.sender.code.length == 0 && msg.sender != tx.origin) revert E_NATIVE_AMBIGUOUS();
         uint256 n = actions.length;
         if (n == 0 || n > MAX_ACTIONS || bodies.length != n) revert E_BOUNDS(0);
         IIndexModule.Effect[] memory effects = _beginPublication(p, n);
@@ -420,7 +571,12 @@ contract Ledger {
 
     /// Retry/nonce/counter checks, then the first writes (nonce, retry key, evidence cell).
     function _beginPublication(Pub memory p, uint256 n) private returns (IIndexModule.Effect[] memory effects) {
-        p.publicationId = keccak256(abi.encode(p.author, p.nonce, p.actionsHash));
+        if (p.format == 0) {
+            p.format = 1;
+            p.execution = executionSet();
+            p.intentHash = intentDigest(Intent(realmId, address(this).codehash, p.author, p.nonce, p.deadline, p.acceptanceProfile, p.indexObligations), p.actionsHash);
+        }
+        p.publicationId = p.format == 2 ? guardedPublicationId(p.author32, p.intentHash) : keccak256(abi.encode(p.author, p.nonce, p.actionsHash));
         uint64 prior = _publicationOrdinal[p.publicationId];
         if (prior != 0) revert AlreadyAdmitted(prior);
         if (p.nonce != nonces[p.author]) revert E_NONCE(p.author, nonces[p.author], p.nonce);
@@ -463,6 +619,13 @@ contract Ledger {
     }
 
     function _writeEvidence(Pub memory p, uint64 first, uint16 leafCount) private {
+        _context[p.publication] = PublicationContext(p.author32, p.execution, p.readsHash, p.intentHash,
+            p.author32 == Keys.principal(p.author) ? 1 : 2, p.proofKind, p.format);
+        if (_execution[p.execution].revision == 0) _execution[p.execution] = _currentExecution();
+        if (p.format == 2) {
+            if (_readSets[p.readsHash].length == 0) _readSets[p.readsHash] = p.readBytes;
+            emit ReadSetChecked(p.publication, p.readsHash);
+        }
         EvidenceCell storage e = _evidence[p.publication];
         e.w0 = uint256(uint160(p.author)) | (uint256(p.proofKind) << 160) | (uint256(p.v) << 164)
             | (uint256(leafCount) << 172) | (uint256(first) << 188) | (p.imported ? (uint256(1) << 236) : 0);
@@ -704,7 +867,8 @@ contract Ledger {
         if (tk != PUBLISH && tk != REUSE) revert E_WITHDRAW(leaf, 1);
         if (((tm >> 148) & 1) != 0) revert E_WITHDRAW(leaf, 2);
         uint64 tpub = uint64((tm >> 20) & GUARD);
-        if (address(uint160(_evidence[tpub].w0)) != p.author) revert E_WITHDRAW(leaf, 3);
+        bytes32 targetPrincipal = _context[tpub].principalId;
+        if (targetPrincipal == 0 || targetPrincipal != p.author32) revert E_WITHDRAW(leaf, 3);
         bytes32 rid = tk == PUBLISH ? Keys.recordFromHash(tr.b, tr.a) : tr.a;
         tr.meta = tm | (uint256(1) << 148);
         RecordCell storage cell = _record[rid];
@@ -714,7 +878,7 @@ contract Ledger {
         ar.a = x.target;
         ef.kind = WITHDRAW;
         ef.admission = p.ord;
-        ef.author = p.author32;
+        ef.author = targetPrincipal;
         ef.recordId = rid;
         ef.typeId = cell.typeId;
         emit Admitted(p.author32, cell.typeId, rid, p.ord);
@@ -740,11 +904,12 @@ contract Ledger {
     /// (and moves the epoch) without changing the Type id.
     function acceptanceProfileOf(Action[] memory actions) public view returns (bytes32 profile) {
         uint64 epoch = registry.epoch();
+        profile = keccak256(abi.encode(keccak256("efs.lab.acceptance-profile/2"), address(registry), epoch));
         for (uint256 i; i < actions.length; ++i) {
             uint8 k = actions[i].kind;
             if (k != PUBLISH && k != REUSE) continue;
-            (,, bytes32 ruleId,, bytes32 policyCodehash,,) = registry.typeInfo(actions[i].typeId);
-            profile = keccak256(abi.encode(profile, actions[i].typeId, ruleId, policyCodehash, epoch));
+            (, address mandatory, bytes32 ruleId, address policy, bytes32 policyCodehash,, uint16 activation) = registry.typeInfo(actions[i].typeId);
+            profile = keccak256(abi.encode(profile, actions[i].typeId, mandatory, ruleId, policy, policyCodehash, activation));
         }
     }
 
@@ -811,9 +976,32 @@ contract Ledger {
         return address(this).codehash;
     }
 
+    function layoutId() public pure virtual returns (bytes32) { return LAYOUT_ID; }
+    function executionRevision() public view returns (uint256) { return ExecutionSlots.read(ExecutionSlots.REVISION); }
+    function genesisChainId() external view returns (uint256) { return ExecutionSlots.read(ExecutionSlots.GENESIS); }
+    function implementationCodeHash() external view returns (bytes32) { return implementationSelf.codehash; }
+    function _indexGeneration() private view returns (uint64) {
+        (bool ok, bytes memory data) = indexModule.staticcall{gas: 30_000}(abi.encodeWithSignature("generation()"));
+        return ok && data.length == 32 ? uint64(uint256(bytes32(data))) : 0;
+    }
+    function _currentExecution() private view returns (ExecutionInfo memory e) {
+        e = ExecutionInfo(realmOrigin(), executionRevision(), address(this).codehash, implementationSelf,
+            implementationSelf.codehash, address(registry), address(registry).codehash, indexModule, indexModule.codehash, _indexGeneration());
+    }
+    function executionSet() public view returns (bytes32) {
+        return keccak256(abi.encode(keccak256("efs.lab.execution-set/2"), layoutId(), domainSeparator, guardedDomainSeparator, _currentExecution()));
+    }
+    function executionInfo(bytes32 key) external view returns (ExecutionInfo memory) { return _execution[key]; }
+    function publicationContext(uint64 publication) external view returns (PublicationContext memory) { return _context[publication]; }
+    /// Missing hash returns empty bytes (UNKNOWN), not an inferred empty read set.
+    /// Maximum preimage is 10,592 bytes (64 principals, 4 positions, 256 heads).
+    function readSetBytes(bytes32 key) external view returns (bytes memory) { return _readSets[key]; }
+    function keyPrincipal(address account) external pure returns (bytes32) { return Keys.principal(account); }
+    function contractPrincipal(bytes32 origin, address account) external pure returns (bytes32) { return Keys.contractPrincipal(origin, account); }
+
     /// Origin of this Realm for contract principals (pre-seal check 1).
     function realmOrigin() public view returns (bytes32) {
-        return keccak256(abi.encode(block.chainid, address(this).codehash));
+        return keccak256(abi.encode(keccak256("efs.lab.realm-origin/2"), ExecutionSlots.read(ExecutionSlots.GENESIS), address(this)));
     }
 
     /// The principal id an account presents at native ingress here: an EOA is its key
@@ -946,7 +1134,9 @@ contract Ledger {
     function setIndexModule(address module) external {
         if (msg.sender != admin) revert E_ADMIN();
         indexModule = module;
+        ExecutionSlots.advance();
         emit IndexModuleSet(module);
+        emit ExecutionChanged(executionSet(), executionRevision());
     }
 
     // ------------------------------------------------------------------------ body words

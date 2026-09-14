@@ -15,6 +15,8 @@ contract FilesApplication {
     address public immutable operator;
     address public immutable sourceAuthor;
     address public immutable reviewer;
+    bytes32 public immutable sourcePrincipal;
+    bytes32 public immutable reviewerPrincipal;
     bytes32 public immutable approvalConcept;
     uint64 public adoptionCount;
     bytes32 public lastRevision;
@@ -36,6 +38,10 @@ contract FilesApplication {
         operator = operator_;
         sourceAuthor = source_;
         reviewer = reviewer_;
+        // Address constructor is a convenience pin at creation, not a resolver
+        // re-run on every adoption and not a claim to infer historical identity.
+        sourcePrincipal = ledger_.principalOf(source_);
+        reviewerPrincipal = ledger_.principalOf(reviewer_);
         approvalConcept = concept_;
         readerCodehash = address(reader_).codehash;
     }
@@ -43,22 +49,38 @@ contract FilesApplication {
     function adoptApprovedRevision(bytes32 file, bytes32 expectedSelected, uint32 expectedOwnHeadRevision,
         FilesJoinedConsumer.Basis calldata basis) external returns (bytes32 revision, uint64 publication)
     {
+        // Legacy ABI keeps its shell-basis meaning. New callers use the explicitly
+        // execution-bound method below; this wrapper does not promise upgrade drift detection.
+        if (basis.core != address(ledger).codehash) revert E_PROFILE();
+        return _adopt(file,expectedSelected,expectedOwnHeadRevision,
+            FilesJoinedConsumer.PrincipalBasis(basis.admission,basis.generation,basis.epoch,ledger.executionSet()));
+    }
+
+    function adoptApprovedRevisionGuarded(bytes32 file, bytes32 expectedSelected, uint32 expectedOwnHeadRevision,
+        FilesJoinedConsumer.PrincipalBasis calldata basis) external returns (bytes32 revision, uint64 publication)
+    {
+        return _adopt(file,expectedSelected,expectedOwnHeadRevision,basis);
+    }
+
+    function _adopt(bytes32 file, bytes32 expectedSelected, uint32 expectedOwnHeadRevision,
+        FilesJoinedConsumer.PrincipalBasis memory basis) private returns (bytes32 revision, uint64 publication)
+    {
         if (msg.sender != operator) revert E_OPERATOR();
         if (address(reader).codehash != readerCodehash) revert E_PROFILE();
-        address[] memory sources = new address[](1);
-        sources[0] = sourceAuthor;
-        FilesJoinedConsumer.FilePoint memory point = reader.readFilePoint(file, sources, approvalConcept, basis);
+        bytes32[] memory sources = new bytes32[](1);
+        sources[0] = sourcePrincipal;
+        FilesJoinedConsumer.FilePoint memory point = reader.readFilePointPrincipals(file, sources, approvalConcept, basis);
         if (point.status != 1 || expectedSelected == bytes32(0)
             || point.revision.recordId != expectedSelected || point.revision.file != file) revert E_SOURCE();
         // Read provenance explicitly: FilePoint intentionally does not return it.
         LensReader lens = reader.lensReader();
-        (uint8 state, bytes32 target,,,uint64 at) = lens.resolve(sources, HEAD, file, bytes32(0));
+        (uint8 state, bytes32 target,,,uint64 at) = lens.resolvePrincipals(sources, HEAD, file, bytes32(0),basis.executionSet);
         if (state != 1 || target != expectedSelected || at == 0 || at > basis.admission) revert E_SOURCE();
-        address[] memory reviewers = new address[](1);
-        reviewers[0] = reviewer;
-        address approvalAuthor;
-        (state, target,, approvalAuthor, at) = lens.resolve(reviewers, TAG, expectedSelected, approvalConcept);
-        if (state != 1 || target != file || approvalAuthor != reviewer || at == 0 || at > basis.admission)
+        bytes32[] memory reviewers = new bytes32[](1);
+        reviewers[0] = reviewerPrincipal;
+        bytes32 approvalAuthor;
+        (state, target,, approvalAuthor, at) = lens.resolvePrincipals(reviewers, TAG, expectedSelected, approvalConcept,basis.executionSet);
+        if (state != 1 || target != file || approvalAuthor != reviewerPrincipal || at == 0 || at > basis.admission)
             revert E_APPROVAL();
 
         bytes memory body = bytes.concat(abi.encode(expectedSelected, file), point.revision.document);

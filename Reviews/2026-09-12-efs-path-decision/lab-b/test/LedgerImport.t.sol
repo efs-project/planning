@@ -16,7 +16,7 @@ contract LedgerImportTest is LabBase {
 
     function test_contract_principal_is_origin_qualified() public {
         // this test contract is a producer contract; it authors natively on two Realms
-        Ledger other = new Ledger(registry, REALM2); // different realmId => different code commitment => different origin
+        Ledger other = new Ledger(registry, REALM2); // a distinct instance, independently of the Realm label or code
         require(address(other).codehash != address(ledger).codehash, "distinct Realms");
         bytes32 salt = bytes32(uint256(9));
         bytes32 s1 = ledger.create(salt);
@@ -24,7 +24,7 @@ contract LedgerImportTest is LabBase {
         require(s1 != s2, "same contract address + same salt => different subject ids on different Realms");
         require(ledger.principalOf(address(this)) != other.principalOf(address(this)), "contract principals differ by origin");
         require(ledger.principalOf(eoaA) == other.principalOf(eoaA) && ledger.principalOf(eoaA) == Keys.principal(eoaA), "an EOA is its key everywhere");
-        bytes32 origin = keccak256(abi.encode(block.chainid, address(ledger).codehash));
+        bytes32 origin = keccak256(abi.encode(keccak256("efs.lab.realm-origin/2"),block.chainid,address(ledger)));
         require(ledger.principalOf(address(this)) == Keys.contractPrincipal(origin, address(this)), "explicit derivation");
         require(s1 == Keys.subject(ledger.principalOf(address(this)), salt), "subject id from the origin-qualified creator");
     }

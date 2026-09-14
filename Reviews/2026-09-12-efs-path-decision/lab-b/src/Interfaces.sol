@@ -23,7 +23,7 @@ interface IIndexModule {
     struct Effect {
         uint8 kind; // Ledger action kind (PUBLISH/REUSE/BIND/UNBIND/CREATE/WITHDRAW)
         uint64 admission; // admission ordinal of this action
-        bytes32 author; // principal id of the publication author
+        bytes32 author; // publication principal; WITHDRAW: target admission's retained principal being released
         bytes32 recordId; // record admitted (publish/reuse/withdraw) or bound target (bind)
         bytes32 typeId; // Type of `recordId` (0 when the target is a subject)
         bytes32 scopeKey; // Keys.scope(author, purpose, subject) for bind/unbind

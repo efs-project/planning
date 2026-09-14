@@ -70,6 +70,33 @@ contract LensReader {
         Cursor next;
     }
 
+    /// V2 readers carry explicit identities and an execution-bound continuation.
+    /// Legacy address methods above/below describe current ingress classification only.
+    struct PrincipalEntry { bytes32 position; bytes32 principalId; bytes32 target; uint32 revision; uint64 admission; }
+    struct PrincipalCursor {
+        uint64 basisAdmission;
+        uint64 indexGeneration;
+        uint64 rulesEpoch;
+        bytes32 executionSet;
+        bytes32 scopeKey;
+        bytes32 lensHash;
+        bytes32 position;
+        uint8 lensIndex;
+        uint64 rawIndex;
+        uint64 selectedSoFar;
+    }
+    struct PrincipalPage {
+        PrincipalEntry[] items;
+        uint64 scanned;
+        uint64 hydrations;
+        uint64 rawTotal;
+        uint64 selectedSoFar;
+        uint8 status;
+        bool mutated;
+        PrincipalCursor next;
+    }
+    bytes32 private constant SUPPORTED_LAYOUT = keccak256("efs.lab.ledger-layout/2:roots-0-12-preserved:context-13:execution-14:readsets-15");
+
     Ledger public immutable ledger;
     IndexModule public immutable index; // address(0) => lists and history are UNKNOWN
 
@@ -81,9 +108,123 @@ contract LensReader {
         index = index_;
     }
 
-    /// Same derivation as Ledger.realmOrigin / principalOf, computed locally (no call).
+    /// Legacy convenience readers classify accounts now using the stable instance origin.
     function _origin() private view returns (bytes32) {
-        return keccak256(abi.encode(block.chainid, address(ledger).codehash));
+        return ledger.realmOrigin();
+    }
+
+    function _explicitBasis(bytes32 execution) private view {
+        if (ledger.layoutId() != SUPPORTED_LAYOUT || ledger.executionSet() != execution
+            || ledger.indexModule() != address(index)) revert E_CURSOR();
+    }
+
+    function resolvePrincipals(bytes32[] calldata principals, bytes32 purpose, bytes32 subject, bytes32 role, bytes32 execution)
+        external view returns (uint8 status, bytes32 target, uint32 revision, bytes32 principalId, uint64 admissionOrdinal)
+    {
+        _explicitBasis(execution);
+        if (principals.length == 0 || principals.length > 255) revert E_LENS();
+        bytes32 position = Keys.position(purpose, subject, role);
+        for (uint256 i; i < principals.length; ++i) {
+            (uint8 state, uint32 rev, uint64 at,,, bytes32 t) = ledger.head(Keys.binding(principals[i], position));
+            if (state == 1) return (FOUND, t, rev, principals[i], at);
+            if (state == 2) return (MASKED, 0, rev, principals[i], at);
+        }
+    }
+
+    function resolveNoTiebreakPrincipals(bytes32[] calldata principals, bytes32 purpose, bytes32 subject, bytes32 role, bytes32 execution)
+        external view returns (uint8 status, PrincipalEntry[] memory candidates)
+    {
+        _explicitBasis(execution);
+        if (principals.length == 0 || principals.length > 255) revert E_LENS();
+        bytes32 position = Keys.position(purpose, subject, role);
+        candidates = new PrincipalEntry[](principals.length);
+        uint256 live;
+        bool removed;
+        for (uint256 i; i < principals.length; ++i) {
+            (uint8 state, uint32 rev, uint64 at,,, bytes32 t) = ledger.head(Keys.binding(principals[i], position));
+            if (state == 1) candidates[live++] = PrincipalEntry(position, principals[i], t, rev, at);
+            else if (state == 2) removed = true;
+        }
+        assembly ("memory-safe") { mstore(candidates, live) }
+        status = live == 0 ? (removed ? MASKED : ABSENT) : (live == 1 && !removed ? FOUND : CONFLICT);
+    }
+
+    function listPrincipals(bytes32[] calldata principals, bytes32 purpose, bytes32 subject, PrincipalCursor calldata cursor, uint256 budget)
+        external view returns (PrincipalPage memory page)
+    {
+        if (principals.length == 0 || principals.length > 255) revert E_LENS();
+        PrincipalCursor memory c = cursor;
+        bytes32 execution = ledger.executionSet();
+        _explicitBasis(execution);
+        bytes32 scopeKey = keccak256(abi.encode(purpose, subject));
+        bytes32 lensHash = keccak256(abi.encode(principals));
+        uint64 generation = address(index) == address(0) ? 0 : index.generation();
+        uint64 epoch = ledger.registry().epoch();
+        (uint64 current,,,) = ledger.counts();
+        if (c.executionSet == 0) {
+            c.basisAdmission = current;
+            c.executionSet = execution; c.indexGeneration = generation; c.rulesEpoch = epoch;
+            c.scopeKey = scopeKey; c.lensHash = lensHash;
+        } else if (c.basisAdmission != current || c.executionSet != execution || c.indexGeneration != generation || c.rulesEpoch != epoch
+            || c.scopeKey != scopeKey || c.lensHash != lensHash) revert E_CURSOR();
+        if (budget > MAX_BUDGET) budget = MAX_BUDGET;
+        page.items = new PrincipalEntry[](budget);
+        if (address(index) == address(0)) return _finishPrincipals(page, c, 0, UNKNOWN);
+        (uint8 cov,,) = index.coverage(_scopeFamily(purpose), scopeKey);
+        if (cov != COMPLETE) return _finishPrincipals(page, c, 0, UNKNOWN);
+        for (uint256 i; i < principals.length; ++i)
+            page.rawTotal += _scopeCount(purpose, Keys.scopeList(Keys.scope(principals[i], purpose, subject)));
+        uint256 filled;
+        uint256 k = c.lensIndex;
+        uint64 j = c.rawIndex;
+        while (k < principals.length) {
+            bytes32 listKey = Keys.scopeList(Keys.scope(principals[k], purpose, subject));
+            uint64 n = _scopeCount(purpose, listKey);
+            while (j < n) {
+                if (page.scanned >= budget) {
+                    c.lensIndex = uint8(k); c.rawIndex = j;
+                    return _finishPrincipals(page, c, filled, PARTIAL);
+                }
+                bytes32 position = ledger.bindingPosition(_scopeAt(purpose, listKey, j++));
+                (uint8 state, uint32 rev, uint64 at,,, bytes32 target) = ledger.head(Keys.binding(principals[k], position));
+                ++page.scanned; ++page.hydrations;
+                if (at > c.basisAdmission) page.mutated = true;
+                if (state != 1) continue;
+                (bool masked, uint64 probes) = _maskedPrincipals(principals, k, position);
+                page.hydrations += probes;
+                if (masked) continue;
+                page.items[filled++] = PrincipalEntry(position, principals[k], target, rev, at);
+                ++c.selectedSoFar; c.position = position;
+            }
+            ++k; j = 0;
+        }
+        c.lensIndex = uint8(principals.length); c.rawIndex = 0;
+        return _finishPrincipals(page, c, filled, COMPLETE);
+    }
+
+    function _finishPrincipals(PrincipalPage memory page, PrincipalCursor memory c, uint256 filled, uint8 status)
+        private pure returns (PrincipalPage memory)
+    {
+        PrincipalEntry[] memory items = page.items;
+        assembly ("memory-safe") { mstore(items, filled) }
+        page.selectedSoFar = c.selectedSoFar; page.status = status; page.next = c;
+        return page;
+    }
+
+    function _maskedPrincipals(bytes32[] calldata principals, uint256 upto, bytes32 position) private view returns (bool, uint64 probes) {
+        for (uint256 i; i < upto; ++i) {
+            ++probes;
+            (uint8 state,,,,,) = ledger.head(Keys.binding(principals[i], position));
+            if (state != 0) return (true, probes);
+        }
+        return (false, probes);
+    }
+
+    function historyPrincipalAt(bytes32 principalId, bytes32 position, uint64 asOf, bytes32 execution)
+        external view returns (uint8, bool, bytes32, uint32, uint64)
+    {
+        _explicitBasis(execution);
+        return historyPrincipal(principalId, position, asOf);
     }
 
     // ------------------------------------------------------------------ point reads
@@ -258,8 +399,15 @@ contract LensReader {
         view
         returns (uint8 status, bool live, bytes32 target, uint32 revision, uint64 admissionOrdinal)
     {
+        return historyPrincipal(Keys.principalFor(author, _origin()), position, asOf);
+    }
+
+    /// Explicit retained principal: never reads or classifies an author's current code.
+    function historyPrincipal(bytes32 principalId, bytes32 position, uint64 asOf)
+        public view returns (uint8 status, bool live, bytes32 target, uint32 revision, uint64 admissionOrdinal)
+    {
         if (address(index) == address(0)) return (UNKNOWN, false, bytes32(0), 0, 0);
-        bytes32 listKey = Keys.historyList(Keys.binding(Keys.principalFor(author, _origin()), position));
+        bytes32 listKey = Keys.historyList(Keys.binding(principalId, position));
         (uint8 cov,,) = index.coverage(index.FAMILY_HISTORY(), listKey);
         if (cov != COMPLETE) return (UNKNOWN, false, bytes32(0), 0, 0);
         (uint64 n,,,) = index.postingHead(listKey);

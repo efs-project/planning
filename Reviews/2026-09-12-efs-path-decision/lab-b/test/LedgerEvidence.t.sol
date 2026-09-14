@@ -83,10 +83,11 @@ contract LedgerEvidenceTest is LabBase {
     }
 
     function test_subject_id_portable_across_fresh_deployment() public {
-        // one signature, two deployments: identical realm, code and (here: empty) index obligations
+        // Key subject identity travels; execution authorization does not. The
+        // implementation-self immutable makes these exact runtime identities distinct.
         ledger.setIndexModule(address(0));
         Ledger ledger2 = new Ledger(registry, REALM);
-        require(address(ledger2).codehash == address(ledger).codehash, "same core code commitment");
+        require(address(ledger2).codehash != address(ledger).codehash, "distinct exact implementation commitments");
         bytes32 salt = bytes32(uint256(77));
         bytes32 subj = subjectOf(eoaA, 77);
         Ledger.Action[] memory a = new Ledger.Action[](3);
@@ -97,7 +98,10 @@ contract LedgerEvidenceTest is LabBase {
         b[1] = q(3000);
         (Ledger.Intent memory intent, bytes memory sig) = signed(PK_A, ledger, 0, a);
         (uint64 p1,) = ledger.executeSigned(intent, a, b, sig);
-        (uint64 p2,) = ledger2.executeSigned(intent, a, b, sig); // imported through the real ingress
+        (bool accepted,) = address(ledger2).call(abi.encodeCall(ledger2.executeSigned,(intent,a,b,sig)));
+        require(!accepted,"source authorization cannot be relabeled as destination authorization");
+        (intent,sig) = signed(PK_A,ledger2,0,a);
+        (uint64 p2,) = ledger2.executeSigned(intent, a, b, sig);
         require(ledger.subjectCreatedAt(subj) == 1 && ledger2.subjectCreatedAt(subj) == 1, "same subject id on both");
         (,,,,,,,,,,,, bytes32 h1) = ledger.evidence(p1);
         (,,,,,,,,,,,, bytes32 h2) = ledger2.evidence(p2);
@@ -105,7 +109,7 @@ contract LedgerEvidenceTest is LabBase {
         bytes32 pubId = keccak256(abi.encode(eoaA, uint64(0), h1));
         require(ledger.publicationOf(pubId) == p1 && ledger2.publicationOf(pubId) == p2, "same publication id");
         (,,, address rec, bool ok) = recon.reconstruct(ledger2, p2);
-        require(ok && rec == eoaA, "destination re-verifies the source signature itself");
+        require(ok && rec == eoaA, "destination verifies its own authorization");
     }
 
     function test_reconstruction_from_state_only_all_kinds() public {

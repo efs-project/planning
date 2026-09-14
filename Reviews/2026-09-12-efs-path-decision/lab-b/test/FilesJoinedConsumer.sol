@@ -20,6 +20,7 @@ contract FilesJoinedConsumer {
 
     enum TagScope { File, SelectedRevision }
     struct Basis { uint64 admission; uint64 generation; uint64 epoch; bytes32 core; }
+    struct PrincipalBasis { uint64 admission; uint64 generation; uint64 epoch; bytes32 executionSet; }
     struct TagAssessment { bytes32 subject; bytes32 target; uint8 status; bool evaluated; bool present; }
     struct Revision {
         bytes32 recordId;
@@ -128,6 +129,32 @@ contract FilesJoinedConsumer {
     {
         _guard(basis);
         return _point(file, authors, concept, basis.admission);
+    }
+
+    /// Guarded-v2 entrypoint. Legacy address/basis methods remain legacy and must
+    /// not be used to reconstruct an author's historical namespace after a transition.
+    function readFilePointPrincipals(bytes32 file, bytes32[] calldata principals, bytes32 concept, PrincipalBasis calldata basis)
+        external view returns (FilePoint memory result)
+    {
+        _checkBinding();
+        (uint64 current,,,) = ledger.counts();
+        if (basis.admission != current || basis.generation != filesIndex.generation() || basis.epoch != ledger.registry().epoch()
+            || basis.executionSet != ledger.executionSet()) revert E_BASIS();
+        _checkProfile();
+        result.file = file;
+        bytes32 selected;
+        (result.status,selected,,,) = lensReader.resolvePrincipals(principals,HEAD,file,0,basis.executionSet);
+        if (result.status == 1) result.revision = _decode(selected,file,basis.admission);
+        result.fileTag = _principalTag(principals,file,concept,file,basis.executionSet);
+        if (result.status == 1) result.revisionTag = _principalTag(principals,selected,concept,file,basis.executionSet);
+    }
+
+    function _principalTag(bytes32[] calldata principals, bytes32 subject, bytes32 concept, bytes32 file, bytes32 execution)
+        private view returns (TagAssessment memory result)
+    {
+        result.subject = subject; result.evaluated = true;
+        (result.status,result.target,,,) = lensReader.resolvePrincipals(principals,TAG,subject,concept,execution);
+        result.present = result.status == 1 && result.target == file;
     }
 
     function _point(bytes32 file, address[] calldata authors, bytes32 concept, uint64 basis)

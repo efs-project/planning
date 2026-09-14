@@ -28,6 +28,20 @@ contract FilesNameResponseFacade is IFilesNameSource {
 
 /// Seven standalone cases; no inherited FilesJoined tests or paid/browser claims.
 contract FilesNamesTest is LabBase {
+    function test_guarded_name_basis_tracks_execution_without_admission_change() public {
+        bytes memory filename = bytes("basis.txt");
+        _create(987,filename,true,0);
+        bytes32 role = keccak256(filename); bytes32 position = Keys.position(FOLDER,MOUNT,role);
+        FilesNameReader.Basis memory basis = FilesNameReader.Basis(admissions(),registry.epoch(),ledger.executionSet());
+        bytes memory data = abi.encodeWithSignature("readNameAt(bytes32,bytes32,bytes32,(uint64,uint64,bytes32))",position,MOUNT,role,basis);
+        (bool ok,bytes memory output) = address(reader).staticcall(data);
+        require(ok && output.length != 0,"execution-bound name reader missing");
+        FilesNameReader.Name memory value = abi.decode(output,(FilesNameReader.Name));
+        require(value.status == 1 && keccak256(value.value) == role,"guarded name bytes");
+        ledger.setIndexModule(address(index));
+        (ok,) = address(reader).staticcall(data);
+        require(!ok,"stale name execution basis accepted");
+    }
     bytes32 internal constant MOUNT = keccak256("lab/files-names/mounted-folder/1"); // caller mounts this exact ID as /
     bytes32 internal rootType;
     bytes32 internal childType;

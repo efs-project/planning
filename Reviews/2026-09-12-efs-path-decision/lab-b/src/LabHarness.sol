@@ -149,6 +149,7 @@ contract Consumer {
 /// PublicationIntent digest, and (for signed ingress) ecrecovers the author from the
 /// retained (r, s, v). No calldata, logs or original client involved.
 contract Reconstructor {
+    error E_FORMAT_UNSUPPORTED();
     /// The publication's Action tuples, rebuilt from its Admission rows in order.
     function actionsOf(Ledger ledger, uint64 publication) public view returns (Ledger.Action[] memory actions) {
         (,,, uint16 leafCount, uint64 first,,,,,,,,) = ledger.evidence(publication);
@@ -165,6 +166,7 @@ contract Reconstructor {
         view
         returns (bytes32 digest, address recovered, uint8 grade, bytes32 sourceRealm)
     {
+        if (ledger.publicationContext(publication).intentFormat != 1) revert E_FORMAT_UNSUPPORTED();
         Ledger.SourceEvidence memory src = ledger.sourceEvidence(publication);
         Ledger.Intent memory si = Ledger.Intent(
             src.realmId, src.coreCodeCommitment, src.author, src.nonce, src.deadline, src.acceptanceProfile, src.indexObligations
@@ -180,6 +182,7 @@ contract Reconstructor {
         view
         returns (Ledger.Action[] memory actions, bytes32 actionsHash, bytes32 digest, address recovered, bool matches)
     {
+        if (ledger.publicationContext(publication).intentFormat != 1) revert E_FORMAT_UNSUPPORTED();
         (
             address author,
             uint8 proofKind,

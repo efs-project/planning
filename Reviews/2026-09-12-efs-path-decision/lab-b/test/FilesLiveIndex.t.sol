@@ -59,6 +59,16 @@ contract FilesLiveIndexTest is FilesNamesTest {
         (bool ok,bytes memory error)=address(lens).staticcall(abi.encodeCall(lens.list,(lensOf(eoaA,address(bob)),FOLDER,MOUNT,p.next,1)));
         require(!ok && bytes4(error)==LensReader.E_CURSOR.selector,"live cursor requires unchanged admission");
     }
+    function test_explicit_live_swap_removal_invalidates_unpinned_continuation() public {
+        _create(1,bytes("a.txt"),true,0);_create(2,bytes("b.txt"),true,0);
+        bytes32[] memory principals=new bytes32[](2);principals[0]=pid(eoaA);principals[1]=pid(address(bob));
+        LensReader.PrincipalCursor memory zero;
+        LensReader.PrincipalPage memory p=lens.listPrincipals(principals,FOLDER,MOUNT,zero,1);
+        require(p.status==lens.PARTIAL() && p.items.length==1,"explicit partial first page");
+        _submit(one(aUnbind(FOLDER,MOUNT,keccak256("a.txt"),1)),new bytes[](1));
+        (bool ok,bytes memory error)=address(lens).staticcall(abi.encodeCall(lens.listPrincipals,(principals,FOLDER,MOUNT,p.next,1)));
+        require(!ok && bytes4(error)==LensReader.E_CURSOR.selector,"explicit live cursor silently skipped swap-moved candidate");
+    }
     function test_live_late_attachment_never_claims_complete_empty() public {
         _create(1,bytes("a.txt"),true,0);
         FilesLiveNamesIndex late=new FilesLiveNamesIndex(address(ledger),rootType,childType,address(rootRule).codehash,

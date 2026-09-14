@@ -123,6 +123,7 @@ contract FilesNameReader {
     uint8 public constant MISSING = 2;
     uint8 public constant INVALID = 3;
     struct Basis { uint64 admission; uint64 epoch; bytes32 core; }
+    struct ExecutionBasis { uint64 admission; uint64 epoch; bytes32 executionSet; }
     struct Name { uint8 status; bytes32 recordId; uint64 firstAdmission; bytes value; }
     Ledger public immutable ledger;
     bytes32 public immutable coreCodehash;
@@ -145,6 +146,18 @@ contract FilesNameReader {
         (uint64 admission,,,) = ledger.counts();
         if (basis.admission != admission || basis.epoch != ledger.registry().epoch()
             || basis.core != coreCodehash || address(ledger).codehash != coreCodehash) revert E_BASIS();
+        return _readName(position,folder,role,basis.admission);
+    }
+
+    /// Versioned basis for a caller that already verified the exact placement.
+    function readNameAt(bytes32 position, bytes32 folder, bytes32 role, ExecutionBasis calldata basis) external view returns (Name memory) {
+        (uint64 admission,,,) = ledger.counts();
+        if (basis.admission != admission || basis.epoch != ledger.registry().epoch() || basis.executionSet != ledger.executionSet()
+            || address(ledger).codehash != coreCodehash || ledger.layoutId() != ledger.LAYOUT_ID()) revert E_BASIS();
+        return _readName(position,folder,role,basis.admission);
+    }
+
+    function _readName(bytes32 position,bytes32 folder,bytes32 role,uint64 basisAdmission) private view returns (Name memory result) {
         FilesNameLayout.pin(ledger, nameType, expectedNameRuleHash);
         (bytes32 purpose, bytes32 retainedFolder, bytes32 retainedRole) = ledger.positionCell(position);
         if (purpose != FilesNameLayout.FOLDER || retainedFolder != folder || retainedRole != role
@@ -154,7 +167,7 @@ contract FilesNameReader {
         if (status == 0) { result.status = UNAVAILABLE; return result; }
         if (status != 1) { result.status = INVALID; return result; }
         if (t == 0 && first == 0 && value.length == 0) { result.status = MISSING; return result; }
-        if (t != nameType || first == 0 || first > basis.admission || !FilesNameLayout.valid(value)
+        if (t != nameType || first == 0 || first > basisAdmission || !FilesNameLayout.valid(value)
             || keccak256(value) != role || Keys.recordFromHash(t, keccak256(value)) != result.recordId) {
             result.status = INVALID; return result;
         }

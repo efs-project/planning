@@ -24,7 +24,7 @@ library Keys {
     // Subject id (lab-new): keccak256(abi.encode(DOM_SUBJECT, creatorPrincipal, creatorSalt))
     bytes32 internal constant DOM_SUBJECT = keccak256("efs2/subject/1");
     // Contract principal (lab-new, pre-seal check 1): keccak256(abi.encode(DOM_PRINCIPAL, uint256(2), realmOrigin, address))
-    // where realmOrigin = keccak256(abi.encode(chainId, coreCodeCommitment)). A contract address is
+    // where realmOrigin is Ledger's versioned (genesis chain, stable instance) commitment. A contract address is
     // not unique across Realms; an EOA key is, so EOA principals stay the padded address (c0 form).
     bytes32 internal constant DOM_PRINCIPAL = keccak256("efs2/principal/1");
     // Exact Type id (lab-new, authority repair 2026-09-13): keccak256(abi.encode(DOM_TYPE, shape,
@@ -64,7 +64,7 @@ library Keys {
     /// This recognizes only the exact 23-byte marker, without executing/following
     /// its target. Delegated native ingress remains NATIVE evidence, not an EFS
     /// per-action signature. Arbitrary runtime transitions and constructor-time
-    /// identity require retained explicit principals before an upgradeable port.
+    /// identity are handled by Ledger's retained publication context and explicit readers.
     function principalFor(address account, bytes32 realmOrigin) internal view returns (bytes32) {
         uint256 size = account.code.length;
         if (size == 0) return principal(account);
