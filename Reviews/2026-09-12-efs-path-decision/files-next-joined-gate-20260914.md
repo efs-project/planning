@@ -1,6 +1,7 @@
 # Next Files gate: real revisions, checked parents and bounded reads
 
-**Status:** source-grounded experiment proposal, not implemented or measured.
+**Status:** cold full-body failure reproduced and independently reviewed;
+bounded remedy and complete joined Files journey still unproved.
 Basis: compact B `1d8356c9de86a488c950abcb3f9f4d17a6126510` (source
 `b94b57c405ef18b7f259cbd636d685ff96738ce7`). The separate archive work does not
 change these Ledger/TypeRegistry sources. This narrows the next
@@ -76,3 +77,27 @@ Source anchors: `lab-b/src/Ledger.sol:134-137,479-591,723-733,834-845,955-978`,
 Quote-only index is precedent, not a Files implementation. No Core/storage
 change was previously needed for the tiny analogue; that conclusion is now
 **conditional on solving bounded parent reads** for realistic sizes.
+
+## September 14, 09:56: the cold-read failure is now observed
+
+The three-control diagnostic and independent review are retained on B
+[`441f3cd`](https://github.com/efs-project/planning/tree/441f3cd/Reviews/2026-09-12-efs-path-decision/lab-b/files-parent-budget-20260914).
+Warm 8,192-byte and cold 64-byte parents permit the valid child; a cold
+8,192-byte parent causes exact mandatory-rule rejection with the tested nonce,
+counts, Record and posting state rolled back. Solc 0.8.30 compiled successfully;
+three tests passed with no failures/skips. No malformed-fixture false positive
+was found in independent review. This is Foundry cold-access evidence, not a
+paid transaction, a measured gas threshold, or a universal Files failure.
+
+The kernel already has `extsload`. A test-only control can read just the
+parent's File-ID word through that existing primitive, leaving storage and
+kernel runtime unchanged. That raw-layout-coupled control is next; it is not
+yet passing evidence or a recommended developer API.
+
+For an eventual ergonomic API, compare a combined bounded metadata/header
+getter (at most two metadata and two body slots) with general bounded range
+reads. Distinguish a missing Record from admitted empty bytes; return length
+and exact Type, and validate profile shape before interpreting zero words.
+A separate compact header/content profile also avoids full reads but changes
+the current inline-body Record IDs and adds content-availability handling.
+No representation change or new permanent getter is adopted here.

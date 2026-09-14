@@ -112,6 +112,48 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September 14, 09:56: Files failure reviewed; consumer verified; no active heavy slot.**
+Independent review confirms the narrow cold-parent getter/budget mismatch;
+diagnostic and retained packet are B `441f3cd`. The same Files worker prepares
+a test-only `extsload` control; kernel and existing budget stay unchanged.
+Archive paid consumer passed its focused unchanged-test GREEN after a real
+behavioral RED. Task 2's runner is still being prepared; no paid archive gas
+or alias choice is claimed. Compiler lease is released early. The recurring
+task now resumes Task 2 instead of completed Task 1; 14:00 UTC cutoff and
+stop-on-unproductive-work rule remain unchanged.
+
+**September 14, 09:51: cold-parent risk reproduced; archive consumer RED gate.**
+The focused cold diagnostic passed all three controls: cold 8,192-byte parent
+rejects exactly with rollback; warm 8,192-byte and cold 64-byte parents accept.
+Independent interpretation review is underway; no Core fix is claimed.
+The cold lease is released early (the first attempt refused before spawn because
+it preceded its start time; `cold-2` completed and stopped all owned processes).
+
+**Root-only compiler lease 09:51–10:11 UTC:** archive's one new paid-consumer
+behavioral RED, then its unchanged-test GREEN when handed back by the same
+worker. Source pin `a72e5eddaa9519a274b5daa237583629e0bf447aa51a0b13dd902bd251ae0343`
+contains the new test and ABI-compatible no-op consumer. Wrapper adds a focused
+consumer selector and exact build-info output under the existing private run
+state; SHA256 `291d8b0d357062f4f1e4ac861a2e0da8f34ebb3eaa6b8e47009453bd161f08a5`.
+Process/disk/deadline guards are unchanged. No Anvil or paid-run authority.
+
+**September 14, 09:49: archive representation semantics pass; focused cold-read diagnostic.**
+Root observed all 95 tests pass (16 archive), successful compilation and owned
+process cleanup in `task2-green-1`; the same Task 2 worker now prepares the
+stateless paid consumer and bounded runner. No gas result or representation
+choice is inferred. The prior compiler lease is released early.
+
+**Root-only compiler lease 09:49–10:09 UTC:** three test-only Files parent-read
+diagnostics, no Anvil or Core change. Input pin
+`688ddd5da2da8bb624a3d1a21403b8567572e2f8145606cffd5066519458073e`
+adds only `test/FilesParentBudget.t.sol` to the passing archive snapshot.
+The existing finite compiler wrapper adds only a focused `cold` test selector
+(wrapper SHA256 `107746e162d348c9710ff934ce90b3ff57191944dcb29a83ece3f3026cf53259`).
+Same run-specific scratch, atomic slot, ten-minute watchdog, 15 GiB scratch
+ceiling and 50 GiB free reserve apply. This tests whether full-body parent reads
+exhaust the unchanged mandatory-acceptance budget when storage is cold; results
+are not yet known. The diagnostic uses a test cold-access control, not paid gas.
+
 **September14,09:38: archive Task1 published; Task2 behavioral gate authorized.**
 [[b-portable-archive-task1-results-20260914|Task1 result and evidence]] are published
 (source `02c34a9`, packet `0d28b0f`). One existing Task2 worker has frozen only
