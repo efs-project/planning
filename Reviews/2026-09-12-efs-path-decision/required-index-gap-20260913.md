@@ -77,3 +77,21 @@ Checked source: B `src/Interfaces.sol:22–38`, `src/Ledger.sol:526–543,834–
 `src/TypeRegistry.sol:85–100,143–185`; C `src/IndexModule.sol:110–118` at the
 pins above. Raw references outside the registered profile are not indexed by
 this proposal and must not be advertised as covered.
+
+## September 14: qualification need not copy the whole Record
+
+The [[required-query-experiment-20260914|source-reviewed experiment]] returns
+Record IDs, not full Quotes. Under pinned, reciprocally attached mandatory
+Ledger/index code, C's checked target posting plus a source-Type/first-admission
+header proves ordinal-0 membership for the exact one-reference Quote Type.
+B's proposed type/ordinal/target-keyed family can similarly use the immutable
+first-admission tuple without rehydrating the body at query time. Its write-side
+validation/index cost remains charged; B's unindexed scan still reads bodies.
+
+This matters for both simplicity and safety: C legitimately admits some
+noncanonical/trailing outer ABI encodings, so demanding a canonical 288-byte
+body at read time would exclude accepted data and copying before checking
+length would not be bounded. The IDs-only access path avoids that unnecessary
+parser. Exact code/profile/coverage checks remain required; an arbitrary
+ABI-compatible index is not trusted. Source review is not a passing executable
+test or a new measured saving. No withdrawal or binding-live-count gap is waived.

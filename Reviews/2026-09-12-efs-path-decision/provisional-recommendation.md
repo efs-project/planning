@@ -118,3 +118,10 @@ still need **implementation and pricing**, not merely a price estimate. B's
 current author-liveness dependency is a portability limitation to repair, not
 an accepted sacrifice. The final/conditional checkpoint is September 14,
 23:10 UTC (6:10pm Chicago).
+
+**Post-cutoff validation supplement, September 14, 01:08:** matching C
+mandatory-rule/late-index controls and the positive calibration are now mined,
+independently checked and published. Both candidates pass that bounded atomicity
+gate; the original cost table and remaining feature/portability qualifications
+are unchanged. The next [[required-query-experiment-20260914|bounded query experiment]]
+has passed source-plan review and entered test/source preparation, not measurement.

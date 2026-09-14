@@ -6,7 +6,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-14
 
-- @v2-pm (harness codex, session efs-warroom-c-controls-20260914-0056): Closed C control-runner source review with 93/93 Node tests and independently reproduced the sealed Store/raw-storage inputs with 18/18 preparation tests. Preparing one finite root-owned matched rollback run and separate summary/packet checks; original Claude workspaces unchanged. / next: publish observed controls or exact failure, then the required-query reversal test; final or conditional handoff remains 23:10 UTC.
+- @v2-pm (harness codex, session efs-warroom-c-controls-20260914-0056; bounded source worker b_required_query): Published independently checked matched C controls at12dc73a/main0fc99dc and released that chain lease. Reviewed the body-free indexed-query design, corrected cursor/metadata bounds and froze a source-derived fixture; B tests now prepared in the preserved successor. Root owns shared status/publication and a finite B compiler-only window; original Claude workspaces unchanged. / next: verify B/C bounded readers, then price complete required-query work; final or conditional handoff remains23:10 UTC.
 
 ## 2026-09-13
 
