@@ -112,6 +112,32 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September14,08:24: scalar decoding repaired; one separately sealed fresh attempt.**
+The two-line parser correction and regression tests are pushed at
+B`b94b57c405ef18b7f259cbd636d685ff96738ce7`; root12/12 audit tests and scoped
+independent review passed. All173 runtime paths are unchanged except the approved
+audit hash; input/contract/gas bytes are identical. The first failure stays retained.
+**Exclusive root heavy lease08:24–08:54UTC, latest start08:32:** one fresh attempt
+in temporary directory `efs-required-query-paid2-20260914.QM7xI0`, using the same
+82transaction/25page workload, prune256,20minute watchdog and15GiB/50GiB guards.
+New287file seal SHA256
+`d35034ccb0e233b9f99594727cbe4384185cfabc6f8a3814d75711b668ec40f7`.
+The original failed directory joins the scratch budget. No automatic fallback,
+compiler or competing heavy process; raw replay and cleanup remain required.
+
+**September14,08:19: first attempt stopped at a runner RPC-decoding defect; lease closed.**
+The run retained38 raw replies through six setup transactions, then correctly
+stopped before any publication/page price claim. The verifier mistakenly treated
+transaction signature `r/s` as fixed32-byte RPC data; Ethereum's transaction
+schema uses integer quantities, so a valid63-nibble `r` was refused. Independent
+numeric comparison confirms the exact sealed signature/sender/hash still match.
+This is a test-harness defect, not an observed EFS contract failure. The same
+worker is adding a focused offline regression and scalar comparison fix; no
+input, signature, gas or contract change is proposed. Anvil75600 and runner75601
+are stopped, confirmed by launch record and process inspection; scratch remains
+retained. The08:16–08:45 lease is **released early**, not permission for a retry.
+A new attempt requires the corrected source review, fresh seal and explicit slot.
+
 **September14,08:16: runner source gates passed; one finite root-owned paid lease.**
 The [[required-query-runner-review-20260914|shared signed runner and raw audit]]
 are pushed at B`7b0471342a99d69c1d423e7e64822ccc0b309f23`; C remains

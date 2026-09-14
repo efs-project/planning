@@ -55,3 +55,26 @@ conditional; the original cost snapshot stays unchanged.
 Retained local evidence: the B successor's plan-owned SDD directory contains the
 task reports,22-test Node26 log, initial review and P2 closeout. Root launch scratch
 is `efs-required-query-paid-20260914.wdaBsu` under the system temporary directory.
+
+## First empirical attempt: useful failure, not a completed measurement
+
+The08:17:18–08:17:20UTC attempt retained38 raw envelopes and six setup receipts,
+then stopped on transaction6's63-nibble signature `r`. The runner checked `r/s`
+as32-byte data; the [Ethereum execution API transaction schema](https://github.com/ethereum/execution-apis/blob/main/src/schemas/transaction.yaml)
+defines them as unsigned quantities. Root confirmed exact numeric equality with
+the sealed signature, recovered sender and transaction hash. Correcting this
+representation check does not weaken signature matching or change the input.
+
+No paid query or common publication occurred. The finite wrapper shut down both
+owned process groups; the early-released lease and failed raw journal are retained.
+Focused offline reproduction, a narrow source repair/re-review and a separately
+sealed fresh attempt are next. Source review did not catch this real-client
+representation mismatch; empirical execution did.
+
+**08:24 correction:** exact canonical-quantity comparison is pushed at
+`b94b57c405ef18b7f259cbd636d685ff96738ce7`. The focused failure reproduced before
+the fix; root12/12 full audit-file tests and independent scoped review passed.
+The unchanged38-entry prefix now replays offline to the next unexecuted step,
+without claiming completion. All other runtime pins and the signed workload
+are unchanged. A separate fresh attempt is authorized in the coordinator
+checkpoint; no output from the first attempt is replaced.
