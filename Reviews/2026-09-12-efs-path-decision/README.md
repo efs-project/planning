@@ -122,6 +122,9 @@ quota block was not bypassed. No new experiment or paid run is queued.
 
 Read [[morning-handoff-20260914|the concise build recommendation]]. Compact B
 remains primary; MUD is a comparison/fallback, not another active build.
+The later [[fable-work-recovery-20260914|Fable recovery inventory]] reconciles
+his interrupted handoffs with saved successors and protects local-only evidence;
+it does not reopen the overnight run or authorize further Claude usage.
 The joined Files lifecycle, sole actual paid Files run, withdrawal correction,
 required-index configuration repair, archive choice and query comparison are
 complete at their separately retained source pins. The live-placement model's
