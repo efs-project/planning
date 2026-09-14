@@ -123,19 +123,25 @@ is [[required-index-gap-20260913|complete incoming-Quote discovery and maintenan
 Its [[required-query-experiment-20260914|bounded source plan]] passed independent
 review: indexed ID discovery can rely on mandatory checked-reference postings
 and bounded metadata, without recopying every Quote body. Reader-bound cursors
-prevent cross-query pagination mistakes. B test/source preparation has started;
-C follows on the same result domain. No compiled/query-run result is claimed.
+prevent cross-query pagination mistakes. B's first real-Ledger test passed after
+the intended missing-implementation RED; broader cases and independent code
+review remain in progress. C follows on the same result domain. No complete
+query conformance or paid-query result is claimed.
 Final or conditional handoff remains September14 at23:10 UTC; no owner
 decision or Fable execution is assumed. Original Claude B/C pins remain unchanged.
 
-**September14,01:36–01:56 UTC: root-only B query compiler lease.**
+**September14,01:36–01:56 UTC: root-only B query compiler lease; released01:42.**
 Latest start01:45; focused test-first RED, then reviewed source/GREEN if ready.
 No Anvil, RPC or paid run. Normal Solidity0.8.30/Cancun/viaIR/optimizer200;
 per-command watchdog ends no later than01:56. Run-specific output/cache/logs
 in `/tmp/efs-required-query-build-20260914.0j17DC`;15GiB owned scratch/50GiB
 free reserve. Root stops/checks process groups on every exit and releases early
 if no compiler work remains. B worktree is the existing preserved successor;
-C/control packets and frozen price rows are untouched.
+C/control packets and frozen price rows are untouched. Initial focused1/1
+passed; runtime artifacts for both readers are8955bytes and selective index5188,
+below EIP-170. The oversized test harness is not a deployable product or a paid
+consumer. No compiler/Anvil process remains. Further focused/full testing needs
+a fresh root lease after the worker's next source checkpoint.
 
 **September 14, 01:05–01:25 UTC: root-only C control lease.** Start no later
 than01:15; **completed and released early at01:08:51**. One fresh loopback Anvil, no compiler,
