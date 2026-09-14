@@ -87,7 +87,7 @@ contract FilesNamesIndex is FilesParentIndex {
         expectedNameRuleHash = nh;
     }
 
-    function onAdmission(uint64 publication, Effect[] calldata effects) public override {
+    function onAdmission(uint64 publication, Effect[] calldata effects) public virtual override {
         super.onAdmission(publication, effects);
         Ledger core = Ledger(ledger);
         FilesNameLayout.pin(core, nameType, expectedNameRuleHash);

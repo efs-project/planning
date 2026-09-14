@@ -1,5 +1,11 @@
 # Road B lab — compact EFS ingestion kernel
 
+> **Current September 14 entry point:** [clickable compact Files prototype](browser/README.md).
+> The cold browser, actual named-write economics, third-party app and mandatory
+> live-folder index have since been implemented and tested. The dated source
+> checkpoints and "unrun" statements below are historical, not current status.
+> This is still disposable evidence, not production contracts or a protocol freeze.
+
 **Disposable lab, no protocol claim.** 2026-09-12; second source pass 2026-09-13 (baseline raw envelopes, joined journey, label probe, stateless consumers — **unrun**: nothing of the second pass has been compiled or executed; the Core was pinned at `dcc7b94`; authority repair 2026-09-13 at `aaecfed` — see [REPAIR.md](REPAIR.md), [FALSIFY.md](FALSIFY.md) and PROFILE.md "Changed after dcc7b94"). Built for the [path-decision sprint](../README.md) as the Road B discriminating experiment ([road-b.md](../road-b.md) §6/§8, plus the coordinator's deltas and pre-seal checks). **Compiled and tested at `2859147` (2026-09-13 10:16:46–10:17:03 UTC, clean detached pin, offline solc 0.8.30, via-IR): `forge build --sizes` exit 0, `forge test` 52 passed / 0 failed across 6 suites — the 43 of `ca1a228` (Core unchanged) plus the 3 paid-slice tests and the 6 faulty-actual-reply controls.** `node --test` 28/28 at the same pin. Runtime sizes at `2859147`: Ledger 17,280 B, TypeRegistry 3,270 B, IndexModule 4,127 B, LensReader 9,445 B, JoinedConsumer 13,852 B, FaultyReads 5,587 B (test-only), MinBodyAcceptor 354 B (all under EIP-170; the earlier 7,985 B JoinedConsumer figure was the `ca1a228` build before the paid slice). The measurement runner (`script/measure.mjs`) has still NOT been executed against either pin — no Anvil, no receipts; see `MANIFEST.draft.json` for the run contract. Every gas figure anywhere in this directory is **ESTIMATED** until a receipt run at this pin.
 
 ## What this is

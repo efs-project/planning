@@ -66,8 +66,9 @@ function fixture(overrides = {}) {
   const rpc = async (method,params) => {
     calls.push({method,params});
     if (method === 'eth_chainId') return '0x7a69';
-    if (method === 'eth_getBlockByNumber' || method === 'eth_getBlockByHash') return {hash:blockHash,number:'0x2a',timestamp:'0x3e8'};
+    if (method === 'eth_getBlockByNumber' || method === 'eth_getBlockByHash') return {hash:blockHash,number:'0x2a',timestamp:'0x3e8',transactions:state.blockTransactions??[]};
     if (method === 'eth_getTransactionReceipt') return state.receipt ?? null;
+    if (method === 'eth_getTransactionByHash') return state.transaction ?? null;
     const ctx = params[1];
     assert.deepEqual(ctx,{blockHash,requireCanonical:true},'all contract/code reads must use the exact EIP-1898 block hash');
     if (method === 'eth_getCode') {
@@ -259,10 +260,37 @@ test('a successful receipt without canonical effects is not semantic success', a
   const plan = await sdk.prepare({operation:'edit',author:A,file,document:'changed'});
   const signed = await sdk.authorize(plan,sign);
   const sent = await sdk.submit(signed,async () => H('tx'));
-  state.receipt = {status:'0x1',blockHash,blockNumber:'0x2a'};
+  state.receipt = {status:'0x1',blockHash,blockNumber:'0x2a',transactionHash:H('tx'),transactionIndex:'0x0',gasUsed:'0x5208'};
+  state.transaction={hash:H('tx'),blockHash,to:signed.transaction.to,input:signed.transaction.data,value:'0x0'};
+  state.blockTransactions=[H('tx')];
   const result = await sdk.reconcile(sent.id);
   assert.equal(result.status,'EFFECTS_MISMATCH');
   assert.notEqual(result.knowledge,'VERIFIED');
+});
+
+test('an unrelated receipt is not attributed to the authorized action or its cost', async () => {
+  for(const fault of ['missing transaction','wrong recipient','wrong input','noncanonical block','wrong inclusion','null status','null gas','boolean status','boolean gas']) {
+    const {sdk,state}=fixture();
+    const plan=await sdk.prepare({operation:'edit',author:A,file,document:'changed'});
+    const signed=await sdk.authorize(plan,sign);
+    await sdk.submit(signed,async()=>H('tx'));
+    state.receipt={status:'0x1',blockHash,blockNumber:'0x2a',transactionHash:H('tx'),transactionIndex:'0x0',gasUsed:'0x5208'};
+    state.transaction={hash:H('tx'),blockHash,to:signed.transaction.to,input:signed.transaction.data,value:'0x0'};
+    state.blockTransactions=[H('tx')];
+    if(fault==='missing transaction')state.transaction=null;
+    if(fault==='wrong recipient')state.transaction.to=B;
+    if(fault==='wrong input')state.transaction.input='0x';
+    if(fault==='noncanonical block')state.receipt.blockHash=H('orphan');
+    if(fault==='wrong inclusion')state.blockTransactions=[H('unrelated')];
+    if(fault==='null status')state.receipt.status=null;
+    if(fault==='null gas')state.receipt.gasUsed=null;
+    if(fault==='boolean status')state.receipt.status=true;
+    if(fault==='boolean gas')state.receipt.gasUsed=false;
+    const result=await sdk.reconcile(plan.id);
+    assert.equal(result.receipt,null,fault);
+    assert.equal(result.status,'BROADCAST_UNKNOWN',fault);
+    assert.notEqual(result.receiptAttribution,'RPC_MATCHED_DIRECT_PLAN',fault);
+  }
 });
 
 test('edit uses the explicit manifest Lens, not merely the writing author', async () => {
@@ -278,6 +306,30 @@ test('selected HEAD drift requires fresh authorization even when own CAS stays z
   let sent = false;
   await assert.rejects(sdk.submit(signed,async () => {sent=true;return H('tx');}),/SELECTION_DRIFT/);
   assert.equal(sent,false);
+});
+test('lower-author source placement drift is checked before removal broadcast', async () => {
+  const f=fixture({respond:({fn,args}) => fn==='resolve' && args[1]===FOLDER ? [1,file,1,B,8] : undefined});
+  const plan=await f.sdk.prepare({operation:'remove',author:A,file,name});
+  const signed=await f.sdk.authorize(plan,sign);
+  f.state.respond=({fn,args}) => fn==='resolve' && args[1]===FOLDER ? [1,H('replacement-file'),2,B,19] : undefined;
+  let sent=false;
+  await assert.rejects(f.sdk.submit(signed,async()=>{sent=true;return H('tx');}),/SELECTION_DRIFT/);
+  assert.equal(sent,false);
+});
+test('concurrent submit calls share one broadcast within the SDK instance', async () => {
+  const {sdk}=fixture();let sends=0;
+  const plan=await sdk.prepare({operation:'edit',author:A,file,document:'changed'});
+  const signed=await sdk.authorize(plan,sign);
+  const send=async()=>{++sends;return H('tx');};
+  await Promise.all([sdk.submit(signed,send),sdk.submit(signed,send)]);
+  assert.equal(sends,1);
+});
+test('unavailable no-tiebreak body preserves the known conflict and both authors', async () => {
+  const {sdk}=fixture({respond:({fn,args})=>{if(fn==='record' && args[0]===rb)throw new Error('provider unavailable');}});
+  const result=await sdk.readFile({file,context:await sdk.pin(),policy:'no-tiebreak'});
+  assert.equal(result.knowledge,'CONFLICT');assert.equal(result.coverage,'PARTIAL');
+  assert.equal(result.value.candidates.length,2);assert.equal(result.value.candidates[1].selection.author.toLowerCase(),B.toLowerCase());
+  assert.equal(result.value.candidates[1].knowledge,'UNKNOWN');assert.equal(result.value.candidates[1].revision,null);
 });
 test('an unavailable content response retains selected HEAD as UNKNOWN, never ABSENT', async () => {
   const {sdk} = fixture({respond:({fn,args}) => {if (fn === 'record' && args[0] === ra) throw new Error('provider unavailable');}});
@@ -317,6 +369,7 @@ test('response loss reconciles exact canonical admissions and heads after reload
     if (fn === 'admission' && args[0] === 22n) return [3,1,2,4,0,false,revised,Z];
     if (fn === 'record' && args[0] === revised) return [types.child,21,1,body];
     if (fn === 'head') return [1,1,22,0,4,revised];
+    if (fn === 'history') return [2,true,revised,1,22];
     if (fn === 'bindingPosition') return [pos(HEAD,file,Z)];
   };
   const reloaded = createCompactSdk({ethers,rpc:f.rpc,manifest,journal:{async get(id){return journal.get(id);},async put(entry){journal.set(entry.id,entry);}}});
@@ -326,7 +379,7 @@ test('response loss reconciles exact canonical admissions and heads after reload
   assert.equal(verified.basis.grade,'RPC_OBSERVED');
   assert.equal(verified.evidence.firstAdmission,'21');
   assert.equal(verified.receipt,null);
-  state.respond = ((original) => input => input.fn === 'head' ? [1,1,22,0,4,rb] : original(input))(state.respond);
+  state.respond = ((original) => input => input.fn === 'history' ? [2,true,rb,1,22] : original(input))(state.respond);
   journal.get(plan.id).plan.expectedHeads = []; // unsigned local hints cannot waive read-back
   assert.equal((await reloaded.reconcile(plan.id)).status,'EFFECTS_MISMATCH');
 });

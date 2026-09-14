@@ -21,7 +21,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
   const positionOf = (p,s,r) => hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/position/1'),p,s,r]);
   const recordOf = (type,bodyHash) => hash(['bytes32','bytes32','bytes32'],[e.id('efs2/record/1'),type,bodyHash]);
   const bindingOf = (author,position) => hash(['bytes32','bytes32','bytes32'],[e.id('efs2/binding/1'),e.zeroPadValue(author,32),position]);
-  const contexts = new WeakSet(), continuations = new WeakMap(), plans = new WeakSet(), signedPlans = new WeakSet();
+  const contexts = new WeakSet(), continuations = new WeakMap(), plans = new WeakSet(), signedPlans = new WeakSet(), submissions = new Map();
   const interfaces = Object.fromEntries(Object.entries(config.contracts).map(([k,c]) => [k,new e.Interface(c.abi)]));
   const blockArg = context => ({blockHash:context.blockHash,requireCanonical:true});
   const call = async (key,fn,args,context) => {
@@ -184,7 +184,10 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
         check(eq(entry.position,positionOf(purpose.head,file,Z)) && entry.admission > 0n
           && entry.admission <= BigInt(context.admission) && authors.some(a => eq(a,entry.author)),'SELECTION');
         const candidateSelection = selection([1,entry.target,entry.revision,entry.author,entry.admission]);
-        candidates.push({selection:candidateSelection,revision:await revisionAt(entry.target,file,context)});
+        let revision=null,knowledge='PRESENT';
+        try {revision=await revisionAt(entry.target,file,context);}
+        catch(error) {knowledge=String(error?.message).startsWith('COMPACT_')?'INVALID':'UNKNOWN';}
+        candidates.push({selection:candidateSelection,revision,knowledge});
       }
       if (s.status === 1) {check(candidates.length === 1,'SELECTION'); s = candidates[0].selection;}
     }
@@ -201,7 +204,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
       revisionTag:revision ? await tagAt(authors,revision.recordId,concept,file,context) : {subject:null,concept,evaluated:false,present:false},
     };
     return result(basisFor(context,authors,policy),revisionFailure?.knowledge ?? ['ABSENT','PRESENT','MASKED','CONFLICT'][s.status],
-      revisionFailure ? 'PARTIAL' : 'COMPLETE',value,revisionFailure ? {reason:revisionFailure.reason} : {});
+      revisionFailure || candidates.some(c=>c.knowledge!=='PRESENT') ? 'PARTIAL' : 'COMPLETE',value,revisionFailure ? {reason:revisionFailure.reason} : {});
   }
   async function readFile(args) {
     await guard(args.context);
@@ -221,7 +224,8 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
       walk = continuations.get(continuation);
       check(walk && walk.context === context && eq(walk.folder,folder) && eq(walk.lensHash,basis.lens.hash),'CONTINUATION');
     }
-    const family = await scalar('index','FAMILY_SCOPE',[],context);
+    check(config.listing===undefined || config.listing==='audit' || config.listing==='live-positive','LISTING_PROFILE');
+    const family = await scalar('index',config.listing==='live-positive'?'FAMILY_LIVE_SCOPE':'FAMILY_SCOPE',[],context);
     const coverage = await call('index','coverage',[family,scope],context);
     if (Number(coverage[0]) !== 2 || coverage[1] !== 1n || String(coverage[2]) !== context.admission
       || await scalar('index','attachedFrom',[],context) !== 1n) {
@@ -338,6 +342,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
         check(!eq(from,to) || !eq(fromRole,toRole),'SAME_PLACEMENT');
         const source = await resolve(authors,purpose.folder,from,fromRole,context);
         check(source.status === 1 && eq(source.target,file),'SOURCE_PLACEMENT');
+        selectionDependencies.push({purpose:purpose.folder,subject:from,role:fromRole,selection:source});
         await binding(purpose.folder,from,fromRole,file,true);
         await binding(purpose.folder,to,toRole,file);
       } else if (operation === 'remove' || operation === 'restorePlacement') {
@@ -345,6 +350,7 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
         if (operation === 'remove') {
           const source = await resolve(authors,purpose.folder,folder,role,context);
           check(source.status === 1 && eq(source.target,file),'SOURCE_PLACEMENT');
+          selectionDependencies.push({purpose:purpose.folder,subject:folder,role,selection:source});
         }
         await binding(purpose.folder,folder,role,file,operation === 'remove');
       } else if (operation === 'addTag' || operation === 'removeTag') {
@@ -374,8 +380,15 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
     const signed = freeze({id:plan.id,plan,signature,transaction});
     signedPlans.add(signed); return signed;
   }
-  async function submit(signed,sendTransaction) {
+  function submit(signed,sendTransaction) {
     check(signedPlans.has(signed),'SIGNED_PLAN');
+    // Single-flight inside this adapter instance. Cross-tab/process exclusion is
+    // the durable journal host's responsibility, not a claim of this Map.
+    if(submissions.has(signed.id)) return submissions.get(signed.id);
+    const pending=submitOnce(signed,sendTransaction).finally(()=>submissions.delete(signed.id));
+    submissions.set(signed.id,pending);return pending;
+  }
+  async function submitOnce(signed,sendTransaction) {
     check(journal?.put && journal?.get,'DURABLE_JOURNAL_REQUIRED');
     const prior = await journal.get(signed.id);
     if (prior) return reconcile(signed.id); // no accidental duplicate broadcast
@@ -419,7 +432,33 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
     check(eq(e.recoverAddress(plan.digest,entry.signature),plan.intent.author),'JOURNAL_SIGNATURE');
     check(eq(entry.transaction.data,interfaces.ledger.encodeFunctionData('executeSigned',[plan.intent,plan.actions,plan.bodies,entry.signature])),'JOURNAL_INTEGRITY');
     let context = await pin();
-    const receipt = entry.transactionHash ? await rpc('eth_getTransactionReceipt',[entry.transactionHash]) : null;
+    // The wallet's returned hash is a hint, not evidence that its receipt belongs
+    // to this plan. Economic attribution is separate from canonical EFS effects.
+    let receipt=null,receiptObservation=null,receiptAttribution='UNAVAILABLE';
+    if(entry.transactionHash) {
+      try {
+        receiptObservation=await rpc('eth_getTransactionReceipt',[entry.transactionHash]);
+        if(receiptObservation) {
+          const r=receiptObservation;
+          const [tx,block]=await Promise.all([rpc('eth_getTransactionByHash',[entry.transactionHash]),
+            rpc('eth_getBlockByNumber',[r.blockNumber,false])]);
+          receiptAttribution=tx&&block?'MISMATCH':'UNKNOWN';
+          const quantity=x=>typeof x==='string' && /^0x(?:0|[1-9a-f][0-9a-f]*)$/i.test(x);
+          if(tx&&block && [r.status,r.gasUsed,r.blockNumber,r.transactionIndex,tx.value,block.number].every(quantity)
+            && (r.effectiveGasPrice===undefined || quantity(r.effectiveGasPrice))
+            && BigInt(r.blockNumber)===BigInt(block.number)
+            && eq(r.transactionHash,entry.transactionHash) && eq(tx.hash,entry.transactionHash)
+            && eq(tx.to,entry.transaction.to) && eq(tx.input,entry.transaction.data)
+            && BigInt(tx.value)===BigInt(entry.transaction.value)
+            && eq(r.blockHash,tx.blockHash) && eq(r.blockHash,block.hash)
+            && eq(block.transactions?.[Number(BigInt(r.transactionIndex))],entry.transactionHash)
+            && (BigInt(r.status)===0n || BigInt(r.status)===1n) && BigInt(r.gasUsed)>=0n
+            && (r.effectiveGasPrice===undefined || BigInt(r.effectiveGasPrice)>=0n)) {
+            receipt=r;receiptAttribution='RPC_MATCHED_DIRECT_PLAN';
+          }
+        }
+      } catch {receiptAttribution='UNKNOWN';}
+    }
     const publication = await scalar('ledger','publicationOf',[plan.publicationId],context);
     let status, evidence = null;
     if (publication === 0n) status = receipt ? (BigInt(receipt.status) === 0n ? 'REVERTED' : 'EFFECTS_MISMATCH') : 'BROADCAST_UNKNOWN';
@@ -454,18 +493,23 @@ export function createCompactSdk({ethers: e, rpc, manifest, journal}) {
       const finalHeads = new Map();
       for (const a of plan.actions) if (a.kind === 3 || a.kind === 4) {
         const position = positionOf(a.purpose,a.subject,a.role), key = bindingOf(plan.intent.author,position);
-        finalHeads.set(key,{key,state:a.kind === 3 ? 1 : 2,revision:a.expectedRevision+1,target:a.target});
+        finalHeads.set(key,{key,position,state:a.kind === 3 ? 1 : 2,revision:a.expectedRevision+1,target:a.target});
       }
+      let supersededAtPublicationBlock=false;
       for (const expected of finalHeads.values()) {
+        const historical=await call('lens','history',[plan.intent.author,expected.position,first+BigInt(plan.actions.length)-1n],context);
+        matches &&= Number(historical[0])===2 && historical[1]===(expected.state===1)
+          && eq(historical[2],expected.target) && Number(historical[3])===expected.revision
+          && historical[4]>=first && historical[4]<first+BigInt(plan.actions.length);
         const h = await call('ledger','head',[expected.key],context);
-        matches &&= Number(h[0]) === expected.state && Number(h[1]) === expected.revision && eq(h[5],expected.target)
-          && h[2] >= first && h[2] < first+BigInt(plan.actions.length);
+        supersededAtPublicationBlock ||= h[2]>=first+BigInt(plan.actions.length);
       }
       status = matches ? 'EFFECTS_VERIFIED' : 'EFFECTS_MISMATCH';
-      evidence = {publication:String(publication),firstAdmission:String(first),leafCount:plan.actions.length};
+      evidence = {publication:String(publication),firstAdmission:String(first),leafCount:plan.actions.length,supersededAtPublicationBlock};
     }
     const outcome = {...entry,status,knowledge:status === 'EFFECTS_VERIFIED' ? 'VERIFIED' : 'UNKNOWN',
-      coverage:status === 'EFFECTS_VERIFIED' ? 'COMPLETE' : 'PARTIAL',basis:basisFor(context,plan.authors),evidence,receipt};
+      coverage:status === 'EFFECTS_VERIFIED' ? 'COMPLETE' : 'PARTIAL',basis:basisFor(context,plan.authors),evidence,
+      receipt,receiptObservation,receiptAttribution};
     await journal.put(plain(outcome)); return outcome;
   }
   return Object.freeze({pin,listFolder,readFile,readName,prepare,authorize,submit,reconcile});

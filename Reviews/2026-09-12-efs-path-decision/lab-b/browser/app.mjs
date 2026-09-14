@@ -1,6 +1,6 @@
 import * as ethers from '/vendor/ethers.mjs';
 import {createCompactSdk} from './compact-sdk.mjs';
-import {folderState,filterRows,canOpen,estimateUsd} from './files-view.mjs';
+import {folderState,filterRows,canOpen,estimateUsd,receiptTotals} from './files-view.mjs';
 
 const $ = id => document.getElementById(id);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -36,13 +36,14 @@ function journalEntries() {
   } catch {state.storageIssue='Local storage is unavailable. Guest reads still work; writes require a durable journal.';return [];}
 }
 async function rpc(method,params=[]) {
-  const start=performance.now(); state.rpc.calls++;
+  const start=performance.now(),id=++state.rpc.calls;
   try {
     const response=await fetch(state.config.rpcUrl,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({jsonrpc:'2.0',id:state.rpc.calls,method,params})});
+      body:JSON.stringify({jsonrpc:'2.0',id,method,params}),signal:AbortSignal.timeout(20000)});
     const raw=await response.text(); state.rpc.bytes+=new TextEncoder().encode(raw).length;
     if(!response.ok) throw new Error(`RPC HTTP ${response.status}`);
     const payload=JSON.parse(raw);
+    if(payload.id!==id) throw new Error('RPC response ID mismatch');
     if(payload.error) throw new Error(payload.error.message ?? `RPC ${payload.error.code}`);
     if(!Object.hasOwn(payload,'result')) throw new Error('RPC response has no result');
     return payload.result;
@@ -141,20 +142,21 @@ function renderActivity() {
   $('activity').innerHTML=(state.storageIssue?`<p class="error">${escape(state.storageIssue)}</p>`:'')+(state.entries.slice(0,20).map(entry=>`<div class="activity-item"><strong>${escape(entry.plan.operation)} · ${escape(entry.status)}</strong><code>${escape(short(entry.id))}</code>${entry.error?`<p>${escape(entry.error)}</p>`:''}<br><button data-action="reconcile" data-id="${escape(entry.id)}">Reconcile without re-signing</button><details><summary>Exact signed plan & read-back</summary><pre class="document">${escape(json(entry))}</pre></details></div>`).join('') || '<p>No local signed plans yet.</p>');
 }
 function renderCosts() {
-  const latest=state.entries.find(entry=>entry.receipt?.gasUsed);
+  const totals=receiptTotals(state.entries), latest=totals.transactions[0];
   const gas=latest?.receipt?.gasUsed ? BigInt(latest.receipt.gasUsed).toString():null;
-  $('cost-summary').textContent=gas?`${pretty(gas)} gas · ${latest.plan.operation}`:'No receipt yet';
+  $('cost-summary').textContent=totals.gas!==null?`${pretty(totals.gas)} gas total · ${totals.transactions.length} tx${totals.unknown?' + unknown':''}`:'No receipt yet';
   const economics=state.economics;
   const networks=economics?.networks??[];
   const source=economics?.source;
   const sourceUrl=typeof source==='string'&&/^https?:\/\//.test(source)?`<a href="${escape(source)}" target="_blank" rel="noreferrer">snapshot source</a>`:escape(typeof source==='object'?json(source):source??'Not provided');
   const localPrice=latest?.receipt?.effectiveGasPrice;
   const localEth=gas&&localPrice?ethers.formatEther(BigInt(gas)*BigInt(localPrice)):null;
-  $('cost-body').innerHTML=`<div class="gas-number">${gas?pretty(gas):'—'} <small>actual receipt gas</small></div><p class="cost-caption">${latest?`${escape(latest.plan.operation)} · ${escape(latest.status)}${localEth?` · ${escape(localEth)} local test ETH`:''}`:'Perform a local test write to measure gas.'}<br>Receipt gas is measured even for a revert; only EFFECTS_VERIFIED means effect success.</p>
-    <table class="cost-grid"><thead><tr><th>Illustrative network model</th><th>Estimated USD</th></tr></thead><tbody>${networks.map(network=>{const usd=estimateUsd(gas,network,economics.ethUsd);return `<tr><td>${escape(network.label)} <span class="muted">${escape(network.kind??'')}</span></td><td>${usd===null?'—':`$${usd.toFixed(4)}`}</td></tr>`;}).join('')||'<tr><td colspan="2">No sourced network assumptions configured.</td></tr>'}</tbody></table>
+  const money=value=>value===null?'—':`$${value.toFixed(4)}`;
+  $('cost-body').innerHTML=`<div class="gas-number">${totals.gas!==null?pretty(totals.gas):'—'} <small>total recorded gas</small></div><p class="cost-caption">${totals.transactions.length} unique recorded receipts${totals.unknown?` · ${totals.unknown} costs unknown`:''}. This browser's journal only; deployments and other users' actions are excluded.<br>${latest?`Last: ${escape(latest.plan.operation)} · ${pretty(gas)} gas · ${escape(latest.status)}${localEth?` · ${escape(localEth)} local test ETH`:''}`:'Perform a local test write to measure gas.'}<br>Reverted transactions still cost gas; only EFFECTS_VERIFIED means effect success.</p>
+    <table class="cost-grid"><thead><tr><th>Execution model</th><th>Last</th><th>Recorded total</th></tr></thead><tbody>${networks.map(network=>`<tr><td>${escape(network.label)}</td><td>${money(estimateUsd(gas,network,economics.ethUsd))}</td><td>${money(estimateUsd(totals.gas,network,economics.ethUsd,totals.transactions.length))}</td></tr>`).join('')||'<tr><td colspan="3">No sourced network assumptions configured.</td></tr>'}</tbody></table>
     <p class="cost-caption">Models, not live quotes or deployed-chain benchmarks. Gas × gwei × ETH/USD + explicit extra USD. L1 data / operator fees are excluded unless entered as extra USD; zero extra does not mean zero real fees.${economics?`<br>Snapshot: ${escape(economics.asOf??'undated')} · ${sourceUrl}${state.editedEconomics?' · locally edited assumptions':''}`:''}</p>
     ${economics?`<details class="assumptions"><summary>Advanced assumptions</summary><label>ETH / USD <input type="number" min="0" step="any" data-economic="ethUsd" value="${escape(economics.ethUsd)}"></label>${networks.map((network,index)=>`<label>${escape(network.label)} · gas gwei <input type="number" min="0" step="any" data-network="${index}" data-economic="gasGwei" value="${escape(network.gasGwei)}"></label><label>${escape(network.label)} · extra USD <input type="number" min="0" step="any" data-network="${index}" data-economic="extraUsd" value="${escape(network.extraUsd)}"></label>`).join('')}</details>`:''}
-    <div class="cost-history">${state.entries.filter(entry=>entry.receipt?.gasUsed).slice(0,5).map(entry=>`${escape(entry.plan.operation)} · ${pretty(BigInt(entry.receipt.gasUsed))} gas · ${escape(entry.status)}<br>`).join('')}</div><div class="rpc-line">RPC work, not gas · ${pretty(state.rpc.calls)} calls · ${(state.rpc.bytes/1024).toFixed(1)} KiB response bodies · ${(state.rpc.ms/1000).toFixed(2)}s summed request time · ${state.rpc.errors} errors<br>Page session only. These reads do not spend transaction gas.</div>`;
+    <div class="cost-history">${totals.transactions.slice(0,5).map(entry=>`<p><strong>${escape(entry.plan.operation)} · ${pretty(BigInt(entry.receipt.gasUsed))} gas</strong><br>${networks.map(network=>`${escape(network.label)} ${money(estimateUsd(entry.receipt.gasUsed,network,economics.ethUsd))}`).join(' · ')}<br>${escape(entry.status)}</p>`).join('')}</div><div class="rpc-line">RPC work, not gas · ${pretty(state.rpc.calls)} calls · ${(state.rpc.bytes/1024).toFixed(1)} KiB response bodies · ${(state.rpc.ms/1000).toFixed(2)}s summed request time · ${state.rpc.errors} errors<br>Page session only. These reads do not spend transaction gas.</div>`;
 }
 function render() {
   if(!state.config) { controls(); return; }
@@ -189,8 +191,10 @@ async function write(operation,args) {
   notice(`Preparing exact ${operation} action…`);
   const plan=await state.sdk.prepare({operation,author:state.wallet.address,authors:authors(),...args});
   const signed=await state.sdk.authorize(plan,digest=>state.wallet.signingKey.sign(digest).serialized);
+  // submit can throw AFTER the external broadcast (for example quota/storage
+  // failure saving its response). Keep the exact plan latched before crossing it.
+  if($('editor').open && state.operation) {state.operation.pending=true;state.operation.planId=plan.id;}
   const submission=await state.sdk.submit(signed,sendTransaction);
-  if($('editor').open && state.operation) state.operation.pending=true;
   const outcome=await state.sdk.reconcile(submission.id);
   if(outcome.status==='EFFECTS_VERIFIED') {
     if(operation==='remove') {state.removed={file:args.file,name:args.name,folder:args.folder};store('removed',state.removed);}
@@ -217,6 +221,7 @@ function openEditor(operation,record) {
   if(operation==='restorePlacement') fields+=`<p>Restore the locally remembered placement <strong>${escape(state.removed.name)}</strong> in ${escape(state.config.mounts.find(m=>m.id===state.removed.folder)?.label??short(state.removed.folder))}? The SDK will revalidate the retained File and Name.</p>`;
   if(operation==='restoreContents') fields+=field('Historical Record ID · verified against this File before signing','record',record??'');
   $('editor-fields').innerHTML=fields; $('editor-submit').textContent=`Sign ${operation} locally`;
+  controls(); // A completed prior dialog must not leave the new operation disabled.
   $('editor').showModal(); $('editor-fields').querySelector('input,textarea,select')?.focus();
 }
 function download() {
@@ -244,8 +249,10 @@ document.addEventListener('click',event=>{
     if(action==='addTag'||action==='removeTag') {
       const concept=$('tag-concept').value.trim(),scope=$('tag-scope').value;
       if(!concept) throw new Error('Enter the exact tag concept text first.');
-      state.filterConcept=concept; $('filter-concept').value=concept;
-      await write(action,{file:selectedRow().file,scope,concept:ethers.id(concept)});
+      const outcome=await write(action,{file:selectedRow().file,scope,concept:ethers.id(concept)});
+      if(outcome.status==='EFFECTS_VERIFIED') {
+        state.filterConcept=concept; $('filter-concept').value=concept;await refresh();
+      }
     }
   });
 });

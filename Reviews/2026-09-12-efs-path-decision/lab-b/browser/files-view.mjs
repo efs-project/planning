@@ -37,9 +37,33 @@ export function canOpen(point) {
     && typeof point.value?.revision?.document === 'string';
 }
 
-export function estimateUsd(gas, network, ethUsd) {
+export function estimateUsd(gas, network, ethUsd, transactions=1) {
   if (gas === null || gas === undefined) return null;
-  const values = [Number(gas),Number(network.gasGwei),Number(network.extraUsd),Number(ethUsd)];
+  const values = [Number(gas),Number(network.gasGwei),Number(network.extraUsd),Number(ethUsd),Number(transactions)];
   if (values.some(v => !Number.isFinite(v) || v < 0)) return null;
-  return values[0]*values[1]*1e-9*values[3]+values[2];
+  return values[0]*values[1]*1e-9*values[3]+values[2]*values[4];
+}
+
+// Journal receipts are RPC observations, not state proofs. Never count one
+// transaction twice or turn missing/contradictory observations into zero cost.
+export function receiptTotals(entries) {
+  const byHash=new Map(); let unidentified=0;
+  for(const entry of entries) {
+    const hash=typeof entry.transactionHash==='string'?entry.transactionHash.toLowerCase():null;
+    if(!/^0x[0-9a-f]{64}$/.test(hash??'')) {unidentified++;continue;}
+    let gas=null;
+    try {
+      const raw=entry.receipt?.gasUsed;
+      if(typeof raw==='string' && /^(?:0x[0-9a-f]+|[0-9]+)$/i.test(raw)) gas=BigInt(raw);
+      const receiptHash=entry.receipt?.transactionHash;
+      if(receiptHash!==undefined && (typeof receiptHash!=='string' || receiptHash.toLowerCase()!==hash)) gas=null;
+    } catch {gas=null;}
+    const prior=byHash.get(hash);
+    if(byHash.has(hash)) {
+      if(!prior || gas===null || prior.gas!==gas) byHash.set(hash,null);
+    } else byHash.set(hash,gas===null?null:{entry,gas});
+  }
+  const known=[...byHash.values()].filter(Boolean);
+  return {gas:known.length?known.reduce((sum,row)=>sum+row.gas,0n):null,
+    transactions:known.map(row=>row.entry),unknown:unidentified+byHash.size-known.length};
 }

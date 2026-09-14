@@ -133,8 +133,9 @@ contract LensReader {
 
     // ------------------------------------------------------------------ budgeted listing
     function list(address[] calldata lens, bytes32 purpose, bytes32 subject, Cursor calldata cursor, uint256 budget)
-        external
+        public
         view
+        virtual
         returns (Page memory page)
     {
         if (lens.length == 0 || lens.length > 255) revert E_LENS();
@@ -162,10 +163,10 @@ contract LensReader {
         page.items = new Entry[](budget);
         page.next = c;
         if (address(index) == address(0)) return _finish(page, c, 0, UNKNOWN);
-        (uint8 cov,,) = index.coverage(index.FAMILY_SCOPE(), scopeKey);
+        (uint8 cov,,) = index.coverage(_scopeFamily(purpose), scopeKey);
         if (cov != COMPLETE) return _finish(page, c, 0, UNKNOWN);
         for (uint256 i; i < lens.length; ++i) {
-            (uint64 n,,,) = index.postingHead(Keys.scopeList(Keys.scope(Keys.principalFor(lens[i], origin), purpose, subject)));
+            uint64 n = _scopeCount(purpose, Keys.scopeList(Keys.scope(Keys.principalFor(lens[i], origin), purpose, subject)));
             page.rawTotal += n;
         }
         uint256 filled;
@@ -174,14 +175,14 @@ contract LensReader {
         while (k < lens.length) {
             bytes32 principal = Keys.principalFor(lens[k], origin);
             bytes32 listKey = Keys.scopeList(Keys.scope(principal, purpose, subject));
-            (uint64 n,,,) = index.postingHead(listKey);
+            uint64 n = _scopeCount(purpose,listKey);
             while (j < n) {
                 if (page.scanned >= budget) {
                     c.lensIndex = uint8(k);
                     c.rawIndex = j;
                     return _finish(page, c, filled, PARTIAL);
                 }
-                bytes32 position = ledger.bindingPosition(index.postingAt(listKey, j));
+                bytes32 position = ledger.bindingPosition(_scopeAt(purpose,listKey,j));
                 (uint8 state, uint32 rev, uint64 adm,,, bytes32 t) = ledger.head(Keys.binding(principal, position));
                 ++page.scanned;
                 ++page.hydrations;
@@ -202,6 +203,12 @@ contract LensReader {
         c.rawIndex = 0;
         return _finish(page, c, filled, COMPLETE);
     }
+
+    // Candidate storage is replaceable without forking the selection/masking
+    // reducer. The default remains the original append-only audit inventory.
+    function _scopeFamily(bytes32) internal view virtual returns(bytes32) {return index.FAMILY_SCOPE();}
+    function _scopeCount(bytes32,bytes32 key) internal view virtual returns(uint64 count) {(count,,,)=index.postingHead(key);}
+    function _scopeAt(bytes32,bytes32 key,uint64 i) internal view virtual returns(uint64) {return index.postingAt(key,i);}
 
     /// A higher lens principal with ANY binding at the position (live or removed) masks it, so
     /// the same name bound by several authors yields one selected entry. Returns the probes paid.

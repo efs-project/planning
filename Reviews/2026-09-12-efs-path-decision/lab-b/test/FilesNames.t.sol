@@ -38,7 +38,7 @@ contract FilesNamesTest is LabBase {
     FilesNamesIndex internal namesIndex;
     FilesNameReader internal reader;
 
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
         rootRule = new FilesRootRule();
         rootType = registry.register(FilesLayout.ROOT_SHAPE, address(rootRule), new bytes32[](0));

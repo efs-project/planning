@@ -81,6 +81,31 @@ contract FilesApplicationTest is FilesJoinedTest {
         require(_snapshotApp(_candidate()) == beforeState, "all effects unchanged");
     }
 
+    function test_app_actual_foreign_file_selection_rejected_without_effects() public {
+        _ready();
+        bytes32 other=bob.create(bytes32(uint256(9002)));
+        bytes32 foreign=bob.publish(rootType,_rootBody(other,bytes("Different file.")));
+        _signedActions(one(aBind(HEAD,file,NO_ROLE,foreign,2)),new bytes[](1));
+        bytes32 beforeState=_snapshotApp(_candidate());
+        try app.adoptApprovedRevision(file,foreign,0,_basisApp()){revert("foreign selected contents accepted");}
+        catch(bytes memory err){expectSel(err,FilesJoinedConsumer.E_PROFILE.selector,"foreign File profile");}
+        require(_snapshotApp(_candidate())==beforeState,"foreign selection leaves every effect unchanged");
+    }
+
+    function test_app_root_fits_but_child_prefix_exceeds_body_limit_and_rolls_back() public {
+        _createRoot();
+        bytes memory document=new bytes(8129); // Root 8161 bytes fits; Child 8193 does not.
+        bytes memory rootBody=_rootBody(file,document);ra=rid(rootType,rootBody);
+        Ledger.Action[] memory a=new Ledger.Action[](3);bytes[] memory b=new bytes[](3);
+        a[0]=aPublish(rootType,rootBody);b[0]=rootBody;
+        a[1]=aBind(HEAD,file,NO_ROLE,ra,1);a[2]=aBind(TAG,ra,APPROVED,file,0);
+        _signedActions(a,b);_application(eoaA,eoaA);
+        bytes32 candidate=rid(childType,_childBody(ra,file,document));bytes32 beforeState=_snapshotApp(candidate);
+        try app.adoptApprovedRevision(file,ra,0,_basisApp()){revert("oversized child accepted");}
+        catch(bytes memory err){require(keccak256(err)==keccak256(abi.encodeWithSelector(Ledger.E_BOUNDS.selector,uint8(3))),"exact output size refusal");}
+        require(_snapshotApp(candidate)==beforeState,"oversized output rolls back app, record, HEAD and index");
+    }
+
     function test_app_file_tag_does_not_authorize_selected_revision() public {
         _createRoot();
         _application(eoaA, eoaA);
