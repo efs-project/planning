@@ -47,6 +47,7 @@ library Keys {
     uint8 internal constant KIND_BACKLINK = 5;
     uint8 internal constant KIND_HISTORY = 8;
     uint8 internal constant KIND_SCOPE = 10;
+    uint8 internal constant KIND_REFERENCE_POSITION = 11;
 
     /// EOA principal id: the left-padded address (c0 form). The same key names the same
     /// principal on every Realm.
@@ -101,6 +102,10 @@ library Keys {
 
     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
         return posting(typeId, KIND_BY_TYPE, 0, bytes32(0));
+    }
+
+    function referenceList(bytes32 sourceType, uint8 ordinal, bytes32 target) internal pure returns (bytes32) {
+        return posting(sourceType, KIND_REFERENCE_POSITION, ordinal, target);
     }
 
     function byAuthorList(bytes32 principalId) internal pure returns (bytes32) {

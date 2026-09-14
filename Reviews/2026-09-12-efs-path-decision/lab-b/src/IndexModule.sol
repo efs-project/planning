@@ -86,7 +86,7 @@ contract IndexModule is IIndexModule {
         ++generation;
     }
 
-    function _declare(bytes32 family, bool mandatory, uint64 fromAdmission) private {
+    function _declare(bytes32 family, bool mandatory, uint64 fromAdmission) internal {
         _family[family] = Family(true, mandatory, fromAdmission);
         emit FamilyDeclared(family, mandatory, fromAdmission);
     }
@@ -154,7 +154,7 @@ contract IndexModule is IIndexModule {
     }
 
     // ---------------------------------------------------------------- packed lists
-    function _append(bytes32 key, uint64 ordinal, bool audit) private {
+    function _append(bytes32 key, uint64 ordinal, bool audit) internal {
         uint256 hw = _postingHead[key];
         uint64 count = uint64(hw);
         uint64 live = uint64(hw >> 64);
