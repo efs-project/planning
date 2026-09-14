@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-14
 
+- @v2-pm (harness codex, session efs-warroom-query-green-20260914-0156): Resuming expanded B query verification from the completed initial1/1 test, with separate source-only review of evidence retention. Preserving frozen normal prices, original Claude worktrees and completed rollback packets. / next: close B reader review, implement matched C metadata reader and prepare the full required-query cost comparison; final/conditional handoff remains23:10 UTC.
+
 - @v2-pm (harness codex, session efs-warroom-c-controls-20260914-0056; bounded source worker b_required_query): Published independently checked matched C controls at12dc73a/main0fc99dc and released that chain lease. Reviewed the body-free indexed-query design, corrected cursor/metadata bounds and froze a source-derived fixture; B tests now prepared in the preserved successor. Root owns shared status/publication and a finite B compiler-only window; original Claude workspaces unchanged. / next: verify B/C bounded readers, then price complete required-query work; final or conditional handoff remains23:10 UTC.
 
 ## 2026-09-13

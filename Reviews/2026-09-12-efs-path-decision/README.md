@@ -143,6 +143,15 @@ below EIP-170. The oversized test harness is not a deployable product or a paid
 consumer. No compiler/Anvil process remains. Further focused/full testing needs
 a fresh root lease after the worker's next source checkpoint.
 
+**September14,01:56–02:16 UTC: root-only expanded B query compiler lease.**
+Latest start02:06; focused16-case suite, bounded fixes if needed, then one full
+B regression. Source-only worker has supplied its report; no new paid result
+or complete-pass claim. No Anvil/RPC. Same normal compiler/fork settings,
+eight-minute per-command watchdog bounded by02:16, output/cache/logs in
+`/tmp/efs-required-query-b-green-20260914.G8M9Z4`,15GiB owned scratch/50GiB
+free reserve. Root stops/checks its groups and releases early. An independent
+portability-seam design review proceeds without touching candidate code.
+
 **September 14, 01:05–01:25 UTC: root-only C control lease.** Start no later
 than01:15; **completed and released early at01:08:51**. One fresh loopback Anvil, no compiler,
 normal Cancun/chain31337/30M blocks, timestamp1800000000, prune256 and
