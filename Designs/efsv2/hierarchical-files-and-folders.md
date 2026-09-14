@@ -122,6 +122,17 @@ Files consumes these generic concepts without renaming them:
 - content Records such as `ChunkTree/1`, `Locator/1`, `ByteDigest/1`, and
   `RepresentationBinding/1`.
 
+**Retained-read clarification (September14 prototype evidence):** withdrawing
+an occurrence does not make retained, well-formed contents invalid or remove
+their selected HEAD/placement. Ordinary Files reads keep those facts separate;
+a later author's REUSE must not toggle another author's selected display.
+Active occurrence count is not a count of distinct maintainers or endorsements.
+The compact prototype's false count0 profile error was reproduced and repaired
+with an unchanged-expectation RED/GREEN regression; see the
+[[../../Reviews/2026-09-12-efs-path-decision/files-withdrawal-reader-fix-plan-20260914|bounded correction]]
+and its retained reviewed evidence at B `80f73d9`. This clarifies the existing
+lifecycle boundary, not an adopted universal display policy or permanent ABI.
+
 Core does not acquire privileged `FILE`, `DIRECTORY`, `PIN`, `TAG`, `PROPERTY`,
 `PATH`, or `SYMLINK` effects. Files Types are ordinary reusable application
 Types. A PIN-like operation is a Binding; a tag is a many-valued relationship

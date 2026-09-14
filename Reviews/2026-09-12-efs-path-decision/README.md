@@ -112,7 +112,7 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
-**September 14, 12:08: actual Files prices approved; withdrawal bug reproduced.**
+**September 14, 12:45: actual Files prices published; two practical defects repaired.**
 
 The three-task Files plan is complete and independently Approved, including
 final cross-task review. B `f7b6909` is pushed with Task3 lifecycle/churn source
@@ -132,22 +132,38 @@ Original signature-padding audit failure and its representation-only correction
 are retained; no second chain run was needed. Required-query and archive lanes
 are closed and must not be reopened.
 
-The separate [[files-withdrawal-probe-plan-20260914|withdrawal characterization]]
-passed exactly3/3 and independent review, committed `1fe8c4c`. It confirms a
-real reader bug: zero active occurrences trigger E_PROFILE for otherwise valid
-retained selected data; Bob REUSE restores readability without undoing Alice's
-withdrawal. The [[files-withdrawal-reader-fix-plan-20260914|narrow corrective plan]]
-now requires actual regression RED before removing that false integrity gate.
-No Core/lifecycle/owner requirement changes. The independent
-[[index-obligation-config-finding-20260914|signed index-configuration gap]]
-also has a source-only remedy review in progress, not an implemented fix.
+The [[files-withdrawal-reader-fix-plan-20260914|retained-read correction]] is
+complete and independently Approved: source `d60318e`, published packet
+`80f73d9`. Actual three-case RED becomes GREEN without changing the expectations;
+full suite158 executions (124 distinct plus34 inherited repeats), normal-size
+build, and preserved raw lifecycle/provenance checks pass. Zero active
+occurrences no longer hide retained selected contents. No Core/lifecycle/owner
+requirement changed, and the earlier paid results are not silently repriced.
 
-Current workers: files_joined_lifecycle prepares corrective RED tests;
-files_paid_runner retains the already-reviewed paid packet;
-files_joined_acceptance reviews the configuration remedy. Root owns all finite
-compiler/Anvil gates and publication. No chain process is active. Finish useful
-bounded repairs and handoff by14:00UTC; do not begin another architecture or
-benchmark campaign. Resume existing worker reports rather than duplicating work.
+The [[index-config-repair-plan-20260914|index-configuration repair]] is also
+independently Approved, source `30073fc`; its packet is being retained. Required
+declarations are constructor-fixed in these directly deployed lab modules.
+Actual queued signatures, module replacement and detached index gaps are tested:
+configuration cannot silently downgrade, but a fixed configuration is still
+not proof of COMPLETE coverage. Actual RED2 ran7 cases (3 expected failures),
+then full162 executions (128 distinct plus34 inherited repeats) and identical-
+input normal-size build passed. An initial zero-test selector attempt is
+preserved as non-evidence. No proxy/future configuration policy or new price is
+claimed. See the [[index-obligation-config-finding-20260914|finding and correction]].
+
+Current productive lane: the [[live-placement-model-plan-20260914|live-placement
+algorithm model]] compares independent lifetime replay against complete
+all-author live candidates. Actual behavioral RED is observed; implementation
+is active. This is not an onchain index or gas/scale claim. SDK and Data Explorer
+PMs have returned bounded advice: preserve selection provenance and separate
+maintenance from validity; the next clickable vertical must recover exact
+filename bytes in a cold guest browser, not rely on fixture names or warm cache.
+A short source-only preflight is locating that precise Files-adapter seam.
+
+Root owns publication and all finite execution gates. No compiler/chain process
+is active. Finish the current model, evidence and concrete build handoff by
+14:00UTC; do not open another architecture or benchmark campaign. Resume existing
+workers rather than duplicating completed work.
 
 Live Claude check still shows **EFS v2 Dev** out of Fable credits, Send disabled,
 reset September 19 at midnight. No restart, model switch, credit purchase or

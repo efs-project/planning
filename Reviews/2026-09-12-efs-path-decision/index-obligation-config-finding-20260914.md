@@ -7,6 +7,11 @@ production remedy, not a permanent design decision or a waived requirement.
 
 ## In ordinary language
 
+**September14 correction:** the sequence described below is preserved diagnostic
+evidence, not the latest behavior. The reviewed direct-deployment repair is
+implemented at B `30073fc`; see the correction at the end of this note. Future
+mutable/proxy configuration remains a design boundary, not a solved general case.
+
 Suppose an app signs “save this note” expecting the required index to support
 complete discovery. Our current compact prototype binds the index contract's
 address and code, but not every setting inside it. The admin can change a
@@ -65,3 +70,29 @@ indexing, or change the already measured cost table. It gives the contracts and
 SDK teams a concrete configuration/authentication boundary to close. The
 ongoing [[files-joined-implementation-plan-20260914|Files reader experiment]]
 separately tests fail-closed coverage and explicit tag-subject handling.
+
+## Implemented correction, September14
+
+The [[index-config-repair-plan-20260914|bounded repair]] now freezes all required
+declarations at construction in the reviewed direct-deployed Index modules.
+Both replacement of an existing required family and runtime addition/promotion
+of a required family reject. Ordinary optional declarations, processed counters
+and generation remain separate. Replacing the attached module changes the
+existing signed obligation and rejects a stale intent; unrelated optional
+progress does not force Alice to sign again.
+
+Seven focused tests ran against the unenforced guard: four controls passed and
+three intended refusals failed. With the guard alone added, the full suite
+passed162 executions (128 distinct plus34 inherited repeats), and the same
+input passed the normal-size build. Independent review is Approved. The first
+selector attempt compiled but selected zero tests and is retained as non-evidence.
+Source is `30073fcdeedfdc24a4d54004afc209ab9c8b8773`; full/size source digest
+`62e1f17ff2d3a042078063cab0ca158a40e0e97ef00e686ffcad168ddea67cf9`.
+
+The genuine detach/write/reattach test is important: an unchanged configuration
+can still have PARTIAL coverage. Exact retained point reads continue to work;
+the complete-folder consumer refuses incomplete enumeration. This repair does
+not add a COMPLETE-at-write precondition, backfill, proxy initialization policy,
+arbitrary-callback safety or a new paid measurement. A production module with
+mutable obligation-affecting state still needs the explicit commitment described
+above; codehash is not a universal substitute for configuration identity.

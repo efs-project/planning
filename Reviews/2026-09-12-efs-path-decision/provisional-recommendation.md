@@ -70,7 +70,7 @@ small-fixture limits and the representation-only audit correction are retained.
 | Exact typed records, checked references and mandatory acceptance | Exercised in the joined small graph; not every schema/resource boundary |
 | Independent authors, history and Lens-selected contract reads | Exercised in both candidates with independently pinned expected outputs |
 | Separate ingestion and mandatory indexing contracts | Present in both; the matched unique-Quote reverse query is now exercised and priced, not every query family |
-| Ordinary Files workflow and useful SDK | Checked parents/backlinks, head-first tags and real rename/move/path reuse/whiteout/restore plus bounded churn pass120/120 and independent task/final review. A small actual Files graph is now priced. A separate zero-occurrence retained-read bug is reproduced and under correction. Cold names, SDK, browser and efficient large/churned listings remain open |
+| Ordinary Files workflow and useful SDK | Checked parents/backlinks, head-first tags and real rename/move/path reuse/whiteout/restore plus bounded churn pass120/120 and independent task/final review. A small actual Files graph is now priced. The separate zero-occurrence retained-read bug is repaired and reviewed (`d60318e`, packet `80f73d9`). Cold names, SDK, browser and efficient large/churned listings remain open |
 | Portable authored evidence | [[b-portable-archive-results-20260914|Signed-claim archive complete and independently reviewed]]: full-vector EOA evidence, claim-local body recovery and separate importer-authored destination admission; representation costs measured, packed default retained. Native-contract historical proof remains unsupported |
 | Full rollback, upgrade/recovery, private/carrier failures and scale | Specific gates remain; isolated prior tests are not one finalist integration |
 
@@ -116,9 +116,11 @@ EFS SDK or lower maintenance bill: [[maintenance-and-reuse-20260913]].
    FileRevision parents and bounded reads]], with head-first revision tags and
    genuine competing authors, now have a qualified consumer. Real lifecycle and
    small churn tests and independent review pass; the separately scoped
-   [[files-paid-results-20260914|Files receipt economics]] is complete. Correct
-   the newly reproduced retained-read/withdrawal conflation in its separate
-   regression plan, without changing Core maintenance or selection. A richer joined
+   [[files-paid-results-20260914|Files receipt economics]] is complete. The
+   retained-read/withdrawal conflation is corrected and independently reviewed
+   without changing Core maintenance or selection. The required-index declaration
+   repair also passes actual RED/GREEN, normal sizes and independent review;
+   configuration identity still does not establish actual COMPLETE coverage. A richer joined
    profile is not priced by the older Quote numbers. Cold filename recovery,
    efficient live listing, SDK write/reconcile and populated-testnet upgrades
    remain explicit implementation gates, not silently completed by unit counts.
