@@ -42,6 +42,24 @@ test('receipt and transaction joins reject sender, calldata, gas, status and sig
   assert.doesNotThrow(()=>assertReceipt(receipt,tx,header));
   for(const change of [{from:input.accounts[3].address},{status:'0x0'},{gasUsed:'0xffffff'},{blockHash:P},{contractAddress:null},{cumulativeGasUsed:'0x1'}]) assert.throws(()=>assertReceipt({...receipt,...change},tx,header));
 });
+// r/s copied verbatim from retained failed envelope 38 (block 6/registerQUOTE).
+// The rest of the envelope is fixed by the unchanged independent input packet.
+const scalarTx=input.transactions[5];
+const scalarMined={...mined,hash:scalarTx.transactionHash,from:scalarTx.from,to:scalarTx.to,input:scalarTx.data,nonce:'0x5',gas:'0x7a1200',blockNumber:'0x6',
+  r:'0xa504bf5e5255fe9cd1134fd670998162cb6b87b2d380309f1395fec7003265d',
+  s:'0x1a5a36ab5c6b387d449bb7d351850527ccb5f1b55e298c428ecf8ae1b2a137ca',v:'0xf4f5'};
+test('RPC signature scalars accept the actual canonical 63-nibble r without changing signed identity',()=>{
+  assert.equal(scalarTx.transactionHash,'0xeda9ea435811ed77dd7f08a65e02e8425e1acf0852eaeebcd0ef437b6d768a33');
+  assert.equal(scalarMined.r.length-2,63);
+  assert.doesNotThrow(()=>assertTransaction(scalarMined,scalarTx,{...header,number:'0x6'}));
+});
+test('RPC signature scalars reject padded, malformed or numerically wrong values for either component',()=>{
+  for(const key of ['r','s']){
+    for(const value of ['0x0'+scalarMined[key].slice(2),'0x','0x00','0x-1','0X1','0xAB',1,null,undefined,'0x0','0x1','0x'+'f'.repeat(65)]){
+      assert.throws(()=>assertTransaction({...scalarMined,[key]:value},scalarTx,{...header,number:'0x6'}));
+    }
+  }
+});
 test('PageRead has exactly the consumer, topic, full commitment and receipt joins',()=>{
   const tx=input.transactions[20],page=input.arms.bScan.pages.old[0];
   const log={address:tx.to,topics:[page.expectedEvent.topic0],data:page.expectedEvent.data,transactionHash:tx.transactionHash,blockHash:H,blockNumber:'0x15',transactionIndex:'0x0',logIndex:'0x0',removed:false};

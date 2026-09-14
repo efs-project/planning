@@ -60,7 +60,8 @@ function joined(value,tx,header){
 export function assertTransaction(value,tx,header){
   joined(value,tx,header);sameBytes(value.input,tx.data);qeq(value.value,tx.value);qeq(value.type,0);qeq(value.nonce,tx.nonce);qeq(value.gas,tx.gas);qeq(value.gasPrice,tx.gasPrice);qeq(value.chainId,tx.chainId);
   const signed=Transaction.from(tx.signedRaw);
-  sameBytes(value.r,signed.signature.r,32);sameBytes(value.s,signed.signature.s,32);qeq(value.v,signed.signature.networkV);
+  // Execution API signature scalars are canonical QUANTITY, not bytes32 DATA.
+  qeq(value.r,signed.signature.r);qeq(value.s,signed.signature.s);qeq(value.v,signed.signature.networkV);
 }
 export function assertReceipt(value,tx,header,page){
   joined(value,tx,header);qeq(value.status,1);qeq(value.type,0);address(value.contractAddress,tx.deploymentAddress??null);
