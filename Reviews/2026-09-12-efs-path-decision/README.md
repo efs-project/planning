@@ -112,6 +112,63 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September 14, 10:34: archive lane complete and pushed; actual Files integration active.**
+[[b-portable-archive-results-20260914|Completed archive result]] and full retained
+packet B `af5764a` report 102/102 tests, independent task/final review approval,
+and the audited 21-transaction comparison. Default stays packed. Three minor
+test-maintenance notes are disclosed; no Core/production/native-proof claim.
+The six-test bounded-parent remedy is reviewed and retained at `c653f50`.
+No compiler/Anvil process or heavy lease is active.
+
+The new [[files-joined-implementation-plan-20260914|Files joined plan]] is a
+two-task, three-file disposable slice with all kernel sources unchanged.
+`files_joined_acceptance` owns Task1's checked Root/Child revisions and required
+parent backlinks; it is preparing compiling behavioral RED before root runs
+anything. Source-only preflight clarified immutable Lens/index wiring, packed
+first-admission masking, family-wide coverage and head-first tag semantics.
+Resume its plan ledger/worker, not completed archive or query benchmarks.
+The heartbeat now points at that work and retains the 14:00 UTC morning cutoff.
+
+**September 14, 10:18: paid archive comparison completed; keep packed.**
+One bounded run completed and released its owned processes/slot at 10:10:33.
+Root independently checked all 21 transactions and six comparison cells against
+the raw RPC packet, exact signed fixtures and full compiler artifacts. Packed
+versus code-storage retention: one action 429,833 / 456,481 gas; two actions
+578,709 / 585,046; 64 actions 9,817,718 / 8,571,876. Code-storage paid reads
+save 13,939 gas each, but it fails the predeclared small-write saving gate, so
+the default stays packed. These are signed-claim archive costs, not file-create
+prices or source-state proofs. Task review and evidence publication follow;
+the paid lease is closed early. Files bounded-read controls passed within the
+102/102 suite and are undergoing their separate scoped review.
+
+**September 14, 10:10: 102/102 tests and normal size gates pass; paid archive lease.**
+The bounded raw-parent control now accepts the valid cold 8 KiB parent while
+retaining wrong-File and short-parent rejection; full-body cold failure remains
+visible. No kernel change. Archive runtimes: packed 6,160 bytes, codeblob 6,324;
+paid consumer 658. Ledger stays 17,280 bytes. Final input pin
+`2b9373560bd428de43f63c8190552752896b323f90a7415261321b5b29c35e62`.
+
+**Exclusive root paid lease 10:10–10:25 UTC, one attempt, latest start 10:15:**
+three deployments, six same-base no-body retentions and twelve paid action
+reads; fixed 1/2/64 vectors and whole receipts. Source and Git state stay frozen
+through capture. Independently reviewed outer gate SHA256
+`2290b8af5a5a21646517a3e994e1f33c81bb58066b679b27f4bc9c6e3e788fc9`
+requires successful `final-size-1` full compiler input/output/artifact joins.
+One local Cancun Anvil, normal 30M block/size limits, prune 128, private cache,
+five-minute watchdog, aggregate 15 GiB scratch and 50 GiB free reserve; atomic
+slot plus process-group cleanup. Keep packed unless the complete independent
+raw audit and predeclared comparison rule pass. Not source-state proof or full
+file-recovery pricing. The earlier compiler lease is released early.
+
+**September 14, 10:04: root-only compiler lease 10:02–10:22 UTC.**
+Run the strengthened test-only raw-parent RED, then unchanged-test GREEN from
+the same worker, followed by the frozen archive full suite/size gate if ready.
+Initial input pin `c4434ee929be7a8a62a69a4ea121630c165241b1cee67a79d2ae67ed13124616`;
+all kernel sources remain unchanged. Existing finite compiler/resource guards
+apply. No Anvil permission yet: the paid runner has a conditional independent
+preflight pass, and its outer safety wrapper plus full compiler-output/artifact
+join still need verification. Packed remains the archive alias.
+
 **September 14, 09:56: Files failure reviewed; consumer verified; no active heavy slot.**
 Independent review confirms the narrow cold-parent getter/budget mismatch;
 diagnostic and retained packet are B `441f3cd`. The same Files worker prepares

@@ -64,7 +64,7 @@ does not create immutable historical snapshots for free.
 | Independent authors, history and Lens-selected contract reads | Exercised in both candidates with independently pinned expected outputs |
 | Separate ingestion and mandatory indexing contracts | Present in both; the matched unique-Quote reverse query is now exercised and priced, not every query family |
 | Ordinary Files workflow and useful SDK | Generic mechanisms cover much of the journey; exact FileRevision parent validation, revision-scoped tags after selection, and SDK integration still need joined tests |
-| Portable authored evidence | The separate signed-claim archive is being implemented after an observed behavioral RED; no archive pass/cost claimed yet. Native-contract historical proof remains unsupported |
+| Portable authored evidence | [[b-portable-archive-results-20260914|Signed-claim archive complete and independently reviewed]]: full-vector EOA evidence, claim-local body recovery and separate importer-authored destination admission; representation costs measured, packed default retained. Native-contract historical proof remains unsupported |
 | Full rollback, upgrade/recovery, private/carrier failures and scale | Specific gates remain; isolated prior tests are not one finalist integration |
 
 No row is silently dropped to make the recommendation pass. A content hash

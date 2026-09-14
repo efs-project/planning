@@ -1,7 +1,7 @@
 # Next Files gate: real revisions, checked parents and bounded reads
 
-**Status:** cold full-body failure reproduced and independently reviewed;
-bounded remedy and complete joined Files journey still unproved.
+**Status:** cold full-body failure and bounded-read remedy both reproduced and
+independently reviewed; actual joined Files journey still being implemented.
 Basis: compact B `1d8356c9de86a488c950abcb3f9f4d17a6126510` (source
 `b94b57c405ef18b7f259cbd636d685ff96738ce7`). The separate archive work does not
 change these Ledger/TypeRegistry sources. This narrows the next
@@ -101,3 +101,21 @@ and exact Type, and validate profile shape before interpreting zero words.
 A separate compact header/content profile also avoids full reads but changes
 the current inline-body Record IDs and adds content-availability handling.
 No representation change or new permanent getter is adopted here.
+
+## September 14: bounded remedy passes without a Core change
+
+The six-control result is retained at B
+[`c653f50`](https://github.com/efs-project/planning/tree/c653f50/Reviews/2026-09-12-efs-path-decision/lab-b/files-bounded-control-20260914).
+The valid cold 8,192-byte parent accepts under the unchanged budget when its
+exact Type, masked length and File-ID word are read through existing `extsload`.
+Wrong-File and short-body cases still reject with tested rollback. All six
+controls passed inside the 102/102 full suite; independent review found no
+actionable issue. This is a pinned-layout Foundry diagnostic, not paid gas or a
+stable public SDK contract. Executable assertions stayed unchanged across RED
+and GREEN; one explanatory comment changed and is disclosed in the review.
+
+The [[files-joined-implementation-plan-20260914|next joined implementation plan]]
+uses that existing primitive only in its disposable profile. Preflight also
+clarified exact index/Lens wiring, first-admission bit masking, family-wide
+coverage and current-basis/status handling. It does not require another Core
+getter to test real revision parentage and head-first revision tags.

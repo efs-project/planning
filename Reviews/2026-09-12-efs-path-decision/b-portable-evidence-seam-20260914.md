@@ -1,14 +1,19 @@
-# B-first portable evidence seam (design preparation only)
+# B-first portable evidence seam
 
-Status: **TASK1 IMPLEMENTED / TASK1 REVIEW PASSED / COST UNMEASURED**;
+Status: **SEMANTICS AND REPRESENTATION COMPARISON COMPLETE / REVIEWS PASSED**;
 not permanent B selection or a feature waiver. Original design source basis:
 B `acbfaf70339b73cd03e937158dd015eb37491b21`; original anchors below remain dated.
 
 September14: the [[required-query-paid-results-20260914|required-query gate]] is
 complete and independently reviewed; B remains the engineering priority.
 The [[b-portable-archive-task1-results-20260914|packed semantic archive now passes]]
-93/93 full B tests and independent Task1 review. Representation comparison and
-paid cost remain unmeasured; the semantic/proof limits below are unchanged.
+93/93 full B tests and independent Task1 review. The later
+[[b-portable-archive-results-20260914|complete comparison]] passes 102/102 tests
+and independent task/final reviews; its sole paid run keeps packed under the
+predeclared rule. The semantic/proof limits below are unchanged. Unmeasured
+wording later in this original preparation is historical; the linked result
+separates newly measured vector retention/reads from still-unpriced body recovery
+and destination admission.
 
 ## Smallest coherent seam and proof level
 
