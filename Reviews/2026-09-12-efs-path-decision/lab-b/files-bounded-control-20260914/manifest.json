@@ -1,0 +1,58 @@
+{
+  "kind": "DISPOSABLE_BOUNDED_PARENT_READ_CONTROL",
+  "initialDiagnosticCommit": "441f3cda2263c1bb7c7b0034dbae9e0d9bf2271a",
+  "sourceSha256": "ef872d4afc11f4fa693fe5d1d99dba0ec96e85921fbea5b75ce451b33b6ada39",
+  "fullGreenSourceDigest": "2b9373560bd428de43f63c8190552752896b323f90a7415261321b5b29c35e62",
+  "tests": {
+    "files": 6,
+    "fullSuite": 102,
+    "failures": 0,
+    "skips": 0
+  },
+  "claim": "EXISTING_EXTSLOAD_ACCEPTS_VALID_COLD_8192_PARENT_AND_REJECTS_WRONG_FILE_OR_SHORT_BODY_WITH_TESTED_ROLLBACK",
+  "limits": "FIXED_LAYOUT_FOUNDRY_COLD_CONTROL_NOT_PAID_TRANSACTION; NO_CORE_CHANGE; NOT_COMPLETE_FILES_WORKFLOW",
+  "files": {
+    "red.json.gz": {
+      "rawBytes": 5892,
+      "rawSha256": "93fc51e4ca945ff1fd75543d8967cce19a33ba9ead77679cc835c29d65bf42d9",
+      "gzipBytes": 2738,
+      "gzipSha256": "a99b6851a4bc78e159a0e9dafde832c193a29dc231db67c12f8a3dcbdf16ec2e"
+    },
+    "red.log.gz": {
+      "rawBytes": 3773,
+      "rawSha256": "f07c70945065251cb7657bddc08a838970547bf39aab62db8d061d3d909b82a3",
+      "gzipBytes": 1130,
+      "gzipSha256": "dc3d985ac73320cc901f4edb0de9bc68ffda28e6a46a51b9199ecb6cbf4ccfd6"
+    },
+    "green.json.gz": {
+      "rawBytes": 5818,
+      "rawSha256": "90c94dd72fc583dec96d3937512011bff8fa219ea7ea88eb82b1c075da104019",
+      "gzipBytes": 2714,
+      "gzipSha256": "f999481b710ed8bd9eea082520f5488bde22af1e00d66791ae1670d872e29523"
+    },
+    "green.log.gz": {
+      "rawBytes": 17340,
+      "rawSha256": "a493310cbfcd57e1c29a1b7958e3b9bf0214dbcd6921e377e199f0ad3b8f2ec4",
+      "gzipBytes": 4480,
+      "gzipSha256": "fa23c52712f1d09df5646b9eac2038f4aecc699ed25303e7ff82ec9086455896"
+    },
+    "red-test.sol.gz": {
+      "rawBytes": 13209,
+      "rawSha256": "45f68162435c80e40b40e8f526fe4c9d11c612e45abbaf8eb887979c5718a843",
+      "gzipBytes": 3348,
+      "gzipSha256": "acf0fa3e2c29818cee2b63abfd7daee419cbfdc8bd1a89907b55548fee2bffe4"
+    },
+    "green-test.sol.gz": {
+      "rawBytes": 13579,
+      "rawSha256": "ef872d4afc11f4fa693fe5d1d99dba0ec96e85921fbea5b75ce451b33b6ada39",
+      "gzipBytes": 3415,
+      "gzipSha256": "f37a37914cb7d4bddd46ec40128ab73175da3d7f9edf25b73ad25203617f70cf"
+    },
+    "independent-review.md.gz": {
+      "rawBytes": 7696,
+      "rawSha256": "999201bdcd0fac7d0d95120fc59701e69ac560c21404e1b06c5c7541351708ac",
+      "gzipBytes": 3323,
+      "gzipSha256": "c4b41b986e453e1a738ee95133ee72f35804652a9a3eb98026ac6a2dc3b677a7"
+    }
+  }
+}
