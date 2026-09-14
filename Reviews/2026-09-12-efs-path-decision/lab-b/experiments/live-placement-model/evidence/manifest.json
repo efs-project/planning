@@ -1,0 +1,95 @@
+{
+  "schema": "efs-live-placement-evidence-1",
+  "status": "CLOSED: GREEN 13/13; independent SpecCompliant / QualityApproved",
+  "sourceUnchangedExceptCandidateBetweenRedAndGreen": true,
+  "packetFileCountIncludingManifest": 18,
+  "hashedFileCountExcludingManifest": 17,
+  "payloadBytesExcludingManifest": 125578,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3064,
+      "sha256": "5beae8080c897d3766bee90fea3eda01c54672297774ce2e618fa88b99c1c89f"
+    },
+    {
+      "path": "independent-review.md",
+      "bytes": 12887,
+      "sha256": "1999b72fe6ba4bfe15d38376b865f9e573bf52a38ddaafdb1e353651781aad61"
+    },
+    {
+      "path": "live-placement-green.json",
+      "bytes": 4936,
+      "sha256": "def1cd59523d4c48c5a8f7eecdfc3e87844e1d7d12358e5ff82442e2d48d56d7"
+    },
+    {
+      "path": "live-placement-red.json",
+      "bytes": 18050,
+      "sha256": "bd2fb1d074963f87594b60032883be7b1c3e6580c5dead059bbbe0f0374d6a59"
+    },
+    {
+      "path": "main-plan.md",
+      "bytes": 4323,
+      "sha256": "384cc6c90e5c14c7b50b9d953da10968f0d7dfd0e29a1193bb28b7345bc3c010"
+    },
+    {
+      "path": "retain-evidence.mjs",
+      "bytes": 4741,
+      "sha256": "fdf65e92a986478c29b70ecb319351ca397fad62951feb9f91055e8e0aa3abe3"
+    },
+    {
+      "path": "run-live-placement-model.mjs",
+      "bytes": 2316,
+      "sha256": "9198c7dfed69e2107e9058590dd7b0bb33791d35710b2a843bccfeb3a10c7bb5"
+    },
+    {
+      "path": "source-green/candidate.mjs",
+      "bytes": 12482,
+      "sha256": "452703b70608ef53294a9f1ad4172b299f2798c71996b73d1bbbbeaecc77605e"
+    },
+    {
+      "path": "source-green/fixtures.mjs",
+      "bytes": 3248,
+      "sha256": "f003a31b1cd770d5e39d20fd966005bd36582a5cb1519691b0c5fc019f619288"
+    },
+    {
+      "path": "source-green/model.test.mjs",
+      "bytes": 12111,
+      "sha256": "210e6226c43b8fc10b3cd82565eac2588c40b77862a42bdfeef4ce6dddc7c344"
+    },
+    {
+      "path": "source-green/reference.mjs",
+      "bytes": 3954,
+      "sha256": "407af262140a32aa1ac068353fea4c61620ce013e5f60b50fed0add1c0d4eaa5"
+    },
+    {
+      "path": "source-red/candidate.mjs",
+      "bytes": 889,
+      "sha256": "8e76ac7675cdaf3322b5cfd97b3f03a24c087641aadbcc9c65a9fbaab0efb8d6"
+    },
+    {
+      "path": "source-red/fixtures.mjs",
+      "bytes": 3248,
+      "sha256": "f003a31b1cd770d5e39d20fd966005bd36582a5cb1519691b0c5fc019f619288"
+    },
+    {
+      "path": "source-red/model.test.mjs",
+      "bytes": 12111,
+      "sha256": "210e6226c43b8fc10b3cd82565eac2588c40b77862a42bdfeef4ce6dddc7c344"
+    },
+    {
+      "path": "source-red/reference.mjs",
+      "bytes": 3954,
+      "sha256": "407af262140a32aa1ac068353fea4c61620ce013e5f60b50fed0add1c0d4eaa5"
+    },
+    {
+      "path": "source-review.md",
+      "bytes": 11836,
+      "sha256": "baddbc836b2d7e5778323283c2cf5a934ac3c954694048b75c7a7324f0c1ff64"
+    },
+    {
+      "path": "task-1-report.md",
+      "bytes": 11428,
+      "sha256": "af7d93efa67f57f9b71d3367e1f3c0353bb23ade825920e87f8aae28ad628e88"
+    }
+  ]
+}

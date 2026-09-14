@@ -1,0 +1,80 @@
+{
+  "label": "live-placement-green",
+  "startedAt": "2026-09-14T12:43:46.164Z",
+  "source": {
+    "reference.mjs": {
+      "sha256": "407af262140a32aa1ac068353fea4c61620ce013e5f60b50fed0add1c0d4eaa5",
+      "bytes": 3954
+    },
+    "fixtures.mjs": {
+      "sha256": "f003a31b1cd770d5e39d20fd966005bd36582a5cb1519691b0c5fc019f619288",
+      "bytes": 3248
+    },
+    "candidate.mjs": {
+      "sha256": "452703b70608ef53294a9f1ad4172b299f2798c71996b73d1bbbbeaecc77605e",
+      "bytes": 12482
+    },
+    "model.test.mjs": {
+      "sha256": "210e6226c43b8fc10b3cd82565eac2588c40b77862a42bdfeef4ce6dddc7c344",
+      "bytes": 12111
+    }
+  },
+  "checks": [
+    {
+      "args": [
+        "--check",
+        "reference.mjs"
+      ],
+      "status": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--check",
+        "fixtures.mjs"
+      ],
+      "status": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--check",
+        "candidate.mjs"
+      ],
+      "status": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--check",
+        "model.test.mjs"
+      ],
+      "status": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "tool": "v26.0.0",
+  "test": {
+    "args": [
+      "--max-old-space-size=128",
+      "--test",
+      "--test-isolation=none",
+      "--test-reporter=tap",
+      "model.test.mjs"
+    ],
+    "status": 0,
+    "signal": null,
+    "stdout": "TAP version 13\n# Subtest: independent reference pins H9 L6 U4 S3, full authored tuples and 14 head probes\nok 1 - independent reference pins H9 L6 U4 S3, full authored tuples and 14 head probes\n  ---\n  duration_ms: 1.482416\n  type: 'test'\n  ...\n# Subtest: candidate complete union must equal pinned authored output, not an empty result\nok 2 - candidate complete union must equal pinned authored output, not an empty result\n  ---\n  duration_ms: 0.840625\n  type: 'test'\n  ...\n# Subtest: ordered effects preserve reference at every publication, both scopes and both tag queries\nok 3 - ordered effects preserve reference at every publication, both scopes and both tag queries\n  ---\n  duration_ms: 2.141\n  type: 'test'\n  ...\n# Subtest: File/revision tags are assessed after placement and exact File HEAD selection\nok 4 - File/revision tags are assessed after placement and exact File HEAD selection\n  ---\n  duration_ms: 0.162875\n  type: 'test'\n  ...\n# Subtest: all 27 absent/live/masked assignments agree with explicit first-non-absent rule\nok 5 - all 27 absent/live/masked assignments agree with explicit first-non-absent rule\n  ---\n  duration_ms: 0.367\n  type: 'test'\n  ...\n# Subtest: two churned names grow lifetime scans 2 to 4 while live-candidate reads stay 1\nok 6 - two churned names grow lifetime scans 2 to 4 while live-candidate reads stay 1\n  ---\n  duration_ms: 0.089208\n  type: 'test'\n  ...\n# Subtest: live stream pages charge candidates, no hidden union/sort, and preserve complete order\nok 7 - live stream pages charge candidates, no hidden union/sort, and preserve complete order\n  ---\n  duration_ms: 0.32\n  type: 'test'\n  ...\n# Subtest: empty before exhaustion is PARTIAL; missing later-author coverage is UNKNOWN\nok 8 - empty before exhaustion is PARTIAL; missing later-author coverage is UNKNOWN\n  ---\n  duration_ms: 0.099\n  type: 'test'\n  ...\n# Subtest: mutation, move, Lens, scope, generation and configuration reject stale continuations\nok 9 - mutation, move, Lens, scope, generation and configuration reject stale continuations\n  ---\n  duration_ms: 0.419084\n  type: 'test'\n  ...\n# Subtest: negative controls: ignored masks and File dedupe disagree with pinned placement tuples\nok 10 - negative controls: ignored masks and File dedupe disagree with pinned placement tuples\n  ---\n  duration_ms: 0.281666\n  type: 'test'\n  ...\n# Subtest: negative controls: later coverage omission and filtering lower tags are caught\nok 11 - negative controls: later coverage omission and filtering lower tags are caught\n  ---\n  duration_ms: 0.20625\n  type: 'test'\n  ...\n# Subtest: negative controls: extra/missing live membership is caught despite claimed coverage\nok 12 - negative controls: extra/missing live membership is caught despite claimed coverage\n  ---\n  duration_ms: 0.265625\n  type: 'test'\n  ...\n# Subtest: negative control: accepting old cursor after dense-set swap-delete gives mixed-basis data\nok 13 - negative control: accepting old cursor after dense-set swap-delete gives mixed-basis data\n  ---\n  duration_ms: 0.110375\n  type: 'test'\n  ...\n1..13\n# tests 13\n# suites 0\n# pass 13\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 22.9285\n",
+    "stderr": ""
+  },
+  "finishedAt": "2026-09-14T12:43:46.436Z",
+  "sourceSnapshot": "/tmp/efs-b-archive-task1.OXPOfb/live-placement-green.source"
+}
