@@ -112,6 +112,23 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September 14, 01:05–01:25 UTC: root-only C control lease.** Start no later
+than01:15; no automatic extension. One fresh loopback Anvil, no compiler,
+normal Cancun/chain31337/30M blocks, timestamp1800000000, prune256 and
+run-owned cache. Runner source `84e1081`, unchanged compiled C source `2ca7349`.
+Full source/quality review and93/93 Node pass; independent preparation18/18
+and exact expectationSHA `2e3c9887…` reproduced. The final file seal and
+report-summary supplement review remain required before launch; no run result
+is claimed by this reservation. Three fresh graphs,27 transactions and2322
+fixed-block logical/physical observations; static/mined attempts both5M.
+Twelve-minute watchdog inside this lease;15GiB total owned scratch/50GiB free
+reserve. Runtime/control scratch: `/tmp/efs-c-controls-paid-20260914.MCwNJk`;
+input scratch: `/tmp/efs-c-control-independent-prep-20260913.MkbdXi`; retained
+artifacts: `/tmp/efs-c-readiness-build-20260913.NoPDle/out`. Root stops and
+checks its process groups on all exits. Frozen product prices and the final
+23:10 handoff are unchanged. A bounded source-only required-query preparation
+runs in parallel; it owns no compiler slot or additional architecture.
+
 **September 13 provisional recommendation issued before the 23:10 deadline.**
 [[provisional-recommendation|Compact B is the primary engineering hypothesis]];
 C remains the focused required-query challenger, and A the semantic reference,

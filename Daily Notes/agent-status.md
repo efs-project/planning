@@ -4,6 +4,10 @@ Active agents append once per work-session. One line per active card. Newest at 
 
 Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
+## 2026-09-14
+
+- @v2-pm (harness codex, session efs-warroom-c-controls-20260914-0056): Closed C control-runner source review with 93/93 Node tests and independently reproduced the sealed Store/raw-storage inputs with 18/18 preparation tests. Preparing one finite root-owned matched rollback run and separate summary/packet checks; original Claude workspaces unchanged. / next: publish observed controls or exact failure, then the required-query reversal test; final or conditional handoff remains 23:10 UTC.
+
 ## 2026-09-13
 
 - @v2-pm (harness codex, session efs-warroom-provisional-20260913-2254): Issuing the provisional compact-B direction with frozen cost qualifications and completed B mined controls; coordinating a C-only runner and independently derived Store/raw-storage expectations. No heavy lease or feature waiver. / next: exact required-query cost reversal and joined portability/Files gates; final or conditional handoff September14 at23:10 UTC.
