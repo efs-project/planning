@@ -60,6 +60,13 @@ These findings neither select B/C nor invalidate the current small storage
 comparison; they prevent presenting whole-history replay as complete portable
 Files. No owner acceptance of weaker portability is inferred.
 
+September14: the bounded [[b-portable-evidence-seam-20260914|B evidence-retention
+proposal]] now specifies a separate signed-claim archive, claim-local body
+coverage, aggregate input bounds and independently authorized destination
+publication. Scoped design review passed after corrections; no implementation,
+gas result, native-source proof or finalist selection is claimed. Required-query
+comparison remains first.
+
 Source review pins: B `4b6154695c89976a7325cd0c51dc9591dee387c1`, C
 `2ca7349e5d683c3ff10651c0fc106c10da946145`. Relevant code beneath each arm's
 `Reviews/2026-09-12-efs-path-decision/lab-{b,c}/src/`: B `Ledger.sol` lines

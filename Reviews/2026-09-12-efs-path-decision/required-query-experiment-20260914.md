@@ -1,6 +1,6 @@
 # Bounded incoming-Quote discovery experiment
 
-> September 14, 2026: independently source-reviewed experimental design, not implemented or measured. No protocol adoption or owner requirement waiver. Root coordinates tests and publication in the preserved B/C successors.
+> September 14, 2026: experimental design with B source/unit gate completed; C implementation and paid comparison remain outstanding. No protocol adoption or owner requirement waiver. Root coordinates tests and publication in the preserved B/C successors.
 
 **Goal:** Price the same bounded query over unique retained Quote Records first admitted at or before a named admission high-water.
 
@@ -62,6 +62,14 @@ Do not change C `IndexModule` or table schema. Add `Records.getHeader(IStoreRead
 
 ## Fixed fixture and expected cardinalities (seal before measurement)
 
+**C count clarification:** target postings can outnumber admissions when other
+Types repeat a checked target in multiple references. Do not import B's stricter
+count/high-water constraint. Bound length to the uint64 cursor domain and slice
+by budget; repeated filtered sources have nondecreasing first-admission order.
+A real-admission auxiliary must make rawTotal exceed highWater and still charge
+every candidate without emitting non-Quote IDs. Exact one-reference Quotes are
+fresh-indexed once; this adds no schema or corrupt-index repair promise.
+
 Create Items and target Pair `P`, unrelated Pair `Q`, and a non-Quote Type whose ordinal0 also expects Pair. In this exact Quote-admission order: `U1(Q), A1(P), U2(Q), A2(P), reuse(A1), U3(Q), B1(P), U4(Q), U5(Q), U6(Q), U7(Q), U8(Q)`. A binds HEAD to A1 then A2; B binds HEAD to B1. Publish one fresh non-Quote `R1(P)`. Seal `basisOld`. Then publish `A3(P), U9(Q), reuse(B1)` and seal `basisCurrent`.
 
 Expected unique results: old `{A1,A2,B1}`; current adds `A3`, regardless of output page boundaries. Observed current `rawTotal` after the tail is B scan/selective/C=`15/4/5`; old-basis eligible counts are `12/3/4`, and the charged future sentinel makes old-basis scanned totals `13/4/5`. Current-basis scanned totals are `15/4/5`. C's fourth old entry is `R1` and must be header-filtered. HEAD history and reuse do not change either expected set. C has no withdrawal kind (`EfsTypes.sol:13–17`; `ActionLib.sol:214–225`), so no matched withdrawal is fabricated. A separate B-only, non-costed auxiliary publishes/reuses Record Z, withdraws each author's occurrence to zero via `Ledger._applyWithdraw` (`Ledger.sol:694–719`), and requires both B readers still return Z; C reports this auxiliary **UNSUPPORTED**, not pass, parity, or zero cost.
@@ -79,3 +87,27 @@ These are experimental safety/comparison bounds, not protocol maxima, affordabil
 5. Create narrow `lab-{b,c}/script/required-query.mjs` plus `.test.mjs` rather than modify normal runners; use a test-only paid consumer in each `IncomingQuotes.t.sol` artifact with the common ABI. Before chain use, independently derive IDs, posting orders, old/current bases, page outputs and status transitions. The root-owned runner sends each page from the same unrelated paid caller, retains signed tx/receipt/header/raw replies, and sums all page plus write-maintenance gas. No result is published until source/input/output reviews reconcile.
 
 Likely failures: selective module attached after admission1 (honest PARTIAL); constructor before Quote registration; wrong runtime/reciprocal attachment; callback OOG; cursor replay across reader/target/type/origin/generation; unbounded Type metadata; `uint256` posting length truncation; future rows counted as basis rows; reuse duplication; current occurrences or HEADs accidentally filtering retained history; C accepting `R1`; returndata above4096; and claiming COMPLETE from current high-water without basis coverage.
+
+## B source/unit gate,03:01 UTC
+
+Source `d547890e57fb0c1ba2ef4d9f8b18b519946197b8` is pushed on the existing
+`codex/efs-warroom-b-run` experiment branch, not merged into planning/main.
+Five planned files only; no Ledger/registry/callback allowance changes.
+The intended missing-implementation RED preceded01:59 focused16/16 and full79/79
+Forge passes;47/47 existing Node tests also passed, no skips. Independent review
+checked the complete five-file snapshot and named Ledger/index/profile links:
+spec PASS, quality PASS, no actionable findings. Root verified reviewed SHA256
+and compiler-source hashes before publication.
+
+Coverage includes historical/unselected unique records, old basis after current
+tail, all cursor fields, late/gapped/unknown coverage, existing live backlink
+maintenance, B-only withdrawal to zero, actual64-ID Page size2688bytes, and a
+64-action/distinct-target callback under unchanged limits. The max-action unit
+gas44,227,867 includes64-Pair setup and is not a publication price or block test.
+
+Solc0.8.30/Cancun/viaIR/optimizer200 artifacts: both readers8955runtime bytes,
+selective index5188, paid consumer1717runtime/1743init. Oversized test-harness
+initcode warnings are retained. Local logs: `efs-required-query-b-green-20260914.G8M9Z4`
+temporary run directory; review/worker reports in the plan's ignored SDD workspace.
+C conformance, whole-delta review, sealed physical fixtures and receipt-backed
+complete query/maintenance cost remain unearned. Frozen product rows are unchanged.

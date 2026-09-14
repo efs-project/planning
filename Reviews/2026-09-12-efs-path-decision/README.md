@@ -112,7 +112,16 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
-**September14: matched B/C rollback controls complete; required-query source work active.**
+**September14,03:05–03:25 UTC: root-only C query compiler lease.**
+Latest start03:15; prepared real-fixture missing-implementation RED, then
+focused GREEN/full tests if ready. No Anvil/RPC or paid run. Existing normal
+Solidity0.8.30/Cancun/viaIR/optimizer200; unchanged C metadata settings.
+Run-specific config/artifact-read permission/output/cache/logs under
+`/tmp/efs-required-query-c-build-20260914.sKwCIN`;8-minute command watchdog
+inside03:25 deadline,15GiB owned scratch/50GiB reserve. Root stops/checks
+process groups and releases early when done. No worker compiler permission.
+
+**September14,03:01: B required-query unit gate published; C source work active.**
 C's single01:08 run and independent packet review passed; evidence `12dc73a`
 is pushed in the preserved C successor. See [[paid-rollback-control]] for exact
 source/input/receipt/raw-state qualifications. Both mandatory-rule and late
@@ -123,12 +132,19 @@ is [[required-index-gap-20260913|complete incoming-Quote discovery and maintenan
 Its [[required-query-experiment-20260914|bounded source plan]] passed independent
 review: indexed ID discovery can rely on mandatory checked-reference postings
 and bounded metadata, without recopying every Quote body. Reader-bound cursors
-prevent cross-query pagination mistakes. B's first real-Ledger test passed after
-the intended missing-implementation RED; broader cases and independent code
-review remain in progress. C follows on the same result domain. No complete
-query conformance or paid-query result is claimed.
-Final or conditional handoff remains September14 at23:10 UTC; no owner
-decision or Fable execution is assumed. Original Claude B/C pins remain unchanged.
+prevent cross-query pagination mistakes. B source `d547890` is now pushed in
+the preserved successor:16/16 focused and79/79 full Forge tests passed at01:59,
+47/47 Node passed, and independent spec/quality review found no actionable
+issue. Root rechecked the exact five reviewed hashes and compiled dependency
+hashes before publication. C's matched body-free reader is now assigned to a
+source-only worker, with a legal repeated-reference count case added. No full
+B/C query conformance or paid-query result is claimed. The next portability
+[[b-portable-evidence-seam-20260914|proposal]] passed scoped design review only;
+its signed claims do not become accepted Records or historical source proofs.
+Final or conditional handoff remains September14 at23:10 UTC. At02:09 the exact
+Claude task showed exhausted Fable credits with a September19 reset; James was
+informed, no purchase/model change made. Original Claude B/C pins remain unchanged.
+The previous B compiler window is expired/released; no heavy process remains.
 
 **September14,01:36–01:56 UTC: root-only B query compiler lease; released01:42.**
 Latest start01:45; focused test-first RED, then reviewed source/GREEN if ready.
@@ -143,7 +159,7 @@ below EIP-170. The oversized test harness is not a deployable product or a paid
 consumer. No compiler/Anvil process remains. Further focused/full testing needs
 a fresh root lease after the worker's next source checkpoint.
 
-**September14,01:56–02:16 UTC: root-only expanded B query compiler lease.**
+**September14,01:56–02:16 UTC: root-only expanded B query compiler lease; closed.**
 Latest start02:06; focused16-case suite, bounded fixes if needed, then one full
 B regression. Source-only worker has supplied its report; no new paid result
 or complete-pass claim. No Anvil/RPC. Same normal compiler/fork settings,
@@ -151,6 +167,11 @@ eight-minute per-command watchdog bounded by02:16, output/cache/logs in
 `/tmp/efs-required-query-b-green-20260914.G8M9Z4`,15GiB owned scratch/50GiB
 free reserve. Root stops/checks its groups and releases early. An independent
 portability-seam design review proceeds without touching candidate code.
+
+The focused/full runs finished01:59 with16/16 and79/79 passes; no compiler
+process remains at03:01. Never reuse the expired wrapper. Reader runtimes8955
+bytes each, selective index5188, paid consumer1717; their ordinary limits pass.
+The oversized unit harness and aggregate unit gas are not paid/block-fit evidence.
 
 **September 14, 01:05–01:25 UTC: root-only C control lease.** Start no later
 than01:15; **completed and released early at01:08:51**. One fresh loopback Anvil, no compiler,
