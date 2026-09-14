@@ -112,6 +112,44 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September 14, 10:59: Files Task 1 and configuration diagnostic published; Task 2 RED gate.**
+
+Both new task reviews approve the exact code. B `eda7a0c` is pushed with
+full compiler/test evidence for Task 1 (`9fdee5e`, 110/110) and the separate
+[[index-obligation-config-finding-20260914|signed index-configuration gap]]
+(`f05cf59`, 1/1 characterization). No kernel change or lost-posting claim.
+Task 2's new consumer and seven additive tests are frozen for a genuine
+wrong-tag-subject RED under the root-only 10:57–11:17 UTC compiler lease;
+no Anvil. Existing eight Files tests are unchanged. Correct implementation
+will follow observed RED, not be called complete in advance.
+
+Live Claude check still shows **EFS v2 Dev** out of Fable credits, Send disabled,
+reset September 19 at midnight. No restart, model switch, credit purchase or
+permission change was attempted. Codex's useful bounded work is continuing;
+one unavailable lane does not block the current Files consumer.
+
+**September 14, 10:50: Files Task 1 passed; independent review and configuration diagnostic (closed).**
+
+Task 1 is committed on B at `9fdee5e`: real same-File parent validation,
+retained parent backlinks, competing signed/native revisions and required-index
+rollback. Root observed 110/110 tests and normal candidate sizes at identical
+frozen input; the kernel is unchanged. Independent task review is in progress.
+Task 2 will add the separately qualified Lens/tag consumer, not claim a full browser.
+The prior lease ended early with owned processes stopped at 10:47:47 UTC.
+A single focused configuration characterization now has a root-only compiler
+lease 10:49–11:04 UTC; no Anvil or external RPC. It tests pending signatures
+against an admin's coverage downgrade. First invocation refused a future-start
+lease before any child; the corrected uniquely labelled run is the actual test.
+
+**September 14, 10:33: root-only Files compiler lease 10:32–10:52 UTC (closed early).**
+Run the four actual-revision acceptance controls against the compiling false
+Child-rule stub, then the same worker's unchanged-assertion GREEN. Initial
+source digest `b45f055b848eae9b007a2c4e6320c68266cd8fdcf3f68b84db422c7a5563cbf3`.
+Existing gate adds only a FilesJoinedTest selector; fixed toolchain, private
+snapshot/cache, ten-minute watchdog, process-group cleanup, 50 GiB free reserve
+and 15 GiB scratch limit remain. No Anvil/RPC or measurement permission. Source
+and assertions freeze while each root gate runs. Archive lane stays closed.
+
 **September 14, 10:34: archive lane complete and pushed; actual Files integration active.**
 [[b-portable-archive-results-20260914|Completed archive result]] and full retained
 packet B `af5764a` report 102/102 tests, independent task/final review approval,

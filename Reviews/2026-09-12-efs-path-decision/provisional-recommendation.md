@@ -63,7 +63,7 @@ does not create immutable historical snapshots for free.
 | Exact typed records, checked references and mandatory acceptance | Exercised in the joined small graph; not every schema/resource boundary |
 | Independent authors, history and Lens-selected contract reads | Exercised in both candidates with independently pinned expected outputs |
 | Separate ingestion and mandatory indexing contracts | Present in both; the matched unique-Quote reverse query is now exercised and priced, not every query family |
-| Ordinary Files workflow and useful SDK | Generic mechanisms cover much of the journey; exact FileRevision parent validation, revision-scoped tags after selection, and SDK integration still need joined tests |
+| Ordinary Files workflow and useful SDK | Exact checked FileRevision parents and required backlinks now pass on unchanged B Core (Task 1, 110/110 total, independently reviewed). Head-first revision tags and qualified folder consumer are in Task 2; SDK and wider Files journey remain open |
 | Portable authored evidence | [[b-portable-archive-results-20260914|Signed-claim archive complete and independently reviewed]]: full-vector EOA evidence, claim-local body recovery and separate importer-authored destination admission; representation costs measured, packed default retained. Native-contract historical proof remains unsupported |
 | Full rollback, upgrade/recovery, private/carrier failures and scale | Specific gates remain; isolated prior tests are not one finalist integration |
 
@@ -101,9 +101,10 @@ EFS SDK or lower maintenance bill: [[maintenance-and-reuse-20260913]].
    pre/post state evidence and separate positive calibrations for B and C.
 2. **Complete:** required-query reversal test; carry only compact B into the
    remaining joined journey, retaining the other roads as comparison evidence.
-3. **In progress:** separate retained source evidence from replay/current destination
-   effects, then price its physical representation. Keep the existing complete
-   signed-vector requirement and unsupported native historical proof explicit.
+3. **Complete for the named signed-claim slice:** retained source evidence is
+   separate from replay/current destination effects, and its packed/codeblob
+   representation is priced and reviewed. Keep the full signed-vector
+   requirement and unsupported native historical proof explicit.
 4. **Next joined delta:** [[files-next-joined-gate-20260914|exercise actual FileRevision parents and bounded reads]], with revision-scoped
    tags after selection. Do not substitute a Quote-shaped analogue or hardcode a
    fixture's parent content as the general validation rule. Existing mandatory

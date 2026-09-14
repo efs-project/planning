@@ -2,6 +2,16 @@
 
 **Status:** cold full-body failure and bounded-read remedy both reproduced and
 independently reviewed; actual joined Files journey still being implemented.
+
+**September 14 supplement:** actual checked Root/Child/grandchild acceptance,
+same-File rejection controls, competing signed/native revisions, retained
+parent backlinks and required-index rollback now pass. Task 1 source `9fdee5e`
+and [full evidence](https://github.com/efs-project/planning/tree/eda7a0c/Reviews/2026-09-12-efs-path-decision/lab-b/files-task1-20260914)
+are pushed and independently approved: 110/110 full tests, 8 Files cases,
+unchanged kernel. Task 2 is implementing qualified head-first tags and a
+complete folder window. Later paragraphs below record the original motivation;
+they are not a claim that completed parent validation remains unimplemented.
+
 Basis: compact B `1d8356c9de86a488c950abcb3f9f4d17a6126510` (source
 `b94b57c405ef18b7f259cbd636d685ff96738ce7`). The separate archive work does not
 change these Ledger/TypeRegistry sources. This narrows the next
