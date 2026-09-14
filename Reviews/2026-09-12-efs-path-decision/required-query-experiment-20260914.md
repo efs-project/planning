@@ -109,5 +109,39 @@ Solc0.8.30/Cancun/viaIR/optimizer200 artifacts: both readers8955runtime bytes,
 selective index5188, paid consumer1717runtime/1743init. Oversized test-harness
 initcode warnings are retained. Local logs: `efs-required-query-b-green-20260914.G8M9Z4`
 temporary run directory; review/worker reports in the plan's ignored SDD workspace.
-C conformance, whole-delta review, sealed physical fixtures and receipt-backed
-complete query/maintenance cost remain unearned. Frozen product rows are unchanged.
+C source/unit results are recorded below. Whole-delta review, sealed physical
+fixtures and receipt-backed complete query/maintenance cost remain unearned.
+Frozen product rows are unchanged.
+
+## C source/unit verification, September14,03:12 UTC
+
+Three scoped files implement the reader and bounded metadata helpers; no Ledger,
+IndexModule, ActionLib, table layout, rule or vendored code changed. Initial
+missing-reader RED preceded10/10 focused tests. Self-review then found that an
+incomplete old-basis query could jump its cursor past an unexamined future tail.
+A real-fixture test failed with that behavior; the one-line repair advances to
+rawTotal only for COMPLETE. Final focused11/11 and full91/91 Forge passed with
+zero skips. Existing EfsTypes shadow warning remains; these are unit tests, not
+paid cost or block-fit results.
+
+The real-admission cases include noncanonical/trailing accepted bytes without
+body reads,32 repeated non-Quote references producing34 postings above admission
+high-water, every cursor field, unknown/partial coverage and2688-byte64-ID Pages.
+Root checked identical full named query ABI and selector `0x9fe8fb7f` across all
+three readers. C reader runtime/initcode8137/11404 bytes; paid consumer1663/1689.
+The normal Solidity0.8.30/Cancun/viaIR/optimizer200 configuration and C metadata
+settings are unchanged.59 unique fresh artifact source hashes match current files.
+
+**Retained validation limitation:** fresh-artifact Node results remain92/93.
+The old measurement helper pins compiler AST numeric IDs from the previous
+snapshot. Its expected physical ranges and the complete initcode/runtime bytes
+for ImportLib, IndexModule, Ledger and LensReader are byte-identical in the new
+build; only AST identifiers differ. Root's full-byte comparison used no masks.
+The artifact-specific helper suite passes72/72 against its explicitly retained
+old build. This diagnoses the mismatch, not a claim of fresh93/93. Leave frozen
+normal-run scripts/evidence alone; a new paid-query runner must independently
+resolve fresh immutable declarations/values and check all deployed bytes.
+
+Run logs and `artifact-reconciliation.json` are retained under the temporary
+`efs-required-query-c-build-20260914.sKwCIN` directory. Independent review and
+publication follow; no paid query or complete-query economic result is claimed.

@@ -112,7 +112,19 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
-**September14,03:05–03:25 UTC: root-only C query compiler lease.**
+**September14,03:27–03:40 UTC: root-only AST artifact export lease.**
+Latest start03:33; one B build then one C build, no tests, Anvil or RPC.
+Reviewed frozen source and normal compiler/fork/optimizer/metadata settings;
+only AST output and scratch paths change. This is needed to derive named
+immutable values independently for the paid fixture, not infer trust from a
+deployed contract's own returned code. Root requires byte-for-byte equality with
+the already tested artifact initcode/runtime and links before using this export.
+Five-minute command watchdog inside03:40;15GiB owned scratch/50GiB free reserve.
+Config/output/cache/logs: `/tmp/efs-required-query-ast-20260914.hrHCoQ`.
+Root alone runs/stops/checks process groups; early release when both builds end.
+Whole-delta review and offline fixture preparation continue without heavy access.
+
+**September14,03:05–03:25 UTC: root-only C query compiler lease; closed03:12:28.**
 Latest start03:15; prepared real-fixture missing-implementation RED, then
 focused GREEN/full tests if ready. No Anvil/RPC or paid run. Existing normal
 Solidity0.8.30/Cancun/viaIR/optimizer200; unchanged C metadata settings.
@@ -120,6 +132,15 @@ Run-specific config/artifact-read permission/output/cache/logs under
 `/tmp/efs-required-query-c-build-20260914.sKwCIN`;8-minute command watchdog
 inside03:25 deadline,15GiB owned scratch/50GiB reserve. Root stops/checks
 process groups and releases early when done. No worker compiler permission.
+
+Final focused11/11 and full91/91 Forge passed after an observed cursor-regression
+RED and repair. No compiler/Anvil process remains. The fresh-artifact Node suite
+is92/93, not a clean pass: one deliberately old-snapshot immutable AST-key pin
+differs. Root verified byte-for-byte identical legacy initcode/runtime templates,
+links and physical immutable ranges against the retained pre-query artifacts;
+the old artifact-specific helper suite passes72/72 on its own pinned inputs.
+Do not reuse that old measurement runner against fresh artifacts. Source review
+and complete paid-query preparation continue without a heavy-run lease.
 
 **September14,03:01: B required-query unit gate published; C source work active.**
 C's single01:08 run and independent packet review passed; evidence `12dc73a`
