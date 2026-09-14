@@ -112,29 +112,42 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
-**September 14, 11:36: qualified Files consumer published; actual lifecycle passes.**
+**September 14, 12:08: actual Files prices approved; withdrawal bug reproduced.**
 
-B `8cd4b82` is pushed with independently approved Task 2 (`d54a120`, 118/118)
-and full compiler/RED/GREEN evidence. The consumer joins HEAD before revision
-tags and refuses incomplete folder windows. Exact point reads do not depend
-on unused reverse-parent enumeration. Task 1 and the separate
+The three-task Files plan is complete and independently Approved, including
+final cross-task review. B `f7b6909` is pushed with Task3 lifecycle/churn source
+and full120/120 plus normal-size evidence. Real rename, move, reused path,
+whiteout and atomic restore are exercised; efficient live-only enumeration
+remains open because one live file can still require four retained-name scans.
+
+The sole actual [[files-paid-results-20260914|Files paid run]] completed with24
+transactions and independent full-result/raw-state review. Create1,289,277,
+signed edit708,640, contract edit777,820, standalone tags523,544–523,569 gas;
+checked paid reads197,363–284,384. Setup13,731,683 is separate. This is a small
+B-only Root/Child note graph, not the older Quote/MUD comparison or the price
+of the entire Files product. Full paid and withdrawal-probe packets are pushed
+on B at `f446bc6852a144c4795c3d229ccc5f205dadcb4d`; root verified every compressed
+payload against its original hash and decompression roundtrip.
+Original signature-padding audit failure and its representation-only correction
+are retained; no second chain run was needed. Required-query and archive lanes
+are closed and must not be reopened.
+
+The separate [[files-withdrawal-probe-plan-20260914|withdrawal characterization]]
+passed exactly3/3 and independent review, committed `1fe8c4c`. It confirms a
+real reader bug: zero active occurrences trigger E_PROFILE for otherwise valid
+retained selected data; Bob REUSE restores readability without undoing Alice's
+withdrawal. The [[files-withdrawal-reader-fix-plan-20260914|narrow corrective plan]]
+now requires actual regression RED before removing that false integrity gate.
+No Core/lifecycle/owner requirement changes. The independent
 [[index-obligation-config-finding-20260914|signed index-configuration gap]]
-remain published, with no kernel change or lost-posting claim.
+also has a source-only remedy review in progress, not an implemented fix.
 
-Task 3 code `c85e5ba` is locally committed: real rename, move, reused pathname,
-whiteout, atomic restore and two-new-name churn. Full120/120 and normal candidate
-sizes pass at `cf0e22d...`; independent review is still pending. Churn confirms
-that a single live file can require four retained-name scans: honest PARTIAL
-handling is demonstrated, efficient live-only enumeration is not. One optional
-test identifier required a reserved-keyword rename before compiling; that was
-not behavioral RED or a Core defect.
-
-The next bounded [[files-paid-workflow-plan-20260914|actual Files gas experiment]]
-prepares six separately priced writes and six paid queries, not another Quote
-or MUD rerun. The wrapper's genuine missing-event RED has been observed; its
-implementation and an independent raw-state/event checker are being prepared.
-Root owns the only compiler/Anvil slot; no paid Files run has occurred yet.
-Preparation deadline12:30UTC, review before13:00, hard shutdown14:00.
+Current workers: files_joined_lifecycle prepares corrective RED tests;
+files_paid_runner retains the already-reviewed paid packet;
+files_joined_acceptance reviews the configuration remedy. Root owns all finite
+compiler/Anvil gates and publication. No chain process is active. Finish useful
+bounded repairs and handoff by14:00UTC; do not begin another architecture or
+benchmark campaign. Resume existing worker reports rather than duplicating work.
 
 Live Claude check still shows **EFS v2 Dev** out of Fable credits, Send disabled,
 reset September 19 at midnight. No restart, model switch, credit purchase or
