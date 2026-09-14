@@ -18,7 +18,7 @@ contract FilesLiveNamesIndex is FilesNamesIndex {
     mapping(uint64 => uint256) private _offsetPlusOne;
     constructor(address c,bytes32 rt,bytes32 ct,bytes32 rh,bytes32 ch,bytes32 nt,bytes32 nh)
         FilesNamesIndex(c,rt,ct,rh,ch,nt,nh) {_declare(FAMILY_LIVE_SCOPE,true,attachedFrom);}
-    function onAdmission(uint64 publication,Effect[] calldata effects) public override {
+    function onAdmission(uint64 publication,Effect[] calldata effects) public virtual override {
         super.onAdmission(publication,effects);
         Ledger core=Ledger(ledger);
         for(uint256 i;i<effects.length;i++){

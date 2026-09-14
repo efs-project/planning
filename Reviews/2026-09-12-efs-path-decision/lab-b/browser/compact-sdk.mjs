@@ -34,6 +34,8 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     return value;
   };
   const config = freeze(plain(manifest));
+  const directories=config.filesProfile==='typed-directory-v1';
+  check(!config.filesProfile||(directories&&config.protocol==='compact-guarded-v2'),'FILES_PROFILE');
   const hash = (types,values) => e.keccak256(coder.encode(types,values));
   const purpose = Object.fromEntries(['head','folder','tag'].map(k => [k,e.id(`efs2/purpose/${k}/1`)]));
   const positionOf = (p,s,r) => hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/position/1'),p,s,r]);
@@ -101,17 +103,17 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       ['files','ledger','ledger'],['files','lensReader','lens'],['files','filesIndex','index'],
       ['names','ledger','ledger'],['names','source','ledger'],
     ]) check(eq(await scalar(key,fn,[],context),addresses[target]),'BINDING');
-    for (const type of ['root','child','name']) {
+    for (const type of ['root','child','name',...(directories?['directory']:[])]) {
       const id = config.types[type], expected = config.ruleHashes[type];
       check(id && expected && !eq(id,Z) && !eq(expected,Z),'PROFILE');
       const d = await call('registry','descriptor',[id],context);
       const refs = Array.from(await scalar('registry','refTypes',[id],context));
-      const shape = e.id(`lab/type/files-${type === 'name' ? 'name-raw-ascii' : `joined-${type}`}/1`);
+      const shape = e.id(`lab/type/files-${type === 'name' ? 'name-raw-ascii' : type==='directory'?'directory':`joined-${type}`}/1`);
       const count = type === 'child' ? 1 : 0;
       check(eq(d[0],shape) && eq(d[1],expected) && Number(d[3]) === count && refs.length === count
         && (!count || eq(refs[0],Z)) && eq(e.keccak256(await code(d[2],context)),expected),'PROFILE');
       check(eq(hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/type/1'),shape,hash(['bytes32[]'],[refs]),expected]),id),'TYPE_ID');
-      for (const key of type === 'name' ? ['index','names'] : ['index','files']) {
+      for (const key of type==='directory'?['index']:type === 'name' ? ['index','names'] : ['index','files']) {
         check(eq(await scalar(key,`${type}Type`,[],context),id),'PROFILE');
         check(eq(await scalar(key,`expected${type[0].toUpperCase()}${type.slice(1)}RuleHash`,[],context),expected),'PROFILE');
       }
@@ -177,7 +179,56 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   }
   async function readName(args) {
     await guard(args.context);
-    return freeze(await nameAt({...args,folder:mounted(args.folder)}));
+    return freeze(await nameAt({...args,folder:await folderFor(args.folder,args.context)}));
+  }
+  async function directoryAt(directory,context) {
+    check(directories,'DIRECTORY_PROFILE');
+    try {
+      const [t,first,,body]=await call('ledger','record',[directory],context);
+      check(eq(t,config.types.directory)&&first>0n&&first<=BigInt(context.admission)
+        &&e.getBytes(body).length===32&&eq(recordOf(t,e.keccak256(body)),directory),'DIRECTORY_INTEGRITY');
+      const seed=body,created=await scalar('ledger','subjectCreatedAt',[seed],context);
+      check(!eq(seed,Z)&&created>0n&&created<=first,'DIRECTORY_INTEGRITY');
+      const admission=await call('ledger','admission',[first],context);
+      check(Number(admission[0])===1&&eq(admission[6],e.keccak256(body))&&eq(admission[7],t),'DIRECTORY_INTEGRITY');
+      return result(basisFor(context),'PRESENT','COMPLETE',{directory,seed,typeId:t,firstAdmission:String(first)});
+    } catch(error) {
+      if(!isRpcUnavailable(error)&&!String(error.message).startsWith('COMPACT_DIRECTORY_INTEGRITY'))throw error;
+      return result(basisFor(context),isRpcUnavailable(error)?'UNKNOWN':'INVALID','PARTIAL',null,
+        {reason:isRpcUnavailable(error)?'DIRECTORY_UNAVAILABLE':'DIRECTORY_INTEGRITY'});
+    }
+  }
+  async function readDirectory({directory,context}) {await guard(context);return freeze(await directoryAt(directory,context));}
+  async function folderFor(folder,context) {
+    if(!directories)return mounted(folder);
+    const id=folder??config.folder,qualified=await directoryAt(id,context);
+    check(qualified.knowledge==='PRESENT',qualified.reason);return id;
+  }
+  async function targetAt(target,context) {
+    try {
+      const created=await scalar('ledger','subjectCreatedAt',[target],context);
+      if(!eq(target,Z)&&created>0n&&created<=BigInt(context.admission))return {kind:'file',knowledge:'PRESENT'};
+      const d=await directoryAt(target,context);
+      return {kind:d.knowledge==='PRESENT'?'directory':d.knowledge==='UNKNOWN'?'unknown':'invalid',knowledge:d.knowledge,descriptor:d};
+    }catch(error){if(!isRpcUnavailable(error))throw error;return {kind:'unknown',knowledge:'UNKNOWN',reason:'TARGET_UNAVAILABLE'};}
+  }
+  async function readPlacement(args) {
+    await guard(args.context);check(directories,'DIRECTORY_PROFILE');
+    const folder=args.folder??config.folder,parent=await directoryAt(folder,args.context);
+    if(parent.knowledge!=='PRESENT')return freeze({...parent,value:{folder},reason:parent.reason});
+    const bytes=bytesOf(args.name);validName(bytes);const role=e.keccak256(bytes),authors=await protocol.selectors(args,args.context);
+    try {
+      const selected=await resolve(authors,purpose.folder,folder,role,args.context),position=positionOf(purpose.folder,folder,role);
+      const value={folder,role,position,selection:selected};
+      if(selected.status!==1)return freeze(result(basisFor(args.context,authors),['ABSENT','PRESENT','MASKED','CONFLICT'][selected.status],'COMPLETE',value));
+      const classification=await targetAt(selected.target,args.context),name=await nameAt({folder,role,position,context:args.context});
+      const knowledge=classification.knowledge==='PRESENT'?name.knowledge:classification.knowledge;
+      return freeze(result(basisFor(args.context,authors),knowledge,knowledge==='PRESENT'?'COMPLETE':'PARTIAL',
+        {...value,target:selected.target,...classification,name}));
+    }catch(error){
+      if(!isRpcUnavailable(error))throw error;
+      return freeze(result(basisFor(args.context,authors),'UNKNOWN','PARTIAL',{folder,role},{reason:'PLACEMENT_UNAVAILABLE'}));
+    }
   }
   function selection(values) {
     const [status,target,revision,author,admission] = values;
@@ -256,9 +307,11 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
 
   const emptyCursor = () => [0,0,0,Z,Z,Z,Z,0,0,0];
   async function listFolder(args={}) {
-    const {context,continuation} = args, folder = mounted(args.folder);
+    const {context,continuation} = args;
     check(!('cursor' in args),'CURSOR_NOT_ACCEPTED');
     await guard(context);
+    const folder=directories?(args.folder??config.folder):mounted(args.folder);
+    if(directories){const d=await directoryAt(folder,context);if(d.knowledge!=='PRESENT')return freeze({...d,value:[],nameCoverage:'PARTIAL',kindCoverage:'PARTIAL'});}
     const authors = await protocol.selectors(args,context);
     const budget = args.budget ?? 64;
     check(Number.isInteger(budget) && budget >= 1 && budget <= 256,'BUDGET');
@@ -290,9 +343,11 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       const s = await resolve(authors,purpose.folder,folder,cell[2],context);
       check(s.status === 1 && eq(s.target,entry.target) && eq(s.author,entry.author)
         && s.revision === Number(entry.revision) && s.admission === String(entry.admission),'MEMBERSHIP');
-      const created = await scalar('ledger','subjectCreatedAt',[entry.target],context);
-      check(!eq(entry.target,Z) && created > 0n && created <= BigInt(context.admission),'FILE_SUBJECT');
-      rows.push({file:entry.target,position:entry.position,folder,role:cell[2],selection:s,
+      let classification={};
+      if(directories)classification=await targetAt(entry.target,context);
+      else {const created = await scalar('ledger','subjectCreatedAt',[entry.target],context);
+        check(!eq(entry.target,Z) && created > 0n && created <= BigInt(context.admission),'FILE_SUBJECT');}
+      rows.push({file:entry.target,...classification,position:entry.position,folder,role:cell[2],selection:s,
         name:await nameAt({position:entry.position,folder,role:cell[2],context})});
     }
     check(page.selectedSoFar === BigInt(rows.length) && next.selectedSoFar === page.selectedSoFar,'PAGE_COUNT');
@@ -300,6 +355,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     if (complete) check(Number(next.lensIndex) === authors.length && next.rawIndex === 0n && scanned === page.rawTotal,'INCOMPLETE_TRAVERSAL');
     else check(Number(page.status) === 1 && page.scanned > 0n,'PAGE_PROGRESS');
     const extra = {nameCoverage:rows.every(r => r.name.knowledge === 'PRESENT') ? 'COMPLETE' : 'PARTIAL',
+      ...(directories?{kindCoverage:rows.every(r=>r.knowledge==='PRESENT')?'COMPLETE':'PARTIAL'}:{}),
       scanned:String(scanned),rawTotal:String(page.rawTotal)};
     if (!complete) {
       const token = Object.freeze({kind:'compact-folder-continuation'});
@@ -369,20 +425,31 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       return point.value.revision;
     };
     const operation = args.operation;
-    if (operation === 'create') {
+    const destination=async(folder,role)=>{
+      if(!directories){await watch(purpose.folder,folder,role,'destination');return;}
+      const selected=await resolve(authors,purpose.folder,folder,role,context);
+      check(selected.status===0||args.replace===true,'DESTINATION_OCCUPIED');
+      await watch(purpose.folder,folder,role,'destination',selected);
+    };
+    if (operation === 'create' || (directories&&operation==='createDirectory')) {
       check(args.salt && !eq(args.salt,Z),'SALT');
       file = hash(['bytes32','bytes32','bytes32'],[e.id('efs2/subject/1'),e.zeroPadValue(author,32),args.salt]);
       check(await scalar('ledger','subjectCreatedAt',[file],context) === 0n,'SUBJECT_EXISTS');
       push({kind:5,salt:args.salt});
-      publishRevision(bytesOf(args.document),null);
+      if(operation==='createDirectory'){
+        const body=coder.encode(['bytes32'],[file]);file=recordOf(config.types.directory,e.keccak256(body));
+        push({kind:1,typeId:config.types.directory,bodyHashOrRecordId:e.keccak256(body)},body);
+      }else publishRevision(bytesOf(args.document),null);
       const role = await retainName(args.name);
-      await watch(purpose.folder,mounted(args.folder),role,'destination');
-      await binding(purpose.head,file,Z,newRevision);
-      await binding(purpose.folder,mounted(args.folder),role,file);
+      const folder=await folderFor(args.folder,context);await destination(folder,role);
+      if(operation==='create')await binding(purpose.head,file,Z,newRevision);
+      await binding(purpose.folder,folder,role,file);
     } else {
       check(file && !eq(file,Z),'FILE_ID');
-      const created = await scalar('ledger','subjectCreatedAt',[file],context);
-      check(created > 0n && created <= BigInt(context.admission),'FILE_SUBJECT');
+      const placementOperation=['move','rename','remove','restorePlacement'].includes(operation);
+      if(directories&&placementOperation)check((await targetAt(file,context)).knowledge==='PRESENT','TARGET_UNAVAILABLE');
+      else {const created = await scalar('ledger','subjectCreatedAt',[file],context);
+        check(created > 0n && created <= BigInt(context.admission),'FILE_SUBJECT');}
       if (operation === 'edit' || operation === 'restoreContents') {
         const current = await selected();
         const document = operation === 'edit' ? bytesOf(args.document)
@@ -390,25 +457,27 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
         publishRevision(document,current.recordId);
         await binding(purpose.head,file,Z,newRevision);
       } else if (operation === 'move' || operation === 'rename') {
-        const from = mounted(args.fromFolder ?? args.folder), to = mounted(args.toFolder ?? args.folder);
+        const from = await folderFor(args.fromFolder ?? args.folder,context), to = await folderFor(args.toFolder ?? args.folder,context);
+        if(directories)check(!eq(to,file),'DIRECTORY_SELF_LINK');
         const fromRole = await retainName(args.fromName), toRole = await retainName(args.name);
         check(!eq(from,to) || !eq(fromRole,toRole),'SAME_PLACEMENT');
         const source = await resolve(authors,purpose.folder,from,fromRole,context);
         check(source.status === 1 && eq(source.target,file),'SOURCE_PLACEMENT');
         selectionDependencies.push({purpose:purpose.folder,subject:from,role:fromRole,selection:source});
         await watch(purpose.folder,from,fromRole,'source',source);
-        await watch(purpose.folder,to,toRole,'destination');
+        await destination(to,toRole);
         await binding(purpose.folder,from,fromRole,file,true);
         await binding(purpose.folder,to,toRole,file);
       } else if (operation === 'remove' || operation === 'restorePlacement') {
-        const folder = mounted(args.folder), role = await retainName(args.name);
+        const folder = await folderFor(args.folder,context), role = await retainName(args.name);
+        if(directories)check(!eq(folder,file),'DIRECTORY_SELF_LINK');
         if (operation === 'remove') {
           const source = await resolve(authors,purpose.folder,folder,role,context);
           check(source.status === 1 && eq(source.target,file),'SOURCE_PLACEMENT');
           selectionDependencies.push({purpose:purpose.folder,subject:folder,role,selection:source});
           await watch(purpose.folder,folder,role,'source',source);
         } else {
-          await watch(purpose.folder,folder,role,'destination');
+          await destination(folder,role);
         }
         await binding(purpose.folder,folder,role,file,operation === 'remove');
       } else if (operation === 'addTag' || operation === 'removeTag') {
@@ -578,5 +647,6 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       receipt,receiptObservation,receiptAttribution,...(reason?{reason}:{})};
     await journal.put(plain(outcome)); return outcome;
   }
-  return Object.freeze({pin,listFolder,readFile,readName,prepare,authorize,submit,reconcile,capabilities:()=>freeze(plain(protocol.capabilities))});
+  return Object.freeze({pin,listFolder,readFile,readName,readDirectory,readPlacement,prepare,authorize,submit,reconcile,
+    capabilities:()=>freeze(plain({...protocol.capabilities,typedDirectories:directories,globalTree:false}))});
 }

@@ -55,6 +55,11 @@ const manifest = {chainId:'31337', folder, authors:{alice:A,bob:B}, contracts, t
 test('legacy factory refuses a guarded manifest instead of silently signing the legacy format', () => {
   assert.throws(() => createCompactSdk({ethers,manifest:{...manifest,protocol:'compact-guarded-v2'}}),/PROTOCOL/);
 });
+test('legacy create retains its own-CAS overwrite semantics without adding a selected-destination read',async()=>{
+  const {sdk}=fixture({respond:({fn})=>{if(fn==='resolve')throw Error('legacy destination selection unavailable');}});
+  const plan=await sdk.prepare({operation:'create',author:A,name,salt:H('legacy-create'),document:'bytes'});
+  assert.equal(plan.actions.filter(a=>a.kind===3).length,2);
+});
 
 function fixture(overrides = {}) {
   const journal = new Map(), calls = [], ownHeads = new Map();

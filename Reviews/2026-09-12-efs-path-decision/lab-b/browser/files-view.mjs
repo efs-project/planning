@@ -3,7 +3,7 @@ export function folderState(result) {
   if (!result) return {kind:'unknown',label:'Folder not yet read'};
   if (result.knowledge === 'CONFLICT') return {kind:'conflict',label:'Conflicting observations'};
   if (result.knowledge === 'INVALID') return {kind:'invalid',label:'Integrity check failed'};
-  if (result.coverage !== 'COMPLETE' || result.nameCoverage === 'PARTIAL') {
+  if (result.coverage !== 'COMPLETE' || result.nameCoverage === 'PARTIAL' || result.kindCoverage === 'PARTIAL') {
     return {kind:'partial',label:'Partial observation — absence is not established'};
   }
   if (result.knowledge === 'ABSENT' && result.value.length === 0) return {kind:'empty',label:'This mounted folder is empty in this Lens'};

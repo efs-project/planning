@@ -1,4 +1,7 @@
 import test from 'node:test';
+test('typed directory unknown kind qualifies membership without claiming an empty folder',()=>{
+  assert.equal(folderState({knowledge:'PRESENT',coverage:'COMPLETE',nameCoverage:'COMPLETE',kindCoverage:'PARTIAL',value:[{kind:'unknown'}]}).kind,'partial');
+});
 import assert from 'node:assert/strict';
 import {folderState, filterRows, canOpen, estimateUsd, receiptTotals} from './files-view.mjs';
 import * as view from './files-view.mjs';

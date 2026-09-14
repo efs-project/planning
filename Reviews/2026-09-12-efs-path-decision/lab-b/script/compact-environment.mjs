@@ -23,7 +23,9 @@ async function freePort() {
   const port = server.address().port; await new Promise(ok => server.close(ok)); return port;
 }
 export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_OUT ?? join(lab,'out'),useLive=process.env.EFS_LISTING_MODE!=='audit',
-  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun'}={}) {
+  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile}={}) {
+  assert(filesProfile===undefined||filesProfile==='typed-directory-v1','supported Files profile');
+  assert(!filesProfile||(protocol==='compact-guarded-v2'&&useLive),'typed directories require guarded live profile');
   assert(['compact-legacy-v1','compact-guarded-v2'].includes(protocol),'supported fixture protocol');
   assert(['direct','proxy'].includes(deployment),'supported fixture deployment');
   assert(['cancun','prague'].includes(hardfork),'supported fixture hardfork');
@@ -144,17 +146,35 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
     const nameShape=e.id('lab/type/files-name-raw-ascii/1'),name=(await call('registry','typeIdOf',[nameShape,nameRule,[]]))[0];
     await transact('registry','register',[nameShape,nameRule,[]]);
     const ruleHashes={root:contracts.rootRule.codeHash,child:contracts.childRule.codeHash,name:contracts.nameRule.codeHash};
-    const index=await deploy('index',useLive?'FilesLiveIndex.sol':'FilesNamesProfile.sol',useLive?'FilesLiveNamesIndex':'FilesNamesIndex',
-      [ledger,root,childType,ruleHashes.root,ruleHashes.child,name,ruleHashes.name]);
+    let directoryType;
+    if(filesProfile){
+      const rule=await deploy('directoryRule','FilesDirectoryProfile.sol','FilesDirectoryRule');
+      const shape=e.id('lab/type/files-directory/1');directoryType=(await call('registry','typeIdOf',[shape,rule,[]]))[0];
+      await transact('registry','register',[shape,rule,[]]);ruleHashes.directory=contracts.directoryRule.codeHash;
+    }
+    const index=await deploy('index',filesProfile?'FilesDirectoryProfile.sol':useLive?'FilesLiveIndex.sol':'FilesNamesProfile.sol',
+      filesProfile?'FilesDirectoryIndex':useLive?'FilesLiveNamesIndex':'FilesNamesIndex',
+      [ledger,root,childType,ruleHashes.root,ruleHashes.child,name,ruleHashes.name,...(filesProfile?[directoryType,ruleHashes.directory]:[])]);
     await transact('ledger','setIndexModule',[index]);
     const lens=await deploy('lens',useLive?'FilesLiveIndex.sol':'LensReader.sol',useLive?'FilesLiveLens':'LensReader',[ledger,index]);
     const files=await deploy('files','FilesJoinedConsumer.sol','FilesJoinedConsumer',[ledger,lens,index,root,childType,ruleHashes.root,ruleHashes.child]);
     await deploy('names','FilesNamesProfile.sol','FilesNameReader',[ledger,ledger,name,ruleHashes.name]);
     await deploy('application','FilesApplication.sol','FilesApplication',[ledger,files,wallets.alice.address,wallets.alice.address,wallets.alice.address,e.id('approved')]);
-    const folder=e.id('compact-demo/root'), archive=e.id('compact-demo/archive');
+    let folder=e.id('compact-demo/root'), archive=e.id('compact-demo/archive');
+    if(filesProfile){
+      assert.equal((await call('ledger','counts'))[0],0n,'attach required directory index before first admission');
+      const salt=e.id('compact-directory/root'),principal=(await call('ledger','principalOf',[wallets.deployer.address]))[0];
+      const hash=(types,values)=>e.keccak256(e.AbiCoder.defaultAbiCoder().encode(types,values));
+      const seed=hash(['bytes32','bytes32','bytes32'],[e.id('efs2/subject/1'),principal,salt]);
+      const body=e.AbiCoder.defaultAbiCoder().encode(['bytes32'],[seed]);
+      const base={kind:0,typeId:e.ZeroHash,bodyHashOrRecordId:e.ZeroHash,purpose:e.ZeroHash,subject:e.ZeroHash,role:e.ZeroHash,target:e.ZeroHash,expectedRevision:0,salt:e.ZeroHash};
+      await transact('ledger','execute',[[{...base,kind:5,salt},{...base,kind:1,typeId:directoryType,bodyHashOrRecordId:e.keccak256(body)}],['0x',body],0],'directory/root-bootstrap');
+      folder=hash(['bytes32','bytes32','bytes32'],[e.id('efs2/record/1'),directoryType,e.keccak256(body)]);
+    }
     const manifest={chainId:'31337',listing:useLive?'live-positive':'audit',folder,folders:[folder,archive],authors:{alice:wallets.alice.address,bob:wallets.bob.address},
       contracts:Object.fromEntries(['ledger','index','lens','registry','files','names'].map(k=>[k,contracts[k]])),
       types:{root,child:childType,name},ruleHashes};
+    if(filesProfile){manifest.filesProfile=filesProfile;manifest.types.directory=directoryType;manifest.folders=[folder];}
     if(protocol==='compact-guarded-v2') {
       manifest.protocol=protocol;
       manifest.executionFamily={origin:(await call('ledger','realmOrigin'))[0],realmId:realm,

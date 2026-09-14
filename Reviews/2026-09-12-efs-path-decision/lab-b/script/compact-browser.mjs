@@ -34,7 +34,9 @@ export async function connectFixture(env,journalName='seed') {
   };
   return {sdk,run,authors};
 }
-export async function startBrowser(env,{seed=true}={}) {
+export async function startBrowser(env,{seed=true,directory=false}={}) {
+  assert(!directory||env.manifest.filesProfile==='typed-directory-v1','directory entrypoint requires reviewed typed profile');
+  assert(!directory||!seed,'directory runner supplies its own guarded seed journey');
   if(seed){
     const {run}=await connectFixture(env);
     await run('create',{name:'welcome.txt',salt:env.ethers.id('welcome-file'),
@@ -44,9 +46,10 @@ export async function startBrowser(env,{seed=true}={}) {
     await run('addTag',{file:shared.file,scope:'file',concept:env.ethers.id('efs')});
   }
   const config={manifest:env.manifest,rpcUrl:env.rpcUrl,
-    mounts:[{id:env.manifest.folder,label:'Files'},{id:env.manifest.folders[1],label:'Archive'}],economics};
+    mounts:[{id:env.manifest.folder,label:'Files'},...(directory?[]:[{id:env.manifest.folders[1],label:'Archive'}])],economics};
   const mime={'.html':'text/html','.mjs':'text/javascript','.css':'text/css'};
   const allowed=new Set(['index.html','app.mjs','files.css','compact-sdk.mjs','files-view.mjs']);
+  if(directory)for(const asset of ['directory-entry.mjs','compact-sdk-v2.mjs','compact-paths.mjs'])allowed.add(asset);
   const server=createServer(async(req,res)=>{
     try{
       if(req.method!=='GET' || !/^127\.0\.0\.1:\d+$/.test(req.headers.host??'')){res.writeHead(403).end('Loopback GET only');return;}
@@ -58,13 +61,15 @@ export async function startBrowser(env,{seed=true}={}) {
       if(path==='/vendor/ethers.mjs'){res.setHeader('Content-Type','text/javascript');res.end(await readFile(join(resolve(process.env.EFS_ETHERS_PATH),'dist/ethers.min.js')));return;}
       const name=path==='/'?'index.html':path.slice(1);
       if(!allowed.has(name)){res.writeHead(404).end('Not found');return;}
-      res.setHeader('Content-Type',mime[name.slice(name.lastIndexOf('.'))]??'application/octet-stream');res.end(await readFile(join(root,name)));
+      res.setHeader('Content-Type',mime[name.slice(name.lastIndexOf('.'))]??'application/octet-stream');
+      const content=await readFile(join(root,name));
+      res.end(directory&&name==='index.html'?content.toString().replace('src="./app.mjs"','src="./directory-entry.mjs"'):content);
     }catch(error){res.writeHead(500).end('Static resource unavailable');}
   });
   await new Promise((ok,no)=>{server.once('error',no);server.listen(0,'127.0.0.1',ok);});
   const url=`http://127.0.0.1:${server.address().port}/`;
   const close=async()=>{await new Promise(ok=>server.close(ok));await env.close();};
-  console.log(json({url,rpc:env.rpcUrl,scratch:env.dir,warning:'DISPOSABLE LOCAL KEYS. NO REAL FUNDS. Explicit folders, not a nested directory profile.'}));
+  console.log(json({url,rpc:env.rpcUrl,scratch:env.dir,warning:directory?'DISPOSABLE LOCAL KEYS. GUARDED TYPED DIRECTORY GRAPH; NO GLOBAL TREE GUARANTEE.':'DISPOSABLE LOCAL KEYS. NO REAL FUNDS. Explicit folders, not a nested directory profile.'}));
   return {url,close};
 }
 async function main(){

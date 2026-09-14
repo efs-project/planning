@@ -9,7 +9,7 @@ const json = value => JSON.stringify(value,null,2);
 const pretty = value => Number(value).toLocaleString('en-US');
 const state = {config:null,sdk:null,folder:null,context:null,page:null,rows:[],selected:null,busy:false,
   keys:null,wallet:null,filterConcept:'',history:{},removed:null,entries:[],economics:null,editedEconomics:false,
-  rpc:{calls:0,bytes:0,ms:0,errors:0},operation:null,prefix:null,storageIssue:null};
+  rpc:{calls:0,bytes:0,ms:0,errors:0},operation:null,prefix:null,storageIssue:null,paths:null,segments:[],route:null};
 
 function notice(message,kind='') {
   $('notice').textContent=message; $('notice').className=`notice ${kind}`; $('notice').hidden=!message;
@@ -19,10 +19,11 @@ function authors() {
   return $('lens').value === 'bob' ? [bob,alice] : [alice,bob];
 }
 function authorName(address) {
-  return Object.entries(state.config.manifest.authors).find(([,v])=>v.toLowerCase()===address?.toLowerCase())?.[0] ?? short(address);
+  return Object.entries(state.config.manifest.authors).find(([,v])=>v.toLowerCase()===address?.toLowerCase()
+    ||(state.paths&&ethers.zeroPadValue(v,32).toLowerCase()===address?.toLowerCase()))?.[0] ?? short(address);
 }
 function selectedRow() { return state.rows.find(row=>row.position===state.selected); }
-function writesAllowed() { return !!state.wallet && !state.busy && $('lens').value!=='conflict'; }
+function writesAllowed() { return !!state.wallet && !state.busy && $('lens').value!=='conflict' && (!state.paths||!!state.folder); }
 function readStored(key,fallback) {
   const raw=localStorage.getItem(state.prefix+key);
   return raw === null ? fallback : JSON.parse(raw);
@@ -80,7 +81,18 @@ function remember(point) {
 }
 async function refresh(continuing=false) {
   notice(continuing?'Continuing the same pinned folder traversal…':'Reading a fresh pinned observation…');
-  if(!continuing) { state.context=null; state.page=null; state.rows=[]; renderRows(); state.context=await state.sdk.pin(); }
+  if(!continuing) {
+    state.context=null; state.page=null; state.rows=[]; renderRows(); state.context=await state.sdk.pin();
+    if(state.paths){
+      state.route=await state.paths.resolvePath({sdk:state.sdk,root:state.config.manifest.folder,segments:state.segments,authors:authors(),context:state.context,budget:64});
+      if(state.route.status!=='PRESENT'||state.route.kind!=='directory'){
+        state.folder=null;state.selected=null;
+        state.page={basis:state.context,knowledge:state.route.status==='PRESENT'?'INVALID':state.route.status,coverage:'PARTIAL',value:[],nameCoverage:'PARTIAL'};
+        notice(`Path ${state.paths.encodePath(state.segments)}: ${state.route.status}. Use a breadcrumb to return; no empty folder is inferred.`,'warning');return;
+      }
+      state.folder=state.route.target;
+    }
+  }
   let continuation=continuing ? state.page?.continuation : undefined;
   // Finite traversal; any retained continuation remains visibly partial.
   for(let pages=0;pages<32;pages++) {
@@ -92,6 +104,7 @@ async function refresh(continuing=false) {
   const rows=[];
   for(const row of state.page.value) {
     let point;
+    if(state.paths&&row.kind!=='file'){rows.push({...row,point:{knowledge:row.knowledge,coverage:row.knowledge==='PRESENT'?'COMPLETE':'PARTIAL',reason:row.kind==='directory'?'Directory · no File HEAD required':'Target kind unavailable'}});continue;}
     try { point=await state.sdk.readFile({file:row.file,authors:authors(),concept,context:state.context,
       policy:$('lens').value==='conflict'?'no-tiebreak':'ordered'}); remember(point); }
     catch(error) { point={knowledge:'UNKNOWN',coverage:'PARTIAL',reason:error.message,value:{file:row.file}}; }
@@ -110,7 +123,7 @@ function renderRows() {
   $('rows').innerHTML=filtered.rows.map(row=>{
     const point=row.point, revision=point?.value?.revision;
     const name=row.name?.knowledge==='PRESENT'?row.name.value:`Name ${row.name?.knowledge?.toLowerCase()??'unavailable'} · ${short(row.file)}`;
-    return `<button class="file-row ${state.selected===row.position?'active':''}" data-action="select" data-position="${escape(row.position)}" aria-pressed="${state.selected===row.position}"><span class="file-icon" aria-hidden="true">▤</span><span class="row-main"><span class="filename">${escape(name)}</span><span class="row-subtitle">File ${escape(short(row.file))}</span></span><span class="row-state">${revision?escape(authorName(point.value.selection.author)):`<span class="badge warning">${escape(point?.knowledge??'UNKNOWN')}</span>`}<span class="row-subtitle">${revision?`${pretty(ethers.getBytes(revision.document).length)} bytes · #${revision.firstAdmission}`:escape(point?.reason??'No selected bytes')}</span></span></button>`;
+    return `<button class="file-row ${state.selected===row.position?'active':''}" data-action="select" data-position="${escape(row.position)}" aria-pressed="${state.selected===row.position}"><span class="file-icon" aria-hidden="true">${row.kind==='directory'?'▱':'▤'}</span><span class="row-main"><span class="filename">${escape(name)}</span><span class="row-subtitle">${row.kind==='directory'?'Directory':row.kind==='unknown'?'Unknown kind':'File'} ${escape(short(row.file))}</span></span><span class="row-state">${revision?escape(authorName(point.value.selection.author)):`<span class="badge warning">${escape(point?.knowledge??'UNKNOWN')}</span>`}<span class="row-subtitle">${revision?`${pretty(ethers.getBytes(revision.document).length)} bytes · #${revision.firstAdmission}`:escape(point?.reason??'No selected bytes')}</span></span></button>`;
   }).join('') || `<div class="empty-list">${state.busy&&!state.page?'Reading from the Ledger…':escape(view.kind==='empty'?view.label:state.page?.coverage==='COMPLETE' && view.kind==='complete' ? 'No matches in this complete observed folder.': 'No rows to show yet. This is not evidence of an empty folder.')}</div>`;
   $('continue').hidden=!state.page?.continuation;
   $('basis').textContent=state.page ? `RPC-observed · block ${state.page.basis.blockNumber} · admission ${state.page.basis.admission} · ${short(state.page.basis.blockHash)}` : 'No qualified observation yet';
@@ -127,6 +140,11 @@ function renderDetail() {
   const preview=open?textPreview(revision.document):null;
   const knownName=row.name?.knowledge==='PRESENT';
   const action=(id,label,blocked=false,extra='')=>`<button data-action="${id}" data-write data-blocked="${blocked}" ${blocked?'disabled':''} ${extra}>${label}</button>`;
+  if(state.paths&&row.kind!=='file'){
+    $('detail').innerHTML=`<h2>${escape(name)}</h2><p>${row.kind==='directory'?'Typed Directory · stable descriptor identity. No File HEAD is required.':'Target kind is unavailable or invalid. Membership has not been discarded.'}</p>
+      <div class="file-actions">${row.kind==='directory'&&knownName?'<button data-action="enter">Open directory →</button>':''}${action('rename','Rename',!knownName||row.kind!=='directory')}${action('move','Move',!knownName||row.kind!=='directory')}${action('remove','Remove placement',!knownName||row.kind!=='directory')}</div>
+      <p>Placements are links, not ownership. Moving or removing one never rewrites or destroys descendants. A Lens may contain aliases or cycles.</p><details><summary>Descriptor and selected edge</summary><pre>${escape(json(row))}</pre></details>`;return;
+  }
   const candidates=(point?.value?.candidates??[]).map(candidate=>`<div class="conflict-card"><strong>${escape(authorName(candidate.selection.author))}</strong> · ${escape(short(candidate.revision?.recordId??candidate.selection.target))}<pre>${escape(candidate.revision?textPreview(candidate.revision.document).text:`${candidate.knowledge??'UNKNOWN'} — candidate bytes unavailable; conflict retained.`)}</pre></div>`).join('');
   const history=state.history[row.file]??[];
   $('detail').innerHTML=`<h2 class="file-title">${escape(name)}</h2><div class="meta-line"><span class="badge ${open?'':'warning'}">${escape(point?.knowledge??'UNKNOWN')}</span><span>${open?`${escape(authorName(point.value.selection.author))} selected · revision ${escape(short(revision.recordId))}`:escape(point?.reason??'No single selected revision')}</span></div>
@@ -157,7 +175,9 @@ function renderCosts() {
 }
 function render() {
   if(!state.config) { controls(); return; }
-  $('mounts').innerHTML=state.config.mounts.map(mount=>`<button class="${state.folder===mount.id?'active':''}" data-action="mount" data-folder="${escape(mount.id)}" aria-pressed="${state.folder===mount.id}" title="Explicit mount ${escape(mount.id)}"><span class="mount-icon" aria-hidden="true">▱</span>${escape(mount.label)}</button>`).join('');
+  $('mounts').innerHTML=state.paths?
+    [{label:'Files',segments:[]},...state.segments.map((label,i)=>({label,segments:state.segments.slice(0,i+1)}))].map(item=>`<button data-action="path" data-path="${escape(state.paths.encodePath(item.segments))}" title="Lens-relative navigation route">${escape(item.label)} /</button>`).join(''):
+    state.config.mounts.map(mount=>`<button class="${state.folder===mount.id?'active':''}" data-action="mount" data-folder="${escape(mount.id)}" aria-pressed="${state.folder===mount.id}" title="Explicit mount ${escape(mount.id)}"><span class="mount-icon" aria-hidden="true">▱</span>${escape(mount.label)}</button>`).join('');
   renderRows(); renderDetail(); renderActivity(); renderCosts(); controls();
 }
 
@@ -177,8 +197,8 @@ async function sendTransaction(transaction) {
   if(BigInt(await rpc('eth_chainId'))!==31337n) throw new Error('Chain changed; no transaction signed.');
   const from=state.wallet.address;
   const [nonce,price,estimate]=await Promise.all([rpc('eth_getTransactionCount',[from,'pending']),rpc('eth_gasPrice'),rpc('eth_estimateGas',[{...transaction,from}])]);
-  const measured=BigInt(estimate), cap=30000000n;
-  if(measured>cap) throw new Error(`Estimated gas ${measured} exceeds this local prototype's 30M cap. No broadcast.`);
+  const measured=BigInt(estimate), cap=state.paths?16777216n:30000000n;
+  if(measured>cap) throw new Error(`Estimated gas ${measured} exceeds this execution profile's ${cap} transaction cap. No broadcast.`);
   const padded=(measured*120n+99n)/100n;
   const raw=await state.wallet.signTransaction({...transaction,chainId:31337,type:0,nonce:Number(BigInt(nonce)),gasPrice:BigInt(price),gasLimit:padded>cap?cap:padded});
   return rpc('eth_sendRawTransaction',[raw]);
@@ -186,6 +206,19 @@ async function sendTransaction(transaction) {
 async function write(operation,args) {
   if(!state.wallet||$('lens').value==='conflict') throw new Error('Choose an ordered Lens and explicitly enable a disposable signer first.');
   notice(`Preparing exact ${operation} action…`);
+  if(state.paths){
+    const context=await state.sdk.pin();args={...args,context};
+    if(operation==='move'&&args.destinationPath){const {route}=await destinationRoute(args.destinationPath,context);args.toFolder=route.target;}
+    if(['create','createDirectory','rename','move','restorePlacement'].includes(operation)){
+      const destination=await state.sdk.readPlacement({folder:args.toFolder??args.folder,name:args.name,authors:authors(),context});
+      if(!['PRESENT','MASKED','ABSENT'].includes(destination.knowledge))throw Error(`Destination is ${destination.knowledge}; refusing to sign.`);
+      if(destination.knowledge!=='ABSENT'){
+        const s=destination.value.selection;
+        if(!confirm(`Destination “${args.name}” is ${destination.knowledge} (${authorName(s.author)}, revision ${s.revision}, target ${s.target}). Replace this selected placement or mask? Retained data is not erased.`))throw Error('Replacement cancelled. Nothing signed.');
+        args.replace=true;
+      }
+    }
+  }
   const plan=await state.sdk.prepare({operation,author:state.wallet.address,authors:authors(),...args});
   const signed=await state.sdk.authorize(plan,digest=>state.wallet.signingKey.sign(digest).serialized);
   // submit can throw AFTER the external broadcast (for example quota/storage
@@ -207,13 +240,14 @@ function field(label,name,value='',type='input') {
 function openEditor(operation,record) {
   const row=selectedRow(), name=row?.name?.value??'';
   state.operation={operation,row,record}; $('editor-error').textContent='';
-  const titles={create:'New file',edit:'Edit contents',rename:'Rename placement',move:'Move to another mount',remove:'Remove this placement',restorePlacement:'Restore last placement',restoreContents:'Restore historical contents'};
+  const titles={create:'New file',createDirectory:'New directory',edit:'Edit contents',rename:'Rename placement',move:state.paths?'Move to a verified directory':'Move to another mount',remove:'Remove this placement',restorePlacement:'Restore last placement',restoreContents:'Restore historical contents'};
   $('editor-title').textContent=titles[operation];
   $('editor-help').textContent=`Signed by ${$('signer').value}, using ${$('lens').selectedOptions[0].textContent}. One atomic local-test action batch; no real funds.`;
   let fields='';
-  if(['create','rename','move'].includes(operation)) fields+=field('Filename · lowercase ASCII','name',operation==='create'?'':name);
+  if(['create','createDirectory','rename','move'].includes(operation)) fields+=field('Exact name · lowercase ASCII','name',['create','createDirectory'].includes(operation)?'':name);
   if(operation==='create'||operation==='edit') fields+=field('Plain-text contents','document',operation==='edit'?textPreview(row.point.value.revision.document).text:'','textarea');
-  if(operation==='move') fields+=`<label class="field-label" for="field-folder">Destination explicit mount</label><select name="toFolder" id="field-folder">${state.config.mounts.filter(mount=>mount.id!==state.folder).map(mount=>`<option value="${escape(mount.id)}">${escape(mount.label)}</option>`).join('')}</select>`;
+  if(state.paths&&operation==='create')fields+='<label class="field-label" for="field-upload">Or upload exact bytes (up to 8160 bytes; overrides text)</label><input type="file" id="field-upload">';
+  if(operation==='move') fields+=state.paths?field('Destination directory path · verified before signing','destinationPath','/')+'<button type="button" data-action="destination">Browse / verify this path</button><div id="destination-children"></div>':`<label class="field-label" for="field-folder">Destination explicit mount</label><select name="toFolder" id="field-folder">${state.config.mounts.filter(mount=>mount.id!==state.folder).map(mount=>`<option value="${escape(mount.id)}">${escape(mount.label)}</option>`).join('')}</select>`;
   if(operation==='remove') fields+=`<p>Remove <strong>${escape(name)}</strong> from this Lens? This adds a placement mask; retained records and other authors' views are not erased.</p>`;
   if(operation==='restorePlacement') fields+=`<p>Restore the locally remembered placement <strong>${escape(state.removed.name)}</strong> in ${escape(state.config.mounts.find(m=>m.id===state.removed.folder)?.label??short(state.removed.folder))}? The SDK will revalidate the retained File and Name.</p>`;
   if(operation==='restoreContents') fields+=field('Historical Record ID · verified against this File before signing','record',record??'');
@@ -227,17 +261,32 @@ function download() {
   const link=document.createElement('a'); link.href=url; link.download=row.name?.knowledge==='PRESENT'?row.name.value:`${row.file}.bin`;
   link.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+async function navigate(segments){state.segments=segments;state.selected=null;history.replaceState(null,'','#'+state.paths.encodePath(segments));await refresh();}
+async function destinationRoute(path,pinned){
+  const context=pinned??await state.sdk.pin(),route=await state.paths.resolvePath({sdk:state.sdk,root:state.config.manifest.folder,segments:state.paths.decodePath(path),authors:authors(),context,budget:64});
+  if(route.status!=='PRESENT'||route.kind!=='directory')throw Error(`Destination ${route.status} (${route.kind}); a verified Directory is required.`);
+  return {context,route};
+}
+async function browseDestination(path){
+  $('field-destinationPath').value=path;const {context,route}=await destinationRoute(path);
+  const page=await state.sdk.listFolder({folder:route.target,authors:authors(),context,budget:64});
+  $('destination-children').innerHTML=`<p>Verified ${escape(path)} · ${escape(short(route.target))}. ${page.coverage==='COMPLETE'?'Complete observed page.':'Partial children; enter an exact path to resolve it.'}</p><button type="button" data-action="destination" data-path="/">Files /</button>`+
+    page.value.filter(r=>r.kind==='directory'&&r.name.knowledge==='PRESENT').map(r=>`<button type="button" data-action="destination" data-path="${escape(state.paths.encodePath([...route.segments,r.name.value]))}">▱ ${escape(r.name.value)}</button>`).join('');
+}
 
 document.addEventListener('click',event=>{
   const button=event.target.closest('[data-action]'); if(!button||button.disabled)return;
   const action=button.dataset.action;
   if(action==='close') { $('editor').close(); return; }
   if(action==='select') {state.selected=button.dataset.position;renderDetail();renderRows();controls();return;}
-  if(['create','edit','rename','move','remove','restorePlacement','restoreContents'].includes(action)) {openEditor(action,button.dataset.record);return;}
+  if(['create','createDirectory','edit','rename','move','remove','restorePlacement','restoreContents'].includes(action)) {openEditor(action,button.dataset.record);return;}
   run(async()=>{
     if(action==='connect') await connect();
     if(action==='disconnect') {state.keys=null;state.wallet=null;notice('Guest mode. Demo keys removed from this screen’s active state.');}
     if(action==='mount') {state.folder=button.dataset.folder;state.selected=null;await refresh();}
+    if(action==='path')await navigate(state.paths.decodePath(button.dataset.path));
+    if(action==='enter')await navigate([...state.segments,selectedRow().name.value]);
+    if(action==='destination')await browseDestination(button.dataset.path??$('field-destinationPath').value);
     if(action==='refresh') await refresh();
     if(action==='continue') await refresh(true);
     if(action==='filter') {state.filterConcept=$('filter-concept').value.trim();await refresh();}
@@ -259,7 +308,11 @@ $('editor-form').addEventListener('submit',event=>{
   run(async()=>{
     try {
       let args={...values,file:row?.file,folder:state.folder};
-      if(operation==='create') args.salt=ethers.hexlify(ethers.randomBytes(32));
+      if(operation==='create'||operation==='createDirectory') args.salt=ethers.hexlify(ethers.randomBytes(32));
+      if(state.paths&&operation==='create'){
+        const upload=$('field-upload')?.files?.[0];if(upload){if(upload.size>8160)throw Error('Inline prototype upload limit is 8160 bytes.');args.document=new Uint8Array(await upload.arrayBuffer());}
+      }
+      if(state.paths&&operation==='move'){const {route}=await destinationRoute(values.destinationPath);args.toFolder=route.target;}
       if(operation==='rename'||operation==='move') args={...args,fromName:row.name.value,fromFolder:row.folder};
       if(operation==='remove') args.name=row.name.value;
       if(operation==='restorePlacement') args={...state.removed};
@@ -289,6 +342,13 @@ await run(async()=>{
   const response=await fetch('/config.json',{cache:'no-store'});
   if(!response.ok) throw new Error(`Configuration unavailable (${response.status}).`);
   state.config=await response.json(); state.folder=state.config.manifest.folder;
+  if(state.config.manifest.filesProfile==='typed-directory-v1'){
+    state.paths=globalThis.efsCompactDirectoryEntry;if(!state.paths)throw Error('Typed profile requires the separately served guarded entrypoint.');
+    state.segments=state.paths.decodePath(location.hash?location.hash.slice(1):'/');
+    $('create').insertAdjacentHTML('beforebegin','<button id="create-directory" data-action="createDirectory" data-write>＋ New directory</button>');
+    document.querySelector('.lab-pill').textContent='GUARDED DIRECTORY LAB · LOCAL';
+    document.querySelector('.about').innerHTML='<summary>About this experiment</summary><p>Private local-test typed Directory graph, not a globally acyclic tree. Exact lowercase ASCII paths are Lens-relative routes; aliases and mixed-author cycles are possible. Breadcrumbs are not universal parent ownership. Source/destination guards freeze known positions, not unseen names. Required profile administration remains trusted.</p><p>Inline file bytes only: new files up to 8160 bytes, edits up to 8128. Downloads are inert and exact. No carrier, encryption, production wallet, portable state proof, public deployment, or all-in chain-fee claim.</p>';
+  }
   state.prefix=`efs-compact:${state.config.manifest.chainId}:${state.config.manifest.contracts.ledger.address}:`;
   state.economics=state.config.economics ? structuredClone(state.config.economics):null;
   try {state.history=readStored('witnessed',{})??{};state.removed=readStored('removed',null);}
@@ -297,6 +357,6 @@ await run(async()=>{
     const previous=readStored(`journal:${entry.id}`,null);
     store(`journal:${entry.id}`,{...entry,localCreatedAt:previous?.localCreatedAt??Date.now()});
   }};
-  state.sdk=createCompactSdk({ethers,rpc,manifest:state.config.manifest,journal});
+  state.sdk=(state.paths?.createSdk??createCompactSdk)({ethers,rpc,manifest:state.config.manifest,journal});
   await refresh();
 });

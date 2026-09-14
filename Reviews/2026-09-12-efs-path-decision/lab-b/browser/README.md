@@ -1,5 +1,59 @@
 # Clickable compact Files prototype
 
+## Guarded typed Directory graph (Task 4A)
+
+The separate `node script/directory-browser.mjs` entrypoint starts a **fresh**
+private loopback chain/proxy and selects `manifest.filesProfile =
+'typed-directory-v1'`. Use the same existing ethers/Anvil/artifact environment
+described below. It does not attach to, restart, or migrate the original demo.
+The required Directory index is installed before admission one; the real root
+is then CREATE + PUBLISH, not a magic mounted hash. Config anchors only that
+root, never child labels or a directory inventory. Ctrl-C closes both servers.
+
+Select a Directory row, then **Open directory**. Breadcrumbs and the `#/...` URL
+are exact Lens-relative navigation routes, re-resolved on refresh/Lens changes.
+They are not parent ownership. The new dialog creates directories; moving uses
+an exact destination path with verified child browsing. An occupied selected
+destination or mask requires explicit replacement confirmation before signing.
+Removal masks one placement; restoring or reusing a name does not erase retained
+records. New-file upload accepts up to 8160 exact bytes (including invalid UTF-8);
+downloads remain inert binary. Carriers/encryption are a later slice.
+
+Shared SDK additions, only enabled by the guarded typed manifest:
+
+- `readDirectory({directory, context})`: exact pinned descriptor/seed validation.
+- `readPlacement({folder, name, authors | principals, context})`: qualified edge
+  and target kind, separate from a File HEAD.
+- `listFolder(...)`: `kind: file | directory | unknown | invalid` rows, with
+  `kindCoverage` separate from membership and name coverage. Unknown kinds retain
+  membership. Existing cumulative continuations remain same-instance/same-basis.
+- `prepare({operation: 'createDirectory', name, salt, folder, ...})`: CREATE seed,
+  immutable Directory descriptor and named placement. `plan.file` is the shared
+  placement-target field and holds the Directory descriptor ID here. No HEAD.
+- Existing `rename`, `move`, `remove`, `restorePlacement` accept File subjects or
+  valid Directory IDs. Selected/masked destinations require `replace: true`.
+  Exact source/destination heads for all declared Lens principals are guarded;
+  writer CAS is retained separately, never added as a 65th principal.
+- `compact-paths.mjs`: `encodePath`, `decodePath`, and `resolvePath({sdk, root,
+  segments, authors | principals, context, budget})`. Status distinguishes PRESENT,
+  ABSENT, MASKED, UNKNOWN, INVALID, PARTIAL, NON_DIRECTORY, and CYCLE. The budget
+  counts root/edge operations, not RPC calls; 1–256 operations, default 64. Every
+  observed edge retains selected author/revision/admission provenance.
+
+This is a Directory **graph**, not a globally acyclic filesystem. A path detects
+repeated Directory IDs only on that route. Aliases are valid. A new unasserted
+`A/new → D` can appear after preflight; then moving A under D can succeed and form
+a cycle without changing either guarded position. The real-chain test retains
+this mixed-author phantom counterexample. No descendant preflight or optional
+helper is claimed to constrain raw Core ingress. The required index enforces
+typed parents/targets/self-link rejection while attached; malicious administration
+remains outside that posture. No Core growth, portable source-state proof,
+production wallet, hosted release, fee guarantee or joined-page/scale claim.
+
+Tests: `browser/compact-paths.test.mjs`, `browser/directory.integration.test.mjs`,
+and `test/FilesDirectoryProfile.t.sol`. The separate entrypoint loads new modules;
+the live legacy `app.mjs` imports none of them and its old allowlist is unchanged.
+
 September 14, 2026. Disposable integration, not production SDK or protocol bytes.
 This screen uses compact B, not the earlier fuller-model browser. Filenames,
 content, selection and tags are read from the deployed contracts; configuration
