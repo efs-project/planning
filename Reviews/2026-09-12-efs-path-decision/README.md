@@ -112,21 +112,35 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
-**September 14, 10:59: Files Task 1 and configuration diagnostic published; Task 2 RED gate.**
+**September 14, 11:36: qualified Files consumer published; actual lifecycle passes.**
 
-Both new task reviews approve the exact code. B `eda7a0c` is pushed with
-full compiler/test evidence for Task 1 (`9fdee5e`, 110/110) and the separate
+B `8cd4b82` is pushed with independently approved Task 2 (`d54a120`, 118/118)
+and full compiler/RED/GREEN evidence. The consumer joins HEAD before revision
+tags and refuses incomplete folder windows. Exact point reads do not depend
+on unused reverse-parent enumeration. Task 1 and the separate
 [[index-obligation-config-finding-20260914|signed index-configuration gap]]
-(`f05cf59`, 1/1 characterization). No kernel change or lost-posting claim.
-Task 2's new consumer and seven additive tests are frozen for a genuine
-wrong-tag-subject RED under the root-only 10:57–11:17 UTC compiler lease;
-no Anvil. Existing eight Files tests are unchanged. Correct implementation
-will follow observed RED, not be called complete in advance.
+remain published, with no kernel change or lost-posting claim.
+
+Task 3 code `c85e5ba` is locally committed: real rename, move, reused pathname,
+whiteout, atomic restore and two-new-name churn. Full120/120 and normal candidate
+sizes pass at `cf0e22d...`; independent review is still pending. Churn confirms
+that a single live file can require four retained-name scans: honest PARTIAL
+handling is demonstrated, efficient live-only enumeration is not. One optional
+test identifier required a reserved-keyword rename before compiling; that was
+not behavioral RED or a Core defect.
+
+The next bounded [[files-paid-workflow-plan-20260914|actual Files gas experiment]]
+prepares six separately priced writes and six paid queries, not another Quote
+or MUD rerun. The wrapper's genuine missing-event RED has been observed; its
+implementation and an independent raw-state/event checker are being prepared.
+Root owns the only compiler/Anvil slot; no paid Files run has occurred yet.
+Preparation deadline12:30UTC, review before13:00, hard shutdown14:00.
 
 Live Claude check still shows **EFS v2 Dev** out of Fable credits, Send disabled,
 reset September 19 at midnight. No restart, model switch, credit purchase or
 permission change was attempted. Codex's useful bounded work is continuing;
-one unavailable lane does not block the current Files consumer.
+one unavailable lane does not block the bounded Codex work. The archive and
+required-query lanes are complete and must not be reopened.
 
 **September 14, 10:50: Files Task 1 passed; independent review and configuration diagnostic (closed).**
 

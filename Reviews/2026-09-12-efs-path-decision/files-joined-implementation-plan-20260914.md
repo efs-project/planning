@@ -21,7 +21,7 @@
 - COMPLETE parent-family coverage means the exact pinned module's declared family is gap-free, from admission 1 through the current basis, plus exhaustion of a parent's count-bounded list. Generic `coverage` ignores its scope argument; never claim independently maintained per-parent coverage.
 - All point/tag/folder composition occurs at current state in one EVM call with supplied frontier, rule epoch, index generation and Core commitment checked. PARTIAL, UNKNOWN, stale basis and conflict do not become empty success.
 - Root one-heavy-slot only, finite watchdog, installed/pinned toolchain, private caches; 50 GiB free reserve and 15 GiB aggregate scratch. No worker compiler, Anvil, RPC or subagent launch. Stop before September 14 14:00 UTC / 09:00 Chicago.
-- Each task hands a compiling stub plus unchanged executable assertions to root for real behavioral RED before implementation. Compilation errors are not RED. Root commits only exact task files after GREEN and reviews; designs/reports stay on main. Previously passing measurements are not repeated without a source/semantic reason.
+- Implementation tasks hand a compiling stub plus unchanged executable assertions to root for real behavioral RED before implementation. Compilation errors are not RED. Task3 characterizes already-existing behavior: a first-pass success is legitimate evidence, with the specified actual negative/positive control, not a reason to break working Core. Root commits only exact task files after GREEN and reviews; designs/reports stay on main. Previously passing measurements are not repeated without a source/semantic reason.
 
 ## File responsibilities and shared fixture
 
@@ -79,11 +79,104 @@ before Task2 implementation. The eventual SDK should expose named `onFile` and
 `onSelectedRevision` operations and generated checked bounded-read adapters;
 no public raw-slot API or production result enum is adopted by this test plan.
 
+**Point-read qualification correction (September14):** exact HEAD/Record/parent
+reads do not enumerate the reverse-parent family, so they must not require that
+family to report COMPLETE. Preserve active module, profile and current Basis
+pins; validate the exact parent by ID. Scope completeness licenses folder
+enumeration, and parent-family completeness licenses reverse-parent enumeration,
+not unrelated exact values. A metadata-only parent-family downgrade should leave
+the exact point result unchanged while still reporting PARTIAL for discovery.
+This corrects an overly strict test expectation; it does not weaken mandatory
+write callbacks or authorize unqualified empty query results.
+
 - [ ] Implement the separate one-window folder join using an all-zero fresh cursor. Require COMPLETE, !mutated, `next.lensIndex==authors.length`, `next.rawIndex==0`, exact next basis/generation/epoch/Core/lensHash/scopeKey, and scope-family coverage from1 through current admission. `scopeKey=keccak256(abi.encode(FOLDER,folder))`. Resolve each selected File HEAD before applying the requested tag tier. In the one-entry fixture, project_efs returns F under both ordered lenses; approved returns F only under Alice-first before RR. A zero-budget nonempty folder is PARTIAL and must fail `E_INCOMPLETE`, not appear empty. A stale basis and detached/replaced index fail closed. Parent lookup requires ordinal<count and nonzero valid admission; zero default posting is not a child.
 - [ ] Root observes targeted GREEN, complete B suite and normal runtime/init sizes. Retain source hashes, full logs, semantic limits and any newly actionable failures. Review and publish exact paths. Paid read/write pricing is a separately bounded follow-up only if it can compare useful work at an explicit source pin; Forge test gas is not an ordinary transaction receipt.
 
 Minimum tests: `test_point_selection_applies_revision_tag_after_head`, `test_conflict_preserves_both_exact_revisions`, `test_complete_one_page_folder_tag_join_is_not_point_evidence`, `test_partial_stale_and_wrong_index_reads_fail_closed`. Existing Task1 tests must remain passing without changing their executable assertions to accommodate the reader.
 
+### Task 3: Real Files move, reused path, whiteout and restore micro-case
+
+**Files:** additive tests/helpers in `test/FilesJoined.t.sol` only. Start after
+Task 2 is GREEN, independently accepted and committed; retain exact consumer,
+profile and Core hashes. No implementation-source or existing-test changes.
+This bounded extension comes from the existing Data Explorer J3–J5 fixture and
+independent source-only lifecycle analysis, not a new architecture.
+
+**Test:** `test_real_files_move_reuse_whiteout_restore`. Reuse the actual
+`_createRoot`, `_publishBranches`, body/signing/Record/parent helpers and Task2
+consumer. Define the second folder's local fixture identifier `PUBLISHED`;
+name roles continue to be hashes, not secretly recovered filename text. Use
+fresh current Basis at each checkpoint and no intervening graph writes among
+reads at that checkpoint.
+
+- [ ] Seed Root and RA/RB branches, but not RR yet. Alice HEAD(F) is revision2;
+  Bob HEAD(F) revision1. Alice `/drafts/note.txt` is F at placement revision1.
+- [ ] Rename as one signed action vector: UNBIND drafts/note expected1, BIND
+  drafts/brief to F expected0. Move as a separate vector: UNBIND drafts/brief
+  expected1, BIND published/brief to F expected0. Add Bob's lower-priority
+  published/brief placement through genuine `bob.execute`, expected0. Exact
+  File/revision identities and HEAD values must remain unchanged.
+- [ ] Reuse the old note path with a real new File G and Root RG. The four
+  actions are CREATE G, PUBLISH Root(G,"Replacement file.\n"), BIND HEAD(G)
+  expected0, BIND drafts/note to G **expected2**. First submit the same shape
+  with incorrect placement expected0 and require exact E_CAS(expected0,
+  actual2), absent G/RG and unchanged tested nonce/count/head/posting state;
+  then prove expected2 succeeds. Tombstones do not reset revision counters.
+- [ ] At post-reuse basis, complete current listings with scan budget2 give
+  exactly G in drafts and one F in published. No ghost drafts/brief or duplicate
+  F. Verify complete/exhausted/full-context windows, direct path selection and
+  exact decoded File/Revision data, not just array lengths. File `project_efs`
+  matches published F under both Lenses and never G. Selected `approved`
+  matches published F@RA under Alice-first only, never G or Bob's RB.
+- [ ] Whiteout Alice published/brief with UNBIND expected1. Alice-first path
+  is MASKED and complete plain/File-tag/revision-tag folder results omit F;
+  Bob-first still sees F@RB and the File tag, without approved. Direct F remains
+  readable with RA/RB and its evidence. This tests namespace masking separately
+  from exact-File presence and tag assertions.
+- [ ] Restore as one THREE-action signed vector: PUBLISH RR(parent RA,F,old
+  10:00 document), BIND HEAD(F) expected2, BIND published/brief expected2.
+  Do not use a helper that creates RR in a separate publication and pretend
+  restore was atomic. Alice HEAD and placement become revision3; Bob's RB
+  remains. File project tag survives; neither draft(R0) nor approved(RA)
+  transfers to RR despite equal old document bytes. RR differs from R0, with
+  equal document digest but different full Root/Child bodies. Verify exact
+  retained R0->{RA,RB} and RA->{RR} memberships; G remains unrelated.
+- [ ] Save sealed admission frontiers and query `historyByRole` as one as-of
+  state each: note F/1 -> mask/2 -> G/3; drafts brief F/1 -> mask/2;
+  published brief F/1 -> mask/2 -> F/3. H_FOUND carries live/target/revision;
+  it is not a history array. Raw current heads/Records supplement the consumer
+  but do not constitute a full independent raw-state oracle.
+- [ ] Before G creation, the two retained draft names are masked. A raw
+  budget1 page must be empty **and PARTIAL/non-final**; its same-state
+  continuation ends COMPLETE empty. The one-window consumer must reject
+  budget1. After G, budget1 may contain G but still be incomplete—do not
+  falsify posting order to demand an empty first page. Full budget2 yields G.
+- [ ] Only if the lifecycle passes with time remaining, a separate tiny-churn
+  test adds then masks two fresh temporary names for F, retaining live set G.
+  Budget2 becomes incomplete; budget4 exhausts four lifetime names and finds
+  exactly G. Vary distinct lifetime names, not merely updates to one name.
+
+**Verification and stop rule:** this is a new characterization of existing
+behavior, so a first-pass test is valid new evidence; do not fabricate a RED by
+breaking production code. The stale-CAS negative has a real successful control.
+Root runs one focused frozen gate, then whole-suite/size checks for the final
+source, under its existing finite resource protocol. On mismatch, retain the
+counterexample and permit one scoped repair only if it preserves the specified
+semantics within the morning window. Do not launch scale, browser or new
+pagination implementation to turn this into a broader project. Stop before
+September14 14:00 UTC.
+
 ## Completion and exclusions
 
-This earns local checked revision chains, retained parent discovery, signed/native authorship separation, competing current selection, explicit tag tiers and one exhausted folder window. It does not earn global tag discovery, arbitrary churn, multi-page cross-transaction coherence, native portable proof, cold filename reconstruction, move/reused-path/whiteout integration, a working browser, or production readiness. Those broader existing journey gates stay open, with their next discriminating test named rather than silently waived.
+Tasks 1/2 earn local checked revision chains, retained parent discovery,
+signed/native authorship separation, competing current selection, explicit tag
+tiers and one exhausted folder window. If Task 3 passes, it additionally earns
+the named small real-Files rename/move/reused-path/whiteout/restore composition
+and bounded same-state churn behavior. No task earns global tag discovery,
+arbitrary churn/scale, cross-transaction historical pagination, native portable
+proof, cold filename reconstruction, a working browser or production readiness.
+Those broader journey gates stay open. Hashed-name lookup and fixture strings
+are not cold reconstruction; locally observed contract authorship is not
+portable historical source proof. Future pricing must keep the journey's
+logical action boundaries, rather than relabel seeded batches as separately
+priced tag actions.

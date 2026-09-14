@@ -63,7 +63,7 @@ does not create immutable historical snapshots for free.
 | Exact typed records, checked references and mandatory acceptance | Exercised in the joined small graph; not every schema/resource boundary |
 | Independent authors, history and Lens-selected contract reads | Exercised in both candidates with independently pinned expected outputs |
 | Separate ingestion and mandatory indexing contracts | Present in both; the matched unique-Quote reverse query is now exercised and priced, not every query family |
-| Ordinary Files workflow and useful SDK | Exact checked FileRevision parents and required backlinks now pass on unchanged B Core (Task 1, 110/110 total, independently reviewed). Head-first revision tags and qualified folder consumer are in Task 2; SDK and wider Files journey remain open |
+| Ordinary Files workflow and useful SDK | Checked parents/backlinks and head-first revision tags are independently reviewed and published. Real rename/move/path reuse/whiteout/restore and bounded churn now pass120/120 total; Task3 review is pending. Cold names, SDK, browser and efficient large/churned listings remain open |
 | Portable authored evidence | [[b-portable-archive-results-20260914|Signed-claim archive complete and independently reviewed]]: full-vector EOA evidence, claim-local body recovery and separate importer-authored destination admission; representation costs measured, packed default retained. Native-contract historical proof remains unsupported |
 | Full rollback, upgrade/recovery, private/carrier failures and scale | Specific gates remain; isolated prior tests are not one finalist integration |
 
@@ -105,12 +105,14 @@ EFS SDK or lower maintenance bill: [[maintenance-and-reuse-20260913]].
    separate from replay/current destination effects, and its packed/codeblob
    representation is priced and reviewed. Keep the full signed-vector
    requirement and unsupported native historical proof explicit.
-4. **Next joined delta:** [[files-next-joined-gate-20260914|exercise actual FileRevision parents and bounded reads]], with revision-scoped
-   tags after selection. Do not substitute a Quote-shaped analogue or hardcode a
-   fixture's parent content as the general validation rule. Existing mandatory
-   acceptance and a profile-specific reference index are the proposed extension
-   seams; arbitrary revision chains are not demonstrated merely by writing a
-   parent ID into a body. Then test the smallest useful SDK write/reconcile path.
+4. **Files joined delta substantially exercised:** [[files-next-joined-gate-20260914|actual
+   FileRevision parents and bounded reads]], with head-first revision tags and
+   genuine competing authors, now have a qualified consumer. Real lifecycle and
+   small churn tests pass; finish their review and the separately planned
+   [[files-paid-workflow-plan-20260914|Files receipt economics]]. A richer joined
+   profile is not priced by the older Quote numbers. Cold filename recovery,
+   efficient live listing, SDK write/reconcile and populated-testnet upgrades
+   remain explicit implementation gates, not silently completed by unit counts.
 
 James's later morning cutoff makes the final September14,14:00UTC handoff
 earlier than the original23:10UTC sprint deadline. It must state whether reversible testnet
