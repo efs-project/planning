@@ -1,0 +1,66 @@
+{
+  "startedAt": "2026-09-14T08:17:18.373Z",
+  "heads": {
+    "/Users/james/Code/EFS/planning-warroom-b-run": "7b0471342a99d69c1d423e7e64822ccc0b309f23",
+    "/Users/james/Code/EFS/planning-warroom-c-run": "3f5702f1d7acc39c1d62a5b1a0795f3fe579ebce"
+  },
+  "lease": {
+    "start": 1789373760000,
+    "latest": 1789374300000,
+    "end": 1789375500000
+  },
+  "pinsSha256": "514f60cecb704a3600d2f46658f4ca2f497e6bd4aedcfc363ead8a5a05b13f69",
+  "resources": {
+    "freeBytes": 293172408320,
+    "scratchBytes": 221678184
+  },
+  "anvilVersion": "anvil Version: 1.7.1\nCommit SHA: 4072e48705af9d93e3c0f6e29e93b5e9a40caed8\nBuild Timestamp: 2026-05-08T07:54:31.470926000Z (1778226871)\nBuild Profile: dist",
+  "rpc": "http://127.0.0.1:59850/",
+  "anvil": {
+    "pid": 75600,
+    "args": [
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "59850",
+      "--chain-id",
+      "31337",
+      "--hardfork",
+      "cancun",
+      "--gas-limit",
+      "30000000",
+      "--timestamp",
+      "1800000000",
+      "--prune-history",
+      "256",
+      "--cache-path",
+      "/tmp/efs-required-query-paid-20260914.wdaBsu/anvil-cache",
+      "--silent"
+    ]
+  },
+  "runner": {
+    "pid": 75601,
+    "args": [
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/required-query.mjs",
+      "--input",
+      "/tmp/efs-required-query-independent-inputs-20260914.EHNqIA/inputs.json",
+      "--permit",
+      "/tmp/efs-required-query-paid-20260914.wdaBsu/permit.json",
+      "--rpc",
+      "http://127.0.0.1:59850/",
+      "--out",
+      "/tmp/efs-required-query-paid-20260914.wdaBsu/result"
+    ],
+    "outcome": {
+      "code": 1,
+      "signal": null
+    }
+  },
+  "failure": "AssertionError [ERR_ASSERTION]: signed query runner failed\n\n1 !== 0\n\n    at file:///private/tmp/efs-required-query-paid-20260914.wdaBsu/launch.mjs:105:10\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)",
+  "finishedAt": "2026-09-14T08:17:20.605Z",
+  "resourcesAfter": {
+    "freeBytes": 293167919104,
+    "scratchBytes": 226271029
+  },
+  "ownedProcessesStopped": true
+}

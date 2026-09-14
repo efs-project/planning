@@ -1,0 +1,66 @@
+{
+  "startedAt": "2026-09-14T08:25:13.846Z",
+  "heads": {
+    "/Users/james/Code/EFS/planning-warroom-b-run": "b94b57c405ef18b7f259cbd636d685ff96738ce7",
+    "/Users/james/Code/EFS/planning-warroom-c-run": "3f5702f1d7acc39c1d62a5b1a0795f3fe579ebce"
+  },
+  "lease": {
+    "start": 1789374240000,
+    "latest": 1789374720000,
+    "end": 1789376040000
+  },
+  "pinsSha256": "d35034ccb0e233b9f99594727cbe4384185cfabc6f8a3814d75711b668ec40f7",
+  "resources": {
+    "freeBytes": 293157314560,
+    "scratchBytes": 226404016
+  },
+  "anvilVersion": "anvil Version: 1.7.1\nCommit SHA: 4072e48705af9d93e3c0f6e29e93b5e9a40caed8\nBuild Timestamp: 2026-05-08T07:54:31.470926000Z (1778226871)\nBuild Profile: dist",
+  "rpc": "http://127.0.0.1:60014/",
+  "anvil": {
+    "pid": 78727,
+    "args": [
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "60014",
+      "--chain-id",
+      "31337",
+      "--hardfork",
+      "cancun",
+      "--gas-limit",
+      "30000000",
+      "--timestamp",
+      "1800000000",
+      "--prune-history",
+      "256",
+      "--cache-path",
+      "/tmp/efs-required-query-paid2-20260914.QM7xI0/anvil-cache",
+      "--silent"
+    ]
+  },
+  "runner": {
+    "pid": 78728,
+    "args": [
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/required-query.mjs",
+      "--input",
+      "/tmp/efs-required-query-independent-inputs-20260914.EHNqIA/inputs.json",
+      "--permit",
+      "/tmp/efs-required-query-paid2-20260914.QM7xI0/permit.json",
+      "--rpc",
+      "http://127.0.0.1:60014/",
+      "--out",
+      "/tmp/efs-required-query-paid2-20260914.QM7xI0/result"
+    ],
+    "outcome": {
+      "code": 0,
+      "signal": null
+    }
+  },
+  "runnerSucceeded": true,
+  "finishedAt": "2026-09-14T08:25:42.837Z",
+  "resourcesAfter": {
+    "freeBytes": 293146730496,
+    "scratchBytes": 236875936
+  },
+  "ownedProcessesStopped": true
+}

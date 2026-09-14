@@ -1,0 +1,206 @@
+{
+  "auditedAt": "2026-09-14T08:26:36.173Z",
+  "node": "v26.0.0",
+  "inputSha256": "077f59b735d2ddb3fbd9c3d432f306b0f919929b20e9a6d5402459790e96788c",
+  "journalSha256": "38c13c643d625d2f998172c22428a62839959243c6acfba4fbae55a4354cdcfb",
+  "journalBytes": 5642386,
+  "result": {
+    "checkedTransactions": 82,
+    "checkedPages": 25,
+    "headers": 83,
+    "requests": 4510,
+    "rawBytes": 4908201,
+    "auditCheckpointCalls": 4100,
+    "pageValidationCalls": 50,
+    "costs": {
+      "bScan": {
+        "deployment": {
+          "transactions": 7,
+          "gas": "8434366",
+          "wei": "16868732000000000",
+          "signedBytes": "41930",
+          "calldataBytes": "41321",
+          "returnedPageBytes": "0",
+          "logicalHeaderReads": "0",
+          "logicalBodyReads": "0"
+        },
+        "setup": {
+          "transactions": 5,
+          "gas": "715591",
+          "wei": "1431182000000000",
+          "signedBytes": "1219",
+          "calldataBytes": "692",
+          "returnedPageBytes": "0",
+          "logicalHeaderReads": "0",
+          "logicalBodyReads": "0"
+        },
+        "typePublication": {
+          "transactions": 0,
+          "gas": "0",
+          "wei": "0",
+          "signedBytes": "0",
+          "calldataBytes": "0",
+          "returnedPageBytes": "0",
+          "logicalHeaderReads": "0",
+          "logicalBodyReads": "0"
+        },
+        "commonWrite": {
+          "transactions": 8,
+          "gas": "7793360",
+          "wei": "15586720000000000",
+          "signedBytes": "15927",
+          "calldataBytes": "15072",
+          "returnedPageBytes": "0",
+          "logicalHeaderReads": "0",
+          "logicalBodyReads": "0"
+        },
+        "oldPage": {
+          "transactions": 7,
+          "gas": "1105688",
+          "wei": "2211376000000000",
+          "signedBytes": "4361",
+          "calldataBytes": "3612",
+          "returnedPageBytes": "4576",
+          "logicalHeaderReads": "12",
+          "logicalBodyReads": "12"
+        },
+        "currentPage": {
+          "transactions": 8,
+          "gas": "1299715",
+          "wei": "2599430000000000",
+          "signedBytes": "4984",
+          "calldataBytes": "4128",
+          "returnedPageBytes": "5248",
+          "logicalHeaderReads": "15",
+          "logicalBodyReads": "15"
+        }
+      },
+      "bSelective": {
+        "deployment": {
+          "transactions": 7,
+          "gas": "8734865",
+          "wei": "17469730000000000",
+          "signedBytes": "44484",
+          "calldataBytes": "43875",
+          "returnedPageBytes": "0",
+          "logicalHeaderReads": "0",
+          "logicalBodyReads": "0"
+        },
+        "setup": {
+          "transactions": 5,
+          "gas": "715591",
+          "wei": "1431182000000000",
+          "signedBytes": "1219",
+          "calldataBytes": "692",
+          "returnedPageBytes": "0",
+          "logicalHeaderReads": "0",
+          "logicalBodyReads": "0"
+        },
+        "typePublication": {
+          "transactions": 0,
+          "gas": "0",
+          "wei": "0",
+          "signedBytes": "0",
+          "calldataBytes": "0",
+          "returnedPageBytes": "0",
+          "logicalHeaderReads": "0",
+          "logicalBodyReads": "0"
+        },
+        "commonWrite": {
+          "transactions": 8,
+          "gas": "8070429",
+          "wei": "16140858000000000",
+          "signedBytes": "15928",
+          "calldataBytes": "15072",
+          "returnedPageBytes": "0",
+          "logicalHeaderReads": "0",
+          "logicalBodyReads": "0"
+        },
+        "oldPage": {
+          "transactions": 2,
+          "gas": "253969",
+          "wei": "507938000000000",
+          "signedBytes": "1246",
+          "calldataBytes": "1032",
+          "returnedPageBytes": "1376",
+          "logicalHeaderReads": "3",
+          "logicalBodyReads": "0"
+        },
+        "currentPage": {
+          "transactions": 2,
+          "gas": "263263",
+          "wei": "526526000000000",
+          "signedBytes": "1246",
+          "calldataBytes": "1032",
+          "returnedPageBytes": "1408",
+          "logicalHeaderReads": "4",
+          "logicalBodyReads": "0"
+        }
+      },
+      "c": {
+        "deployment": {
+          "transactions": 7,
+          "gas": "25714831",
+          "wei": "51429662000000000",
+          "signedBytes": "95517",
+          "calldataBytes": "94909",
+          "returnedPageBytes": "0",
+          "logicalHeaderReads": "0",
+          "logicalBodyReads": "0"
+        },
+        "setup": {
+          "transactions": 1,
+          "gas": "69974",
+          "wei": "139948000000000",
+          "signedBytes": "140",
+          "calldataBytes": "36",
+          "returnedPageBytes": "0",
+          "logicalHeaderReads": "0",
+          "logicalBodyReads": "0"
+        },
+        "typePublication": {
+          "transactions": 1,
+          "gas": "2476850",
+          "wei": "4953700000000000",
+          "signedBytes": "2703",
+          "calldataBytes": "2596",
+          "returnedPageBytes": "0",
+          "logicalHeaderReads": "0",
+          "logicalBodyReads": "0"
+        },
+        "commonWrite": {
+          "transactions": 8,
+          "gas": "13794689",
+          "wei": "27589378000000000",
+          "signedBytes": "18232",
+          "calldataBytes": "17376",
+          "returnedPageBytes": "0",
+          "logicalHeaderReads": "0",
+          "logicalBodyReads": "0"
+        },
+        "oldPage": {
+          "transactions": 3,
+          "gas": "411269",
+          "wei": "822538000000000",
+          "signedBytes": "1869",
+          "calldataBytes": "1548",
+          "returnedPageBytes": "2016",
+          "logicalHeaderReads": "5",
+          "logicalBodyReads": "0"
+        },
+        "currentPage": {
+          "transactions": 3,
+          "gas": "411924",
+          "wei": "823848000000000",
+          "signedBytes": "1869",
+          "calldataBytes": "1548",
+          "returnedPageBytes": "2048",
+          "logicalHeaderReads": "5",
+          "logicalBodyReads": "0"
+        }
+      }
+    },
+    "evidenceGrade": "RPC_OBSERVED_NOT_AUTHENTICATED_STATE_PROOF",
+    "internalCallCounts": "UNMEASURED_NO_TRACE"
+  }
+}
