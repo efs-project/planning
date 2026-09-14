@@ -1,0 +1,38 @@
+{
+  "kind": "DISPOSABLE_FOUNDRY_COLD_ACCESS_DIAGNOSTIC",
+  "baseCommit": "0d28b0f6b9ccd92a9139cbe2f3635ff4b1a46b0f",
+  "sourceDigest": "688ddd5da2da8bb624a3d1a21403b8567572e2f8145606cffd5066519458073e",
+  "tests": {
+    "total": 3,
+    "failures": 0,
+    "skips": 0
+  },
+  "claim": "FULL_BODY_PARENT_READ_EXCEEDS_FIXED_COLD_ACCEPTANCE_ENVELOPE",
+  "limits": "TEST_COLD_CONTROL_NOT_PAID_TRANSACTION; NO_CORE_FIX; NOT_A_UNIVERSAL_FILES_FAILURE",
+  "files": {
+    "cold-2.json.gz": {
+      "rawBytes": 5509,
+      "rawSha256": "ba31a88e1cfdbee5793e5d44c4d468d9fb5f0f04a68512619f353ff1aa4be58a",
+      "gzipBytes": 2606,
+      "gzipSha256": "7e14a415b66d73f3a7505f43e143571770e4588911555445352d02e6f251384b"
+    },
+    "cold-2.log.gz": {
+      "rawBytes": 3045,
+      "rawSha256": "21f05e296f40fc3f5c788bafc1decc6a499cef71259231347cea4e31635dd7e8",
+      "gzipBytes": 881,
+      "gzipSha256": "c69f91ce5ccab40cb4f050cdf90f075c492e1840445780917fefeb774e81e2e6"
+    },
+    "diagnostic.sol.gz": {
+      "rawBytes": 7502,
+      "rawSha256": "d74cd05aa3ed3e7a642537a084e2c0425820686cf618caa03a8cecfde67acc8a",
+      "gzipBytes": 2450,
+      "gzipSha256": "2db6f9229145245f888504e88fdf92c428c5ed5a4ab508d0cdd8f75f43759c78"
+    },
+    "independent-review.md.gz": {
+      "rawBytes": 6848,
+      "rawSha256": "793d818e09f25dd127d92a407e20682848ff7b1a3cc7399d92d1f1fd919f2ab3",
+      "gzipBytes": 3038,
+      "gzipSha256": "2e9f6ef1bdc1798a76f7218b0fef60923cd252a2ab6f8ccec0ef1fab3cc714b7"
+    }
+  }
+}
