@@ -1,0 +1,26 @@
+✔ sealed schedules, six roles, exact126 reads261 slots59 rows each (1.284584ms)
+✔ Evidence is325static bytes, 11 words, no dynamic fields (1.243375ms)
+✔ hand literal left-aligned highWater6/11, not B right-aligned integer (1.224917ms)
+✔ hand literal uint64 author posting uses eight-byte big endian and two words (0.208625ms)
+✔ length accumulator and first field length both retained (0.138667ms)
+✔ zero-length hidden backing slots stay in mandatory inventory (1.06725ms)
+✔ framed Quote exact288bytes occupies all9dynamic words (0.43275ms)
+✔ TAG scope uses concept and File as second triple member, not role (0.105833ms)
+✔ Store length and data namespace slots independently recomputed (0.19725ms)
+✔ C S0/S1 admission basis is0/6, not execution block26/27 (0.266041ms)
+✔ no Type/Record occurrence key collision; all seven are checked (0.060209ms)
+✔ full native and signed intent numericfields are decimalstrings (0.067792ms)
+✔ independently recomputed EIP712 signature and bad signature refusal (2.352916ms)
+✔ changed TAG role changes signed action hash and fails literal call comparison (4.003292ms)
+✔ exact mandatory and late-index errors have independently literal selectors/lengths (0.202ms)
+✔ local signed tx independently recovers signer and rejects nonce/data/gas drift (28.817042ms)
+✔ runtime adapter rejects wrong link name/placeholder/missing immutable/overlap (10.203125ms)
+✔ absent packet never defaults to passing audit (5.521125ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 497.965125

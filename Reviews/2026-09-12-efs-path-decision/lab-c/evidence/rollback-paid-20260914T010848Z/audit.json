@@ -1,0 +1,215 @@
+{
+  "schema": "efs-lab-c/independent-rollback-audit/1",
+  "status": "PASS_RPC_OBSERVED",
+  "counts": {
+    "rawEnvelopes": 2518,
+    "logicalReads": 756,
+    "storageReads": 1566,
+    "signedTransactions": 27,
+    "deployments": 18,
+    "staticMinedLinks": 3,
+    "headers": 28
+  },
+  "transactions": [
+    {
+      "arm": "scale7",
+      "kind": "deployment",
+      "block": 1,
+      "hash": "0x0cab1fa90c418f34b21f4c11603321f3cb2a0231bf00d2188a39ce846a82c0b2",
+      "gasUsed": "4356044"
+    },
+    {
+      "arm": "scale7",
+      "kind": "deployment",
+      "block": 2,
+      "hash": "0x37b959e6b36746f2d8ffa50b8a3223b515c0644880da48fe3e39ad5d8784897e",
+      "gasUsed": "6793577"
+    },
+    {
+      "arm": "scale7",
+      "kind": "deployment",
+      "block": 3,
+      "hash": "0xb26605af12cc59e65e18753624db1eb75bc5519638a579a38d56d861e0a7106b",
+      "gasUsed": "11972902"
+    },
+    {
+      "arm": "scale7",
+      "kind": "setup",
+      "block": 4,
+      "hash": "0xf7a3b716cd3ffc0a84ce9b639dd23c2f25fbd4b53a0af5961d9d6fbac3659b2d",
+      "gasUsed": "69974"
+    },
+    {
+      "arm": "scale7",
+      "kind": "deployment",
+      "block": 5,
+      "hash": "0xa97a406260f7a297ce743f12dd46058b664b71a63853631d45044d5d41d1f2fe",
+      "gasUsed": "93667"
+    },
+    {
+      "arm": "scale7",
+      "kind": "deployment",
+      "block": 6,
+      "hash": "0x5785a466ebf8ac8811c2592406d4097d01d40877721a6cd4c1cd548ac78357ca",
+      "gasUsed": "185034"
+    },
+    {
+      "arm": "scale7",
+      "kind": "deployment",
+      "block": 7,
+      "hash": "0x51170e89ad5d6c4e94e0ca59977417f40f60f21c3bac3cb1d03735729e1d7f7d",
+      "gasUsed": "647360"
+    },
+    {
+      "arm": "scale7",
+      "kind": "setup",
+      "block": 8,
+      "hash": "0x03cfe0a3e308db0d2ff75d4e06b5930fbf4ff9f52b12b2c3a15d9110a2148993",
+      "gasUsed": "3247923"
+    },
+    {
+      "arm": "scale7",
+      "kind": "attempt",
+      "block": 9,
+      "hash": "0x562c66309dbc16c41076ea43e9a15f4daab6f8c1c5ca106b0664b93c05fdd381",
+      "gasUsed": "366020"
+    },
+    {
+      "arm": "lateIndex",
+      "kind": "deployment",
+      "block": 10,
+      "hash": "0xf92b9d1a207dbee927a14702b62f49576487f4a130f5e0e2d8eb785e89336aa2",
+      "gasUsed": "4356044"
+    },
+    {
+      "arm": "lateIndex",
+      "kind": "deployment",
+      "block": 11,
+      "hash": "0x1d0e3692270df7977001034488330739faf407c05a8aa62c4d6e2d4dc1b256ea",
+      "gasUsed": "6793961"
+    },
+    {
+      "arm": "lateIndex",
+      "kind": "deployment",
+      "block": 12,
+      "hash": "0xa4fc68f199cd979e1b008021a884d81a1e5c5138887132ffd38a977757c2a67f",
+      "gasUsed": "11972890"
+    },
+    {
+      "arm": "lateIndex",
+      "kind": "setup",
+      "block": 13,
+      "hash": "0xc2888131a5591f8bfc27293cc74cbabd4f8beb04e0809f312f1722a4d3ce4fc5",
+      "gasUsed": "69974"
+    },
+    {
+      "arm": "lateIndex",
+      "kind": "deployment",
+      "block": 14,
+      "hash": "0x421d370794687a89c0b52abb0967cea7f59d1029b5960f53a97d59d64e461d7b",
+      "gasUsed": "93667"
+    },
+    {
+      "arm": "lateIndex",
+      "kind": "deployment",
+      "block": 15,
+      "hash": "0xe2ea11233cda4fcef604ff855bf628970ab75113fe4c641017801bbad7821dc3",
+      "gasUsed": "185034"
+    },
+    {
+      "arm": "lateIndex",
+      "kind": "deployment",
+      "block": 16,
+      "hash": "0x42bd1473868fb9c7efe5259ddf0df42ee3a34401d653875b1f0dde69c54de703",
+      "gasUsed": "647360"
+    },
+    {
+      "arm": "lateIndex",
+      "kind": "setup",
+      "block": 17,
+      "hash": "0xc2ac013035543304b6be8a0a14d712a409d0560af8cbe38a2dd1871553b3e534",
+      "gasUsed": "3247923"
+    },
+    {
+      "arm": "lateIndex",
+      "kind": "attempt",
+      "block": 18,
+      "hash": "0x6c9389ad2113f1055443416e96f90536bc0b21ddb528e3d2d7cb3b3bff8eae86",
+      "gasUsed": "2246568"
+    },
+    {
+      "arm": "calibration",
+      "kind": "deployment",
+      "block": 19,
+      "hash": "0x37c9886857182f706e31d56b45b1151008ff84464ca4156a919d02ff6a37d46d",
+      "gasUsed": "4356044"
+    },
+    {
+      "arm": "calibration",
+      "kind": "deployment",
+      "block": 20,
+      "hash": "0xcd941bc5c7c09aabdb6d8c7595c0a7d8d2911242b74b9d1aea343f44c69cbc65",
+      "gasUsed": "6793577"
+    },
+    {
+      "arm": "calibration",
+      "kind": "deployment",
+      "block": 21,
+      "hash": "0x89f24e534f8850606e9926cb640bbaa7772fc3fb37efbbd8af674802283ca321",
+      "gasUsed": "11972902"
+    },
+    {
+      "arm": "calibration",
+      "kind": "setup",
+      "block": 22,
+      "hash": "0x8426e475197469e264f42059c95ce58a275f75b9970c42e2010e663da0f9f6a3",
+      "gasUsed": "69974"
+    },
+    {
+      "arm": "calibration",
+      "kind": "deployment",
+      "block": 23,
+      "hash": "0xa69adf2873cb6ef996ee0439b87ada03c9a6aefc7a02432cf7d661c6f2dcffb9",
+      "gasUsed": "93667"
+    },
+    {
+      "arm": "calibration",
+      "kind": "deployment",
+      "block": 24,
+      "hash": "0xeca9700ce7391b1826f557c4778449e5cf34b7d4c80e2ca7dcf1a0f587e5001c",
+      "gasUsed": "185034"
+    },
+    {
+      "arm": "calibration",
+      "kind": "deployment",
+      "block": 25,
+      "hash": "0x39ba9ea0ce01a29636addbf1e25e0fcdc1f6911cb7c44bfa3948ffd893e2f0be",
+      "gasUsed": "647360"
+    },
+    {
+      "arm": "calibration",
+      "kind": "setup",
+      "block": 26,
+      "hash": "0xd78ca79cff97d173c5257382ca245b2219e055a9170e6e400e0af6d3784017f9",
+      "gasUsed": "3247923"
+    },
+    {
+      "arm": "calibration",
+      "kind": "attempt",
+      "block": 27,
+      "hash": "0x1481adc6654a43afb9050bf89042953a611e36e562143bead640730e5743e98d",
+      "gasUsed": "2400648"
+    }
+  ],
+  "limitations": [
+    "Number-qualified RPC observations joined to retained headers, not authenticated state proof or EIP-1898 requireCanonical calls.",
+    "Compiler/source provenance and reviewed fault semantics are prior sealed inputs; literal code observations do not prove source compilation.",
+    "No C/B feature parity, full Files, portability, adoption or normal product-price conclusion."
+  ],
+  "inputSha256": {
+    "expectations": "2e3c9887a3ed933fccfa2cf4854775b029d045c376628a1cacad68463d70931e",
+    "raw": "b04b3e018c968e71d584d46878d015acb08c9a190aaf83f81dcf874afdbf0658",
+    "report": "31725c34d0c2869b9d28696657cf2f7b2dfeede529ade7734210234ac9bbfd8b",
+    "audit": "4e284f5c1567b7ab6c80b74fc2263bcc726363ed4b94c2b16dbbe945be31ea95"
+  }
+}

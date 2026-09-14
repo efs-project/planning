@@ -1,0 +1,122 @@
+{
+  "schema": "efs-lab-c/control-evidence-inventory/1",
+  "source": "84e1081e46163547e2928c12a4551233e8f07afc",
+  "files": {
+    "raw.jsonl": {
+      "sha256": "b04b3e018c968e71d584d46878d015acb08c9a190aaf83f81dcf874afdbf0658",
+      "bytes": 3140747
+    },
+    "report.json": {
+      "sha256": "31725c34d0c2869b9d28696657cf2f7b2dfeede529ade7734210234ac9bbfd8b",
+      "bytes": 555677
+    },
+    "audit.json": {
+      "sha256": "1247900a68f70684f34b7f99a20228d76d43a606692d8f01002c3e6c4915045d",
+      "bytes": 6312
+    },
+    "supplemental.json": {
+      "sha256": "cc2b74ba1d08646797558c73f86c4c861e2b28dabc3f84e4efa9b96c7c06cfd8",
+      "bytes": 9566
+    },
+    "pins.json": {
+      "sha256": "41dd3b3f53c53819a0a4117584b067651f4f0060a73ff98247d2e31f017ea2fa",
+      "bytes": 14265
+    },
+    "launch-record.json": {
+      "sha256": "dbc9cdfa2901edab27e892af1a89bd34e8600406bcdafb8398005e3adcc9327f",
+      "bytes": 16192
+    },
+    "source-node-test.log": {
+      "sha256": "da46f8209e0c9e3f8aff9fb2bc302c34d27ec74413d988765629dcd665a1215c",
+      "bytes": 10400
+    },
+    "preparation-test.log": {
+      "sha256": "9996a9fd7f240e772a4dce0aad35f39d33e5b5f1b552a0f6e16d8a52fd8b06d8",
+      "bytes": 1599
+    },
+    "supplemental-test.log": {
+      "sha256": "d973322036ed77a42872960a1e341b3d9b527e747356c834f9d85d3fa9ae9ffb",
+      "bytes": 3366
+    },
+    "anvil.log": {
+      "sha256": "88d3eeaf4ad7666dc31f483122655e474444518daecde54d4d98bc1d4caf5a42",
+      "bytes": 183847
+    },
+    "runner.log": {
+      "sha256": "fba5e057ca10e992cb4f020dc85c5549f68b8dbb5ea7460458fd97c6cc4b204c",
+      "bytes": 118
+    },
+    "notes.md": {
+      "sha256": "d3f35aec79db39c273e5dbeb01b8d57c9e444692b55e6e037f90bff40c4e5389",
+      "bytes": 1856
+    },
+    "launch.mjs": {
+      "sha256": "af09d26a7b3c7f93508b8264d86d2aa5a706f98d1c53bf68dd5c4e3fa52f228b",
+      "bytes": 7172
+    },
+    "seal-pins.mjs": {
+      "sha256": "a9832bffe1d63d78a6713ea1330a81278ad8d41989d30c5e81e50dc6ce7f06cb",
+      "bytes": 2967
+    },
+    "supplemental-check.mjs": {
+      "sha256": "7ce24f93221627a41c23f7b01da2663c9964f4a9929eb927720f1081d95c2031",
+      "bytes": 12158
+    },
+    "supplemental-check.test.mjs": {
+      "sha256": "42346984adaabd68f757d6bfa4a11de65984a3d291669bbcd19c62ac143e7bb4",
+      "bytes": 8913
+    },
+    "prepare.mjs": {
+      "sha256": "9ef8a9b1e38eaa0419521e43ccfb11ff9e39008e3dd0ab9960ed223c80d0e21e",
+      "bytes": 22378
+    },
+    "runtime.mjs": {
+      "sha256": "896ff8a98cb537b151e2a5b048937dc471aca533a6619b64a9a35375555c6a53",
+      "bytes": 5012
+    },
+    "audit.mjs": {
+      "sha256": "4e284f5c1567b7ab6c80b74fc2263bcc726363ed4b94c2b16dbbe945be31ea95",
+      "bytes": 14679
+    },
+    "expectations.json": {
+      "sha256": "2e3c9887a3ed933fccfa2cf4854775b029d045c376628a1cacad68463d70931e",
+      "bytes": 949962
+    },
+    "preparation-details.json": {
+      "sha256": "8ef56112b89364954763d72c87bef466a45d8e2cb0da101902303f9391e3a393",
+      "bytes": 915155
+    },
+    "preparation.test.mjs": {
+      "sha256": "3d08e02e366dff0bda62022037f919cc6d9b06d14ab70ed7a8782f9272e2664f",
+      "bytes": 10533
+    },
+    "assumptions.md": {
+      "sha256": "43d070da88e3b05c9da2e99cbdf3bc431f88235211136f7b7b808dec4e7d6b21",
+      "bytes": 6572
+    },
+    "runner-review.md": {
+      "sha256": "5c1a04362f632e559cf05c9f7e0ed1cd785b557244e266eaab132c93138ab2af",
+      "bytes": 6087
+    },
+    "preparation-review.md": {
+      "sha256": "66180888621d4a7d939effbf4a48c59e75986ef96df5a548fbe4d998464fb3bb",
+      "bytes": 3684
+    },
+    "launch-review.md": {
+      "sha256": "e43198b82e5664795853d66299de23559574e10b81f300c7d18a08a54b0b7678",
+      "bytes": 4602
+    },
+    "packet-review.md": {
+      "sha256": "a030d44fc3c1252a938f97df579628dc05850d57eee2b2ce10f242053041049e",
+      "bytes": 4087
+    },
+    "rollback-control.mjs": {
+      "sha256": "44f8f1186fccf595039b3cab1b63b83023ab97f6256dc48c3399de76cbc07854",
+      "bytes": 44782
+    },
+    "rollback-control.test.mjs": {
+      "sha256": "bcc0c5e4b9b4d20a5ec586435eb687d8b8a79a33891b57268978b11283ea4804",
+      "bytes": 7151
+    }
+  }
+}
