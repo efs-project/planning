@@ -95,6 +95,19 @@ contract LensReader {
         bool mutated;
         PrincipalCursor next;
     }
+    // Internal reducers return selector ordinals, so wrappers can expose either
+    // addresses or explicit IDs without a second scan or reverse identity lookup.
+    struct Selection { bytes32 position; uint256 selector; bytes32 target; uint32 revision; uint64 admission; }
+    struct ScanPage {
+        Selection[] items;
+        uint64 scanned;
+        uint64 hydrations;
+        uint64 rawTotal;
+        uint64 selectedSoFar;
+        uint8 status;
+        bool mutated;
+        PrincipalCursor next;
+    }
     bytes32 private constant SUPPORTED_LAYOUT = keccak256("efs.lab.ledger-layout/2:roots-0-12-preserved:context-13:execution-14:readsets-15");
 
     Ledger public immutable ledger;
@@ -115,7 +128,8 @@ contract LensReader {
 
     function _explicitBasis(bytes32 execution) private view {
         if (ledger.layoutId() != SUPPORTED_LAYOUT || ledger.executionSet() != execution
-            || ledger.indexModule() != address(index)) revert E_CURSOR();
+            || ledger.indexModule() != address(index)
+            || (address(index) != address(0) && index.ledger() != address(ledger))) revert E_CURSOR();
     }
 
     function resolvePrincipals(bytes32[] calldata principals, bytes32 purpose, bytes32 subject, bytes32 role, bytes32 execution)
@@ -123,12 +137,9 @@ contract LensReader {
     {
         _explicitBasis(execution);
         if (principals.length == 0 || principals.length > 255) revert E_LENS();
-        bytes32 position = Keys.position(purpose, subject, role);
-        for (uint256 i; i < principals.length; ++i) {
-            (uint8 state, uint32 rev, uint64 at,,, bytes32 t) = ledger.head(Keys.binding(principals[i], position));
-            if (state == 1) return (FOUND, t, rev, principals[i], at);
-            if (state == 2) return (MASKED, 0, rev, principals[i], at);
-        }
+        Selection memory selected;
+        (status,selected) = _resolve(principals,Keys.position(purpose,subject,role));
+        return (status,selected.target,selected.revision,status == ABSENT ? bytes32(0) : principals[selected.selector],selected.admission);
     }
 
     function resolveNoTiebreakPrincipals(bytes32[] calldata principals, bytes32 purpose, bytes32 subject, bytes32 role, bytes32 execution)
@@ -136,17 +147,9 @@ contract LensReader {
     {
         _explicitBasis(execution);
         if (principals.length == 0 || principals.length > 255) revert E_LENS();
-        bytes32 position = Keys.position(purpose, subject, role);
-        candidates = new PrincipalEntry[](principals.length);
-        uint256 live;
-        bool removed;
-        for (uint256 i; i < principals.length; ++i) {
-            (uint8 state, uint32 rev, uint64 at,,, bytes32 t) = ledger.head(Keys.binding(principals[i], position));
-            if (state == 1) candidates[live++] = PrincipalEntry(position, principals[i], t, rev, at);
-            else if (state == 2) removed = true;
-        }
-        assembly ("memory-safe") { mstore(candidates, live) }
-        status = live == 0 ? (removed ? MASKED : ABSENT) : (live == 1 && !removed ? FOUND : CONFLICT);
+        Selection[] memory selected;
+        (status,selected) = _conflicts(principals,Keys.position(purpose,subject,role));
+        return (status,_principalEntries(selected,principals));
     }
 
     function listPrincipals(bytes32[] calldata principals, bytes32 purpose, bytes32 subject, PrincipalCursor calldata cursor, uint256 budget)
@@ -162,16 +165,28 @@ contract LensReader {
         uint64 epoch = ledger.registry().epoch();
         (uint64 current,,,) = ledger.counts();
         if (c.executionSet == 0) {
+            if (c.basisAdmission != 0 || c.indexGeneration != 0 || c.rulesEpoch != 0 || c.scopeKey != 0 || c.lensHash != 0
+                || c.position != 0 || c.lensIndex != 0 || c.rawIndex != 0 || c.selectedSoFar != 0) revert E_CURSOR();
             c.basisAdmission = current;
             c.executionSet = execution; c.indexGeneration = generation; c.rulesEpoch = epoch;
             c.scopeKey = scopeKey; c.lensHash = lensHash;
         } else if (c.basisAdmission != current || c.executionSet != execution || c.indexGeneration != generation || c.rulesEpoch != epoch
             || c.scopeKey != scopeKey || c.lensHash != lensHash) revert E_CURSOR();
+        ScanPage memory scanned = _scan(principals,purpose,subject,c,budget);
+        return PrincipalPage(_principalEntries(scanned.items,principals),scanned.scanned,scanned.hydrations,scanned.rawTotal,
+            scanned.selectedSoFar,scanned.status,scanned.mutated,scanned.next);
+    }
+
+    /// One candidate/mask/paging reducer for both public ABIs. The wrappers own
+    /// their basis laws; only traversal fields and scopeKey are interpreted here.
+    function _scan(bytes32[] memory principals, bytes32 purpose, bytes32 subject, PrincipalCursor memory c, uint256 budget)
+        private view returns (ScanPage memory page)
+    {
         if (budget > MAX_BUDGET) budget = MAX_BUDGET;
-        page.items = new PrincipalEntry[](budget);
-        if (address(index) == address(0)) return _finishPrincipals(page, c, 0, UNKNOWN);
-        (uint8 cov,,) = index.coverage(_scopeFamily(purpose), scopeKey);
-        if (cov != COMPLETE) return _finishPrincipals(page, c, 0, UNKNOWN);
+        page.items = new Selection[](budget);
+        if (address(index) == address(0)) return _finishScan(page, c, 0, UNKNOWN);
+        (uint8 cov,,) = index.coverage(_scopeFamily(purpose), c.scopeKey);
+        if (cov != COMPLETE) return _finishScan(page, c, 0, UNKNOWN);
         for (uint256 i; i < principals.length; ++i)
             page.rawTotal += _scopeCount(purpose, Keys.scopeList(Keys.scope(principals[i], purpose, subject)));
         uint256 filled;
@@ -183,35 +198,35 @@ contract LensReader {
             while (j < n) {
                 if (page.scanned >= budget) {
                     c.lensIndex = uint8(k); c.rawIndex = j;
-                    return _finishPrincipals(page, c, filled, PARTIAL);
+                    return _finishScan(page, c, filled, PARTIAL);
                 }
                 bytes32 position = ledger.bindingPosition(_scopeAt(purpose, listKey, j++));
                 (uint8 state, uint32 rev, uint64 at,,, bytes32 target) = ledger.head(Keys.binding(principals[k], position));
                 ++page.scanned; ++page.hydrations;
                 if (at > c.basisAdmission) page.mutated = true;
                 if (state != 1) continue;
-                (bool masked, uint64 probes) = _maskedPrincipals(principals, k, position);
+                (bool masked, uint64 probes) = _masked(principals, k, position);
                 page.hydrations += probes;
                 if (masked) continue;
-                page.items[filled++] = PrincipalEntry(position, principals[k], target, rev, at);
+                page.items[filled++] = Selection(position, k, target, rev, at);
                 ++c.selectedSoFar; c.position = position;
             }
             ++k; j = 0;
         }
         c.lensIndex = uint8(principals.length); c.rawIndex = 0;
-        return _finishPrincipals(page, c, filled, COMPLETE);
+        return _finishScan(page, c, filled, COMPLETE);
     }
 
-    function _finishPrincipals(PrincipalPage memory page, PrincipalCursor memory c, uint256 filled, uint8 status)
-        private pure returns (PrincipalPage memory)
+    function _finishScan(ScanPage memory page, PrincipalCursor memory c, uint256 filled, uint8 status)
+        private pure returns (ScanPage memory)
     {
-        PrincipalEntry[] memory items = page.items;
+        Selection[] memory items = page.items;
         assembly ("memory-safe") { mstore(items, filled) }
         page.selectedSoFar = c.selectedSoFar; page.status = status; page.next = c;
         return page;
     }
 
-    function _maskedPrincipals(bytes32[] calldata principals, uint256 upto, bytes32 position) private view returns (bool, uint64 probes) {
+    function _masked(bytes32[] memory principals, uint256 upto, bytes32 position) private view returns (bool, uint64 probes) {
         for (uint256 i; i < upto; ++i) {
             ++probes;
             (uint8 state,,,,,) = ledger.head(Keys.binding(principals[i], position));
@@ -234,15 +249,9 @@ contract LensReader {
         returns (uint8 status, bytes32 target, uint32 revision, address author, uint64 admissionOrdinal)
     {
         if (lens.length == 0) revert E_LENS();
-        bytes32 position = Keys.position(purpose, subject, role);
-        bytes32 origin = _origin();
-        for (uint256 i; i < lens.length; ++i) {
-            (uint8 state, uint32 rev, uint64 adm,,, bytes32 t) =
-                ledger.head(Keys.binding(Keys.principalFor(lens[i], origin), position));
-            if (state == 1) return (FOUND, t, rev, lens[i], adm);
-            if (state == 2) return (MASKED, bytes32(0), rev, lens[i], adm);
-        }
-        return (ABSENT, bytes32(0), 0, address(0), 0);
+        Selection memory selected;
+        (status,selected) = _resolve(_principals(lens),Keys.position(purpose,subject,role));
+        return (status,selected.target,selected.revision,status == ABSENT ? address(0) : lens[selected.selector],selected.admission);
     }
 
     /// Agreement policy (LENS_NO_TIEBREAK / L-EQ): every live candidate is returned; more than
@@ -253,23 +262,9 @@ contract LensReader {
         returns (uint8 status, Entry[] memory candidates)
     {
         if (lens.length == 0) revert E_LENS();
-        bytes32 position = Keys.position(purpose, subject, role);
-        candidates = new Entry[](lens.length);
-        uint256 live;
-        bool removed;
-        bytes32 origin = _origin();
-        for (uint256 i; i < lens.length; ++i) {
-            (uint8 state, uint32 rev, uint64 adm,,, bytes32 t) =
-                ledger.head(Keys.binding(Keys.principalFor(lens[i], origin), position));
-            if (state == 1) candidates[live++] = Entry(position, lens[i], t, rev, adm);
-            else if (state == 2) removed = true;
-        }
-        assembly ("memory-safe") {
-            mstore(candidates, live)
-        }
-        if (live == 0) status = removed ? MASKED : ABSENT;
-        else if (live == 1 && !removed) status = FOUND;
-        else status = CONFLICT;
+        Selection[] memory selected;
+        (status,selected) = _conflicts(_principals(lens),Keys.position(purpose,subject,role));
+        return (status,_addressEntries(selected,lens));
     }
 
     // ------------------------------------------------------------------ budgeted listing
@@ -299,50 +294,16 @@ contract LensReader {
         ) {
             revert E_CURSOR();
         }
-        bytes32 origin = _origin();
-        if (budget > MAX_BUDGET) budget = MAX_BUDGET; // paid reads: bound memory expansion
-        page.items = new Entry[](budget);
-        page.next = c;
-        if (address(index) == address(0)) return _finish(page, c, 0, UNKNOWN);
-        (uint8 cov,,) = index.coverage(_scopeFamily(purpose), scopeKey);
-        if (cov != COMPLETE) return _finish(page, c, 0, UNKNOWN);
-        for (uint256 i; i < lens.length; ++i) {
-            uint64 n = _scopeCount(purpose, Keys.scopeList(Keys.scope(Keys.principalFor(lens[i], origin), purpose, subject)));
-            page.rawTotal += n;
-        }
-        uint256 filled;
-        uint256 k = c.lensIndex;
-        uint64 j = c.rawIndex;
-        while (k < lens.length) {
-            bytes32 principal = Keys.principalFor(lens[k], origin);
-            bytes32 listKey = Keys.scopeList(Keys.scope(principal, purpose, subject));
-            uint64 n = _scopeCount(purpose,listKey);
-            while (j < n) {
-                if (page.scanned >= budget) {
-                    c.lensIndex = uint8(k);
-                    c.rawIndex = j;
-                    return _finish(page, c, filled, PARTIAL);
-                }
-                bytes32 position = ledger.bindingPosition(_scopeAt(purpose,listKey,j));
-                (uint8 state, uint32 rev, uint64 adm,,, bytes32 t) = ledger.head(Keys.binding(principal, position));
-                ++page.scanned;
-                ++page.hydrations;
-                ++j;
-                if (adm > c.basisAdmission) page.mutated = true;
-                if (state != 1) continue;
-                (bool masked, uint256 probes) = _masked(lens, k, position, origin);
-                page.hydrations += uint64(probes);
-                if (masked) continue;
-                page.items[filled++] = Entry(position, lens[k], t, rev, adm);
-                ++c.selectedSoFar;
-                c.position = position;
-            }
-            ++k;
-            j = 0;
-        }
-        c.lensIndex = uint8(lens.length);
-        c.rawIndex = 0;
-        return _finish(page, c, filled, COMPLETE);
+        // The common worker treats this field as opaque; it remains shell code
+        // in the legacy wrapper, never a silently upgraded execution guarantee.
+        PrincipalCursor memory traversal = PrincipalCursor(c.basisAdmission,c.indexGeneration,c.rulesEpoch,c.coreCodeCommitment,
+            c.scopeKey,c.lensHash,c.position,c.lensIndex,c.rawIndex,c.selectedSoFar);
+        ScanPage memory scanned = _scan(_principals(lens),purpose,subject,traversal,budget);
+        traversal = scanned.next;
+        Cursor memory next = Cursor(traversal.basisAdmission,traversal.indexGeneration,traversal.rulesEpoch,traversal.executionSet,
+            traversal.scopeKey,traversal.lensHash,traversal.position,traversal.lensIndex,traversal.rawIndex,traversal.selectedSoFar);
+        return Page(_addressEntries(scanned.items,lens),scanned.scanned,scanned.hydrations,scanned.rawTotal,
+            scanned.selectedSoFar,scanned.status,scanned.mutated,next);
     }
 
     // Candidate storage is replaceable without forking the selection/masking
@@ -351,30 +312,46 @@ contract LensReader {
     function _scopeCount(bytes32,bytes32 key) internal view virtual returns(uint64 count) {(count,,,)=index.postingHead(key);}
     function _scopeAt(bytes32,bytes32 key,uint64 i) internal view virtual returns(uint64) {return index.postingAt(key,i);}
 
-    /// A higher lens principal with ANY binding at the position (live or removed) masks it, so
-    /// the same name bound by several authors yields one selected entry. Returns the probes paid.
-    function _masked(address[] calldata lens, uint256 upto, bytes32 position, bytes32 origin)
-        private
-        view
-        returns (bool masked, uint256 probes)
-    {
-        for (uint256 i; i < upto; ++i) {
-            ++probes;
-            (uint8 state,,,,,) = ledger.head(Keys.binding(Keys.principalFor(lens[i], origin), position));
-            if (state != 0) return (true, probes);
-        }
-        return (false, probes);
+    function _principals(address[] calldata authors) private view returns (bytes32[] memory ids) {
+        ids = new bytes32[](authors.length);
+        bytes32 origin = _origin();
+        for (uint256 i; i < authors.length; ++i) ids[i] = Keys.principalFor(authors[i],origin);
     }
 
-    function _finish(Page memory page, Cursor memory c, uint256 filled, uint8 status) private pure returns (Page memory) {
-        Entry[] memory items = page.items;
-        assembly ("memory-safe") {
-            mstore(items, filled)
+    function _resolve(bytes32[] memory ids, bytes32 position) private view returns (uint8 status, Selection memory selected) {
+        for (uint256 i; i < ids.length; ++i) {
+            (uint8 state,uint32 revision,uint64 at,,,bytes32 target) = ledger.head(Keys.binding(ids[i],position));
+            if (state != 0) return (state == 1 ? FOUND : MASKED,Selection(position,i,state == 1 ? target : bytes32(0),revision,at));
         }
-        page.selectedSoFar = c.selectedSoFar;
-        page.status = status;
-        page.next = c;
-        return page;
+    }
+
+    function _conflicts(bytes32[] memory ids, bytes32 position) private view returns (uint8 status, Selection[] memory selected) {
+        selected = new Selection[](ids.length);
+        uint256 live;
+        bool removed;
+        for (uint256 i; i < ids.length; ++i) {
+            (uint8 state,uint32 revision,uint64 at,,,bytes32 target) = ledger.head(Keys.binding(ids[i],position));
+            if (state == 1) selected[live++] = Selection(position,i,target,revision,at);
+            else if (state == 2) removed = true;
+        }
+        assembly ("memory-safe") { mstore(selected,live) }
+        status = live == 0 ? (removed ? MASKED : ABSENT) : (live == 1 && !removed ? FOUND : CONFLICT);
+    }
+
+    function _principalEntries(Selection[] memory selected, bytes32[] memory ids) private pure returns (PrincipalEntry[] memory entries) {
+        entries = new PrincipalEntry[](selected.length);
+        for (uint256 i; i < selected.length; ++i) {
+            Selection memory s = selected[i];
+            entries[i] = PrincipalEntry(s.position,ids[s.selector],s.target,s.revision,s.admission);
+        }
+    }
+
+    function _addressEntries(Selection[] memory selected, address[] calldata authors) private pure returns (Entry[] memory entries) {
+        entries = new Entry[](selected.length);
+        for (uint256 i; i < selected.length; ++i) {
+            Selection memory s = selected[i];
+            entries[i] = Entry(s.position,authors[s.selector],s.target,s.revision,s.admission);
+        }
     }
 
     // ------------------------------------------------------------------ as-of history (bisection over the packed history list)

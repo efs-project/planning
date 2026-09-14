@@ -77,4 +77,22 @@ contract FilesLiveIndexTest is FilesNamesTest {
         LensReader.Page memory p=lateLens.list(lensOf(eoaA,address(bob)),FOLDER,MOUNT,zero,32);
         require(p.status==lateLens.UNKNOWN() && p.items.length==0,"late live index is unknown not empty");
     }
+    function test_live_address_explicit_parity_after_swap_removal() public {
+        _create(1,bytes("a.txt"),true,0);_create(2,bytes("b.txt"),true,0);_create(3,bytes("c.txt"),true,0);
+        _submit(one(aUnbind(FOLDER,MOUNT,keccak256("a.txt"),1)),new bytes[](1));
+        bytes32[] memory principals=new bytes32[](2);principals[0]=pid(eoaA);principals[1]=pid(address(bob));
+        LensReader.Cursor memory old;LensReader.PrincipalCursor memory current;
+        for(uint256 i;i<2;++i){
+            LensReader.Page memory op=lens.list(lensOf(eoaA,address(bob)),FOLDER,MOUNT,old,1);
+            LensReader.PrincipalPage memory np=lens.listPrincipals(principals,FOLDER,MOUNT,current,1);
+            require(op.items.length==1 && np.items.length==1 && op.rawTotal==2 && np.rawTotal==2,"dense scan skipped candidate");
+            require(op.items[0].position==np.items[0].position && op.items[0].target==np.items[0].target
+                && op.items[0].admission==np.items[0].admission && pid(op.items[0].author)==np.items[0].principalId,"live entry parity");
+            require(op.status==np.status && op.scanned==np.scanned && op.hydrations==np.hydrations
+                && op.selectedSoFar==np.selectedSoFar,"live page parity");
+            require(op.items[0].position==Keys.position(FOLDER,MOUNT,keccak256(i==0?bytes("c.txt"):bytes("b.txt"))),"swap moved ordering");
+            old=op.next;current=np.next;
+        }
+        require(current.selectedSoFar==2,"live count after removal");
+    }
 }

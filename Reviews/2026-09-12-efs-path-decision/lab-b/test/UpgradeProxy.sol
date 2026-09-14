@@ -16,6 +16,7 @@ contract UpgradeProxy {
     bytes32 private immutable expectedLayout;
     error E_UPGRADE_ADMIN();
     error E_UPGRADE_INCOMPATIBLE();
+    error E_ETH_UNSUPPORTED();
     event Upgraded(address indexed implementation);
     event ExecutionChanged(bytes32 indexed executionSet, uint256 revision);
 
@@ -51,6 +52,8 @@ contract UpgradeProxy {
     function implementation() external view returns (address) {
         return address(uint160(ExecutionSlots.read(ExecutionSlots.IMPLEMENTATION)));
     }
+    /// This fixture is not an ETH custodian. Empty calls never delegate or retain funds.
+    receive() external payable { revert E_ETH_UNSUPPORTED(); }
     fallback() external payable {
         address target = address(uint160(ExecutionSlots.read(ExecutionSlots.IMPLEMENTATION)));
         assembly ("memory-safe") {

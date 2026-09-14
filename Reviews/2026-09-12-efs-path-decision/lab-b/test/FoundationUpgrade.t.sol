@@ -12,6 +12,7 @@ import {UpgradeProxy} from "./UpgradeProxy.sol";
 
 interface UpgradeVm { function prank(address, address) external; function chainId(uint256) external; }
 interface UpgradeCodeVm { function etch(address,bytes calldata) external; }
+interface UpgradeBalanceVm { function deal(address,uint256) external; }
 contract LayoutIncompatibleLedger is Ledger {
     constructor(ITypeRegistry r, bytes32 realm) Ledger(r,realm) {}
     function layoutId() public pure override returns(bytes32) { return keccak256("incompatible-layout"); }
@@ -47,6 +48,15 @@ contract FoundationUpgradeTest is LabBase {
     }
     function principals() private view returns(bytes32[] memory p) {
         p = new bytes32[](2); p[0] = pid(address(alice)); p[1] = pid(address(bob));
+    }
+    function testProxyExplicitlyRejectsEmptyCallsAndEther() public {
+        UpgradeBalanceVm(address(vm)).deal(address(this),1);
+        bytes32 execution = ledger.executionSet();
+        for (uint256 value; value < 2; ++value) {
+            (bool ok,bytes memory err) = address(proxy).call{value:value}("");
+            require(!ok && sel(err) == bytes4(keccak256("E_ETH_UNSUPPORTED()")),"empty proxy call lacks explicit refusal");
+        }
+        require(address(proxy).balance == 0 && ledger.executionSet() == execution && admissions() == 0,"receive changed state");
     }
     function testPopulatedUpgradePreservesRootsMaskHistoryAndWithdrawal() public {
         bytes32 s = alice.create(bytes32("file"));
