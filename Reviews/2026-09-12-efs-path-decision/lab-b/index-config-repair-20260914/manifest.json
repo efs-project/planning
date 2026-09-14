@@ -1,0 +1,331 @@
+{
+  "kind": "DISPOSABLE_DIRECT_DEPLOYMENT_REQUIRED_INDEX_DECLARATION_REPAIR",
+  "sourceCommit": "30073fcdeedfdc24a4d54004afc209ab9c8b8773",
+  "sourceCommitAuthority": "ROOT_REPORTED; NO_WORKER_GIT",
+  "sourceDigest": "62e1f17ff2d3a042078063cab0ca158a40e0e97ef00e686ffcad168ddea67cf9",
+  "redSourceDigest": "1433275f55abdc42bbd29ac9e03a950ec8fdc6a6f1cb2bb20b21d58f68168013",
+  "tests": {
+    "initialAttempt": {
+      "selected": 0,
+      "childExit": 0,
+      "evidentiaryStatus": "NOT_RED_OR_GREEN"
+    },
+    "red": {
+      "passed": 4,
+      "failed": 3,
+      "skipped": 0,
+      "cases": 7,
+      "intendedFailures": [
+        "test_internal_required_declarations_are_constructor_only()",
+        "test_required_downgrade_refuses_without_invalidating_signed_publication()",
+        "test_required_family_downgrades_refuse_and_queries_remain_complete()"
+      ]
+    },
+    "green": {
+      "executionsPassed": 162,
+      "distinctNamedCases": 128,
+      "inheritedRepeats": 34,
+      "failures": 0,
+      "skipped": 0,
+      "targetedCases": [
+        "test_internal_required_declarations_are_constructor_only()",
+        "test_required_downgrade_refuses_without_invalidating_signed_publication()",
+        "test_required_family_downgrades_refuse_and_queries_remain_complete()",
+        "test_signed_write_survives_other_author_optional_and_generation_progress()",
+        "test_actual_module_replacement_rejects_old_signature()",
+        "test_default_unset_index_keeps_zero_obligation_and_unknown_listing()",
+        "test_reader_rechecks_parent_and_scope_coverage()"
+      ]
+    },
+    "assertionsUnchangedAfterRed": true
+  },
+  "review": {
+    "verdict": "SPEC_COMPLIANT_QUALITY_APPROVED",
+    "sha256": "27dc27a3d9c5ce43030aef130ee5159b0f903d5810a23f2ce0a540c0b14a200e"
+  },
+  "change": "INTERNAL_DECLARE_ONLY_TWO_CONDITIONS_AND_COMMENTS_AFTER_RED; NO_LEDGER_ABI_OR_INTENT_SCHEMA_CHANGE",
+  "behavior": "REQUIRED_SET_AND_START_CONSTRUCTOR_FROZEN_IN_REVIEWED_DIRECT_MODULES; OPTIONAL_PROGRESS_GENERATION_AND_WITHDRAWAL_MAINTENANCE_PRESERVED",
+  "sizes": {
+    "compiler": "Solidity 0.8.30 viaIR optimizer200 Cancun",
+    "IndexModule": {
+      "runtimeBytes": 4179,
+      "compilerInitcodeBytes": 6021
+    },
+    "SelectiveReferenceIndexModule": {
+      "runtimeBytes": 5240,
+      "compilerInitcodeBytes": 8515
+    },
+    "FilesParentIndex": {
+      "runtimeBytes": 5339,
+      "compilerInitcodeBytes": 9325
+    },
+    "FilesJoinedConsumer": {
+      "runtimeBytes": 15865,
+      "compilerInitcodeBytes": 19976
+    },
+    "Ledger": {
+      "runtimeBytes": 17280,
+      "compilerInitcodeBytes": 17670
+    },
+    "constructorArgumentsExcludedFromCompilerInitcode": true
+  },
+  "gates": [
+    {
+      "label": "index-config-repair-red",
+      "startedAt": "2026-09-14T12:25:15.250Z",
+      "finishedAt": "2026-09-14T12:25:21.567Z",
+      "sourceDigest": "1433275f55abdc42bbd29ac9e03a950ec8fdc6a6f1cb2bb20b21d58f68168013",
+      "exitCode": 0,
+      "ownedProcessesStopped": true,
+      "slotReleased": true,
+      "evidentiaryStatus": "ZERO_TEST_NON_EVIDENCE"
+    },
+    {
+      "label": "index-config-repair-red-2",
+      "startedAt": "2026-09-14T12:28:55.433Z",
+      "finishedAt": "2026-09-14T12:29:14.069Z",
+      "sourceDigest": "1433275f55abdc42bbd29ac9e03a950ec8fdc6a6f1cb2bb20b21d58f68168013",
+      "exitCode": 1,
+      "ownedProcessesStopped": true,
+      "slotReleased": true,
+      "evidentiaryStatus": "EXECUTED_EVIDENCE"
+    },
+    {
+      "label": "index-config-repair-full",
+      "startedAt": "2026-09-14T12:32:18.781Z",
+      "finishedAt": "2026-09-14T12:33:11.469Z",
+      "sourceDigest": "62e1f17ff2d3a042078063cab0ca158a40e0e97ef00e686ffcad168ddea67cf9",
+      "exitCode": 0,
+      "ownedProcessesStopped": true,
+      "slotReleased": true,
+      "evidentiaryStatus": "EXECUTED_EVIDENCE"
+    },
+    {
+      "label": "index-config-repair-size",
+      "startedAt": "2026-09-14T12:34:35.550Z",
+      "finishedAt": "2026-09-14T12:35:28.084Z",
+      "sourceDigest": "62e1f17ff2d3a042078063cab0ca158a40e0e97ef00e686ffcad168ddea67cf9",
+      "exitCode": 0,
+      "ownedProcessesStopped": true,
+      "slotReleased": true,
+      "evidentiaryStatus": "EXECUTED_EVIDENCE"
+    }
+  ],
+  "limits": "CONFIGURATION_NOT_COMPLETE_AT_WRITE; REAL_GAPS_REMAIN_PARTIAL; NO_PROXY_POLICY_OR_UNIVERSAL_MUTABLE_INDEX_ABI; NO_ARBITRARY_CALLBACK_PROOF; NO_BACKFILL; NO_NEW_PAID_COSTS_OR_PORTABILITY_PROOF",
+  "custody": "Mechanical retention, no new tests/compiler/RPC/Git or paid run. Complete frozen source inventories and compiler bytes verified before writing. Old paid/query/archive packets untouched.",
+  "files": {
+    "index-config-repair-red.json.gz": {
+      "rawBytes": 7277,
+      "rawSha256": "6cb7fe33161cddad8bef7503b9df37d04076bda363beea94e932a70fcbb7e757",
+      "gzipBytes": 3288,
+      "gzipSha256": "39ada773901e9acdefec84869c7b89bd09c655c6b95132b5f8ed5ffc4159fa23",
+      "roundtripVerified": true,
+      "description": "Complete original zero-test selector attempt; explicitly NOT RED or GREEN evidence."
+    },
+    "index-config-repair-red.log.gz": {
+      "rawBytes": 2210,
+      "rawSha256": "de865f417a664bb8078d992c439aa2a1e3a0c744e93b3caf8e5f82ec4770e12d",
+      "gzipBytes": 505,
+      "gzipSha256": "056d4b163d67f773aad5383ba957244f27467c65602fbeee8dc5de49eeccd3a0",
+      "roundtripVerified": true,
+      "description": "Complete original zero-test selector attempt; explicitly NOT RED or GREEN evidence."
+    },
+    "index-config-repair-red-2.json.gz": {
+      "rawBytes": 7350,
+      "rawSha256": "3d53b9e7a42c94c38bcec0e3cf7f8e6b961ae64d1df13184db13ba9376aafde2",
+      "gzipBytes": 3306,
+      "gzipSha256": "e253a92400647dd2468f92efe7164a5b1a55715dfca5fac827375538d41bda83",
+      "roundtripVerified": true,
+      "description": "Complete original gate report or unabridged execution log."
+    },
+    "index-config-repair-red-2.log.gz": {
+      "rawBytes": 7943,
+      "rawSha256": "3c006d6e1c65c72ceb4e16df7da826358a3d281ca84e0892529632225ff23223",
+      "gzipBytes": 1661,
+      "gzipSha256": "662873723f445bf7819b816702020164a818a943cbf9b41b50ff09b20a47891e",
+      "roundtripVerified": true,
+      "description": "Complete original gate report or unabridged execution log."
+    },
+    "index-config-repair-full.json.gz": {
+      "rawBytes": 6772,
+      "rawSha256": "654b9b9559d06d5800599f4a6dba1c5553c7f8ef2ba37a29d98477abc41e4a25",
+      "gzipBytes": 2996,
+      "gzipSha256": "0be0ee383581a7003f0e467c7accc41c81ca15cd57b86dba4e01a5e73f3ce2db",
+      "roundtripVerified": true,
+      "description": "Complete original gate report or unabridged execution log."
+    },
+    "index-config-repair-full.log.gz": {
+      "rawBytes": 26780,
+      "rawSha256": "3dd6e51f0ae891dc81c29b106ae1f9ccfc3820473fce0ff79aa343916f05743a",
+      "gzipBytes": 5734,
+      "gzipSha256": "67c7a207d28d82b1c72d2b5e582b4c5b1a41c9c9d5a8830ae446a02aa3e7b523",
+      "roundtripVerified": true,
+      "description": "Complete original gate report or unabridged execution log."
+    },
+    "index-config-repair-size.json.gz": {
+      "rawBytes": 6706,
+      "rawSha256": "0f51f283118648caf670ec4102b410ad3a70aa878b5917fb67a2fa735c8844f2",
+      "gzipBytes": 2971,
+      "gzipSha256": "378dfbb40f1ccb130fcd55ab90c435b3b0402425e39b6a5a67bd78f46fe76a5d",
+      "roundtripVerified": true,
+      "description": "Complete original gate report or unabridged execution log."
+    },
+    "index-config-repair-size.log.gz": {
+      "rawBytes": 57362,
+      "rawSha256": "0661a93ad443485ef10d69f2bd761de9f03b49cd22eb39a6d25a55f49781e699",
+      "gzipBytes": 5281,
+      "gzipSha256": "8d7960f924af8df7ece1a2719cfd5b9e51762ede22993e75eba375e0ebf51996",
+      "roundtripVerified": true,
+      "description": "Complete original gate report or unabridged execution log."
+    },
+    "red-2-full-compiler-info.json.gz": {
+      "rawBytes": 12322237,
+      "rawSha256": "0bbd544b014107c71fc19b846df684b3a176a7d5e39924d14d973affc059fd9a",
+      "gzipBytes": 1405411,
+      "gzipSha256": "6cff2ff94874fd0758679d0fc5f425450c2825112c2f9cb9dad53620d74714ad",
+      "roundtripVerified": true,
+      "description": "Original full compiler input/output including sources, settings, AST, ABI, metadata, creation/deployed bytecode and immutable references."
+    },
+    "size-full-compiler-info.json.gz": {
+      "rawBytes": 27877218,
+      "rawSha256": "3e5ce21def8c3f13ab4104c1b6236a5787a349b2261279dbdca2214d423e2fd1",
+      "gzipBytes": 3545650,
+      "gzipSha256": "28d11d68dd1daca8aeed84621e8d8fbd100a2ac7e5de79b70eef1d9a56df5100",
+      "roundtripVerified": true,
+      "description": "Original full compiler input/output including sources, settings, AST, ABI, metadata, creation/deployed bytecode and immutable references."
+    },
+    "red-2-frozen-source-inventory.json.gz": {
+      "rawBytes": 1086498,
+      "rawSha256": "06cefaee508c172b57c28ea620a04def4f6cccd9f5e76d453641493765c28661",
+      "gzipBytes": 253767,
+      "gzipSha256": "f2d172953514a82b9eca0b86bee2d4108d36ade80fe2da1fc48e77f00073f3ed",
+      "roundtripVerified": true,
+      "description": "Mechanical UTF-8 escrow of all 47 gate-inventoried sources/config/scripts, checked against frozen execution snapshot."
+    },
+    "green-frozen-source-inventory.json.gz": {
+      "rawBytes": 1086828,
+      "rawSha256": "f9b8cbb1c35efd745b12662cc8cdfff223d0ee5c160a7f884da5ce377f830b75",
+      "gzipBytes": 253872,
+      "gzipSha256": "a07d4e53bdf4a3111ccf80d7d5283e68fa8bcd7deb2e6220126f111de52e22e7",
+      "roundtripVerified": true,
+      "description": "Mechanical UTF-8 escrow of all 47 gate-inventoried sources/config/scripts, checked against frozen execution snapshot."
+    },
+    "red-2-IndexModule.sol.gz": {
+      "rawBytes": 8729,
+      "rawSha256": "88a3e007125484fba6f00d7b330804faa9d57d26068a4bb47dc214507ebbccd8",
+      "gzipBytes": 2821,
+      "gzipSha256": "599cd7ad07493de668e073024efba6d23ba2e7ebeb36ed523f64eafd01be79e5",
+      "roundtripVerified": true,
+      "description": "Exact error-only RED module, no guards."
+    },
+    "green-IndexModule.sol.gz": {
+      "rawBytes": 9054,
+      "rawSha256": "2072d1b796af5143c3341363778bfd3b875c19da9dd3970c26b4cfac790a82a9",
+      "gzipBytes": 2954,
+      "gzipSha256": "e4f768e92a0a22d1f95915e86c727fa40358a759ebfe80f98f10e98670785cbb",
+      "roundtripVerified": true,
+      "description": "Exact GREEN module, only two conditions plus lifecycle comments after actual RED."
+    },
+    "unchanged-IndexConfigExpectation.t.sol.gz": {
+      "rawBytes": 15470,
+      "rawSha256": "bef6a87c19a49b4b8e409869ae9589f61f012e5c155b4e5176f030efc96e7ef3",
+      "gzipBytes": 3753,
+      "gzipSha256": "bb050982c5dedecbfa84a89ed82832be2f25a29c9e97f8a3505d4dc8e753a8fa",
+      "roundtripVerified": true,
+      "description": "Exact repaired test file, unchanged from actual RED2 through GREEN/size."
+    },
+    "unchanged-IncomingQuotes.t.sol.gz": {
+      "rawBytes": 28240,
+      "rawSha256": "e683ce0198b343ba3f4b7888f0ba9cc04d002158ec75606eb84928066cb07150",
+      "gzipBytes": 6154,
+      "gzipSha256": "91a21871f290481edfeccb807199e18ba46a20fecef8aa7d8d28878dbdc73e33",
+      "roundtripVerified": true,
+      "description": "Exact repaired test file, unchanged from actual RED2 through GREEN/size."
+    },
+    "unchanged-FilesJoined.t.sol.gz": {
+      "rawBytes": 62855,
+      "rawSha256": "f162b2bc4feec913b9b2d92f90d76abcd7dde8613f02471b695946321cddc4e4",
+      "gzipBytes": 12174,
+      "gzipSha256": "5a4310937a3789b510950f4acaf4407cf3d43a8f9c2b7254d902ba66b3677653",
+      "roundtripVerified": true,
+      "description": "Exact repaired test file, unchanged from actual RED2 through GREEN/size."
+    },
+    "frozen-foundry.toml.gz": {
+      "rawBytes": 460,
+      "rawSha256": "6ea7c7198bc697f74b6286ec830edbefc20e7c549eafda2343c863702055bf2c",
+      "gzipBytes": 336,
+      "gzipSha256": "833c99778c38b9e8192ac794719a6156bc045b1b1c521e42d06d77db367ab836",
+      "roundtripVerified": true,
+      "description": "Exact frozen normal build configuration, not changing live configuration."
+    },
+    "task-report.md.gz": {
+      "rawBytes": 11003,
+      "rawSha256": "61c3b5c0957e87525a661482dc00b2c720f90cdb347f5ed18c04f1ca4f9c6604",
+      "gzipBytes": 5114,
+      "gzipSha256": "6681a6e23c22d58c2eaa9ee00b25d8050552559669e7a0b1dc5053383609823d",
+      "roundtripVerified": true,
+      "description": "Complete implementer report through full/size evidence, final independent review and source commit closure."
+    },
+    "independent-final-review.md.gz": {
+      "rawBytes": 13060,
+      "rawSha256": "27dc27a3d9c5ce43030aef130ee5159b0f903d5810a23f2ce0a540c0b14a200e",
+      "gzipBytes": 5651,
+      "gzipSha256": "8d8d42bd57197aa3dcb408be41f7055f6c8eea2747dc7fc7d08596760c6a943f",
+      "roundtripVerified": true,
+      "description": "Complete execution-linked final independent SpecCompliant / QualityApproved review."
+    },
+    "approved-plan.md.gz": {
+      "rawBytes": 5352,
+      "rawSha256": "7510a6e1b700421ae34e9a3b8060dba2552716193418c8bb1e7baf56bfd66557",
+      "gzipBytes": 2504,
+      "gzipSha256": "9027769d566589a2181e8e37138b99bb1024953e07484e0e0d6e3a4b1fa40145",
+      "roundtripVerified": true,
+      "description": "Approved narrow reversible direct-deployment repair plan."
+    },
+    "prior-executed-finding.md.gz": {
+      "rawBytes": 5722,
+      "rawSha256": "6f964a85646d05e3c69c91d7d292b22560ef83f16617f8b220a1e3e361ba891d",
+      "gzipBytes": 2739,
+      "gzipSha256": "49eb01befd841c18b41d82bf6e8c01b6130144cf299bf8051b9fe32fcd018158",
+      "roundtripVerified": true,
+      "description": "Original executed admin-downgrade finding, historical provenance rather than current unrepaired behavior."
+    },
+    "bounded-remedy-review.md.gz": {
+      "rawBytes": 12389,
+      "rawSha256": "fd65b903a5904527924f4fa8ae190327097215c9da47b09eb05abdbb2292c518",
+      "gzipBytes": 5262,
+      "gzipSha256": "722002e604b18726038188723c8309e022c3103d7f7c0295215c743872953b55",
+      "roundtripVerified": true,
+      "description": "Pre-implementation bounded alternatives and limits review."
+    },
+    "outer-forge-gate-at-retention.mjs.gz": {
+      "rawBytes": 16681,
+      "rawSha256": "31edc078b8fd85dd28b0a2c31cc6701edbfb50caafb11cc84d35c9ba3895bd8f",
+      "gzipBytes": 6299,
+      "gzipSha256": "666e86ee99dafba8cb6d38e7a0d31d5d9af6453eedd7200e51c7ede6f8766d3e",
+      "roundtripVerified": true,
+      "description": "Outer harness as retained after selector/count correction, not a claim of byte identity for every historical attempt; each original invocation is in its report."
+    },
+    "outer-forge-gate-at-retention.test.mjs.gz": {
+      "rawBytes": 8753,
+      "rawSha256": "e9044bf5351063015a4748f3b34fc992ae3a49f732e8cb18fbb38ce49fc334cf",
+      "gzipBytes": 2711,
+      "gzipSha256": "c2c090f9d8b5f4d1191a090d65f8e4133aeed567a8fa86927c751c7c73e1de38",
+      "roundtripVerified": true,
+      "description": "Outer harness test source at retention, not run by this packager."
+    },
+    "retain-index-config-repair.mjs.gz": {
+      "rawBytes": 13118,
+      "rawSha256": "e28cf1a5dae2cb7d75944c1b2e3ba38ab4612e580e79d3b32efe54214e38cce0",
+      "gzipBytes": 5382,
+      "gzipSha256": "2299fcd1546f0df89d8d3bb52be2e9da44f8132e84a049505cc337c523417c38",
+      "roundtripVerified": true,
+      "description": "This apply_patch-authored mechanical retention generator; no experiment rerun."
+    }
+  },
+  "totals": {
+    "files": 26,
+    "rawBytes": 42706067,
+    "gzipBytes": 5548296
+  }
+}
