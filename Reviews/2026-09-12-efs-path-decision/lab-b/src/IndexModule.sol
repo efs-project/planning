@@ -59,6 +59,7 @@ contract IndexModule is IIndexModule {
 
     error E_LEDGER();
     error E_ADMIN();
+    error E_MANDATORY_FAMILY();
     error E_ORDER(bytes32 key, uint64 last, uint64 proposed);
     error E_GUARD();
 
@@ -87,6 +88,11 @@ contract IndexModule is IIndexModule {
     }
 
     function _declare(bytes32 family, bool mandatory, uint64 fromAdmission) internal {
+        // Direct deployments only: base and derived constructors define the required set.
+        // Runtime optional declarations cannot replace it; this is not a proxy initializer.
+        if (_family[family].mandatory || (mandatory && address(this).code.length != 0)) {
+            revert E_MANDATORY_FAMILY();
+        }
         _family[family] = Family(true, mandatory, fromAdmission);
         emit FamilyDeclared(family, mandatory, fromAdmission);
     }

@@ -476,20 +476,48 @@ contract FilesJoinedTest is LabBase {
         _publishBranches();
         FilesJoinedConsumer reader = _filesReader();
         FilesJoinedConsumer.Basis memory basis = _basis();
-        filesIndex.declareOptional(filesIndex.FAMILY_SCOPE(), 1);
+        FilesJoinedConsumer.FilePoint memory before = reader.readFilePoint(file, lensOf(eoaA), APPROVED, basis);
+        require(before.status == 1 && before.revision.recordId == ra && before.revisionTag.present,
+            "healthy exact point control");
+        {
+            FilesJoinedConsumer.FolderResult memory healthy = reader.readFolderTaggedOnce(
+                DRAFTS, lensOf(eoaA, address(bob)), PROJECT_EFS, FilesJoinedConsumer.TagScope.File, 8, basis);
+            require(healthy.status == 2 && healthy.files.length == 1 && healthy.files[0].revision.recordId == ra,
+                "healthy scope query before real gap");
+            (uint8 status, uint64 from, uint64 through) = filesIndex.coverage(filesIndex.FAMILY_FILES_PARENT(), 0);
+            require(status == 2 && from == 1 && through == basis.admission, "specialized constructor maintains required parent family");
+        }
+        bytes32 obligation = ledger.indexObligations();
+        bytes32 parentPostings = _postingDigest(Keys.referenceList(childType, 0, r0));
+        ledger.setIndexModule(address(0));
+        bytes[] memory bodies = new bytes[](1);
+        bodies[0] = hex"d1";
+        _assertEvidence(_signedActions(one(aPublish(BINARY, bodies[0])), bodies), eoaA, ledger.PROOF_SIGNED());
+        _assertRecord(rid(BINARY, bodies[0]), BINARY, bodies[0]);
+        require(filesIndex.lastProcessed() == basis.admission, "detached actual admission was not indexed");
+        ledger.setIndexModule(address(filesIndex));
+        bodies[0] = hex"d2";
+        _assertEvidence(_signedActions(one(aPublish(BINARY, bodies[0])), bodies), eoaA, ledger.PROOF_SIGNED());
+        _assertRecord(rid(BINARY, bodies[0]), BINARY, bodies[0]);
+        require(filesIndex.gapped() && admissions() == basis.admission + 2 && filesIndex.lastProcessed() == admissions(),
+            "reattached real callback detects missing admission despite current frontier");
+        require(ledger.indexObligations() == obligation && _postingDigest(Keys.referenceList(childType, 0, r0)) == parentPostings,
+            "same configuration and retained parent postings do not claim complete coverage");
+        basis = _basis();
+        (uint8 scopeStatus, uint64 scopeFrom, uint64 scopeThrough) = filesIndex.coverage(filesIndex.FAMILY_SCOPE(), 0);
+        require(scopeStatus == 1 && scopeFrom == 1 && scopeThrough == basis.admission, "scope is honestly partial at fresh basis");
         _rejectRead(reader, abi.encodeCall(reader.readFolderTaggedOnce,
             (DRAFTS, lensOf(eoaA, address(bob)), PROJECT_EFS, FilesJoinedConsumer.TagScope.File, 8, basis)),
             FilesJoinedConsumer.E_INCOMPLETE.selector);
-        FilesJoinedConsumer.FilePoint memory before = reader.readFilePoint(file, lensOf(eoaA), APPROVED, basis);
-        require(before.status == 1 && before.revision.recordId == ra && before.revisionTag.present,
-            "exact point control does not consume scope enumeration");
-        filesIndex.declareOptional(filesIndex.FAMILY_FILES_PARENT(), 1);
         (uint8 status, uint64 from, uint64 through) =
             filesIndex.coverage(filesIndex.FAMILY_FILES_PARENT(), Keys.referenceList(childType, 0, r0));
         require(status == 1 && from == 1 && through == admissions(), "parent enumeration coverage is honestly PARTIAL");
-        FilesJoinedConsumer.FilePoint memory afterDowngrade = reader.readFilePoint(file, lensOf(eoaA), APPROVED, basis);
-        require(keccak256(abi.encode(afterDowngrade)) == keccak256(abi.encode(before)),
-            "exact point remains unchanged without reverse-parent enumeration");
+        FilesJoinedConsumer.FilePoint memory afterGap = reader.readFilePoint(file, lensOf(eoaA), APPROVED, basis);
+        require(afterGap.status == 1 && afterGap.file == file, "fresh exact point does not consume enumeration");
+        _assertRevision(afterGap.revision, ra, childType, r0, "Meeting at 11:00.\n");
+        require(keccak256(abi.encode(afterGap.revision, afterGap.fileTag, afterGap.revisionTag))
+            == keccak256(abi.encode(before.revision, before.fileTag, before.revisionTag)),
+            "same retained bytes and tags under changed basis, not a full-basis encoding comparison");
     }
 
     // Catches a false revision-tag assessment when HEAD is absent/masked, and treating FOUND wrong-target as yes.

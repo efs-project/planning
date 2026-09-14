@@ -315,12 +315,24 @@ contract IncomingQuotesTest is LabBase {
         assertPartial(pair);
     }
 
-    function test_downgraded_mandatory_families_never_complete() public {
+    // Catches optional setters replacing either base or specialized required declarations.
+    function test_required_family_downgrades_refuse_and_queries_remain_complete() public {
         bytes32 pair = pairFixture();
-        publish(alice, joinedType, quote(pair, 1));
-        index.declareOptional(index.FAMILY_BY_TYPE(), 1);
-        index.declareOptional(SelectiveReferenceIndexModule(address(index)).FAMILY_REFERENCE_POSITION(), 1);
-        assertPartial(pair);
+        bytes32 recordId = publish(alice, joinedType, quote(pair, 1));
+        bytes32[2] memory families = [index.FAMILY_BY_TYPE(), SelectiveReferenceIndexModule(address(index)).FAMILY_REFERENCE_POSITION()];
+        for (uint256 i; i < families.length; ++i) {
+            (bool ok, bytes memory err) = address(index).call(abi.encodeCall(index.declareOptional, (families[i], uint64(1))));
+            require(!ok && keccak256(err) == keccak256(abi.encodeWithSelector(IndexModule.E_MANDATORY_FAMILY.selector)),
+                "base and specialized required downgrade refuse exactly");
+            (uint8 status, uint64 from, uint64 through) = index.coverage(families[i], pair);
+            require(status == index.COMPLETE() && from == 1 && through == 4, "constructor requirement and maintained coverage preserved");
+        }
+        BIncomingQuotesReader.Cursor memory zero;
+        BIncomingQuotesReader.Page memory a = scan.incomingQuotes(pair, admissions(), 64, zero);
+        BIncomingQuotesReader.Page memory b = indexedReader.incomingQuotes(pair, admissions(), 64, zero);
+        require(a.status == scan.COMPLETE() && b.status == indexedReader.COMPLETE(), "both real queries remain complete");
+        require(a.records.length == 1 && b.records.length == 1 && a.records[0] == recordId && b.records[0] == recordId,
+            "both queries return the actual admitted quote");
     }
 
     function test_scan_works_with_original_nonselective_index() public {
