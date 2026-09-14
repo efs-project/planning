@@ -6,8 +6,8 @@ import {Ledger} from "../src/Ledger.sol";
 import {FilesJoinedTest} from "./FilesJoined.t.sol";
 import {FilesJoinedConsumer} from "./FilesJoinedConsumer.sol";
 
-/// Characterizes existing behavior, including an undesirable E_PROFILE conflation.
-/// Not a specification approving that reader policy. No Core/profile/reader fixes.
+/// Retained selected Files remain readable independently of maintained occurrences.
+/// Disposable reader regression, not an application-validity or availability claim.
 /// Run only test_withdraw_ methods; inherited tests are not three new test results.
 contract FilesWithdrawalTest is FilesJoinedTest {
     struct PostingBefore {
@@ -129,61 +129,96 @@ contract FilesWithdrawalTest is FilesJoinedTest {
         return originalFirst;
     }
 
-    function _assertBobStillReads(FilesJoinedConsumer reader) private view {
+    function _assertTag(FilesJoinedConsumer.TagAssessment memory tag, bytes32 subject, bool present) private view {
+        require(tag.subject == subject && tag.evaluated && tag.present == present
+            && tag.status == (present ? 1 : 0) && tag.target == (present ? file : bytes32(0)),
+            "exact evaluated tag subject, status, target and presence");
+    }
+
+    function _assertPoint(FilesJoinedConsumer.FilePoint memory point, bytes32 recordId, bytes32 parent,
+        string memory document, bool fileTagged, bool revisionTagged) private view
+    {
+        require(point.status == 1 && point.file == file, "exact retained selected File point");
+        _assertRevision(point.revision, recordId, childType, parent, document);
+        _assertTag(point.fileTag, file, fileTagged);
+        _assertTag(point.revisionTag, recordId, revisionTagged);
+    }
+
+    function _selectedAuthor(FilesJoinedConsumer reader, address[] memory authors, address expectedAuthor,
+        bytes32 expectedTarget, uint32 expectedRevision) private view
+    {
+        (uint8 status, bytes32 target, uint32 revision, address author, uint64 admission_) =
+            reader.lensReader().resolve(authors, HEAD, file, NO_ROLE);
+        (uint8 state, uint32 rawRevision, uint64 rawAdmission,,, bytes32 rawTarget) =
+            ledger.head(Keys.binding(pid(expectedAuthor), Keys.position(HEAD, file, NO_ROLE)));
+        require(status == 1 && author == expectedAuthor && target == expectedTarget && revision == expectedRevision,
+            "exact Lens-selected author, revision and target");
+        require(state == 1 && rawTarget == expectedTarget && rawRevision == expectedRevision
+            && admission_ == rawAdmission && admission_ != 0 && admission_ <= admissions(),
+            "selected provenance is the retained authored HEAD admission");
+    }
+
+    function _assertCandidate(FilesJoinedConsumer.ConflictCandidate memory candidate, address author,
+        bytes32 recordId, uint32 revision, string memory document) private view
+    {
+        (uint8 state, uint32 rawRevision, uint64 rawAdmission,,, bytes32 rawTarget) =
+            ledger.head(Keys.binding(pid(author), Keys.position(HEAD, file, NO_ROLE)));
+        require(candidate.binding.position == Keys.position(HEAD, file, NO_ROLE)
+            && candidate.binding.author == author && candidate.binding.target == recordId
+            && candidate.binding.revision == revision && candidate.binding.admission == rawAdmission
+            && rawAdmission != 0 && rawAdmission <= admissions() && state == 1
+            && rawRevision == revision && rawTarget == recordId, "exact conflict candidate authored binding");
+        _assertRevision(candidate.revision, recordId, childType, r0, document);
+    }
+
+    function _assertBobStillReads(FilesJoinedConsumer reader) private view returns (bytes32 digest) {
         address[] memory authors = lensOf(address(bob), eoaA);
         FilesJoinedConsumer.FilePoint memory point = reader.readFilePoint(file, authors, APPROVED, _basis());
-        require(point.status == 1 && point.file == file && !point.revisionTag.present, "Bob-first selected File remains readable");
-        _assertRevision(point.revision, rb, childType, r0, "Meeting at 09:00.\n");
+        _assertPoint(point, rb, r0, "Meeting at 09:00.\n", false, false);
+        _selectedAuthor(reader, authors, address(bob), rb, 1);
         FilesJoinedConsumer.FolderResult memory result = _folder(reader, authors, PROJECT_EFS, FilesJoinedConsumer.TagScope.File);
-        require(result.files.length == 1 && result.files[0].revision.recordId == rb && result.files[0].fileTag.present,
-            "Bob-first File tag folder succeeds");
+        require(result.files.length == 1 && result.next.selectedSoFar == 1, "Bob-first exact one selected File");
+        _assertPoint(result.files[0], rb, r0, "Meeting at 09:00.\n", true, false);
+        digest = keccak256(abi.encode(point, result.files));
         result = _folder(reader, authors, APPROVED, FilesJoinedConsumer.TagScope.SelectedRevision);
         require(result.files.length == 0 && result.next.selectedSoFar == 1, "Bob approved is complete empty after placement selection");
+        return keccak256(abi.encode(digest, result.files));
     }
 
-    function _validControls(FilesJoinedConsumer reader) private view {
+    function _retainedReadControls(FilesJoinedConsumer reader) private view returns (bytes32 digest) {
         address[] memory authors = lensOf(eoaA, address(bob));
         FilesJoinedConsumer.FilePoint memory point = reader.readFilePoint(file, authors, APPROVED, _basis());
-        require(point.status == 1 && point.file == file && point.revisionTag.present, "valid Alice approved point control");
-        _assertRevision(point.revision, ra, childType, r0, "Meeting at 11:00.\n");
+        _assertPoint(point, ra, r0, "Meeting at 11:00.\n", false, true);
+        _selectedAuthor(reader, authors, eoaA, ra, 2);
         FilesJoinedConsumer.FolderResult memory result = _folder(reader, authors, PROJECT_EFS, FilesJoinedConsumer.TagScope.File);
-        require(result.files.length == 1 && result.files[0].revision.recordId == ra, "valid Alice File folder control");
+        require(result.files.length == 1 && result.next.selectedSoFar == 1, "Alice exact one selected File");
+        _assertPoint(result.files[0], ra, r0, "Meeting at 11:00.\n", true, false);
+        digest = keccak256(abi.encode(point, result.files));
         result = _folder(reader, authors, APPROVED, FilesJoinedConsumer.TagScope.SelectedRevision);
-        require(result.files.length == 1 && result.files[0].revision.recordId == ra, "valid Alice revision folder control");
+        require(result.files.length == 1 && result.next.selectedSoFar == 1, "Alice exact one approved selected revision");
+        _assertPoint(result.files[0], ra, r0, "Meeting at 11:00.\n", false, true);
+        digest = keccak256(abi.encode(digest, result.files));
         FilesJoinedConsumer.ConflictResult memory conflict = reader.readFileConflict(file, authors, PROJECT_EFS, _basis());
-        require(conflict.status == 3 && conflict.candidates.length == 2, "valid conflict control");
-        _assertBobStillReads(reader);
+        require(conflict.status == 3 && conflict.file == file && conflict.candidates.length == 2, "exact retained two-candidate conflict");
+        _assertTag(conflict.fileTag, file, true);
+        _assertCandidate(conflict.candidates[0], eoaA, ra, 2, "Meeting at 11:00.\n");
+        _assertCandidate(conflict.candidates[1], address(bob), rb, 1, "Meeting at 09:00.\n");
+        // Cursor basis fields advance with lifecycle admissions; _folder checks each
+        // fresh context above. This digest compares only the complete returned data.
+        return keccak256(abi.encode(digest, conflict, _assertBobStillReads(reader)));
     }
 
-    function _profileError(FilesJoinedConsumer reader, bytes memory callData) private view {
-        (bool ok, bytes memory data) = address(reader).staticcall(callData);
-        require(!ok && keccak256(data) == keccak256(abi.encodeWithSelector(FilesJoinedConsumer.E_PROFILE.selector)),
-            "characterization: exact E_PROFILE, not stale basis or missing data");
-    }
-
-    function _aliceReadFailures(FilesJoinedConsumer reader) private view {
-        address[] memory authors = lensOf(eoaA, address(bob));
-        FilesJoinedConsumer.Basis memory basis = _basis();
-        _profileError(reader, abi.encodeCall(reader.readFilePoint, (file, authors, APPROVED, basis)));
-        _profileError(reader, abi.encodeCall(reader.readFileConflict, (file, authors, PROJECT_EFS, basis)));
-        _profileError(reader, abi.encodeCall(reader.readFolderTaggedOnce,
-            (DRAFTS, authors, PROJECT_EFS, FilesJoinedConsumer.TagScope.File, 8, basis)));
-        _profileError(reader, abi.encodeCall(reader.readFolderTaggedOnce,
-            (DRAFTS, authors, APPROVED, FilesJoinedConsumer.TagScope.SelectedRevision, 8, basis)));
-    }
-
-    function test_withdraw_selected_revision_retained_but_reads_reject() public {
+    function test_withdraw_selected_revision_retained_and_readable() public {
         _createRoot();
         _publishBranches();
         FilesJoinedConsumer reader = _filesReader();
-        _validControls(reader);
+        bytes32 selectedBefore = _retainedReadControls(reader);
         _assertParents(r0, ra, rb);
         _withdrawAliceSole(ra);
         _assertParents(r0, ra, rb); // retained parent membership is not current validity
         (uint8 state, uint32 revision, bytes32 target) = headOf(eoaA, HEAD, file, NO_ROLE);
         require(state == 1 && revision == 2 && target == ra, "Alice still explicitly selects RA");
-        _aliceReadFailures(reader);
-        _assertBobStillReads(reader);
+        require(_retainedReadControls(reader) == selectedBefore, "withdrawal changes no selected data, tags or authored candidates");
     }
 
     function _publishNewChild(bytes32 parent, bytes memory document, bool select) private returns (bytes32 recordId) {
@@ -215,33 +250,33 @@ contract FilesWithdrawalTest is FilesJoinedTest {
         _createRoot();
         _publishBranches();
         FilesJoinedConsumer reader = _filesReader();
-        _validControls(reader);
+        _retainedReadControls(reader);
         uint64 rootFirst = _withdrawAliceSole(r0);
-        _validControls(reader); // live RA/RB decode retained zero-occurrence Root header
+        _retainedReadControls(reader); // RA/RB decode retained zero-occurrence Root header
         bytes32 newChild = _publishNewChild(r0, bytes("Meeting at 12:00.\n"), false);
         _threeRootChildren(newChild);
         _completeCurrentFamilies();
         uint64 aliceFirst = _withdrawAliceSole(ra);
-        _aliceReadFailures(reader); // positive gate for the currently selected zero-count failure
+        _retainedReadControls(reader); // selected zero-occurrence Child is still the exact retained RA
         bytes32 grandchild = _publishNewChild(ra, bytes("Meeting at 08:00.\n"), true);
         _assertParents(ra, grandchild, 0);
         _threeRootChildren(newChild);
         FilesJoinedConsumer.FilePoint memory point = reader.readFilePoint(file, lensOf(eoaA, address(bob)), PROJECT_EFS, _basis());
-        require(point.status == 1 && point.fileTag.present, "new grandchild selected and File tag retained");
-        _assertRevision(point.revision, grandchild, childType, ra, "Meeting at 08:00.\n");
+        _assertPoint(point, grandchild, ra, "Meeting at 08:00.\n", true, false);
+        _selectedAuthor(reader, lensOf(eoaA, address(bob)), eoaA, grandchild, 3);
         _assertZeroRetained(r0, rootType, rootFirst, _rootBody(file, bytes("Meeting at 10:00.\n")));
         _assertZeroRetained(ra, childType, aliceFirst, _childBody(r0, file, bytes("Meeting at 11:00.\n")));
         _completeCurrentFamilies();
         _assertBobStillReads(reader);
     }
 
-    function test_withdraw_other_author_reuse_restores_read_without_head_change() public {
+    function test_withdraw_other_author_reuse_does_not_toggle_selected_reads() public {
         _createRoot();
         _publishBranches();
         FilesJoinedConsumer reader = _filesReader();
-        _validControls(reader);
+        _retainedReadControls(reader);
         uint64 original = _withdrawAliceSole(ra);
-        _aliceReadFailures(reader);
+        bytes32 zeroOccurrenceReads = _retainedReadControls(reader);
         bytes32 bindings_ = _allFixtureBindings();
         bytes32 retained_ = _retainedPostingState();
         CountsBefore memory counts_ = _countsBefore();
@@ -251,13 +286,14 @@ contract FilesWithdrawalTest is FilesJoinedTest {
         (uint8 kind,,,,, bool reuseWithdrawn, bytes32 reused,) = ledger.admission(admission_);
         require(kind == 2 && !reuseWithdrawn && reused == ra, "Bob made a real maintained REUSE occurrence");
         (, uint64 first, uint32 occurrences,) = ledger.record(ra);
-        require(first == original && occurrences == 1, "one aggregate maintainer without replacing first admission");
+        require(first == original && occurrences == 1, "one maintained occurrence without replacing first admission");
         (,,,,, bool aliceWithdrawn,,) = ledger.admission(original);
         require(aliceWithdrawn, "Alice original publication remains withdrawn");
         require(_allFixtureBindings() == bindings_ && _retainedPostingState() == retained_,
             "Bob REUSE changed no HEAD placement tag or retained parent membership");
         _assertParents(r0, ra, rb);
         _completeCurrentFamilies();
-        _validControls(reader); // Alice-first returns RA again despite Alice's still-withdrawn occurrence
+        require(_retainedReadControls(reader) == zeroOccurrenceReads,
+            "Bob REUSE cannot toggle Alice-selected display, tags or authored conflict candidates");
     }
 }

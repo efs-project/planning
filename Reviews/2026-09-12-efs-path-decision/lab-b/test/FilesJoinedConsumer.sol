@@ -11,6 +11,8 @@ import {FilesLayout, FilesChildRule, FilesParentIndex} from "./FilesJoinedProfil
 /// All composition is current-state in one EVM call. Profile identity and retained
 /// admission are verified; this does not re-run mutable application policy or prove
 /// historical native authorship. Full inline document reads are not a gas optimization.
+/// Results describe retained selected data, not current occurrence maintenance or
+/// application validity; withdrawing an occurrence does not change HEAD selection.
 contract FilesJoinedConsumer {
     bytes32 private constant HEAD = keccak256("efs2/purpose/head/1");
     bytes32 private constant FOLDER = keccak256("efs2/purpose/folder/1");
@@ -155,11 +157,10 @@ contract FilesJoinedConsumer {
     function _decode(bytes32 selected, bytes32 file, uint64 basis) private view returns (Revision memory result) {
         bytes memory body;
         uint64 firstAdmission;
-        uint32 occurrences;
         result.recordId = selected;
-        (result.typeId, firstAdmission, occurrences, body) = ledger.record(selected);
+        (result.typeId, firstAdmission,, body) = ledger.record(selected);
         if (selected == 0 || (result.typeId != rootType && result.typeId != childType)
-            || firstAdmission == 0 || firstAdmission > basis || occurrences == 0
+            || firstAdmission == 0 || firstAdmission > basis
             || body.length > 8192 || Keys.recordFromHash(result.typeId, keccak256(body)) != selected) revert E_PROFILE();
         (uint8 kind,,,,,, bytes32 bodyHash, bytes32 admittedType) = ledger.admission(firstAdmission);
         if (kind != 1 || admittedType != result.typeId || bodyHash != keccak256(body)) revert E_PROFILE();
