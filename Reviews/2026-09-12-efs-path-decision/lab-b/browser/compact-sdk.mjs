@@ -12,8 +12,19 @@ export function createCompactSdk(options) {
 
 // Additive seam: guarded fixtures import this engine. Live-served legacy assets
 // never import a new module (the existing server has a closed asset allowlist).
-export function createCompactEngine({ethers: e, rpc, manifest, journal}, protocolFactory) {
+export function createCompactEngine({ethers: e, rpc: transport, manifest, journal}, protocolFactory) {
   const Z = e.ZeroHash, coder = e.AbiCoder.defaultAbiCoder();
+  // Track transport failures by provenance, not message spelling. Local ABI,
+  // journal and programming errors must not become persisted availability claims.
+  const rpcFailures = new WeakSet();
+  const rpc = async (...args) => {
+    try {return await transport(...args);}
+    catch (cause) {
+      const error = cause && typeof cause === 'object' ? cause : new Error(String(cause));
+      rpcFailures.add(error); throw error;
+    }
+  };
+  const isRpcUnavailable = error => rpcFailures.has(error);
   const fail = (code) => {throw new Error(`COMPACT_${code}`);};
   const check = (condition, code) => {if (!condition) fail(code);};
   const eq = (a,b) => String(a).toLowerCase() === String(b).toLowerCase();
@@ -71,7 +82,7 @@ export function createCompactEngine({ethers: e, rpc, manifest, journal}, protoco
     principal:plan=>e.zeroPadValue(plan.intent.author,32),
     recoveryError:null,capabilities:{protocol:'compact-legacy-v1',guardedWrites:false},
   };
-  const protocol = {...legacy,...protocolFactory?.({e,rpc,config,hash,eq,check,fail,plain,freeze,call,scalar,code,addresses,interfaces,blockArg,positionOf,recordOf,bindingOf})};
+  const protocol = {...legacy,...protocolFactory?.({e,rpc,isRpcUnavailable,config,hash,eq,check,fail,plain,freeze,call,scalar,code,addresses,interfaces,blockArg,positionOf,recordOf,bindingOf})};
   const basisFor = (context,authors,policy='ordered') => ({...context,
     lens:{address:addresses.lens,codeHash:config.contracts.lens.codeHash,policy,
       ...protocol.lensFields(authors ?? []), hash:authors ? protocol.lensHash(authors) : null},
@@ -470,25 +481,16 @@ export function createCompactEngine({ethers: e, rpc, manifest, journal}, protoco
     return entry;
   }
   async function reconcile(id) {
-    try{return await reconcileEntry(id);}
-    catch(error){
-      if(!protocol.recoveryError)throw error;
-      const qualification=protocol.recoveryError(error);if(!qualification)throw error;
-      const entry=await journal.get(id),outcome={...entry,...qualification,knowledge:'UNKNOWN',coverage:'PARTIAL',evidence:null,
-        receipt:null,receiptObservation:null,receiptAttribution:'UNKNOWN'};
-      await journal.put(plain(outcome));return outcome;
-    }
-  }
-  async function reconcileEntry(id) {
     check(journal?.get && journal?.put,'DURABLE_JOURNAL_REQUIRED');
     const entry = await journal.get(id); check(entry && entry.id === id,'JOURNAL_NOT_FOUND');
     const {plan} = entry;
+    // Complete local validation before any RPC and outside availability catches.
     check(eq(entry.transaction.to,addresses.ledger) && String(plan.basis.chainId) === String(config.chainId),'JOURNAL_REALM');
     check(eq(hash([interfaces.ledger.getFunction('execute').inputs[0]],[plan.actions]),plan.actionsHash),'JOURNAL_INTEGRITY');
     protocol.verifyJournal(entry,id);
     check(eq(e.recoverAddress(plan.digest,entry.signature),plan.intent.author),'JOURNAL_SIGNATURE');
     check(eq(entry.transaction.data,protocol.encode(plan,entry.signature)),'JOURNAL_INTEGRITY');
-    let context = await pin();
+    let context = null;
     // The wallet's returned hash is a hint, not evidence that its receipt belongs
     // to this plan. Economic attribution is separate from canonical EFS effects.
     let receipt=null,receiptObservation=null,receiptAttribution='UNAVAILABLE';
@@ -518,6 +520,7 @@ export function createCompactEngine({ethers: e, rpc, manifest, journal}, protoco
     }
     let status, evidence = null, reason;
     try {
+    context = await pin();
     const publication = await scalar('ledger','publicationOf',[plan.publicationId],context);
     if (publication === 0n) status = receipt ? (BigInt(receipt.status) === 0n ? 'REVERTED' : 'EFFECTS_MISMATCH') : 'BROADCAST_UNKNOWN';
     else {
@@ -571,7 +574,7 @@ export function createCompactEngine({ethers: e, rpc, manifest, journal}, protoco
       ({status,reason}=qualification);
     }
     const outcome = {...entry,status,knowledge:status === 'EFFECTS_VERIFIED' ? 'VERIFIED' : 'UNKNOWN',
-      coverage:status === 'EFFECTS_VERIFIED' ? 'COMPLETE' : 'PARTIAL',basis:basisFor(context,plan.authors),evidence,
+      coverage:status === 'EFFECTS_VERIFIED' ? 'COMPLETE' : 'PARTIAL',basis:context?basisFor(context,plan.authors):null,evidence,
       receipt,receiptObservation,receiptAttribution,...(reason?{reason}:{})};
     await journal.put(plain(outcome)); return outcome;
   }

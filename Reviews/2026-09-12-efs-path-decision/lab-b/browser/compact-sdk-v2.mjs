@@ -7,7 +7,7 @@ export function createGuardedCompactSdk(options) {
 
 // Only protocol/context/identity codecs live here. Files construction, traversals,
 // capability ownership, journals and receipt attribution remain in one engine.
-function guardedProtocol({e,rpc,config,hash,eq,check,fail,plain,call,scalar,code,addresses,interfaces,bindingOf}) {
+function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fail,plain,call,scalar,code,addresses,interfaces,bindingOf}) {
   const Z=e.ZeroHash,coder=e.AbiCoder.defaultAbiCoder(),family=config.executionFamily;
   const layout=e.id('efs.lab.ledger-layout/2:roots-0-12-preserved:context-13:execution-14:readsets-15');
   const domain={name:'EFS2-RoadB-Lab',version:'2'};
@@ -172,8 +172,8 @@ function guardedProtocol({e,rpc,config,hash,eq,check,fail,plain,call,scalar,code
     },
     recoveryError(error) {
       const message=String(error?.message??error);
-      if(/UNSUPPORTED/.test(message))return {status:'UNSUPPORTED',reason:message};
-      if(/HISTORY_UNAVAILABLE|BLOCK_UNAVAILABLE|BLOCK_REORG/.test(message)||!message.startsWith('COMPACT_'))return {status:'UNKNOWN',reason:message};
+      if(/^COMPACT_(EXECUTION|FORMAT)_UNSUPPORTED$/.test(message))return {status:'UNSUPPORTED',reason:message};
+      if(/^COMPACT_(HISTORY_UNAVAILABLE|BLOCK_UNAVAILABLE|BLOCK_REORG)$/.test(message)||isRpcUnavailable(error))return {status:'UNKNOWN',reason:message};
       return null;
     },
   };

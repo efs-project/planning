@@ -272,6 +272,35 @@ test('a successful receipt without canonical effects is not semantic success', a
   assert.notEqual(result.knowledge,'VERIFIED');
 });
 
+test('legacy recovery observes the receipt before preserving its existing context-failure rejection', async () => {
+  const {sdk,state,journal,calls} = fixture();
+  const plan=await sdk.prepare({operation:'edit',author:A,file,document:'changed'});
+  const signed=await sdk.authorize(plan,sign),sent=await sdk.submit(signed,async()=>H('receipt-before-pin'));
+  state.receipt={status:'0x1',blockHash,blockNumber:'0x2a',transactionHash:H('receipt-before-pin'),transactionIndex:'0x0',gasUsed:'0x5208'};
+  state.transaction={hash:H('receipt-before-pin'),blockHash,to:signed.transaction.to,input:signed.transaction.data,value:'0x0'};
+  state.blockTransactions=[H('receipt-before-pin')];
+  const prior=JSON.stringify(journal.get(sent.id)),start=calls.length;
+  state.respond=()=>{throw Error('initial EFS reads unavailable');};
+  await assert.rejects(sdk.reconcile(sent.id),/initial EFS reads unavailable/);
+  assert.equal(calls.slice(start).filter(c=>c.method==='eth_getTransactionReceipt').length,1);
+  assert.equal(JSON.stringify(journal.get(sent.id)),prior,'legacy failure must not mutate the retained envelope');
+});
+
+test('legacy local malformed envelope codecs reject before any RPC or journal write', async () => {
+  const {sdk,journal,calls}=fixture();
+  const plan=await sdk.prepare({operation:'edit',author:A,file,document:'changed'});
+  const signed=await sdk.authorize(plan,sign),sent=await sdk.submit(signed,async()=>H('malformed-legacy'));
+  const original=JSON.stringify(journal.get(sent.id));
+  for(const mutate of [entry=>entry.plan.bodies[0]='0xgg',entry=>entry.plan.actions[0].expectedRevision=-1,
+    entry=>delete entry.plan.actions[0].typeId,entry=>entry.plan.intent.nonce='18446744073709551616']) {
+    const corrupt=JSON.parse(original);mutate(corrupt);journal.set(sent.id,corrupt);
+    const serialized=JSON.stringify(corrupt),start=calls.length;
+    await assert.rejects(sdk.reconcile(sent.id));
+    assert.equal(calls.length,start,'local malformed authorization cannot reach the provider');
+    assert.equal(JSON.stringify(journal.get(sent.id)),serialized,'local failure cannot persist an availability outcome');
+  }
+});
+
 test('an unrelated receipt is not attributed to the authorized action or its cost', async () => {
   for(const fault of ['missing transaction','wrong recipient','wrong input','noncanonical block','wrong inclusion','null status','null gas','boolean status','boolean gas']) {
     const {sdk,state}=fixture();

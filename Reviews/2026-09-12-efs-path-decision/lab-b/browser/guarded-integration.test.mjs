@@ -21,6 +21,82 @@ function client(env,journal,options={}) {
   return {sdk,authors,prepare,authorize,run};
 }
 
+test('guarded initial-context failure retains only independently refreshed receipt evidence', {timeout:120_000},async t=>{
+  const env=await createEnvironment({protocol:'compact-guarded-v2',deployment:'proxy'});t.after(()=>env.close());
+  const {ethers:e,manifest,rpc}=env,journal=await env.createJournal('recovery-context');
+  const originalClient=client(env,journal),seed=await originalClient.run('create',{name:'recovery.txt',salt:e.id('recovery-context'),document:'retained'});
+  const original=await journal.get(seed.id),freshReceipt=await rpc('eth_getTransactionReceipt',[original.transactionHash]);
+  const exercise=async(failure,receiptMode)=>{
+    const cache=clone(original),writes=[],methods=[];
+    cache.receipt={...cache.receipt,gasUsed:'0xdeadbeef'};cache.receiptObservation=cache.receipt;
+    cache.receiptAttribution='RPC_MATCHED_DIRECT_PLAN';
+    const sdk=createGuardedCompactSdk({ethers:e,manifest,
+      journal:{get:async()=>clone(cache),put:async entry=>writes.push(clone(entry))},
+      rpc:async(method,params)=>{
+        methods.push(method);
+        if(method==='eth_getTransactionReceipt') {
+          if(receiptMode==='missing')return null;
+          if(receiptMode==='offline')throw Error('receipt endpoint unavailable');
+        }
+        if(failure==='unavailable'&&method==='eth_call')throw Error('initial EFS reads unavailable');
+        if(failure==='missing-block'&&method==='eth_getBlockByNumber'&&params[0]==='latest')return null;
+        return rpc(method,params);
+      }});
+    const result=await sdk.reconcile(seed.id);
+    assert.equal(result.status,failure==='unsupported'?'UNSUPPORTED':'UNKNOWN');
+    assert.equal(result.knowledge,'UNKNOWN');assert.equal(result.coverage,'PARTIAL');assert.equal(result.evidence,null);
+    assert.equal(result.basis,null,'a failed initial pin has no current semantic basis');
+    assert.equal(methods.filter(method=>method==='eth_getTransactionReceipt').length,1,'receipt requested despite initial EFS pin failure');
+    assert.equal(writes.length,1);assert.equal(writes[0].status,result.status);
+    if(receiptMode==='available') {
+      assert.equal(result.receiptAttribution,'RPC_MATCHED_DIRECT_PLAN');
+      assert.deepEqual(result.receipt,freshReceipt);assert.deepEqual(result.receiptObservation,freshReceipt);
+      assert(methods.includes('eth_getTransactionByHash'));assert(methods.includes('eth_getBlockByNumber'));
+    }else {
+      assert.equal(result.receiptAttribution,receiptMode==='missing'?'UNAVAILABLE':'UNKNOWN');
+      assert.equal(result.receipt,null);assert.equal(result.receiptObservation,null);
+    }
+  };
+  for(const failure of ['unavailable','missing-block'])for(const receiptMode of ['available','missing','offline']) {
+    await t.test(`${failure}/${receiptMode}`,()=>exercise(failure,receiptMode));
+  }
+  // Real compatible activation outside the reviewed implementation allowlist:
+  // retained authorization stays reviewed while the new current EFS pin fails.
+  const unreviewed=await env.deploy('unreviewed','Ledger.sol','Ledger',[manifest.contracts.registry.address,manifest.executionFamily.realmId]);
+  await env.transact('proxy','upgradeTo',[unreviewed],'unreviewed-activation');
+  for(const receiptMode of ['available','missing','offline'])await t.test(`unsupported/${receiptMode}`,()=>exercise('unsupported',receiptMode));
+});
+
+test('guarded malformed local envelope bytes shapes and ranges reject before RPC or journal mutation', {timeout:120_000},async t=>{
+  const env=await createEnvironment({protocol:'compact-guarded-v2',deployment:'proxy'});t.after(()=>env.close());
+  const {ethers:e,manifest}=env,journal=await env.createJournal('recovery-local');
+  const {run}=client(env,journal),seed=await run('create',{name:'local-codec.txt',salt:e.id('local-codec'),document:'retained'});
+  const original=await journal.get(seed.id),published=original.plan.actions.findIndex(action=>action.kind===1);
+  for(const [label,mutate] of [
+    ['body malformed hex',entry=>entry.plan.bodies[published]='0xgg'],
+    ['body odd hex',entry=>entry.plan.bodies[published]='0x0'],
+    ['body wrong type',entry=>entry.plan.bodies[published]={hex:'0x00'}],
+    ['signature malformed hex',entry=>entry.signature='0xgg'],
+    ['calldata malformed hex',entry=>entry.transaction.data='0xgg'],
+    ['action shape',entry=>delete entry.plan.actions[0].typeId],
+    ['action array shape',entry=>entry.plan.actions={}],
+    ['action uint32 underflow',entry=>entry.plan.actions[0].expectedRevision=-1],
+    ['action uint32 overflow',entry=>entry.plan.actions[0].expectedRevision=4294967296],
+    ['intent uint64 overflow',entry=>entry.plan.intent.nonce='18446744073709551616'],
+    ['intent shape',entry=>delete entry.plan.intent.executionSet],
+    ['read-set array shape',entry=>entry.plan.readSet.principalIds={}],
+    ['read-set bytes32 shape',entry=>entry.plan.readSet.expectedHeads[0]='0x00'],
+    ['value quantity shape',entry=>entry.transaction.value='not-a-quantity'],
+  ])await t.test(label,async()=>{
+    const corrupt=clone(original);mutate(corrupt);let requests=0,writes=0;
+    const sdk=createGuardedCompactSdk({ethers:e,manifest,
+      journal:{get:async()=>clone(corrupt),put:async()=>{++writes;}},
+      rpc:async()=>{++requests;throw Error('local validation must not reach RPC');}});
+    await assert.rejects(sdk.reconcile(seed.id));
+    assert.equal(requests,0);assert.equal(writes,0,'local integrity errors cannot become persisted UNKNOWN');
+  });
+});
+
 test('guarded environment deploys a reviewed proxy family without changing legacy defaults', {timeout:120_000}, async t => {
   const env = await createEnvironment({protocol:'compact-guarded-v2',deployment:'proxy'}); t.after(()=>env.close());
   assert.equal(env.manifest.protocol,'compact-guarded-v2');
