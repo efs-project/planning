@@ -32,9 +32,11 @@ code; a standalone key-free distribution/wallet adapter is not packaged here.
 
 ## Try it
 
-1. Open `meeting.txt`, switch Alice-first/Bob-first, then Conflict review.
-   Conflicts have candidates, not a fabricated winning document. Conflict
-   review applies to HEAD; placements remain explicitly Alice-first.
+1. Open `meeting.txt`, switch **Alice → Bob** / **Bob → Alice**, then
+   **Advanced: conflict review (diagnostic)**. Ordered Lenses take the first
+   authored entry; a deliberate mask stops fallback. Conflicts have candidates,
+   not a fabricated winning document. Conflict review applies only to HEAD;
+   placements remain explicitly Alice → Bob.
 2. Enable Alice's disposable signer. Create a small lowercase `note.txt`.
    Edit, rename, move to Archive, remove its placement, restore it.
 3. Add a concept tag to **File identity**, then to **Selected revision**. Edit
@@ -43,10 +45,18 @@ code; a standalone key-free distribution/wallet adapter is not packaged here.
 4. Reload and open the result again. Filenames and bytes come from the chain,
    not the local activity journal. Local history is only witnessed revision-ID
    navigation hints, not a complete onchain version inventory.
-5. Expand the floating cost meter. It shows deduplicated recorded receipt gas,
-   last and recent actions, running totals and editable four-chain USD models.
-   Estimates use a dated snapshot and **exclude L2 data/operator fees** unless
-   explicitly entered. They are not all-in quotes or cross-chain benchmarks.
+5. The floating cost meter leads with **estimated Base USD**, with actual
+   recorded local receipt gas on a separate line. Expand for recent actions
+   and the running total: Action, Gas, Ethereum L1, Base, ZKsync. Duplicate
+   transaction hashes count once; reverted included transactions count; missing
+   or contradictory receipts stay unknown and qualify the known subtotal.
+   Ethereum/Base execution-only estimates use the server's dated snapshot and
+   **exclude L2 data/operator fees** unless manually entered. Advanced assumptions
+   are editable for those two modeled networks and retained during this page
+   session; the old config's other networks are filtered out by ID in the browser.
+   **ZKsync is Not measured**: EraVM pricing is not local EVM gas times a fee,
+   and this screen deliberately provides no numeric ZKsync model. None of these
+   numbers are live quotes, all-in fees, or cross-chain benchmarks.
 
 One logical write is an exact signed plan and atomic Ledger batch. The demo
 signs both the EFS intent and the outer local transaction in software; this

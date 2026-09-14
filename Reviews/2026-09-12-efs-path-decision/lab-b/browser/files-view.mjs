@@ -38,19 +38,23 @@ export function canOpen(point) {
 }
 
 export function estimateUsd(gas, network, ethUsd, transactions=1) {
-  if (gas === null || gas === undefined) return null;
-  const values = [Number(gas),Number(network.gasGwei),Number(network.extraUsd),Number(ethUsd),Number(transactions)];
+  // EraVM pricing cannot be inferred from this local EVM receipt.
+  if (network?.id === 'zksync') return null;
+  const raw = [gas,network?.gasGwei,network?.extraUsd,ethUsd,transactions];
+  if (raw.some(v => v === null || v === undefined || v === '')) return null;
+  const values = raw.map(Number);
   if (values.some(v => !Number.isFinite(v) || v < 0)) return null;
-  return values[0]*values[1]*1e-9*values[3]+values[2]*values[4];
+  const estimate=values[0]*values[1]*1e-9*values[3]+values[2]*values[4];
+  return Number.isFinite(estimate)?estimate:null;
 }
 
 // Journal receipts are RPC observations, not state proofs. Never count one
 // transaction twice or turn missing/contradictory observations into zero cost.
 export function receiptTotals(entries) {
-  const byHash=new Map(); let unidentified=0;
+  const byHash=new Map(), observations=[];
   for(const entry of entries) {
     const hash=typeof entry.transactionHash==='string'?entry.transactionHash.toLowerCase():null;
-    if(!/^0x[0-9a-f]{64}$/.test(hash??'')) {unidentified++;continue;}
+    if(!/^0x[0-9a-f]{64}$/.test(hash??'')) {observations.push({entry,gas:null});continue;}
     let gas=null;
     try {
       const raw=entry.receipt?.gasUsed;
@@ -60,10 +64,43 @@ export function receiptTotals(entries) {
     } catch {gas=null;}
     const prior=byHash.get(hash);
     if(byHash.has(hash)) {
-      if(!prior || gas===null || prior.gas!==gas) byHash.set(hash,null);
-    } else byHash.set(hash,gas===null?null:{entry,gas});
+      if(gas===null || prior.gas!==gas) prior.gas=null;
+    } else {const row={entry,gas};byHash.set(hash,row);observations.push(row);}
   }
-  const known=[...byHash.values()].filter(Boolean);
+  const known=observations.filter(row=>row.gas!==null);
   return {gas:known.length?known.reduce((sum,row)=>sum+row.gas,0n):null,
-    transactions:known.map(row=>row.entry),unknown:unidentified+byHash.size-known.length};
+    transactions:known.map(row=>row.entry),unknown:observations.length-known.length,observations};
+}
+
+const costEscape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = value => value === null ? 'Unknown' : value > 0 && value < 0.0001 ? '< $0.0001' : `$${value.toFixed(4)}`;
+
+// Browser-only projection of the existing timestamped config. Preserve source
+// indices so edits affect the intended network even with the old four-chain config.
+export function costPresentation(entries, economics) {
+  const totals=receiptTotals(entries);
+  const configured=Array.isArray(economics?.networks)?economics.networks:[];
+  const networks=['ethereum','base'].flatMap(id=>{
+    const index=configured.findIndex(network=>network.id===id);
+    return index<0?[]:[{...configured[index],index,label:id==='ethereum'?'Ethereum L1':'Base'}];
+  });
+  const costs=(gas,transactions=1)=>Object.fromEntries(['ethereum','base'].map(id=>[
+    id,estimateUsd(gas,networks.find(network=>network.id===id),economics?.ethUsd,transactions),
+  ]));
+  const rows=totals.observations.slice(0,5).map(({entry,gas})=>({
+    label:entry.plan?.operation??'Unknown action',status:entry.status??'Unknown status',
+    gas,...costs(gas),zksync:null,
+  }));
+  const total={label:totals.unknown?'Known subtotal':'Recorded total',gas:totals.gas,
+    ...costs(totals.gas,totals.transactions.length),zksync:null};
+  const headline=total.base===null
+    ? `Base estimate unavailable${entries.length?'':' · no receipts'}${totals.unknown?` · ${totals.unknown} unknown`:''}`
+    : `Base ≈ ${money(total.base)} ${totals.unknown?`known subtotal · ${totals.unknown} unknown`:'estimated'}`;
+  const receiptSummary=`${totals.gas===null?'No recorded':totals.gas.toLocaleString('en-US')} local gas · ${totals.transactions.length} receipts${totals.unknown?` · ${totals.unknown} unknown`:''}`;
+  return {columns:['Action','Gas','Ethereum L1','Base','ZKsync'],networks,rows,total,headline,receiptSummary,totals};
+}
+
+export function renderCostTable(view) {
+  const cells=row=>`<th scope="row">${costEscape(row.label)}${row.status?`<small>${costEscape(row.status)}</small>`:''}</th><td>${row.gas===null?'Unknown':row.gas.toLocaleString('en-US')}</td><td>${costEscape(money(row.ethereum))}</td><td class="base-estimate">${costEscape(money(row.base))}</td><td>Not measured</td>`;
+  return `<div class="cost-table-scroll" role="region" aria-label="Recent action costs" tabindex="0"><table class="cost-grid"><caption>Recent actions (up to 5); total includes all journal receipts</caption><thead><tr>${view.columns.map(label=>`<th scope="col">${costEscape(label)}</th>`).join('')}</tr></thead><tbody>${view.rows.map(row=>`<tr>${cells(row)}</tr>`).join('')||'<tr><td colspan="5">No local actions recorded yet.</td></tr>'}</tbody><tfoot><tr>${cells(view.total)}</tr></tfoot></table></div>`;
 }

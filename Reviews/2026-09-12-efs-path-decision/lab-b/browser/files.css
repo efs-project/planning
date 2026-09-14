@@ -540,7 +540,7 @@ summary {
   right:26px;
   bottom:22px;
   z-index:5;
-  width:400px;
+  width:480px;
   max-width:calc(100vw - 32px);
   background:#fff;
   border:1px solid #d0dccc;
@@ -560,6 +560,7 @@ summary {
   display:none
 }
 .cost-dot {
+  flex-shrink:0;
   width:8px;
   height:8px;
   border-radius:50%;
@@ -568,10 +569,20 @@ summary {
 .cost-widget summary strong {
   font-size:12px
 }
-#cost-summary {
+.cost-headline {
+  display:flex;
+  flex:1;
+  min-width:0;
+  flex-direction:column;
+  gap:5px;
+  overflow-wrap:anywhere
+}
+#cost-receipts {
   font-size:10px;
-  color:var(--muted);
-  margin-left:auto
+  color:var(--muted)
+}
+#cost-summary {
+  color:var(--green)
 }
 .chevron {
   color:#7b8b77
@@ -607,11 +618,49 @@ summary {
   border-collapse:collapse;
   margin:12px 0
 }
+.cost-table-scroll {
+  overflow-x:auto
+}
+.cost-grid caption {
+  text-align:left;
+  font-size:10px;
+  color:var(--muted);
+  padding-bottom:8px
+}
 .cost-grid td,.cost-grid th {
-  padding:8px 0;
+  padding:8px 5px;
   border-bottom:1px solid var(--line);
   text-align:left;
-  font-weight:400
+  font-weight:400;
+  vertical-align:top
+}
+.cost-grid th[scope="row"] {
+  text-transform:none;
+  font-size:11px;
+  color:inherit;
+  max-width:110px;
+  overflow-wrap:anywhere
+}
+.cost-grid small {
+  display:block;
+  font-size:8px;
+  color:var(--muted);
+  margin-top:4px
+}
+.cost-grid tfoot th,.cost-grid tfoot td {
+  font-weight:600;
+  border-top:2px solid var(--line)
+}
+.base-estimate {
+  color:var(--green);
+  background:#f5f8f3
+}
+.lens-help {
+  margin:0;
+  padding:0 20px 12px;
+  font-size:11px;
+  line-height:1.6;
+  color:var(--muted)
 }
 .cost-grid td:last-child,.cost-grid th:last-child {
   text-align:right
@@ -792,7 +841,9 @@ h1 {
   justify-content:flex-end
 }
 .lens-control select {
-  flex:1
+  flex:1;
+  min-width:0;
+  width:100%
 }
 .filterbar {
   padding:12px 12px 4px

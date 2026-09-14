@@ -1,6 +1,6 @@
 import * as ethers from '/vendor/ethers.mjs';
 import {createCompactSdk} from './compact-sdk.mjs';
-import {folderState,filterRows,canOpen,estimateUsd,receiptTotals} from './files-view.mjs';
+import {folderState,filterRows,canOpen,costPresentation,renderCostTable} from './files-view.mjs';
 
 const $ = id => document.getElementById(id);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -142,21 +142,18 @@ function renderActivity() {
   $('activity').innerHTML=(state.storageIssue?`<p class="error">${escape(state.storageIssue)}</p>`:'')+(state.entries.slice(0,20).map(entry=>`<div class="activity-item"><strong>${escape(entry.plan.operation)} · ${escape(entry.status)}</strong><code>${escape(short(entry.id))}</code>${entry.error?`<p>${escape(entry.error)}</p>`:''}<br><button data-action="reconcile" data-id="${escape(entry.id)}">Reconcile without re-signing</button><details><summary>Exact signed plan & read-back</summary><pre class="document">${escape(json(entry))}</pre></details></div>`).join('') || '<p>No local signed plans yet.</p>');
 }
 function renderCosts() {
-  const totals=receiptTotals(state.entries), latest=totals.transactions[0];
-  const gas=latest?.receipt?.gasUsed ? BigInt(latest.receipt.gasUsed).toString():null;
-  $('cost-summary').textContent=totals.gas!==null?`${pretty(totals.gas)} gas total · ${totals.transactions.length} tx${totals.unknown?' + unknown':''}`:'No receipt yet';
   const economics=state.economics;
-  const networks=economics?.networks??[];
+  const view=costPresentation(state.entries,economics), {totals,networks}=view;
+  $('cost-summary').textContent=view.headline;
+  $('cost-receipts').textContent=view.receiptSummary;
+  const assumptionsOpen=$('cost-body').querySelector('.assumptions')?.open??false;
   const source=economics?.source;
   const sourceUrl=typeof source==='string'&&/^https?:\/\//.test(source)?`<a href="${escape(source)}" target="_blank" rel="noreferrer">snapshot source</a>`:escape(typeof source==='object'?json(source):source??'Not provided');
-  const localPrice=latest?.receipt?.effectiveGasPrice;
-  const localEth=gas&&localPrice?ethers.formatEther(BigInt(gas)*BigInt(localPrice)):null;
-  const money=value=>value===null?'—':`$${value.toFixed(4)}`;
-  $('cost-body').innerHTML=`<div class="gas-number">${totals.gas!==null?pretty(totals.gas):'—'} <small>total recorded gas</small></div><p class="cost-caption">${totals.transactions.length} unique recorded receipts${totals.unknown?` · ${totals.unknown} costs unknown`:''}. This browser's journal only; deployments and other users' actions are excluded.<br>${latest?`Last: ${escape(latest.plan.operation)} · ${pretty(gas)} gas · ${escape(latest.status)}${localEth?` · ${escape(localEth)} local test ETH`:''}`:'Perform a local test write to measure gas.'}<br>Reverted transactions still cost gas; only EFFECTS_VERIFIED means effect success.</p>
-    <table class="cost-grid"><thead><tr><th>Execution model</th><th>Last</th><th>Recorded total</th></tr></thead><tbody>${networks.map(network=>`<tr><td>${escape(network.label)}</td><td>${money(estimateUsd(gas,network,economics.ethUsd))}</td><td>${money(estimateUsd(totals.gas,network,economics.ethUsd,totals.transactions.length))}</td></tr>`).join('')||'<tr><td colspan="3">No sourced network assumptions configured.</td></tr>'}</tbody></table>
-    <p class="cost-caption">Models, not live quotes or deployed-chain benchmarks. Gas × gwei × ETH/USD + explicit extra USD. L1 data / operator fees are excluded unless entered as extra USD; zero extra does not mean zero real fees.${economics?`<br>Snapshot: ${escape(economics.asOf??'undated')} · ${sourceUrl}${state.editedEconomics?' · locally edited assumptions':''}`:''}</p>
-    ${economics?`<details class="assumptions"><summary>Advanced assumptions</summary><label>ETH / USD <input type="number" min="0" step="any" data-economic="ethUsd" value="${escape(economics.ethUsd)}"></label>${networks.map((network,index)=>`<label>${escape(network.label)} · gas gwei <input type="number" min="0" step="any" data-network="${index}" data-economic="gasGwei" value="${escape(network.gasGwei)}"></label><label>${escape(network.label)} · extra USD <input type="number" min="0" step="any" data-network="${index}" data-economic="extraUsd" value="${escape(network.extraUsd)}"></label>`).join('')}</details>`:''}
-    <div class="cost-history">${totals.transactions.slice(0,5).map(entry=>`<p><strong>${escape(entry.plan.operation)} · ${pretty(BigInt(entry.receipt.gasUsed))} gas</strong><br>${networks.map(network=>`${escape(network.label)} ${money(estimateUsd(entry.receipt.gasUsed,network,economics.ethUsd))}`).join(' · ')}<br>${escape(entry.status)}</p>`).join('')}</div><div class="rpc-line">RPC work, not gas · ${pretty(state.rpc.calls)} calls · ${(state.rpc.bytes/1024).toFixed(1)} KiB response bodies · ${(state.rpc.ms/1000).toFixed(2)}s summed request time · ${state.rpc.errors} errors<br>Page session only. These reads do not spend transaction gas.</div>`;
+  $('cost-body').innerHTML=`<div class="gas-number">${totals.gas!==null?pretty(totals.gas):'—'} <small>recorded local receipt gas${totals.unknown?' · known subtotal':''}</small></div><p class="cost-caption">${totals.transactions.length} unique recorded receipts${totals.unknown?` · ${totals.unknown} costs unknown`:''}. This browser's journal only; deployments and other users' actions are excluded.<br>Reverted included transactions still cost gas; only EFFECTS_VERIFIED means effect success.</p>
+    ${renderCostTable(view)}
+    <p class="cost-caption">Execution-only estimates, not live quotes or deployed-chain benchmarks. Local EVM gas × snapshot gwei × ETH/USD + any manually entered extra USD. L2 data/operator fees are excluded unless manually entered; zero extra does not mean zero real fees.<br><strong>ZKsync: Not measured.</strong> EraVM pricing is not local EVM gas multiplied by a fee.${economics?`<br>Snapshot: ${escape(economics.asOf??'undated')} · ${sourceUrl}${state.editedEconomics?' · locally edited assumptions (this page session)':''}`:''}</p>
+    ${economics?`<details class="assumptions"${assumptionsOpen?' open':''}><summary>Advanced assumptions</summary><label>ETH / USD <input type="number" min="0" step="any" data-economic="ethUsd" value="${escape(economics.ethUsd)}"></label>${networks.map(network=>`<label>${escape(network.label)} · gas gwei <input type="number" min="0" step="any" data-network="${network.index}" data-economic="gasGwei" value="${escape(network.gasGwei)}"></label><label>${escape(network.label)} · extra USD / tx <input type="number" min="0" step="any" data-network="${network.index}" data-economic="extraUsd" value="${escape(network.extraUsd)}"></label>`).join('')}<p class="cost-caption">ZKsync has no editable numeric model in this EVM experiment.</p></details>`:''}
+    <div class="rpc-line">RPC work, not gas · ${pretty(state.rpc.calls)} calls · ${(state.rpc.bytes/1024).toFixed(1)} KiB response bodies · ${(state.rpc.ms/1000).toFixed(2)}s summed request time · ${state.rpc.errors} errors<br>Page session only. These reads do not spend transaction gas.</div>`;
 }
 function render() {
   if(!state.config) { controls(); return; }
@@ -282,7 +279,7 @@ $('signer').addEventListener('change',()=>run(async()=>{
 }));
 $('cost-body').addEventListener('change',event=>{
   const {economic,network}=event.target.dataset; if(!economic)return;
-  const value=Number(event.target.value); if(!Number.isFinite(value)||value<0) {renderCosts();return;}
+  const value=Number(event.target.value); if(event.target.value===''||!Number.isFinite(value)||value<0) {renderCosts();return;}
   if(network===undefined) state.economics[economic]=value;
   else state.economics.networks[Number(network)][economic]=value;
   state.editedEconomics=true;renderCosts();
