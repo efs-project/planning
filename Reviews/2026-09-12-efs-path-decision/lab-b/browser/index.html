@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Files · EFS compact lab</title>
+  <link rel="stylesheet" href="./files.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="EFS Files home"><span class="brand-mark">e</span><strong>EFS</strong><span class="brand-divider">/</span>Files</a>
+    <span class="lab-pill">COMPACT LAB · LOCAL</span>
+    <div class="signer-controls"><span id="signer-status">Guest · read only</span><select id="signer" aria-label="Disposable signer" disabled><option value="alice">Alice</option><option value="bob">Bob</option></select><button id="connect" data-action="connect">Use disposable demo signer</button><button id="disconnect" data-action="disconnect" hidden>Return to guest</button></div>
+  </header>
+  <main>
+    <section class="heading"><div><p class="eyebrow">YOUR FILES, OBSERVED ONCHAIN</p><h1>A place for your records.</h1><p class="subtitle">Read directly from the Ledger. Choose whose view you see.</p></div><button class="primary" id="create" data-action="create" disabled>＋ New file</button></section>
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+    <section class="workspace" aria-label="Files workspace">
+      <div class="workspace-toolbar"><nav id="mounts" class="mounts" aria-label="Explicit mounted folders"></nav><div class="lens-control"><label for="lens">Lens</label><select id="lens"><option value="alice">Alice first</option><option value="bob">Bob first</option><option value="conflict">Conflict review</option></select><button data-action="refresh" aria-label="Refresh pinned observation" title="Read a new pinned observation">↻ Refresh</button></div></div>
+      <div class="filterbar"><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Find a filename" aria-label="Find a filename"></label><input id="filter-concept" placeholder="Tag concept, e.g. important" aria-label="Tag concept filter"><select id="filter-scope" aria-label="Tag filter subject"><option value="either">File or selected revision</option><option value="file">File tags only</option><option value="revision">Selected revision tags only</option></select><button data-action="filter">Apply tag filter</button></div>
+      <p id="coverage" class="coverage" aria-live="polite">Connecting to the local experiment…</p>
+      <div class="panes"><section class="file-list" aria-label="Folder contents"><div class="list-header"><span>Name</span><span>Selected revision</span></div><div id="rows"></div><button id="continue" data-action="continue" hidden>Continue partial traversal</button></section><aside id="detail" class="detail" aria-label="File inspector"><div class="welcome"><span class="empty-icon">▤</span><h2>Open a file</h2><p>Names and contents come from retained records, not a private directory.</p></div></aside></div>
+      <footer class="workspace-footer"><span id="basis">No qualified observation yet</span><button id="restore" data-action="restorePlacement" disabled>Restore last removed placement</button></footer>
+    </section>
+    <div class="below-workspace"><details class="about"><summary>About this experiment</summary><p>Prototype only. The two folders are explicit ID mounts, not proven nested paths. Names use lowercase ASCII <code>a–z 0–9 . _ -</code>. Inline record bodies are limited to 8192 bytes: 8160 document bytes for a new file and 8128 for edits.</p><p>Read-back is <strong>RPC-observed</strong>, not a state proof or finality guarantee. No MIME metadata is asserted: UTF-8 may be previewed as plain text; downloads preserve the verified bytes. Conflict review compares file HEADs; folder placement still uses Alice-first order.</p><p>Demo signers are public, disposable local-test keys, loaded only on request and never saved by this screen. No real-wallet connection is implemented. Removing a placement masks a name in the signer's Lens; it does not erase history. Revision history below is locally witnessed, not exhaustive.</p></details><details class="activity"><summary>Local activity & recovery <span id="activity-count"></span></summary><p>Signed plans are saved before broadcast. Reconcile checks canonical effects without signing again.</p><div id="activity"></div></details></div>
+  </main>
+  <details id="cost-widget" class="cost-widget"><summary><span class="cost-dot"></span><strong>Gas & cost</strong><span id="cost-summary">No writes yet</span><span class="chevron">⌃</span></summary><div id="cost-body"></div></details>
+  <dialog id="editor"><form id="editor-form"><div class="dialog-heading"><h2 id="editor-title"></h2><button type="button" data-action="close" aria-label="Close dialog">×</button></div><p id="editor-help" class="muted"></p><div id="editor-fields"></div><p id="editor-error" class="error" role="alert"></p><div class="dialog-actions"><button type="button" data-action="close">Cancel</button><button id="editor-submit" class="primary" type="submit">Sign local test action</button></div></form></dialog>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>
