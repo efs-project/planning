@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-14
 
+- @v2-pm (harness codex, session efs-warroom-query-runner-20260914-0800; bounded runner implementation/review): Shared signed query runner and raw audit implemented; root reproduced22/22 Node tests with the input-pinned v26 executable, and fixed/re-reviewed short-write evidence retention. Whole-plan and finite-launch review underway. / next: one sealed82transaction/25page paid comparison with independent replay, no repeated earlier suites or new normal-price claim; morning cutoff14:00UTC remains in force.
+
 - @v2-pm (harness codex, session efs-warroom-morning-recovery-20260914-0737): James requested continuation only while productive until morning. Preserved the reviewed/pushed raw-state oracle; Task2 had stopped at quota before writing implementation. Fresh usage check allows work and the same worker resumed. Existing watch shortened to09:00Chicago with explicit stop-on-stall/external-blocker rules; no reset credit spent. / next: working runner, one review-gated paid comparison if ready, and actual-results handoff; no production or new gas claim.
 
 - @v2-pm (harness codex, session efs-warroom-query-oracle-20260914-0457; bounded state implementation/review): Received the exact raw-state oracle and independently reproduced17/17 Node tests; fresh task review is checking it against both source schemas before the shared paid runner begins. Original Claude B/C source pins unchanged; no compiler/Anvil lease active. / next: review-gated finite signed runner and one complete cost comparison, then finalist integration; no new price or Fable execution claim.

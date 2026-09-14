@@ -108,9 +108,27 @@ Use the **Coordinator checkpoint** below as the single coordination surface, wri
 
 Codex is the default heavy-run operator. Before anyone builds or starts a chain, explicitly hand off the run slot and record the owning process, scratch paths and watchdog. Use finite, bounded-history Anvil runs; no unrestricted state dumps, persistent background benchmark nodes or full storage traces. Proposed budget: 15 GB total scratch and 50 GB free-disk reserve. Stop before crossing it, retain compact evidence, and clean only verified run-owned paths. Preserve existing user demos and other agents' processes.
 
-Publish consolidated owner checkpoints at the first shortlist, 24-hour recommendation and final handoff—not every cross-agent message. The Codex thread heartbeat `coordinate-efs-engineering-war-room` checks hourly through September 14 at 23:10 UTC to resume useful work and coordinate returned results. It stays quiet on unchanged state and stops at the final handoff/deadline. This is a follow-up mechanism, not evidence that every worker or laptop process runs continuously.
+Publish consolidated owner checkpoints at the first shortlist, 24-hour recommendation and final handoff—not every cross-agent message. The Codex thread heartbeat `coordinate-efs-engineering-war-room` checks hourly through September 14 at **14:00 UTC/09:00Chicago**, per James's later morning cutoff, to resume useful work and coordinate returned results. It stays quiet on unchanged state and stops at the final handoff/deadline or sooner if the productivity gate fails. This is a follow-up mechanism, not evidence that every worker or laptop process runs continuously.
 
 ### Coordinator checkpoint
+
+**September14,08:16: runner source gates passed; one finite root-owned paid lease.**
+The [[required-query-runner-review-20260914|shared signed runner and raw audit]]
+are pushed at B`7b0471342a99d69c1d423e7e64822ccc0b309f23`; C remains
+`3f5702f1d7acc39c1d62a5b1a0795f3fe579ebce`. Root22/22 Node26 tests and fresh
+whole-plan/source/launcher review passed. The173-path runtime inventory and
+286-file source/input/review seal are retained; pins SHA256
+`514f60cecb704a3600d2f46658f4ca2f497e6bd4aedcfc363ead8a5a05b13f69`.
+
+**Exclusive heavy lease: Codex root,08:16–08:45UTC, latest start08:25.**
+Exactly one fresh loopback Anvil attempt;82 sealed transactions/25 paid pages,
+no compiler, no gas/fixture change or automatic retry. Owned scratch
+`efs-required-query-paid-20260914.wdaBsu` under the system temporary directory;
+prune256, run-specific cache,20minute watchdog bounded by lease,15GiB total
+owned scratch/50GiB reserve, unconditional owned-process termination. PIDs and
+commands go in its launch record. All other heavy operators wait. No chain
+result is claimed before complete raw replay and cleanup checks. This comparison
+does not alter the frozen normal-price table or approve a permanent design.
 
 **September14,07:40: quota-interrupted runner resumed; morning productivity cutoff.**
 James asked to continue only while productive through the morning. This watch now
