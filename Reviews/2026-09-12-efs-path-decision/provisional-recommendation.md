@@ -32,8 +32,8 @@ priority, not “B already meets every requirement.”
 current prototype the finished foundation. No sacrifice of portability,
 mandatory validation, Lenses or required discovery is approved. Today we have
 a substantially cheaper useful implementation to pursue, not the unavoidable
-price of the complete EFS promise. The next day is for the named comparison
-and integration gates below, not another open-ended architecture search.
+price of the complete EFS promise. The remaining morning work is for the named
+integration gates below, not another open-ended architecture search.
 
 ## What users would pay in the measured slice
 
@@ -62,9 +62,9 @@ does not create immutable historical snapshots for free.
 | --- | --- |
 | Exact typed records, checked references and mandatory acceptance | Exercised in the joined small graph; not every schema/resource boundary |
 | Independent authors, history and Lens-selected contract reads | Exercised in both candidates with independently pinned expected outputs |
-| Separate ingestion and mandatory indexing contracts | Present in both; actual required query families are not equivalent yet |
-| Ordinary Files workflow and useful SDK | Both can express the four reviewed Files cases; end-to-end fixture and generated/runtime adapters remain work |
-| Portable authored evidence | Existing import/replay paths are insufficient for independent evidence retention; native-contract historical proof remains unsupported |
+| Separate ingestion and mandatory indexing contracts | Present in both; the matched unique-Quote reverse query is now exercised and priced, not every query family |
+| Ordinary Files workflow and useful SDK | Generic mechanisms cover much of the journey; exact FileRevision parent validation, revision-scoped tags after selection, and SDK integration still need joined tests |
+| Portable authored evidence | The separate signed-claim archive is being implemented after an observed behavioral RED; no archive pass/cost claimed yet. Native-contract historical proof remains unsupported |
 | Full rollback, upgrade/recovery, private/carrier failures and scale | Specific gates remain; isolated prior tests are not one finalist integration |
 
 No row is silently dropped to make the recommendation pass. A content hash
@@ -101,9 +101,15 @@ EFS SDK or lower maintenance bill: [[maintenance-and-reuse-20260913]].
    pre/post state evidence and separate positive calibrations for B and C.
 2. **Complete:** required-query reversal test; carry only compact B into the
    remaining joined journey, retaining the other roads as comparison evidence.
-3. **Next:** separate retained source evidence from replay/current destination effects;
-   exercise the small Files/SDK journey against that same candidate, with
-   explicit proof and historical-pagination limits.
+3. **In progress:** separate retained source evidence from replay/current destination
+   effects, then price its physical representation. Keep the existing complete
+   signed-vector requirement and unsupported native historical proof explicit.
+4. **Next joined delta:** [[files-next-joined-gate-20260914|exercise actual FileRevision parents and bounded reads]], with revision-scoped
+   tags after selection. Do not substitute a Quote-shaped analogue or hardcode a
+   fixture's parent content as the general validation rule. Existing mandatory
+   acceptance and a profile-specific reference index are the proposed extension
+   seams; arbitrary revision chains are not demonstrated merely by writing a
+   parent ID into a body. Then test the smallest useful SDK write/reconcile path.
 
 James's later morning cutoff makes the final September14,14:00UTC handoff
 earlier than the original23:10UTC sprint deadline. It must state whether reversible testnet
@@ -128,8 +134,8 @@ ranges against the retained table, with no blocking overclaim. The concise
 takeaway must say required reverse discovery and stronger portable evidence
 still need **implementation and pricing**, not merely a price estimate. B's
 current author-liveness dependency is a portability limitation to repair, not
-an accepted sacrifice. The final/conditional checkpoint is September 14,
-23:10 UTC (6:10pm Chicago).
+an accepted sacrifice. The original September14,23:10UTC final checkpoint was
+superseded by James's later morning cutoff: September14,14:00UTC/9am Chicago.
 
 **Post-cutoff validation supplement, September 14, 01:08:** matching C
 mandatory-rule/late-index controls and the positive calibration are now mined,

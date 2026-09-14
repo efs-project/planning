@@ -112,6 +112,16 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September14,09:31: archive semantics pass; independent task review running.**
+Root observed the intended behavioral RED, then all93 B tests passed, including
+14 new archive tests. The archive runtime is6,098bytes (initcode6,299), and all
+seven approved methods are present. Candidate commit `02c34a9` is local pending
+task review, not yet pushed. No Ledger change or paid archive price is claimed.
+All owned compiler processes stopped and the slot is released; the09:20 lease
+is closed early. Task2 has not started and needs its own finite run permission.
+The next [[files-next-joined-gate-20260914|Files gate]] now includes a concrete
+cold-parent read-budget risk, not merely more small Quote fixtures.
+
 **September14,09:20: finite archive compiler gate authorized.** Root alone owns
 the compiler slot from09:20 through09:40UTC; no Anvil/RPC run is authorized.
 The reviewed operational wrapper uses one atomic lock, an immutable source
