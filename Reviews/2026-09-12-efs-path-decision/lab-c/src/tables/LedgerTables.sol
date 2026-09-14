@@ -86,6 +86,14 @@ library Records {
     return StoreCore.getDynamicField(_tableId, key1(recordId), 0);
   }
 
+  /// One logical header lookup, two external fixed-field calls; never copies body bytes.
+  /// MUD returns left-aligned fields with potentially nonzero trailing bytes.
+  function getHeader(IStoreRead store, bytes32 recordId) internal view returns (bytes32 typeId, uint64 firstAdmission) {
+    bytes32[] memory key = key1(recordId);
+    typeId = store.getStaticField(_tableId, key, 0, _fieldLayout);
+    firstAdmission = uint64(bytes8(store.getStaticField(_tableId, key, 1, _fieldLayout)));
+  }
+
   function get(
     IStoreRead store,
     bytes32 recordId
@@ -467,6 +475,21 @@ library Types {
 
   function _getAdmission(bytes32 typeId) internal view returns (uint64) {
     return uint64(bytes8(StoreCore.getStaticField(_tableId, key1(typeId), 2, _fieldLayout)));
+  }
+
+  /// Exact one-reference profile: five bounded external calls (length, three fields, slice).
+  /// This reads retained metadata, not the opaque Type Record body or an unbounded ref array.
+  function getOneRefHeader(IStoreRead store, bytes32 typeId)
+    internal view returns (address acceptor, bytes32 acceptorCodehash, uint64 admission, bytes32 refType)
+  {
+    bytes32[] memory key = key1(typeId);
+    require(store.getDynamicFieldLength(_tableId, key, 0) == 32, "expected exactly one Type reference");
+    acceptor = address(bytes20(store.getStaticField(_tableId, key, 0, _fieldLayout)));
+    acceptorCodehash = store.getStaticField(_tableId, key, 1, _fieldLayout);
+    admission = uint64(bytes8(store.getStaticField(_tableId, key, 2, _fieldLayout)));
+    bytes memory ref = store.getDynamicFieldSlice(_tableId, key, 0, 0, 32);
+    require(ref.length == 32, "invalid Type reference slice");
+    refType = Bytes.getBytes32(ref, 0);
   }
 
   function get(
