@@ -112,6 +112,24 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September14,07:40: quota-interrupted runner resumed; morning productivity cutoff.**
+James asked to continue only while productive through the morning. This watch now
+ends at09:00Chicago/14:00UTC, earlier than the original23:10 sprint handoff.
+Task1 remains pushed and reviewed; the Task2 worker hit quota before leaving code
+or a report. Fresh account status allows work, so the same worker resumed from
+the existing brief. No paid run or new gas result exists yet. Priorities are the
+working runner, one bounded comparison if ready, then an honest handoff. Stop the
+recurring task early if useful execution is blocked or genuinely stalls; no
+duplicate workers or repeated completed test suites. No heavy lease is active.
+
+**September14,05:09: raw-state oracle reviewed; shared paid runner executing as a coding task.**
+[[required-query-state-oracle-20260914|Oracle source and exact-state tests]] are
+pushed at B`7bd787b`; root17/17 Node passes and independent review/P3 closeout
+are complete. One bounded worker now implements the shared signed runner, not a
+chain run. No compiler/Anvil lease is active and no new gas result is claimed.
+The planned4100checkpoint probes are audit overhead, not browser query traffic.
+Original Claude pins remain unchanged; final/conditional deadline23:10UTC remains.
+
 **September14,04:14: paid-query inputs independently reviewed; runner preparation.**
 Root reproduced17/17 offline input tests and the exact input SHA256; independent
 review checked21 runtimes,25 app signatures,82 signed transactions and25 complete

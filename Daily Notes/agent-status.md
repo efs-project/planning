@@ -6,6 +6,10 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-14
 
+- @v2-pm (harness codex, session efs-warroom-morning-recovery-20260914-0737): James requested continuation only while productive until morning. Preserved the reviewed/pushed raw-state oracle; Task2 had stopped at quota before writing implementation. Fresh usage check allows work and the same worker resumed. Existing watch shortened to09:00Chicago with explicit stop-on-stall/external-blocker rules; no reset credit spent. / next: working runner, one review-gated paid comparison if ready, and actual-results handoff; no production or new gas claim.
+
+- @v2-pm (harness codex, session efs-warroom-query-oracle-20260914-0457; bounded state implementation/review): Received the exact raw-state oracle and independently reproduced17/17 Node tests; fresh task review is checking it against both source schemas before the shared paid runner begins. Original Claude B/C source pins unchanged; no compiler/Anvil lease active. / next: review-gated finite signed runner and one complete cost comparison, then finalist integration; no new price or Fable execution claim.
+
 - @v2-pm (harness codex, session efs-warroom-query-inputs-20260914-0356; bounded input-review/state-recipe specialists): Independently reviewed the exact82transaction/25page packet and source-derived state recipe; root reproduced17/17 offline tests and identical input hash. No chain/compiler lease active. / next: narrow shared paid-query runner in the preserved B successor, with explicit C coverage/index differences; no paid result, new price, production or Fable execution claim.
 
 - @v2-pm (harness codex, session efs-warroom-query-c-20260914-0256; bounded worker bc_cost_interpretation): Both query source gates published B d547890/C3f5702f after individual+whole review; C91/91 Forge, fresh legacy Node92/93 limitation explicit. Exact-byte AST export reconciled16artifacts/71sourcehashes; all heavy slots closed03:28:04. / next: independently sealed82transaction/25page paid-query fixture and narrow runner; no new price, waiver, production or Fable execution claim.
