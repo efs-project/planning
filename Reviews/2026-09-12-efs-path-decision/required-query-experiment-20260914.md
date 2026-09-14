@@ -143,5 +143,23 @@ normal-run scripts/evidence alone; a new paid-query runner must independently
 resolve fresh immutable declarations/values and check all deployed bytes.
 
 Run logs and `artifact-reconciliation.json` are retained under the temporary
-`efs-required-query-c-build-20260914.sKwCIN` directory. Independent review and
-publication follow; no paid query or complete-query economic result is claimed.
+`efs-required-query-c-build-20260914.sKwCIN` directory. C source is now pushed
+as `3f5702f1d7acc39c1d62a5b1a0795f3fe579ebce`, exact three files only. Task and
+[[required-query-source-review-20260914|whole-delta source/unit reviews]] passed
+without a Critical/Important finding. Both experiment workspaces are preserved.
+
+Root exported AST metadata for the16 relevant B/C deployment artifacts into
+`efs-required-query-ast-20260914.hrHCoQ/{b-out,c-out}`. All71 unique transitive
+source hashes and full executable templates/links/physical immutable spans
+match the already tested set. This changes no source, compiler profile or
+measurement. Offline preparation can now derive runtime values by declaration
+name, including inherited fields, without trusting an observed chain answer.
+
+Next is the fixed82-transaction/25-paid-page comparison from independently
+sealed inputs. Its two signed EOA authors are the same in all three fresh
+graphs; existing genuine contract-author unit/paid controls remain separate.
+Legacy type0/2gwei and15M-deploy/8M-publication/5M-page limits are disposable
+run settings, not actual gas, affordability or product policy. All deployment,
+setup,8 common publications per arm, C's separate Type publication and complete
+old/current query costs must remain visible. No paid query or complete-query
+economic result is claimed yet.

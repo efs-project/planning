@@ -112,7 +112,18 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
-**September14,03:27–03:40 UTC: root-only AST artifact export lease.**
+**September14,03:31: both required-query readers published; paid fixture next.**
+B `d547890` and C `3f5702f` passed individual and combined source/unit review;
+see [[required-query-source-review-20260914]]. Existing prototype branches are
+preserved, not merged. B79/79 and C91/91 full Forge pass; C's fresh legacy Node
+92/93 metadata-pin limitation remains explicit. The corrected incomplete-page
+cursor never skips an unexamined future tail. This is not a new gas result.
+Independent offline preparation now derives the fixed82-transaction/25-page
+comparison, including every required-index publication and complete query.
+AST exports are reconciled; no compiler/Anvil process remains. No James decision
+or Fable action is needed at this checkpoint. Final deadline remains23:10 UTC.
+
+**September14,03:27–03:40 UTC: root-only AST artifact export lease; closed03:28:04.**
 Latest start03:33; one B build then one C build, no tests, Anvil or RPC.
 Reviewed frozen source and normal compiler/fork/optimizer/metadata settings;
 only AST output and scratch paths change. This is needed to derive named
@@ -123,6 +134,14 @@ Five-minute command watchdog inside03:40;15GiB owned scratch/50GiB free reserve.
 Config/output/cache/logs: `/tmp/efs-required-query-ast-20260914.hrHCoQ`.
 Root alone runs/stops/checks process groups; early release when both builds end.
 Whole-delta review and offline fixture preparation continue without heavy access.
+
+B build21files/24.14s and C73files/18.31s completed with exit0. Root checked all
+16 required deployment artifact ASTs, all71 transitive source hashes, and exact
+initcode/runtime bytes, links and physical immutable ranges against tested
+artifacts. Build-only lint/shadow/test-harness warnings are retained in logs;
+this is not a pristine lint claim or an additional test run. `LEASE_RELEASED`
+prevents reuse of the wrapper. Fresh named-immutable derivation remains part of
+independently reviewed input preparation before any paid-run permission.
 
 **September14,03:05–03:25 UTC: root-only C query compiler lease; closed03:12:28.**
 Latest start03:15; prepared real-fixture missing-implementation RED, then

@@ -6,7 +6,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-14
 
-- @v2-pm (harness codex, session efs-warroom-query-c-20260914-0256; bounded workers c_required_query, c_required_query_review, bc_cost_interpretation): B query source d547890 published; C final11/11 focused and91/91 Forge pass after cursor RED/repair. Fresh Node92/93 has diagnosed old-artifact AST pin drift, not silently green; source review and independent paid-fixture preparation active. Compiler slot closed03:12:28, no Anvil. / next: reviewed C publication and whole-delta gate, then sealed complete-query cost; no new price, waiver or Fable execution claim.
+- @v2-pm (harness codex, session efs-warroom-query-c-20260914-0256; bounded worker bc_cost_interpretation): Both query source gates published B d547890/C3f5702f after individual+whole review; C91/91 Forge, fresh legacy Node92/93 limitation explicit. Exact-byte AST export reconciled16artifacts/71sourcehashes; all heavy slots closed03:28:04. / next: independently sealed82transaction/25page paid-query fixture and narrow runner; no new price, waiver, production or Fable execution claim.
 
 - @v2-pm (harness codex, session efs-warroom-query-green-20260914-0156): Resuming expanded B query verification from the completed initial1/1 test, with separate source-only review of evidence retention. Preserving frozen normal prices, original Claude worktrees and completed rollback packets. / next: close B reader review, implement matched C metadata reader and prepare the full required-query cost comparison; final/conditional handoff remains23:10 UTC.
 
