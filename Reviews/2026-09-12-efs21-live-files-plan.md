@@ -1,5 +1,13 @@
 # Live-file experiment without a new kernel storage mode
 
+> **September 15 compact-source correction:** the concrete `NativeKernel`,
+> `ExpandedTypeRegistry` and raw-validator instructions below target the older
+> native arm, not current compact `lab-b` at `abf0ab1`. Do not dispatch them
+> unchanged. The [[2026-09-12-efs21-live-contract-files#Compact prototype preflight — September 15|compact preflight]]
+> preserves the economic/semantic question but identifies the required ordinary
+> Type and Files-periphery extensions. The current owner scope excludes UI work
+> and exhaustive regression campaigns; use decisive read/write controls instead.
+
 > Staged, not dispatched. Follow the active full-model cost work; one implementation/build/new-world owner. Use `superpowers:subagent-driven-development`, actual-behavior TDD, independent review and root reproduction. This is a disposable native-profile experiment, not full-v2 parity or a permanent backing ABI.
 
 **Goal:** prove that an ordinary EFS path can expose existing contract state without publishing a duplicate Record on every application update. Price registration, actual application writes, paid readers and optional snapshots; make the history/index tradeoff visible in a clickable browser.

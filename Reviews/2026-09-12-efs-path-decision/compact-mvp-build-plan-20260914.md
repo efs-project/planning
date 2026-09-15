@@ -11,6 +11,19 @@ We do not need another hundred design pages before implementation. The two
 foundation changes below are now tested in the prototype; the remaining work is
 a sequenced vertical build. “Ready to code” is not “freeze for 100 years.”
 
+**September 15 recovery follow-up:** the
+[[original-author-recovery-20260915|bounded source-off reconstruction experiment]]
+restored nine original-EOA claims, then verified cold Files reads and continued
+owner/native-app writes without changing Core. Independent scope review and
+parent 12/12 + 1/1 reruns pass. It requires fresh authorization per source claim
+and an unused destination author namespace; withdrawals, arbitrary subset merges,
+unknown-rule deployment and native source-state proofs are not solved. Archive
+plus active restoration costs 24.42M gas across transactions before setup in
+this recipe. This narrows the portability gap, not a generalized import claim.
+Next concrete core-usefulness probe:
+[[../2026-09-12-efs21-live-contract-files#Compact prototype preflight — September 15|admission-checked live-backed Files through an explicit periphery profile]].
+Do not dispatch the old native-arm live-file plan unchanged or add UI polish.
+
 **Core validation handoff, September 15, 04:37 UTC:** the approved core experiment
 pass is complete at local code `abf0ab1`, with the final integration review finding
 no new Critical/Important defect in its inspected scope. Start with

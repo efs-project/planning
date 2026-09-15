@@ -56,3 +56,32 @@ This experiment is a high-leverage follow-up to the active [[2026-09-11-efs21-ov
 The source-grounded [[2026-09-12-efs21-live-files-plan|implementation plan]] uses existing native Record/Files contracts unchanged, with a distinct descriptor Type and separate read adapter. It is independently reviewed and staged, not dispatched; raw-byte admission alone does not validate descriptor semantics.
 
 Independent design/source review approved after clarifying that URL resolution is not an onchain forwarding caller. Root checked the original Plan9 paper, sysfs/9P references, primary ERC status/text, actual ERC5219 interface, and EVM static-call/block-basis specifications. No virtual-file implementation, savings measurement, protocol adoption or production deployment is claimed.
+
+## Compact prototype preflight — September 15
+
+Read-only source analysis at compact `lab-b` `abf0ab1` found **no required Ledger
+or Type-identity change**, but a real Files-profile extension. The current joined
+reader and SDK recognize four exact revision Types. The current carrier profile's
+digest commits immutable bytes; it cannot be relabelled as changing live output.
+This is an explicit prototype profile boundary, not a permanent Core limitation.
+
+For an admission-checked typed-backing experiment, the next implementation should
+register an ordinary exact live-descriptor Type plus live-root/live-child revision
+Types, with checked references to the descriptor and parent. Extend the separate
+Files index/reader/SDK profile to recognize them and retain same-File ancestry.
+Existing Type IDs, immutable byte meanings and Ledger stay unchanged. The native
+arm's raw-validator plan above is not the compact implementation recipe.
+
+A smaller wrapper containing an opaque descriptor ID could demonstrate live
+reading through existing inline revisions, but its inner link would not be an
+admission-checked typed reference or indexed backlink. Do not use that shortcut
+to claim the stronger data-model requirement is proven.
+
+The decisive compact slice needs five controls: real mounted File and paid
+consumer with provider-only updates leaving EFS counts/HEAD unchanged; invalid
+descriptor/ancestry rejection at admission; bounded exact-return `STATICCALL`
+including zero/failure/large-return/caller context; no fallback after a selected
+provider fails; and coherent block-hash reads plus an explicit immutable snapshot.
+Price registration, provider writes, stored-copy control, paid reads and snapshot
+separately. Live values do not acquire automatic EFS revision history or complete
+value-filter indexing. This remains source-reviewed, **not implemented or priced**.

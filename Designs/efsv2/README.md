@@ -10,6 +10,18 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**September 15 — source-off recovery now works in a bounded slice:**
+[[../../Reviews/2026-09-12-efs-path-decision/original-author-recovery-20260915|nine signed Files operations were restored on another deployment]],
+then read and extended by the original owner and a native application. Ledger
+is unchanged. This needs fresh EOA approval per claim and an unused destination
+author namespace; generalized import, withdrawals and authenticated source-state
+proofs remain unproven. Archive retention plus restoration costs 24.42M gas
+across transactions in the small measured recipe, excluding setup. This is
+feasibility evidence, not cheap bulk migration. The
+[[../../Reviews/2026-09-12-efs21-live-contract-files#Compact prototype preflight — September 15|live-file preflight]]
+also found an explicit Files-profile extension is needed; changing live output
+cannot masquerade as immutable bytes. No UI work or owner-demo replacement.
+
 **September 14 — current build direction:** the
 [[../../Reviews/2026-09-12-efs-path-decision/compact-prototype-results-20260914|compact Files browser is connected and measured]].
 It exercises real named Files, Lenses, lifecycle operations, a third-party
@@ -28,8 +40,9 @@ its full cost is retained. The actual three-Type Note experiment and final core
 review are complete at local code `abf0ab1`; the
 [[../../Reviews/2026-09-12-efs-path-decision/compact-core-feasibility-20260914|core feasibility handoff]]
 separates working capabilities, optimization work, impractical large operations
-and unproven requirements. Original-author live filesystem migration is still
-unfinished; archive retention is not that feature. James has deferred ordinary
+and unproven requirements. That pass did not yet implement original-author live
+reconstruction; the September 15 result above closes its narrow EOA slice,
+not generalized migration. Archive retention is still distinct. James has deferred ordinary
 multi-tab host/UI hardening. This is a credible upgradeable MVP starting point,
 not a completed portable filesystem or a permanence-ready protocol.
 Compact B is the recommendation, not
