@@ -1,6 +1,6 @@
-/** Exact disposable raw-SHA256/AES-GCM profile. No implicit fetching, MIME
- * inference, credentials, or string conversion of payloads. Byte identity is
- * independent of transport and plaintext identity is independent of ciphertext. */
+/** Exact disposable raw-SHA256/AES-GCM v2 profile. No implicit fetching, MIME
+ * inference, credentials, or string conversion of payloads. Encrypted public
+ * descriptors commit ciphertext only; plaintext digests are local read results. */
 export const MAX_CONTENT_BYTES=1048576;
 const zero='0'.repeat(64),nonceZero='0'.repeat(24);
 const hex=bytes=>Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
@@ -17,7 +17,7 @@ function validate(d) {
   need([d.inline,d.digest,d.plainDigest].every(v=>typeof v==='string'&&/^[0-9a-f]{64}$/.test(v))&&/^[0-9a-f]{24}$/.test(d.nonce),'DESCRIPTOR');
   need([d.length,d.plainLength].every(n=>Number.isSafeInteger(n)&&n>=0&&n<=MAX_CONTENT_BYTES),'DESCRIPTOR_LENGTH');
   need(d.carrier!==0||d.length<=8160,'DESCRIPTOR_LENGTH');
-  need(d.encryption===1?d.length===d.plainLength+16:(d.nonce===nonceZero&&d.length===d.plainLength&&d.digest===d.plainDigest),'DESCRIPTOR_ENCRYPTION');
+  need(d.encryption===1?(d.length===d.plainLength+16&&d.plainDigest===zero):(d.nonce===nonceZero&&d.length===d.plainLength&&d.digest===d.plainDigest),'DESCRIPTOR_ENCRYPTION');
 }
 export function encodeDescriptor(d) {
   validate(d);const word=n=>n.toString(16).padStart(64,'0');
@@ -36,7 +36,7 @@ export async function encryptContent(bytes,key,{carrier=0,media=0}={}) {
   bytesOf(bytes);need(bytesOf(key).length===32,'KEY_LENGTH');
   const nonce=crypto.getRandomValues(new Uint8Array(12)),k=await crypto.subtle.importKey('raw',key,'AES-GCM',false,['encrypt']);
   const ciphertext=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv:nonce,tagLength:128},k,bytes));
-  const descriptor={...await describe(ciphertext,{carrier,media}),encryption:1,nonce:hex(nonce),plainLength:bytes.length,plainDigest:await digest(bytes)};
+  const descriptor={...await describe(ciphertext,{carrier,media}),encryption:1,nonce:hex(nonce),plainLength:bytes.length,plainDigest:zero};
   validate(descriptor);return {bytes:ciphertext,descriptor};
 }
 export async function openContent(d,{loadCarrier,signal,maxBytes=MAX_CONTENT_BYTES,key}={}) {
@@ -57,7 +57,8 @@ export async function openContent(d,{loadCarrier,signal,maxBytes=MAX_CONTENT_BYT
     const k=await crypto.subtle.importKey('raw',key,'AES-GCM',false,['decrypt']);
     const clear=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:unhex(d.nonce),tagLength:128},k,bytes));
     signal?.throwIfAborted();
-    if(clear.length!==d.plainLength||await digest(clear)!==d.plainDigest)return {state:'CORRUPT',reason:'PLAINTEXT_MISMATCH',ciphertextVerified:true};
-    return {state:'AVAILABLE_VERIFIED',bytes:clear,ciphertextVerified:true,plaintextVerified:true};
+    if(clear.length!==d.plainLength)return {state:'CORRUPT',reason:'PLAINTEXT_MISMATCH',ciphertextVerified:true};
+    const plainDigest=await digest(clear);signal?.throwIfAborted();
+    return {state:'AVAILABLE_VERIFIED',bytes:clear,ciphertextVerified:true,plaintextVerified:true,plainDigest};
   }catch(error){signal?.throwIfAborted();return {state:'OPAQUE',reason:'AUTHENTICATION_FAILED',ciphertextVerified:true,plaintextVerified:false};}
 }

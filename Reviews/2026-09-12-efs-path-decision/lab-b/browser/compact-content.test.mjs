@@ -35,6 +35,18 @@ test('AES-GCM verifies ciphertext before key use and authenticates plaintext wit
   const corrupt=sealed.bytes.slice();corrupt[0]^=1;
   assert.equal((await content.openContent(sealed.descriptor,{loadCarrier:async()=>corrupt,key})).reason,'DIGEST_MISMATCH');
 });
+test('encrypted descriptors forbid public plaintext fingerprints and report a local authenticated digest',async()=>{
+  const key=crypto.getRandomValues(new Uint8Array(32)),sealed=await content.encryptContent(binary,key),zero='0'.repeat(64),plainHash=await content.digest(binary);
+  assert.equal(sealed.descriptor.plainDigest,zero);
+  assert.deepEqual(content.decodeDescriptor(content.encodeDescriptor(sealed.descriptor)),sealed.descriptor);
+  assert.throws(()=>content.encodeDescriptor({...sealed.descriptor,plainDigest:plainHash}),/DESCRIPTOR_ENCRYPTION/);
+  const forged=content.encodeDescriptor(sealed.descriptor);forged[351]=1;
+  assert.throws(()=>content.decodeDescriptor(forged),/DESCRIPTOR_ENCRYPTION/);
+  let reads=0;assert.equal((await content.openContent({...sealed.descriptor,plainDigest:plainHash},{key,loadCarrier:async()=>{reads++;return sealed.bytes;}})).state,'UNSUPPORTED');assert.equal(reads,0);
+  const opened=await content.openContent(sealed.descriptor,{key,loadCarrier:async()=>sealed.bytes});
+  assert.equal(opened.plainDigest,plainHash);assert.equal(opened.plaintextVerified,true);assert.deepEqual(opened.bytes,binary);
+  const plain=await content.describe(binary);assert.equal(plain.plainDigest,plainHash);assert.throws(()=>content.encodeDescriptor({...plain,plainDigest:zero}),/DESCRIPTOR_ENCRYPTION/);
+});
 test('aborted opens never resolve as available',async()=>{
   const abort=new AbortController(),d=await content.describe(binary);abort.abort();
   await assert.rejects(content.openContent(d,{signal:abort.signal,loadCarrier:async()=>binary}),/abort/i);

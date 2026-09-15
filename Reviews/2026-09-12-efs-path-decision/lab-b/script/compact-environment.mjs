@@ -24,7 +24,7 @@ async function freePort() {
 }
 export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_OUT ?? join(lab,'out'),useLive=process.env.EFS_LISTING_MODE!=='audit',
   protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile}={}) {
-  assert(!contentProfile||(contentProfile==='raw-sha256-aesgcm-v1'&&filesProfile==='typed-directory-v1'),'supported content profile');
+  assert(!contentProfile||(contentProfile==='raw-sha256-aesgcm-v2'&&filesProfile==='typed-directory-v1'),'supported content profile');
   assert(filesProfile===undefined||filesProfile==='typed-directory-v1','supported Files profile');
   assert(!filesProfile||(protocol==='compact-guarded-v2'&&useLive),'typed directories require guarded live profile');
   assert(['compact-legacy-v1','compact-guarded-v2'].includes(protocol),'supported fixture protocol');

@@ -36,7 +36,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   const config = freeze(plain(manifest));
   const directories=config.filesProfile==='typed-directory-v1';
   check(!config.filesProfile||(directories&&config.protocol==='compact-guarded-v2'),'FILES_PROFILE');
-  const carriers=config.contentProfile==='raw-sha256-aesgcm-v1';
+  const carriers=config.contentProfile==='raw-sha256-aesgcm-v2';
   check(!config.contentProfile||(carriers&&directories&&contentCodec),'CONTENT_PROFILE');
   const carrierKeys=['bytes','content','carrierRoot','carrierChild','concept'];
   const hash = (types,values) => e.keccak256(coder.encode(types,values));
@@ -540,6 +540,10 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
           const d=historical.content;content={descriptor:d,bytes:d.carrier===0?e.getBytes((await retainedAt('0x'+d.inline,config.types.bytes,context)).body).slice(32):undefined};
         }else {document=historical?e.getBytes(historical.document):content?null:bytesOf(args.document);
           if(!content&&current.profile==='carrier-v1')content={bytes:document};}
+        // A supplied-key read must never make ordinary editing publish plaintext.
+        // Restore is also a new successor, so only ciphertext history can follow
+        // an encrypted selection without a separate explicit decryption API.
+        check(current.content?.encryption!==1||content?.descriptor?.encryption===1,'ENCRYPTED_SUCCESSOR_REQUIRED');
         await publishRevision(document,current.recordId,content);
         await binding(purpose.head,file,Z,newRevision);
       } else if (operation === 'move' || operation === 'rename') {

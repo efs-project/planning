@@ -9,7 +9,8 @@ import {Keys} from "../src/Keys.sol";
 /// Every descriptor has one exact Bytes reference. External descriptors use the
 /// canonical empty Bytes Record as a sentinel, never an arbitrary URI/DAG hash.
 /// Body: [bytesRef,version,carrier,hashAlg,length,sha256,media,cipher,nonce12,
-///        plaintextLength,plaintextSHA256]. All scalars are 32-byte words;
+///        plaintextLength,plaintextSHA256OrZero]. Encrypted digest MUST be zero
+/// in this v2 profile: no public plaintext fingerprint. Scalars are 32-byte words;
 /// nonce is left-aligned with 20 zero padding bytes. Maximum stored bytes 1 MiB.
 contract FilesBytesRule is IAcceptor {
     // Hash the supplied calldata ONCE; descriptor joins later need only header
@@ -29,7 +30,7 @@ contract FilesContentRule is IAcceptor {
         uint256 plainLength=uint256(bytes32(data[288:320]));bytes32 plainHash=bytes32(data[320:352]);
         if(version!=1||carrier>1||algorithm!=1||media>2||cipher>1||length>1048576||plainLength>1048576||uint160(uint256(nonce))!=0)return false;
         if(cipher==0){if(nonce!=0||plainLength!=length||plainHash!=hash)return false;}
-        else if(length!=plainLength+16)return false;
+        else if(length!=plainLength+16||plainHash!=0)return false;
         (bytes32 t,uint64 first,uint32 size)=FilesLayout.header(Ledger(msg.sender),refs[0]);
         if(t!=bytesType||first==0||size<32||size>8192)return false;
         bytes32 retainedHash=FilesLayout.word(Ledger(msg.sender),refs[0],0);

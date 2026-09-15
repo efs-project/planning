@@ -20,16 +20,18 @@ function verifiedBytes(row=selectedRow()){
   if(row.point?.value?.revision?.profile==='carrier-v1')return state.contentResult?.state==='AVAILABLE_VERIFIED'&&state.contentResult.recordId===row.point.value.revision.recordId?state.contentResult.bytes:null;
   return canOpen(row.point)?ethers.getBytes(row.point.value.revision.document):null;
 }
-function contentMessage(result){return result?.reason==='AUTHENTICATION_FAILED'?'The key could not authenticate this file':({AVAILABLE_VERIFIED:'Verified file bytes',UNAVAILABLE:'File bytes are unavailable',CORRUPT:'File integrity check failed',OPAQUE:'Encrypted file — key needed',UNSUPPORTED:'This content format is not supported'}[result?.state]??'File bytes have not been opened');}
+function contentMessage(result){return result?.reason==='KEY_FORMAT'?'Key must be 64 hexadecimal digits':result?.reason==='AUTHENTICATION_FAILED'?'The key could not authenticate this file':({AVAILABLE_VERIFIED:'Verified file bytes',UNAVAILABLE:'File bytes are unavailable',CORRUPT:'File integrity check failed',OPAQUE:'Encrypted file — key needed',UNSUPPORTED:'This content format is not supported'}[result?.state]??'File bytes have not been opened');}
 async function openContent(){
   clearContent();const row=selectedRow(),navigation=state.navigation,generation=state.readGeneration,position=state.selected,record=row?.point?.value?.revision?.recordId;
   if(!record)return;
   const request={abort:new AbortController()};state.contentRequest=request;
   const current=()=>routeCurrent(navigation)&&generation===state.readGeneration&&position===state.selected&&request===state.contentRequest;
-  const keyText=$('content-key')?.value.trim(),key=keyText?ethers.getBytes(keyText.startsWith('0x')?keyText:'0x'+keyText):undefined;
+  const keyText=$('content-key')?.value.trim();
   const useExternal=$('allow-carrier')?.checked===true;
   renderDetail();controls();
   try {
+    if(keyText&&!/^(?:0x)?[0-9a-f]{64}$/i.test(keyText))throw Error('KEY_FORMAT');
+    const key=keyText?ethers.getBytes('0x'+keyText.replace(/^0x/i,'')):undefined;
     const result=await state.sdk.readContent({file:row.file,record,authors:authors(),context:state.context,key,signal:request.abort.signal,
       ...(useExternal&&state.config.carrierOrigin?{loadCarrier:state.paths.content.createRawTransport({origin:state.config.carrierOrigin,maxBytes:1048576,timeoutMs:5000})}:{})});
     if(!current())return;state.contentResult=result;
@@ -218,8 +220,8 @@ function renderDetail() {
   if(revision?.profile==='carrier-v1'){
     const bytes=verifiedBytes(row),text=bytes?textPreview(bytes):null,d=revision.content,content=state.contentResult;
     $('detail').innerHTML=`<h2>${escape(name)}</h2><p>${escape(contentMessage(content))}${state.contentRequest?' · opening…':''}</p>
-      <div class="file-actions"><button data-action="openContent">Open verified bytes</button><button data-action="download" data-blocked="${!bytes}" ${bytes?'':'disabled'}>↓ Download bytes</button>${action('edit','Edit as UTF-8 text',!text?.utf8)}${action('rename','Rename',!knownName)}${action('move','Move',!knownName)}${action('remove','Remove placement',!knownName)}</div>
-      ${d.encryption?'<label>Supplied key (64 hexadecimal digits)<input id="content-key" type="password" autocomplete="off"></label><p>Key stays in this open operation; it is not saved to the journal.</p>':''}
+      <div class="file-actions"><button data-action="openContent">Open verified bytes</button><button data-action="download" data-blocked="${!bytes}" ${bytes?'':'disabled'}>↓ Download bytes</button>${action('edit','Edit as UTF-8 text',!text?.utf8||d.encryption===1)}${action('rename','Rename',!knownName)}${action('move','Move',!knownName)}${action('remove','Remove placement',!knownName)}</div>
+      ${d.encryption?'<label>Supplied key (64 hexadecimal digits)<input id="content-key" type="password" autocomplete="off"></label><p>Key stays in this open operation; it is not saved to the journal. Encrypted files are read-only in this text editor; opening or downloading does not publish plaintext.</p>':''}
       ${d.carrier===1?`<label><input id="allow-carrier" type="checkbox"> Allow this open to fetch from ${escape(state.config.carrierOrigin??'no configured transport')}</label><p>Explicit raw SHA-256 transport; no credentials or redirects, 1 MiB / 5-second cap.</p>`:''}
       ${state.previewUrl?`<img class="verified-image" src="${escape(state.previewUrl)}" alt="Verified static PNG preview" style="max-width:100%;max-height:420px">`:''}
       ${bytes?`<p>${pretty(bytes.length)} verified bytes. ${text.utf8?'UTF-8 interpretation below.':'Binary bytes; download preserves them exactly.'}</p>${text.utf8?`<pre class="document">${escape(text.text)}</pre>`:''}`:''}
@@ -336,6 +338,7 @@ function field(label,name,value='',type='input') {
 function openEditor(operation,record) {
   if(state.paths&&(!routeCurrent(state.navigation)||!state.navigation?.ready))return;
   const row=selectedRow(), name=row?.name?.value??'';
+  if(operation==='edit'&&row?.point?.value?.revision?.content?.encryption===1){notice('Encrypted files are read-only in this text editor.','warning');return;}
   state.operation={operation,row,record,navigation:state.navigation,folder:state.folder}; $('editor-error').textContent='';
   const titles={create:'New file',createDirectory:'New directory',edit:'Edit contents',rename:'Rename placement',move:state.paths?'Move to a verified directory':'Move to another mount',remove:'Remove this placement',restorePlacement:'Restore last placement',restoreContents:'Restore historical contents'};
   $('editor-title').textContent=titles[operation];

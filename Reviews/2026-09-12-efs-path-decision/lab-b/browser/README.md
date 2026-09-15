@@ -32,11 +32,20 @@ The 16-byte authentication tag counts toward storage limits. The sample
 `encrypted.bin` uses the **public disposable key `11` repeated 32 times** (also
 printed by the runner), not secret data. Missing key is OPAQUE, wrong-key/auth
 failure has its own reason, and corrupt ciphertext fails digest verification
-before decryption. Keys are not written to the SDK journal. Public names,
-metadata and plaintext hashes remain visible: this is not private enumeration,
-key distribution, recovery, or a full privacy claim.
+before decryption. Keys are not written to the SDK journal. Encrypted files are
+read-only in the ordinary text editor, even after a supplied-key open. The SDK
+refuses document/default unencrypted successors (including plaintext history
+restores) with `COMPACT_ENCRYPTED_SUCCESSOR_REQUIRED`; explicitly supplied
+encrypted content and historical ciphertext restoration remain supported. A
+re-encryption editor or deliberate decrypt-and-publish operation is not provided.
+Public names, lengths and authored media remain visible: this is not private
+enumeration, traffic-analysis protection, key distribution, or recovery.
 
-Exact new ordinary Types, only under `contentProfile: raw-sha256-aesgcm-v1`:
+Exact new ordinary Types, only under `contentProfile: raw-sha256-aesgcm-v2`.
+This fresh profile changes the Content rule hash and derived exact Type IDs;
+the SDK and runner reject the earlier `raw-sha256-aesgcm-v1` manifest rather than
+silently reinterpreting it. Descriptor version=1 and the `carrier-v1` revision
+layout label still identify the unchanged word layout, not the manifest profile.
 
 - Bytes: `[SHA256(payload), payload]`, no Record refs, 32–8192 body bytes.
   Mandatory rule hashes supplied calldata once. Descriptor checks later use
@@ -46,7 +55,11 @@ Exact new ordinary Types, only under `contentProfile: raw-sha256-aesgcm-v1`:
   carrier (0 inline / 1 raw external), hash algorithm=1 (SHA-256), stored length,
   stored digest, authored media (0 binary / 1 UTF-8 / 2 PNG), cipher (0 / 1
   AES-256-GCM), left-aligned nonce12 with zero padding, plaintext length and
-  plaintext digest. External descriptors reference the canonical empty Bytes
+  plaintext digest word. For cipher=1 this word **must be zero**, avoiding a
+  public plaintext fingerprint that enables guesses of short or known contents.
+  Ciphertext hash, AES-GCM authentication and plaintext length are checked;
+  a plaintext digest is computed only locally after decryption. For cipher=0
+  the plaintext digest still equals the stored digest. External descriptors reference the canonical empty Bytes
   sentinel; they do not put a URI into identity. Identifier is exactly
   `efs-raw-sha256:<64 lowercase hex>`, not an arbitrary IPFS DAG root.
 - Carrier root revision `[descriptor, File]`; child `[parent, descriptor, File]`.
@@ -74,8 +87,10 @@ opens historical immutable content without moving HEAD. `readConcept`,
 The required `FilesCarrierIndex` composes the accepted Directory/Names index and
 adds carrier-child parent postings. Ledger is unchanged. Admission validates
 onchain descriptors and retained references, **not unprovided remote bytes or
-plaintext**. SDK download integrity, ciphertext authentication and plaintext
-commitment checks are separate evidence. The old joined Solidity consumer remains
+plaintext**. SDK download integrity and ciphertext authentication/decoded length
+are separate evidence; an encrypted read's `plainDigest` is a local result, not
+a public plaintext commitment. The SDK's no-downgrade edit guard is an application
+safety boundary, not a new generic Core lineage restriction. The old joined Solidity consumer remains
 an inline-profile consumer; a contract can inspect new structured metadata using
 Ledger records, but remote payload use requires supplied bytes or a separately
 supported witness. No portable state proof, broad paid-read adapter, global tree,

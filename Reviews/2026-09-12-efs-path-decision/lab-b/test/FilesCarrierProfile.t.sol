@@ -51,8 +51,14 @@ contract FilesCarrierProfileTest is LabBase {
         bytes32 fake=ledger.publish(BINARY,abi.encode(file));reject(ct,abi.encode(fake,d,file));
     }
     function test_encryption_canonical_parameters_required() public {
-        bytes memory d=descriptor(new bytes(17),1);d[255]=bytes1(uint8(1));d[319]=bytes1(uint8(1));ledger.publish(dt,d);
+        bytes memory d=descriptor(new bytes(17),1);d[255]=bytes1(uint8(1));d[319]=bytes1(uint8(1));for(uint256 i=320;i<352;i++)d[i]=0;ledger.publish(dt,d);
         d[319]=bytes1(uint8(2));reject(dt,d);d[319]=bytes1(uint8(1));d[280]=bytes1(uint8(1));reject(dt,d);
+    }
+    function test_encrypted_public_plaintext_fingerprint_rejected_direct_core() public {
+        bytes memory d=descriptor(new bytes(17),1);d[255]=bytes1(uint8(1));d[319]=bytes1(uint8(1));
+        reject(dt,d); // The previous profile accepted this public nonzero digest.
+        for(uint256 i=320;i<352;i++)d[i]=0;ledger.publish(dt,d);
+        d[351]=bytes1(uint8(1));reject(dt,d);
     }
     function test_signed_batch_rejection_rolls_back_prior_create_and_publication() public {
         bytes memory d=descriptor(hex"ff",0);d[159]=bytes1(uint8(2));uint64 beforeCount=admissions();

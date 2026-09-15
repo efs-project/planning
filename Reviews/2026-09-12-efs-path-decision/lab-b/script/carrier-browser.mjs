@@ -8,7 +8,7 @@ import {samplePng} from './carrier-fixtures.mjs';
 import {createFilesCompactSdk} from '../browser/compact-files-sdk.mjs';
 import {describe,encryptContent} from '../browser/compact-content.mjs';
 export async function startCarrierDemo(){
-  const env=await createEnvironment({protocol:'compact-guarded-v2',deployment:'proxy',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v1'});
+  const env=await createEnvironment({protocol:'compact-guarded-v2',deployment:'proxy',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v2'});
   let fixture;
   try{
     const {ethers:e,wallets,manifest}=env,png=samplePng();fixture=await startRawCarrier([png]);

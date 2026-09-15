@@ -14,7 +14,7 @@ const source=(await readFile(new URL('./app.mjs',import.meta.url),'utf8')).repla
 const ethers=await loadEthers(),key='0x'+'11'.repeat(32),wallet=new ethers.Wallet(key);
 const tick=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};
 const deferred=()=>{let resolve,reject;const promise=new Promise((r,j)=>{resolve=r;reject=j;});return {promise,resolve,reject};};
-async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,initial='#/',typed=true,carriers=false,image=false}={}){
+async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,initial='#/',typed=true,carriers=false,image=false,encrypted=false}={}){
   const listeners=new Map(),elements=new Map();
   const element=id=>{
     if(!elements.has(id))elements.set(id,{id,value:'',textContent:'',innerHTML:'',dataset:{},disabled:false,hidden:false,open:false,
@@ -40,15 +40,15 @@ async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,initial
     async readDirectory(){return {knowledge:'PRESENT',coverage:'COMPLETE'};},
     async readPlacement({folder,name}){const target=child(folder,name);return target?{knowledge:'PRESENT',coverage:'COMPLETE',value:{target,kind:'directory',selection:{author:wallet.address,revision:1,admission:'9'}}}:{knowledge:'ABSENT',coverage:'COMPLETE',value:{}};},
     async listFolder({folder,authors,context}){if(holdList&&folder==='slow'&&authors[0]===wallet.address)await holdList.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',basis:context,value:[row(folder,authors[0]!==wallet.address?'bob.txt':folder==='root'?'root.txt':folder==='renamed'?'child.txt':'slow.txt'),...(carriers?[row(folder,'second.txt')]:[])]};},
-    async readFile({file}){if(holdRead&&file.startsWith('slow-'))await holdRead.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',value:{file,selection:{author:wallet.address},revision:{file,recordId:'record',document:carriers?null:'0x61',profile:carriers?'carrier-v1':'legacy-inline',content:carriers?{length:4,media:0,encryption:0}:undefined,firstAdmission:'9'},fileTag:{evaluated:true},revisionTag:{evaluated:true}}};},
-    async readContent({file}){stats.content++;if(holdContent)await holdContent.promise;return {state:'AVAILABLE_VERIFIED',bytes:Uint8Array.of(0,255,128,65),file,recordId:'record'};},
+    async readFile({file}){if(holdRead&&file.startsWith('slow-'))await holdRead.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',value:{file,selection:{author:wallet.address},revision:{file,recordId:'record',document:carriers?null:'0x61',profile:carriers?'carrier-v1':'legacy-inline',content:carriers?{length:4,media:0,encryption:encrypted?1:0}:undefined,firstAdmission:'9'},fileTag:{evaluated:true},revisionTag:{evaluated:true}}};},
+    async readContent({file}){stats.content++;if(holdContent)await holdContent.promise;return {state:'AVAILABLE_VERIFIED',bytes:encrypted?new TextEncoder().encode('private note'):Uint8Array.of(0,255,128,65),file,recordId:'record'};},
     async prepare(args){stats.prepare++;stats.prepared.push(args);if(holdPrepare)await holdPrepare.promise;return {id:'plan',digest:ethers.id('intent')};},
     async authorize(plan,sign){stats.authorize++;await sign(plan.digest);return {id:'plan',transaction:{}};},
     async submit(_signed,send){stats.submit++;if(holdSubmit)await holdSubmit.promise;await send({to:wallet.address,data:'0x',value:0});return {id:'plan'};},
     async reconcile(){return {status:'EFFECTS_VERIFIED'};}};
   const config={rpcUrl:'http://127.0.0.1:12346',manifest:{chainId:'31337',folder:'root',filesProfile:'typed-directory-v1',authors:{alice:wallet.address,bob:'0x00000000000000000000000000000000000000b2'},contracts:{ledger:{address:wallet.address}}},mounts:[{id:'root',label:'Files'}]};
   if(!typed)delete config.manifest.filesProfile;
-  if(carriers){config.manifest.contentProfile='raw-sha256-aesgcm-v1';config.carrierOrigin='http://127.0.0.1:12347';}
+  if(carriers){config.manifest.contentProfile='raw-sha256-aesgcm-v2';config.carrierOrigin='http://127.0.0.1:12347';}
   const stored=new Map();const localStorage={getItem:k=>stored.get(k)??null,setItem:(k,v)=>stored.set(k,v)};
   const fetch=async(url,options)=>({ok:true,async json(){return url==='/config.json'?config:{alice:key};},async text(){const req=JSON.parse(options.body);
     if(req.method==='eth_sendRawTransaction')stats.broadcast++;
@@ -143,6 +143,24 @@ test('carrier list never fetches payload and explicit open downloads exact inval
   assert.equal(a.stats.content,0);assert.match(a.element('detail').innerHTML,/Open verified bytes/);
   await a.click('openContent');assert.equal(a.stats.content,1);assert.match(a.element('detail').innerHTML,/Verified/);
   await a.click('download');assert.deepEqual(new Uint8Array(await a.stats.blobs.at(-1).arrayBuffer()),Uint8Array.of(0,255,128,65));
+});
+test('opened encrypted UTF-8 keeps the actual app ordinary editor disabled',async()=>{
+  const a=await app({carriers:true,encrypted:true});await a.click('connect');await a.click('select',{position:'root/root.txt'});
+  a.element('content-key').value=key;await a.click('openContent');assert.match(a.element('detail').innerHTML,/private note/);
+  assert.match(a.element('detail').innerHTML,/data-action="edit"[^>]*data-blocked="true"[^>]*disabled/);
+  await a.click('edit');assert.equal(a.element('editor').open,false,'event handler also refuses a bypassed disabled control');
+  assert.equal(a.stats.prepare,0);assert.equal(a.stats.authorize,0);assert.equal(a.stats.broadcast,0);
+  await a.click('download');assert.equal(await a.stats.blobs.at(-1).text(),'private note','explicit download remains available');
+  await a.click('restoreContents',{record:'historical-ciphertext'});assert.equal(a.element('editor').open,true,'ciphertext restore dialog remains available');
+});
+test('malformed supplied key clears the open lifecycle and a corrected key can retry',async()=>{
+  const a=await app({carriers:true,encrypted:true});await a.click('select',{position:'root/root.txt'});
+  a.element('content-key').value=key;await a.click('openContent');assert.match(a.element('detail').innerHTML,/private note/);
+  a.element('content-key').value='not-hex';await a.click('openContent');
+  assert.match(a.element('detail').innerHTML,/Key must be 64 hexadecimal digits/);
+  assert.doesNotMatch(a.element('detail').innerHTML,/private note|opening…/);assert.equal(a.stats.content,1);
+  assert.match(a.element('detail').innerHTML,/data-action="download"[^>]*data-blocked="true"/);
+  a.element('content-key').value=key;await a.click('openContent');assert.equal(a.stats.content,2);assert.match(a.element('detail').innerHTML,/private note/);
 });
 test('late carrier success or rejection cannot overwrite a new route or selection',async()=>{
   for(const reject of [false,true]){

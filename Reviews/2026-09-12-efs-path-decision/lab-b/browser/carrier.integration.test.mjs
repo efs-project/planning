@@ -2,14 +2,44 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createEnvironment} from '../script/compact-environment.mjs';
 import {createFilesCompactSdk} from './compact-files-sdk.mjs';
-import {describe,encryptContent} from './compact-content.mjs';
+import {describe,encryptContent,decodeDescriptor,digest} from './compact-content.mjs';
 import {startRawCarrier} from '../script/raw-carrier-fixture.mjs';
 import {createRawTransport,storeRawBytes} from './compact-carrier-host.mjs';
 import {samplePng} from '../script/carrier-fixtures.mjs';
 import {startBrowser} from '../script/compact-browser.mjs';
+test('encrypted predecessors refuse implicit plaintext plans while explicit ciphertext edits and restores work',{timeout:120000},async t=>{
+  const env=await createEnvironment({protocol:'compact-guarded-v2',deployment:'proxy',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v2'});t.after(()=>env.close());
+  const {ethers:e,manifest,wallets,rpc}=env,authors=Object.values(manifest.authors);
+  const sdk=createFilesCompactSdk({ethers:e,manifest,rpc,journal:await env.createJournal('encrypted-successors')});
+  assert.throws(()=>createFilesCompactSdk({ethers:e,manifest:{...manifest,contentProfile:'raw-sha256-aesgcm-v1'},rpc}),/CONTENT_PROFILE/);
+  const prepare=(operation,args)=>sdk.prepare({operation,author:wallets.alice.address,authors,...args});
+  const run=async(operation,args)=>{
+    const p=await prepare(operation,args),signed=await sdk.authorize(p,d=>wallets.alice.signingKey.sign(d).serialized);
+    await sdk.submit(signed,tx=>env.send(operation,tx,'alice'));assert.equal((await sdk.reconcile(p.id)).status,'EFFECTS_VERIFIED');return p;
+  };
+  const publicRoot=await run('create',{name:'private.txt',salt:e.id('private-successor'),document:'public placeholder'}),file=publicRoot.file;
+  const key=crypto.getRandomValues(new Uint8Array(32)),original=new TextEncoder().encode('private original note'),changed=new TextEncoder().encode('private changed note');
+  const sealed=await encryptContent(original,key),encrypted=await run('edit',{file,content:sealed});
+  const before=await sdk.pin(),txCount=env.transactions.length;
+  for(const args of [{document:'implicit plaintext'},{content:{bytes:changed}},{content:{bytes:changed,descriptor:await describe(changed)}},{content:{descriptor:await describe(changed,{carrier:1})}}])
+    await assert.rejects(prepare('edit',{file,...args}),/ENCRYPTED_SUCCESSOR_REQUIRED/);
+  await assert.rejects(prepare('restoreContents',{file,record:publicRoot.newRevision}),/ENCRYPTED_SUCCESSOR_REQUIRED/);
+  assert.equal(env.transactions.length,txCount);assert.deepEqual(await sdk.pin(),before,'refused preparations neither publish nor advance the observed basis');
+  assert.equal((await sdk.readFile({file,authors,context:before})).value.revision.recordId,encrypted.newRevision);
+  const next=await encryptContent(changed,key),edited=await run('edit',{file,content:next});
+  const descriptorBody=edited.actions.flatMap((a,i)=>a.typeId===manifest.types.content?[edited.bodies[i]]:[]);
+  assert.equal(descriptorBody.length,1);const descriptor=decodeDescriptor(e.getBytes(descriptorBody[0]));assert.equal(descriptor.encryption,1);assert.equal(descriptor.plainDigest,'0'.repeat(64));
+  assert(edited.bodies.includes(e.hexlify(e.concat(['0x'+next.descriptor.digest,next.bytes]))),'prepared Bytes contains ciphertext, not document fallback');
+  assert(!JSON.stringify(edited).includes(e.hexlify(changed).slice(2)));assert(!JSON.stringify(edited).includes(e.hexlify(key).slice(2)));
+  assert(!JSON.stringify(edited).includes(await digest(changed)),'no public plaintext fingerprint in the prepared plan');
+  const open=async()=>sdk.readContent({file,authors,context:await sdk.pin(),key});
+  const opened=await open();assert.deepEqual(opened.bytes,changed);assert.equal(opened.plainDigest,await digest(changed));
+  const restored=await run('restoreContents',{file,record:encrypted.newRevision});assert.notEqual(restored.newRevision,encrypted.newRevision);
+  assert.deepEqual((await open()).bytes,original);assert.equal((await sdk.readFile({file,authors,context:await sdk.pin()})).value.revision.content.encryption,1);
+});
 test('cold guarded Files preserve binary, descriptors, revision lineage and scoped Concept labels',{timeout:120000},async t=>{
-  const env=await createEnvironment({protocol:'compact-guarded-v2',deployment:'proxy',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v1'});t.after(()=>env.close());
-  assert.equal(env.manifest.contentProfile,'raw-sha256-aesgcm-v1');
+  const env=await createEnvironment({protocol:'compact-guarded-v2',deployment:'proxy',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v2'});t.after(()=>env.close());
+  assert.equal(env.manifest.contentProfile,'raw-sha256-aesgcm-v2');
   const {ethers:e,manifest,wallets,rpc}=env,authors=Object.values(manifest.authors),binary=Uint8Array.of(0,255,128,65);
   const fixture=await startRawCarrier([samplePng()]);t.after(()=>fixture.close());
   const browser=await startBrowser(env,{seed:false,directory:true,carrierFixture:fixture});t.after(()=>browser.close());

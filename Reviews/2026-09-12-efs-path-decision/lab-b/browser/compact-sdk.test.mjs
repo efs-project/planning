@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { gunzipSync } from 'node:zlib';
 import { pathToFileURL } from 'node:url';
 import { createCompactSdk } from './compact-sdk.mjs';
+import { createFilesCompactSdk } from './compact-files-sdk.mjs';
 
 // External boundary only: independent ABI-encoded provider observations. Task 2
 // also runs these public APIs against a real deployment, not this fixture.
@@ -54,6 +55,11 @@ const manifest = {chainId:'31337', folder, authors:{alice:A,bob:B}, contracts, t
 
 test('legacy factory refuses a guarded manifest instead of silently signing the legacy format', () => {
   assert.throws(() => createCompactSdk({ethers,manifest:{...manifest,protocol:'compact-guarded-v2'}}),/PROTOCOL/);
+});
+test('guarded Files factory rejects the earlier public-plaintext-fingerprint carrier profile before RPC',()=>{
+  let requests=0;
+  assert.throws(()=>createFilesCompactSdk({ethers,manifest:{...manifest,protocol:'compact-guarded-v2',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v1'},rpc:()=>{requests++;}}),/CONTENT_PROFILE/);
+  assert.equal(requests,0);
 });
 test('legacy create retains its own-CAS overwrite semantics without adding a selected-destination read',async()=>{
   const {sdk}=fixture({respond:({fn})=>{if(fn==='resolve')throw Error('legacy destination selection unavailable');}});
