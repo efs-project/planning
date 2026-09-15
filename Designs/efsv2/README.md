@@ -18,8 +18,10 @@ contract and a separate mandatory live-folder index. Start with the
 the stable identity/execution-version and atomic dependency gates are now joined
 to the reviewed guarded SDK. Typed directories, binary uploads, verified PNG
 opening, retained tag labels and bounded encrypted-content handling are also
-reviewed in the prototype; batched reads/scale and cold recovery remain in
-progress. The build plan carries the exact checkpoint and remaining gates.
+reviewed in the prototype. Bounded joined pages and scale tests are also reviewed,
+including real paid-reader limits and fixes for uncertain/continued results.
+Cold signed-claim recovery, durable cooperating tabs and the Note-version example
+remain. The build plan carries the exact checkpoint and remaining gates.
 Compact B is the recommendation, not
 a permanent freeze. The [[../../Reviews/2026-09-12-efs-path-decision/README|three-road comparison]]
 is retained evidence, not authority to restart Claude work or another tournament.

@@ -11,8 +11,8 @@ We do not need another hundred design pages before implementation. The two
 foundation changes below are now tested in the prototype; the remaining work is
 a sequenced vertical build. “Ready to code” is not “freeze for 100 years.”
 
-**Completion checkpoint, September 15, 01:15 UTC:** code worktree
-`codex/efs-warroom-b-run` at `4dec0c9` has independently reviewed stable
+**Completion checkpoint, September 15, 03:04 UTC:** code worktree
+`codex/efs-warroom-b-run` at `9248feb` has independently reviewed stable
 identity/execution context, bounded transaction-time read assertions and the
 shared guarded Files SDK. 262 Solidity executions and 97 Node executions pass,
 including real mined-order controls, populated compatible proxy activation and
@@ -38,8 +38,26 @@ removes publicly guessable plaintext hashes, retaining ciphertext integrity and
 AES-GCM authentication. Names, sizes and media metadata remain public. These are
 reversible prototype engineering choices, not private metadata or key-recovery
 guarantees. Ledger ABI and code are unchanged by the carrier work.
-Joined-scale reads are active; guarded signed-claim export, durable
-cooperating-tab host and the exact-Type Note example remain.
+Bounded joined read pages and scale controls are now reviewed. The initial
+`2975ba7` campaign traversed 1,000 live names, 10,000 lifetime names with one
+remaining live placement, and 64 contributing authors. Old-name churn did not
+force rescanning removed placements. Wide Lenses did expose a real gas cliff:
+larger pages failed even when direct calls sometimes succeeded. Actual paid
+controls at the corrected `9248feb` use candidate budgets 32/32/8/4 for
+1/8/32/64 authors, costing 4.66M/11.34M/8.81M/8.60M gas for that named first-page
+recipe; no transaction limit was raised. Those are local execution receipts,
+not universal defaults or public-network fees. The larger campaign remains
+pinned to its earlier source, not relabelled as a new final-bytecode run.
+
+Review and new differential tests caught stale search results, incomplete
+unavailable-page qualification and unresolved candidates being labelled definite
+matches. All are fixed; uncertainty stays visible without becoming false absence
+or false presence. Parent independently reran 59 covering Node tests and 24
+reader Solidity tests. Real browser QA showed 32/PARTIAL then 36/COMPLETE rows,
+rapid search followed by the correct continued result, Bob→Alice fallback, and
+verified bytes. The external reader is 15,791 runtime bytes; Ledger ABI/code are
+unchanged by this slice. Guarded signed-claim export, durable cooperating-tab
+host and the exact-Type Note example remain.
 The existing owner browser and chain are preserved. UI labels Alice → Bob / Bob →
 Alice and uses a Base-first drawer with Ethereum L1/Base execution models and an
 explicitly unmeasured ZKsync column. No production repository or public testnet
