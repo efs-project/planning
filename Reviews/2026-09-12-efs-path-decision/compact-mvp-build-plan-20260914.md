@@ -56,8 +56,9 @@ or false presence. Parent independently reran 59 covering Node tests and 24
 reader Solidity tests. Real browser QA showed 32/PARTIAL then 36/COMPLETE rows,
 rapid search followed by the correct continued result, Bob→Alice fallback, and
 verified bytes. The external reader is 15,791 runtime bytes; Ledger ABI/code are
-unchanged by this slice. Guarded signed-claim export, durable cooperating-tab
-host and the exact-Type Note example remain.
+unchanged by this slice. Guarded signed-claim export, the exact-Type Note example
+and a core feasibility synthesis remain; the owner's scope clarification below
+defers normal host/UI hardening.
 The existing owner browser and chain are preserved. UI labels Alice → Bob / Bob →
 Alice and uses a Base-first drawer with Ethereum L1/Base execution models and an
 explicitly unmeasured ZKsync column. No production repository or public testnet
@@ -65,6 +66,35 @@ was created; software-signed local transactions do not establish real-wallet
 approval counts, total public-network fees or native cross-chain source proofs.
 
 ## 1. Close two foundation gates in the existing prototype
+
+### Owner scope clarification: core feasibility, not product completion
+
+James's latest direction is to prove the data model and contract economics with
+decisive experiments, not polish disposable application code. The remaining
+prototype exit gates are:
+
+- **Portability:** cold export, source disappearance, independent verification,
+  unrelated-party retention, complete versus missing Type/rule closure, and
+  destination permission distinct from original attribution. Measure the actual
+  bounded archive operations; native source-state proof remains unproved.
+- **Types and contract use:** three real exact Note Types, contract-enforced
+  validation and explicit compatible/breaking projections; reuse the tested
+  native application and atomic-write controls, adding a probe only where an
+  important capability or cost has no evidence.
+- **Feasibility synthesis:** matched whole-operation costs, required versus
+  optional overhead, point reads versus enumeration, wide-Lens and batch cliffs,
+  and what is inherent versus optimizable. Retained local receipts are not actual
+  public-network fees; any repricing must expose its network assumptions.
+
+Durable multi-tab application plumbing, further UI polish, exhaustive browser
+coverage, production wallet adapters and general software hardening are **not
+prototype completion gates**. A minimal cold guest/static-access check matters
+only insofar as it proves there is no hidden EFS data server dependency. Keep
+focused falsifiers and relevant regressions; do not repeatedly run unrelated
+suites or expand the feature list. Finish with a plain **works / needs
+optimization / impractical / unproven** verdict and the smallest real-code plan.
+The later vertical-build sequence remains the implementation roadmap, not a
+requirement to construct a production application inside this experiment.
 
 ### A. Stable identity, honest execution versions
 
