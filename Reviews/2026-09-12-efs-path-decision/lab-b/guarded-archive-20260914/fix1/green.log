@@ -1,0 +1,12 @@
+✔ offline guarded verifier derives exact signature evidence without RPC and rejects independent tamper classes (285.341959ms)
+✔ final six argument guarded ABI admits exactly bounded maximal padding and refuses one byte over (141.334834ms)
+✔ guarded source and archive cold readers are distinct from journal recovery (0.403709ms)
+✔ a signed never-admitted claim cannot omit a zero-valued declared Record reference (55.417334ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1298.768042

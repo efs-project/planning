@@ -8,16 +8,16 @@ const intentType='tuple(bytes32 realmId,bytes32 realmOrigin,bytes32 executionSet
 const readType='tuple(bytes32[] principalIds,bytes32[] positions,bytes32[] expectedHeads)';
 const executionType='tuple(bytes32 origin,uint256 revision,bytes32 shellCodeHash,address implementation,bytes32 implementationCodeHash,address registryAddress,bytes32 registryCodeHash,address indexAddress,bytes32 indexCodeHash,uint64 indexGeneration)';
 const hash=(types,values)=>e.keccak256(coder.encode(types,values));
-export function fixture(){
+export function fixture({refTypes=[],body='0x0102'}={}){
   const author=new e.Wallet(e.toBeHex(0xA11CE,32));
   const profile={layoutId:e.id('efs.lab.ledger-layout/2:roots-0-12-preserved:context-13:execution-14:readsets-15'),
     legacyDomain:e.TypedDataEncoder.hashDomain({name:'EFS2-RoadB-Lab',version:'1'}),guardedDomain:e.TypedDataEncoder.hashDomain({name:'EFS2-RoadB-Lab',version:'2'})};
   const execution={origin:e.id('origin'),revision:'7',shellCodeHash:e.id('shell'),implementation:author.address,implementationCodeHash:e.id('implementation'),
     registryAddress:author.address,registryCodeHash:e.id('registry'),indexAddress:author.address,indexCodeHash:e.id('index'),indexGeneration:'3'};
   const reads={principalIds:[e.zeroPadValue(author.address,32),e.toBeHex(7,32)],positions:[e.id('position')],expectedHeads:[e.id('head-a'),e.id('head-b')]};
-  const type={shape:e.id('shape'),ruleId:Z,refTypes:[],ruleCode:'0x'};
-  type.typeId=hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/type/1'),type.shape,hash(['bytes32[]'],[[]]),Z]);
-  const body='0x0102',recordId=hash(['bytes32','bytes32','bytes32'],[e.id('efs2/record/1'),type.typeId,e.keccak256(body)]);
+  const type={shape:e.id('shape'),ruleId:Z,refTypes,ruleCode:'0x'};
+  type.typeId=hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/type/1'),type.shape,hash(['bytes32[]'],[refTypes]),Z]);
+  const recordId=hash(['bytes32','bytes32','bytes32'],[e.id('efs2/record/1'),type.typeId,e.keccak256(body)]);
   const actions=[{kind:1,typeId:type.typeId,bodyHashOrRecordId:e.keccak256(body),purpose:Z,subject:Z,role:Z,target:Z,expectedRevision:0,salt:Z}];
   const actionsHash=hash([actionType+'[]'],[actions]);
   const intent={realmId:e.id('realm'),realmOrigin:execution.origin,executionSet:hash(['bytes32','bytes32','bytes32','bytes32',executionType],
@@ -59,4 +59,16 @@ test('final six argument guarded ABI admits exactly bounded maximal padding and 
 });
 test('guarded source and archive cold readers are distinct from journal recovery',()=>{
   assert.equal(typeof archive?.createGuardedArchiveReader,'function','cold retained-state reader exists');
+});
+test('a signed never-admitted claim cannot omit a zero-valued declared Record reference',async()=>{
+  const x=fixture({refTypes:[Z],body:Z});
+  assert.equal(e.recoverAddress(x.claimId,x.signature),x.intent.author,'real signature over the exact malformed reference claim');
+  await assert.rejects(archive.verifyGuardedClaim(e,x),/ARCHIVE_REFERENCE_MISSING/);
+  x.closure.records.push({recordId:Z,typeId:Z,present:false,reason:'RECORD_UNAVAILABLE'});
+  x.closure.coverage='PARTIAL';
+  const result=await archive.verifyGuardedClaim(e,x);
+  assert.equal(result.proof,'AUTHOR_SIGNATURE_VERIFIED');
+  assert.equal(result.sourceAdmission,'NOT_PROVEN');
+  assert.equal(result.closureCoverage,'PARTIAL');
+  assert.deepEqual(result.missingMeaning,[`record:${Z}`]);
 });

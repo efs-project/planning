@@ -72,7 +72,8 @@ function checkClosure(e,x,expected){
   for(const r of c.records)if(r.present){
     const t=types.get(r.typeId.toLowerCase());if(t.present===false)continue;
     for(let i=0;i<t.refTypes.length;i++){
-      const id=e.dataSlice(r.body,i*32,i*32+32);if(eq(id,e.ZeroHash))continue;
+      // A zero expected Type is a wildcard, not an optional Record reference.
+      const id=e.dataSlice(r.body,i*32,i*32+32);
       const ref=records.get(id.toLowerCase());need(ref,'REFERENCE_MISSING');
       if(ref.present&&!eq(t.refTypes[i],e.ZeroHash))need(eq(ref.typeId,t.refTypes[i]),'REFERENCE_TYPE');
     }
@@ -172,7 +173,7 @@ export function createGuardedArchiveReader({ethers:e,rpc,manifest}){
       }
       if(t.present)for(let i=0;i<t.refTypes.length;i++){
         need(e.getBytes(r.body).length>=32*(i+1),'REFERENCE_LENGTH');const ref=e.dataSlice(r.body,i*32,i*32+32);
-        if(!eq(ref,e.ZeroHash))queue.push({id:ref,type:t.refTypes[i]});
+        queue.push({id:ref,type:t.refTypes[i]});
       }
     }
     return {roots,records:[...records.values()],types:[...types.values()],coverage:[...records.values()].some(r=>!r.present)||[...types.values()].some(t=>!t.present)?'PARTIAL':'COMPLETE'};

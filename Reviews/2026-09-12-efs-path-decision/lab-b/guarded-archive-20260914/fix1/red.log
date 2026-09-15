@@ -1,0 +1,25 @@
+✖ a signed never-admitted claim cannot omit a zero-valued declared Record reference (140.751167ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 925.794167
+
+✖ failing tests:
+
+test at browser/guarded-archive.test.mjs:63:1
+✖ a signed never-admitted claim cannot omit a zero-valued declared Record reference (140.751167ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/guarded-archive.test.mjs:66:3)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /ARCHIVE_REFERENCE_MISSING/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
