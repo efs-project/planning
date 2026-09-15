@@ -1,0 +1,30 @@
+{
+  "experiment": "guarded-original-author-recovery-20260915",
+  "baseRevision": "abf0ab1ed151a2f23ca039572eb4fa54a692f7df",
+  "sourceSha256": {
+    "src/GuardedRecovery.sol": "805665dbde66396c9b6cde93dea275103c129d24e1cee9101034317ec82bb806",
+    "test/GuardedRecovery.t.sol": "8d99ed66b9c387335aa498db750c1b3b4939c0c032fb88dd3fbe17eae8618f70",
+    "test/RecoveryCarrierApplication.sol": "fe58a3193561a683e2b1001beab7d9a39d26b4ec0826a1ccbeb96467e8547a80",
+    "browser/guarded-recovery.integration.test.mjs": "b8999f3ff084894baea58c4b8c76d0ff8cd23d3154fc79335d7b52508ceaaa6b"
+  },
+  "evidenceSha256": {
+    "contract-green.log.gz": "71c421c53b56b9e2a2ad98fca5a7b1dd0d4c9d431568582acc78b3f86b55b686",
+    "contract-red.log.gz": "3327de9a2b28528242bdee871710ecff4ccbc737901438f3981859309b32ca12",
+    "control-transactions.jsonl.gz": "0e63fde9dd9cc40caa555776a4802b05af949484684f915bc08ff754f41759b9",
+    "destination-transactions.jsonl.gz": "c18c9b7c28bcb22f12e133efa15c70ed466fe6073655080421e94b84e44d8988",
+    "integration-green.log.gz": "7fde1bf5d5953ad8b72e6911bc516204c1159d55e49a9bb1fcf4659342d70441",
+    "native-red.log.gz": "73b5f258684b5cd2020395388347eed9ef3c6b24d6eebbe6e2577c1e0442bbce",
+    "readset-red.log.gz": "f4d0f57b13050723362057c446b86f6a8d4ccd2a73e3322fa654040ebcf64ba4",
+    "runner-report.json.gz": "5973e131dc88424b67968c9e1d171f607288aabf4467ef972e64b3a48ca7b511",
+    "source-bundles.json.gz": "3949a9cf9dfac5106874463e6397939b7c2a104577c12f59b73b0f0d0f326a0e",
+    "source-transactions.jsonl.gz": "ccd87027f38f089f67e6b904b136261e68dd373b3a92c014082a4e2764e58130"
+  },
+  "proofGrades": {
+    "sourceAuthorship": "AUTHOR_SIGNATURE_VERIFIED",
+    "sourceAdmission": "NOT_PROVEN",
+    "sourceGuardTruth": "NOT_PROVEN",
+    "destinationAuthority": "FRESH_ORIGINAL_EOA_SIGNATURE_PER_CLAIM",
+    "destinationEvidence": "LOCAL_RPC_OBSERVED_NOT_STATE_PROOF",
+    "coreIsImported": false
+  }
+}
