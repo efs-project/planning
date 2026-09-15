@@ -11,6 +11,23 @@ We do not need another hundred design pages before implementation. The two
 foundation changes below are now tested in the prototype; the remaining work is
 a sequenced vertical build. “Ready to code” is not “freeze for 100 years.”
 
+**Core validation handoff, September 15, 04:37 UTC:** the approved core experiment
+pass is complete at local code `abf0ab1`, with the final integration review finding
+no new Critical/Important defect in its inspected scope. Start with
+[[compact-core-feasibility-20260914|what works, what costs too much, and what remains unproven]],
+rather than reading the historical test counts below. Three actual
+Note Types now have contract validation, explicit compatible/breaking projections
+and paid direct-Ledger consumption; missing history/reorg stays UNKNOWN after a
+focused review fix, with42/42 covering checks independently rerun.
+Ordinary contract/Files work is viable under the tested caps; giant filtered
+multi-author scans and one-shot maximum archive writes are not. Full guarded
+Core import/original-author live namespace migration, live contract-backed files,
+native source proofs and public-network economics are still explicit core work.
+This supports one reversible build direction, not evidence
+that every requirement is implemented or authority to create/deploy repositories.
+James's ordinary host/UI deferral remains in force; the owner demo is preserved.
+The checkpoint below retains the earlier task-specific measurements.
+
 **Completion checkpoint, September 15, 03:55 UTC:** code worktree
 `codex/efs-warroom-b-run` at `3ffa279` has independently reviewed stable
 identity/execution context, bounded transaction-time read assertions and the
@@ -77,8 +94,9 @@ Staged retention succeeds at 12,342,925 plus 9,078,577 gas, excluding deployment
 and independent retention of the bundle's meaning closure. The failed one-shot
 costs gas too. Smaller ordinary claims are separately priced in the retained
 `lab-b/guarded-archive-20260914` evidence; these measurements remain pinned to
-`e397df9`, not relabelled after the JS-only fix. The exact-Type Note example and
-final core feasibility synthesis remain; normal host/UI hardening is deferred.
+`e397df9`, not relabelled after the JS-only fix. At this earlier checkpoint the
+Note example/final synthesis remained; their completed result is linked above.
+Normal host/UI hardening is still deferred.
 The existing owner browser and chain are preserved. UI labels Alice → Bob / Bob →
 Alice and uses a Base-first drawer with Ethereum L1/Base execution models and an
 explicitly unmeasured ZKsync column. No production repository or public testnet

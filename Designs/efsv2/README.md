@@ -24,10 +24,14 @@ Cold signed-claim recovery is now reviewed too: the source can be stopped after
 export, another account can retain the bundle without taking destination
 authority, and missing Type/rule material stays explicitly incomplete. The
 maximum archive call fails the transaction cap; bounded staging succeeds and
-its full cost is retained. The exact-Type Note example and final core feasibility
-verdict remain. James has deferred ordinary multi-tab host/UI hardening: this
-prototype must establish what works, what is costly, and what remains unproved,
-not become a production application. The build plan carries the exact gates.
+its full cost is retained. The actual three-Type Note experiment and final core
+review are complete at local code `abf0ab1`; the
+[[../../Reviews/2026-09-12-efs-path-decision/compact-core-feasibility-20260914|core feasibility handoff]]
+separates working capabilities, optimization work, impractical large operations
+and unproven requirements. Original-author live filesystem migration is still
+unfinished; archive retention is not that feature. James has deferred ordinary
+multi-tab host/UI hardening. This is a credible upgradeable MVP starting point,
+not a completed portable filesystem or a permanence-ready protocol.
 Compact B is the recommendation, not
 a permanent freeze. The [[../../Reviews/2026-09-12-efs-path-decision/README|three-road comparison]]
 is retained evidence, not authority to restart Claude work or another tournament.
