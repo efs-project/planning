@@ -7,12 +7,12 @@ September 14, 2026 · v2 PM recommendation · no repository/deployment authority
 prototype and measurements]] now support that choice. Keep the fuller prototype
 and MUD comparison as reference evidence; stop maintaining parallel product roads.
 
-We do not need another hundred design pages before implementation. We need two
-small foundation changes tested before copying Core into the production repo,
-then a sequenced vertical build. “Ready to code” is not “freeze for 100 years.”
+We do not need another hundred design pages before implementation. The two
+foundation changes below are now tested in the prototype; the remaining work is
+a sequenced vertical build. “Ready to code” is not “freeze for 100 years.”
 
-**Completion checkpoint, September 15, 00:11 UTC:** code worktree
-`codex/efs-warroom-b-run` at `0fcb9dd` has independently reviewed stable
+**Completion checkpoint, September 15, 01:15 UTC:** code worktree
+`codex/efs-warroom-b-run` at `4dec0c9` has independently reviewed stable
 identity/execution context, bounded transaction-time read assertions and the
 shared guarded Files SDK. 262 Solidity executions and 97 Node executions pass,
 including real mined-order controls, populated compatible proxy activation and
@@ -26,8 +26,20 @@ tests for the JS-only route fixes. A real browser created a nested file, renamed
 and moved its parent, then cold-recovered the unchanged child. Browser testing
 also caught and fixed stale same-document routing; direct paths, Back/Forward
 and malformed-route refusal now work, including superseded-read/signing guards.
-Binary/carrier profiles are active; joined-scale reads, guarded signed-claim
-export, durable cooperating-tab host and the exact-Type Note example remain.
+Binary/carrier profiles and retained Concept labels are now implemented and
+reviewed: 300 Solidity and 144 Node executions pass, with an independent rerun of
+300 Solidity and 62 covering Node tests. Real browser uploads/open of a PNG work
+both onchain and through the explicitly selected external byte fixture; the
+existing binary/empty/maximum-inline controls preserve exact bytes. Missing,
+malformed and wrong keys remain distinct from absent data. Review caught and
+fixed a silent plaintext-edit downgrade after decryption; the safe prototype
+editor is read-only for encrypted files. A fresh exact content profile also
+removes publicly guessable plaintext hashes, retaining ciphertext integrity and
+AES-GCM authentication. Names, sizes and media metadata remain public. These are
+reversible prototype engineering choices, not private metadata or key-recovery
+guarantees. Ledger ABI and code are unchanged by the carrier work.
+Joined-scale reads are active; guarded signed-claim export, durable
+cooperating-tab host and the exact-Type Note example remain.
 The existing owner browser and chain are preserved. UI labels Alice → Bob / Bob →
 Alice and uses a Base-first drawer with Ethereum L1/Base execution models and an
 explicitly unmeasured ZKsync column. No production repository or public testnet

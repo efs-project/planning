@@ -16,7 +16,9 @@ It exercises real named Files, Lenses, lifecycle operations, a third-party
 contract and a separate mandatory live-folder index. Start with the
 [[../../Reviews/2026-09-12-efs-path-decision/compact-mvp-build-plan-20260914|concrete MVP build plan]]:
 the stable identity/execution-version and atomic dependency gates are now joined
-to the reviewed guarded SDK; the Directory/carrier/read/SDK/SPA vertical is in
+to the reviewed guarded SDK. Typed directories, binary uploads, verified PNG
+opening, retained tag labels and bounded encrypted-content handling are also
+reviewed in the prototype; batched reads/scale and cold recovery remain in
 progress. The build plan carries the exact checkpoint and remaining gates.
 Compact B is the recommendation, not
 a permanent freeze. The [[../../Reviews/2026-09-12-efs-path-decision/README|three-road comparison]]
