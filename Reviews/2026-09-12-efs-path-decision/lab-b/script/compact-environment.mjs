@@ -23,7 +23,8 @@ async function freePort() {
   const port = server.address().port; await new Promise(ok => server.close(ok)); return port;
 }
 export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_OUT ?? join(lab,'out'),useLive=process.env.EFS_LISTING_MODE!=='audit',
-  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile}={}) {
+  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile}={}) {
+  assert(!contentProfile||(contentProfile==='raw-sha256-aesgcm-v1'&&filesProfile==='typed-directory-v1'),'supported content profile');
   assert(filesProfile===undefined||filesProfile==='typed-directory-v1','supported Files profile');
   assert(!filesProfile||(protocol==='compact-guarded-v2'&&useLive),'typed directories require guarded live profile');
   assert(['compact-legacy-v1','compact-guarded-v2'].includes(protocol),'supported fixture protocol');
@@ -152,9 +153,22 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
       const shape=e.id('lab/type/files-directory/1');directoryType=(await call('registry','typeIdOf',[shape,rule,[]]))[0];
       await transact('registry','register',[shape,rule,[]]);ruleHashes.directory=contracts.directoryRule.codeHash;
     }
-    const index=await deploy('index',filesProfile?'FilesDirectoryProfile.sol':useLive?'FilesLiveIndex.sol':'FilesNamesProfile.sol',
-      filesProfile?'FilesDirectoryIndex':useLive?'FilesLiveNamesIndex':'FilesNamesIndex',
-      [ledger,root,childType,ruleHashes.root,ruleHashes.child,name,ruleHashes.name,...(filesProfile?[directoryType,ruleHashes.directory]:[])]);
+    const contentTypes={};
+    if(contentProfile){
+      const specs=[['bytes','bytes','FilesBytesRule',[],[]],['content','content','FilesContentRule',()=>[contentTypes.bytes],()=>[contentTypes.bytes]],
+        ['carrierRoot','carrier-root','FilesCarrierRootRule',[],()=>[contentTypes.content]],
+        ['carrierChild','carrier-child','FilesCarrierChildRule',()=>[root,childType,contentTypes.carrierRoot],()=>[e.ZeroHash,contentTypes.content]],
+        ['concept','concept','FilesConceptRule',[],[]]];
+      for(const [key,slug,contract,constructor,ref] of specs){
+        const rule=await deploy(key+'Rule','FilesCarrierProfile.sol',contract,typeof constructor==='function'?constructor():constructor);
+        const shape=e.id(`lab/type/files-${slug}/1`),refs=typeof ref==='function'?ref():ref;
+        contentTypes[key]=(await call('registry','typeIdOf',[shape,rule,refs]))[0];await transact('registry','register',[shape,rule,refs]);ruleHashes[key]=contracts[key+'Rule'].codeHash;
+      }
+    }
+    const legacyIndexArgs=[root,childType,ruleHashes.root,ruleHashes.child,name,ruleHashes.name,...(filesProfile?[directoryType,ruleHashes.directory]:[])];
+    const index=await deploy('index',contentProfile?'FilesCarrierProfile.sol':filesProfile?'FilesDirectoryProfile.sol':useLive?'FilesLiveIndex.sol':'FilesNamesProfile.sol',
+      contentProfile?'FilesCarrierIndex':filesProfile?'FilesDirectoryIndex':useLive?'FilesLiveNamesIndex':'FilesNamesIndex',
+      contentProfile?[ledger,legacyIndexArgs,Object.values(contentTypes),Object.keys(contentTypes).map(k=>ruleHashes[k])]:[ledger,...legacyIndexArgs]);
     await transact('ledger','setIndexModule',[index]);
     const lens=await deploy('lens',useLive?'FilesLiveIndex.sol':'LensReader.sol',useLive?'FilesLiveLens':'LensReader',[ledger,index]);
     const files=await deploy('files','FilesJoinedConsumer.sol','FilesJoinedConsumer',[ledger,lens,index,root,childType,ruleHashes.root,ruleHashes.child]);
@@ -175,6 +189,7 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
       contracts:Object.fromEntries(['ledger','index','lens','registry','files','names'].map(k=>[k,contracts[k]])),
       types:{root,child:childType,name},ruleHashes};
     if(filesProfile){manifest.filesProfile=filesProfile;manifest.types.directory=directoryType;manifest.folders=[folder];}
+    if(contentProfile){manifest.contentProfile=contentProfile;Object.assign(manifest.types,contentTypes);}
     if(protocol==='compact-guarded-v2') {
       manifest.protocol=protocol;
       manifest.executionFamily={origin:(await call('ledger','realmOrigin'))[0],realmId:realm,

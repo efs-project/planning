@@ -14,7 +14,7 @@ const source=(await readFile(new URL('./app.mjs',import.meta.url),'utf8')).repla
 const ethers=await loadEthers(),key='0x'+'11'.repeat(32),wallet=new ethers.Wallet(key);
 const tick=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};
 const deferred=()=>{let resolve,reject;const promise=new Promise((r,j)=>{resolve=r;reject=j;});return {promise,resolve,reject};};
-async function app({holdList,holdRead,holdPrepare,holdSubmit,initial='#/',typed=true}={}){
+async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,initial='#/',typed=true,carriers=false,image=false}={}){
   const listeners=new Map(),elements=new Map();
   const element=id=>{
     if(!elements.has(id))elements.set(id,{id,value:'',textContent:'',innerHTML:'',dataset:{},disabled:false,hidden:false,open:false,
@@ -24,7 +24,7 @@ async function app({holdList,holdRead,holdPrepare,holdSubmit,initial='#/',typed=
     return elements.get(id);
   };
   for(const [id,value] of Object.entries({lens:'alice',signer:'alice','filter-scope':'either'}))element(id).value=value;
-  const document={getElementById:element,querySelector:element,querySelectorAll:()=>[],
+  const document={getElementById:element,querySelector:element,querySelectorAll:()=>[],createElement:()=>({click(){},remove(){}}),body:{append(){}},
     addEventListener(type,fn){listeners.set('document:'+type,fn);}};
   const location={hostname:'127.0.0.1',href:'http://127.0.0.1:12345/',hash:initial};
   const events=new Map(),dispatch=type=>{for(const fn of events.get(type)??[])fn({type});};
@@ -33,33 +33,37 @@ async function app({holdList,holdRead,holdPrepare,holdSubmit,initial='#/',typed=
     pushState(_a,_b,url){location.hash=url;hashes.splice(++index);hashes.push(url);},
     back(){if(index>0){location.hash=hashes[--index];dispatch('popstate');dispatch('hashchange');}},
     forward(){if(index+1<hashes.length){location.hash=hashes[++index];dispatch('popstate');dispatch('hashchange');}}};
-  const stats={pin:0,authorize:0,submit:0,prepare:0,broadcast:0},context={blockNumber:'7',admission:'9',blockHash:ethers.id('route-basis')};
+  const stats={pin:0,authorize:0,submit:0,prepare:0,broadcast:0,content:0,blobs:[],revoked:[],uploads:[],prepared:[]},context={blockNumber:'7',admission:'9',blockHash:ethers.id('route-basis')};
   const child=(folder,name)=>folder==='root'&&name==='archive'?'archive':folder==='archive'&&name==='qa-renamed'?'renamed':folder==='root'&&name==='slow'?'slow':null;
   const row=(folder,name,kind='file')=>({file:`${folder}-${name}`,folder,kind,knowledge:'PRESENT',name:{knowledge:'PRESENT',value:name},position:`${folder}/${name}`,selection:{author:wallet.address,revision:1,admission:'9'}});
   const sdk={async pin(){stats.pin++;return {...context,blockNumber:String(6+stats.pin),admission:String(8+stats.pin)};},
     async readDirectory(){return {knowledge:'PRESENT',coverage:'COMPLETE'};},
     async readPlacement({folder,name}){const target=child(folder,name);return target?{knowledge:'PRESENT',coverage:'COMPLETE',value:{target,kind:'directory',selection:{author:wallet.address,revision:1,admission:'9'}}}:{knowledge:'ABSENT',coverage:'COMPLETE',value:{}};},
-    async listFolder({folder,authors,context}){if(holdList&&folder==='slow'&&authors[0]===wallet.address)await holdList.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',basis:context,value:[row(folder,authors[0]!==wallet.address?'bob.txt':folder==='root'?'root.txt':folder==='renamed'?'child.txt':'slow.txt')]};},
-    async readFile({file}){if(holdRead&&file.startsWith('slow-'))await holdRead.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',value:{file,selection:{author:wallet.address},revision:{file,recordId:'record',document:'0x61',firstAdmission:'9'},fileTag:{evaluated:true},revisionTag:{evaluated:true}}};},
-    async prepare(){stats.prepare++;if(holdPrepare)await holdPrepare.promise;return {id:'plan',digest:ethers.id('intent')};},
+    async listFolder({folder,authors,context}){if(holdList&&folder==='slow'&&authors[0]===wallet.address)await holdList.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',basis:context,value:[row(folder,authors[0]!==wallet.address?'bob.txt':folder==='root'?'root.txt':folder==='renamed'?'child.txt':'slow.txt'),...(carriers?[row(folder,'second.txt')]:[])]};},
+    async readFile({file}){if(holdRead&&file.startsWith('slow-'))await holdRead.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',value:{file,selection:{author:wallet.address},revision:{file,recordId:'record',document:carriers?null:'0x61',profile:carriers?'carrier-v1':'legacy-inline',content:carriers?{length:4,media:0,encryption:0}:undefined,firstAdmission:'9'},fileTag:{evaluated:true},revisionTag:{evaluated:true}}};},
+    async readContent({file}){stats.content++;if(holdContent)await holdContent.promise;return {state:'AVAILABLE_VERIFIED',bytes:Uint8Array.of(0,255,128,65),file,recordId:'record'};},
+    async prepare(args){stats.prepare++;stats.prepared.push(args);if(holdPrepare)await holdPrepare.promise;return {id:'plan',digest:ethers.id('intent')};},
     async authorize(plan,sign){stats.authorize++;await sign(plan.digest);return {id:'plan',transaction:{}};},
     async submit(_signed,send){stats.submit++;if(holdSubmit)await holdSubmit.promise;await send({to:wallet.address,data:'0x',value:0});return {id:'plan'};},
     async reconcile(){return {status:'EFFECTS_VERIFIED'};}};
   const config={rpcUrl:'http://127.0.0.1:12346',manifest:{chainId:'31337',folder:'root',filesProfile:'typed-directory-v1',authors:{alice:wallet.address,bob:'0x00000000000000000000000000000000000000b2'},contracts:{ledger:{address:wallet.address}}},mounts:[{id:'root',label:'Files'}]};
   if(!typed)delete config.manifest.filesProfile;
+  if(carriers){config.manifest.contentProfile='raw-sha256-aesgcm-v1';config.carrierOrigin='http://127.0.0.1:12347';}
   const stored=new Map();const localStorage={getItem:k=>stored.get(k)??null,setItem:(k,v)=>stored.set(k,v)};
   const fetch=async(url,options)=>({ok:true,async json(){return url==='/config.json'?config:{alice:key};},async text(){const req=JSON.parse(options.body);
     if(req.method==='eth_sendRawTransaction')stats.broadcast++;
     return JSON.stringify({id:req.id,result:req.method==='eth_chainId'?'0x7a69':req.method==='eth_estimateGas'?'0x5208':'0x1'});}});
-  const scope=vm.createContext({document,location,history,localStorage,fetch,performance,AbortSignal,TextEncoder,URL,Blob,structuredClone,setTimeout,
+  class TestURL extends URL {static createObjectURL(blob){stats.blobs.push(blob);return 'blob:test';}static revokeObjectURL(url){stats.revoked.push(url);}}
+  const scope=vm.createContext({document,location,history,localStorage,fetch,performance,AbortSignal,AbortController,TextEncoder,Uint8Array,URL:TestURL,Blob,structuredClone,setTimeout,
     confirm:()=>true,FormData:class{constructor(form){return Object.entries(form.values??{});}},
     addEventListener(type,fn){events.set(type,[...(events.get(type)??[]),fn]);},
-    efsCompactDirectoryEntry:{...paths,createSdk:()=>sdk}});
+    efsCompactDirectoryEntry:{...paths,createSdk:()=>sdk,content:{verifyPng:async()=>{if(image)return {blob:new Blob(['test'])};throw Error('not PNG');},
+      describe:async(bytes,{carrier})=>({carrier,length:bytes.length}),storeRawBytes:async bytes=>{stats.uploads.push(bytes);}}}});
   const execute=vm.compileFunction(`return (async()=>{${source}\n})();`,['ethers','createCompactSdk','folderState','filterRows','canOpen','costPresentation','renderCostTable'],{parsingContext:scope});
   await execute(ethers,()=>sdk,...['folderState','filterRows','canOpen','costPresentation','renderCostTable'].map(k=>view[k]));
   const click=async(action,data={})=>{listeners.get('document:click')({target:{closest:()=>({disabled:false,dataset:{action,...data}})}});await tick();};
   return {element,stats,location,history,async hash(value,event='hashchange'){history.pushState(null,'',value);dispatch(event);await tick();},
-    dispatch,click,async submit(){element('editor-form').values={name:'new.txt',document:'contents'};element('editor-form').listeners.get('submit')({preventDefault(){},target:element('editor-form')});await tick();}};
+    dispatch,click,async submit(values={}){element('editor-form').values={name:'new.txt',document:'contents',...values};element('editor-form').listeners.get('submit')({preventDefault(){},target:element('editor-form')});await tick();}};
 }
 
 test('direct hash edits and browser back/forward re-resolve actual app rows and breadcrumbs',async()=>{
@@ -133,4 +137,34 @@ test('current-generation rejected route read remains visibly unqualified and non
   assert.match(a.element('coverage').textContent,/Partial observation/);assert.equal(a.element('basis').textContent,'No qualified observation yet');
   assert.doesNotMatch(a.element('rows').innerHTML,/root\.txt|slow\.txt/);assert.equal(a.element('create').disabled,true);
   await a.click('create');assert.equal(a.element('editor').open,false);
+});
+test('carrier list never fetches payload and explicit open downloads exact invalid UTF-8 bytes',async()=>{
+  const a=await app({carriers:true});assert.equal(a.stats.content,0);await a.click('select',{position:'root/root.txt'});
+  assert.equal(a.stats.content,0);assert.match(a.element('detail').innerHTML,/Open verified bytes/);
+  await a.click('openContent');assert.equal(a.stats.content,1);assert.match(a.element('detail').innerHTML,/Verified/);
+  await a.click('download');assert.deepEqual(new Uint8Array(await a.stats.blobs.at(-1).arrayBuffer()),Uint8Array.of(0,255,128,65));
+});
+test('late carrier success or rejection cannot overwrite a new route or selection',async()=>{
+  for(const reject of [false,true]){
+    const hold=deferred(),a=await app({carriers:true,holdContent:hold});await a.click('select',{position:'root/root.txt'});await a.click('openContent');assert.equal(a.stats.content,1);
+    await a.hash('#/archive/qa-renamed');await a.click('select',{position:'renamed/child.txt'});
+    const frame=a.element('detail').innerHTML;if(reject)hold.reject(Error('old content failed'));else hold.resolve();await tick();
+    assert.equal(a.element('detail').innerHTML,frame);assert.doesNotMatch(a.element('notice').textContent,/old content failed/);assert.equal(a.stats.blobs.length,0);
+  }
+});
+test('explicit external upload carries more than Core inline limit without lossy text conversion',async()=>{
+  const a=await app({carriers:true});await a.click('connect');await a.click('create');
+  const bytes=new Uint8Array(9000);bytes[8193]=255;a.element('field-upload').files=[{size:bytes.length,arrayBuffer:async()=>bytes.buffer}];
+  await a.submit({carriage:'external'});assert.equal(a.stats.uploads.length,1);assert.deepEqual(a.stats.uploads[0],bytes);
+  assert.equal(a.stats.prepared[0].content.descriptor.carrier,1);assert.equal(a.stats.prepared[0].content.descriptor.length,9000);assert.equal(a.stats.broadcast,1);
+});
+test('same-route selection or Lens change cancels late carrier results and releases an old preview URL',async()=>{
+  for(const change of ['selection','lens']){
+    const hold=deferred(),a=await app({carriers:true,holdContent:hold});await a.click('select',{position:'root/root.txt'});await a.click('openContent');
+    if(change==='selection')await a.click('select',{position:'root/second.txt'});
+    else{a.element('lens').value='bob';a.element('lens').listeners.get('change')();await tick();}
+    const frame=a.element('detail').innerHTML;hold.resolve();await tick();assert.equal(a.element('detail').innerHTML,frame);assert.equal(a.stats.blobs.length,0);
+  }
+  const a=await app({carriers:true,image:true});await a.click('select',{position:'root/root.txt'});await a.click('openContent');assert.equal(a.stats.blobs.length,1);
+  await a.click('select',{position:'root/second.txt'});assert.deepEqual(a.stats.revoked,['blob:test']);assert.doesNotMatch(a.element('detail').innerHTML,/src="blob:test"/);
 });

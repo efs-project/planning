@@ -1,5 +1,94 @@
 # Clickable compact Files prototype
 
+## Guarded byte carriers and Concept labels (Task 4B)
+
+Run `node script/carrier-browser.mjs` with the existing ethers/Anvil/artifact
+environment below. This starts a **fresh** guarded proxy/Directory fixture plus
+a separate ephemeral raw-byte transport. It never connects to the owner's legacy
+server or chain. Ctrl-C closes the browser server, raw transport and owned Anvil.
+`script/directory-browser.mjs` remains the Task 4A inline-only fixture;
+`script/compact-browser.mjs` remains the older unguarded explicit-mount fixture.
+
+Select a File and choose **Open verified bytes**. No external payload is fetched
+from a list or merely selecting a row. Each external open requires the visible
+origin checkbox. Download is exact inert `application/octet-stream`, including
+NUL, invalid UTF-8 and genuinely empty files. Text editing is explicitly UTF-8;
+there is no filename-based media inference. Preview accepts only CRC-checked,
+successfully decoded static RGBA8 PNG, at most 2048 pixels per dimension and
+1,048,576 total pixels. HTML/SVG and other image profiles remain inert downloads.
+
+New-file upload offers onchain inline (8160 stored payload bytes) or the explicitly
+named **local external fixture** (1 MiB stored bytes). The latter is a byte-only
+PUT/GET driver, not a Files backend or IPFS durability service. It independently
+checks SHA-256 before retaining an object, allows only the current loopback UI
+Origin for browser writes, refuses redirects/credentials, and is limited to 32
+objects / 8 MiB total. It refuses excess data instead of evicting another object.
+Objects disappear when the fixture stops; a successful byte upload followed by a
+cancelled/failed Ledger action may leave an unreferenced object until then.
+Transport permission and 5-second timeout / 1 MiB streaming cap are host controls.
+
+Optional supplied 32-byte hexadecimal AES-GCM keys encrypt before publication.
+The 16-byte authentication tag counts toward storage limits. The sample
+`encrypted.bin` uses the **public disposable key `11` repeated 32 times** (also
+printed by the runner), not secret data. Missing key is OPAQUE, wrong-key/auth
+failure has its own reason, and corrupt ciphertext fails digest verification
+before decryption. Keys are not written to the SDK journal. Public names,
+metadata and plaintext hashes remain visible: this is not private enumeration,
+key distribution, recovery, or a full privacy claim.
+
+Exact new ordinary Types, only under `contentProfile: raw-sha256-aesgcm-v1`:
+
+- Bytes: `[SHA256(payload), payload]`, no Record refs, 32–8192 body bytes.
+  Mandatory rule hashes supplied calldata once. Descriptor checks later use
+  the pinned Bytes Type, retained length and digest header, not a cold full-body
+  rehash. This compositional check keeps the unchanged 300k acceptance gas cap.
+- ContentDescriptor: 352 bytes / 11 words: Bytes Record ref, version=1,
+  carrier (0 inline / 1 raw external), hash algorithm=1 (SHA-256), stored length,
+  stored digest, authored media (0 binary / 1 UTF-8 / 2 PNG), cipher (0 / 1
+  AES-256-GCM), left-aligned nonce12 with zero padding, plaintext length and
+  plaintext digest. External descriptors reference the canonical empty Bytes
+  sentinel; they do not put a URI into identity. Identifier is exactly
+  `efs-raw-sha256:<64 lowercase hex>`, not an arbitrary IPFS DAG root.
+- Carrier root revision `[descriptor, File]`; child `[parent, descriptor, File]`.
+  Exact refs are `[Content]` / `[any Record, Content]`. The finite parent set is
+  old inline Root/Child and new carrier Root/Child, with same-File checks.
+  Old inline Types and their offsets remain unchanged; no reverse transition
+  into their old child rule is claimed.
+- Concept: nonzero 32-byte namespace + 1–128 printable ASCII label bytes.
+  Its Record ID is the existing TAG role. UI label lookup uses the root Directory
+  namespace, or an exact supplied Concept ID. Equal labels do not imply global
+  authority. File versus selected-revision tags stay distinct; Directory tags
+  apply only to the stable Directory descriptor, never to all descendants.
+  Missing label bytes remain unknown. Legacy `id(text)` tags are not reinterpreted.
+
+`createFilesCompactSdk` injects pure content codecs into the **same guarded SDK
+engine**, not another Files engine or journal. `prepare` accepts
+`content: {bytes, media?}` or `{descriptor, bytes?}`; external descriptors do not
+require a transport inside signing. `readContent({file, record?, context,
+authors|principals, loadCarrier?, signal?, maxBytes?, key?})` returns separate
+AVAILABLE_VERIFIED / UNAVAILABLE / CORRUPT / OPAQUE / UNSUPPORTED states, pinned
+File/revision/basis, and verified bytes only when available. `record` explicitly
+opens historical immutable content without moving HEAD. `readConcept`,
+`conceptId` and generic `readTag` retain label and TAG qualifications.
+
+The required `FilesCarrierIndex` composes the accepted Directory/Names index and
+adds carrier-child parent postings. Ledger is unchanged. Admission validates
+onchain descriptors and retained references, **not unprovided remote bytes or
+plaintext**. SDK download integrity, ciphertext authentication and plaintext
+commitment checks are separate evidence. The old joined Solidity consumer remains
+an inline-profile consumer; a contract can inspect new structured metadata using
+Ledger records, but remote payload use requires supplied bytes or a separately
+supported witness. No portable state proof, broad paid-read adapter, global tree,
+public deployment, real wallet or all-in chain fee is claimed here.
+
+Browser opens reuse the accepted navigation/read-generation lifecycle. Navigation,
+selection and Lens changes cancel obsolete results and release old preview URLs.
+Only the new carrier entrypoint imports carrier modules; the legacy app's closed
+allowlist has no reverse imports. Tests: `compact-content.test.mjs`,
+`compact-carrier-host.test.mjs`, `carrier.integration.test.mjs`, the existing route
+regressions, and `test/FilesCarrierProfile.t.sol` (including inherited Directory
+bypass/rollback tests under the composed index).
+
 ## Guarded typed Directory graph (Task 4A)
 
 The separate `node script/directory-browser.mjs` entrypoint starts a **fresh**
@@ -21,7 +110,8 @@ an exact destination path with verified child browsing. An occupied selected
 destination or mask requires explicit replacement confirmation before signing.
 Removal masks one placement; restoring or reusing a name does not erase retained
 records. New-file upload accepts up to 8160 exact bytes (including invalid UTF-8);
-downloads remain inert binary. Carriers/encryption are a later slice.
+downloads remain inert binary. This Task 4A runner has no carriers/encryption;
+use the separately pinned Task 4B runner above for those behaviors.
 
 Shared SDK additions, only enabled by the guarded typed manifest:
 

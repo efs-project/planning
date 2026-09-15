@@ -11,7 +11,7 @@ import {FilesDirectoryRule,FilesDirectoryIndex,FilesDirectoryLayout} from "./Fil
 contract FilesDirectoryProfileTest is LabBase {
     bytes32 rt; bytes32 ct; bytes32 nt; bytes32 dt;
     FilesLiveNamesIndex live;
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
         FilesRootRule rr=new FilesRootRule(); rt=registry.register(FilesLayout.ROOT_SHAPE,address(rr),new bytes32[](0));
         FilesChildRule cr=new FilesChildRule(rt); ct=registry.register(FilesLayout.CHILD_SHAPE,address(cr),new bytes32[](1));

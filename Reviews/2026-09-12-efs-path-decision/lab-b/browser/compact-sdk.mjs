@@ -12,7 +12,7 @@ export function createCompactSdk(options) {
 
 // Additive seam: guarded fixtures import this engine. Live-served legacy assets
 // never import a new module (the existing server has a closed asset allowlist).
-export function createCompactEngine({ethers: e, rpc: transport, manifest, journal}, protocolFactory) {
+export function createCompactEngine({ethers: e, rpc: transport, manifest, journal,contentCodec}, protocolFactory) {
   const Z = e.ZeroHash, coder = e.AbiCoder.defaultAbiCoder();
   // Track transport failures by provenance, not message spelling. Local ABI,
   // journal and programming errors must not become persisted availability claims.
@@ -36,6 +36,9 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   const config = freeze(plain(manifest));
   const directories=config.filesProfile==='typed-directory-v1';
   check(!config.filesProfile||(directories&&config.protocol==='compact-guarded-v2'),'FILES_PROFILE');
+  const carriers=config.contentProfile==='raw-sha256-aesgcm-v1';
+  check(!config.contentProfile||(carriers&&directories&&contentCodec),'CONTENT_PROFILE');
+  const carrierKeys=['bytes','content','carrierRoot','carrierChild','concept'];
   const hash = (types,values) => e.keccak256(coder.encode(types,values));
   const purpose = Object.fromEntries(['head','folder','tag'].map(k => [k,e.id(`efs2/purpose/${k}/1`)]));
   const positionOf = (p,s,r) => hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/position/1'),p,s,r]);
@@ -125,6 +128,16 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     }
     check(eq(await scalar('ledger','coreCodeCommitment',[],context),context.core),'CORE');
     check(eq(await scalar('names','coreCodehash',[],context),context.core),'CORE');
+    if(carriers)for(let i=0;i<carrierKeys.length;i++){
+      const key=carrierKeys[i],type=config.types[key],expected=config.ruleHashes[key];
+      const shape=e.id(`lab/type/files-${['bytes','content','carrier-root','carrier-child','concept'][i]}/1`);
+      const refs=i===1?[config.types.bytes]:i===2?[config.types.content]:i===3?[Z,config.types.content]:[];
+      const d=await call('registry','descriptor',[type],context),actual=Array.from(await scalar('registry','refTypes',[type],context));
+      check(type&&expected&&!eq(expected,Z)&&eq(d[0],shape)&&eq(d[1],expected)&&Number(d[3])===refs.length
+        &&actual.length===refs.length&&actual.every((r,j)=>eq(r,refs[j]))&&eq(e.keccak256(await code(d[2],context)),expected)
+        &&eq(hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/type/1'),shape,hash(['bytes32[]'],[refs]),expected]),type),'CONTENT_PROFILE');
+      check(eq(await scalar('index','carrierTypes',[i],context),type)&&eq(await scalar('index','carrierRuleHashes',[i],context),expected),'CONTENT_PROFILE');
+    }
   }
 
   async function pinAt(block) {
@@ -243,9 +256,11 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   }
   async function revisionAt(recordId,file,context) {
     const [typeId,first,occurrences,body] = await call('ledger','record',[recordId],context);
-    const bytes = e.getBytes(body), child = eq(typeId,config.types.child), prefix = child ? 64 : 32;
-    check((child || eq(typeId,config.types.root)) && first > 0n && first <= BigInt(context.admission)
+    const carrier=carriers&&(eq(typeId,config.types.carrierRoot)||eq(typeId,config.types.carrierChild));
+    const bytes = e.getBytes(body), child = eq(typeId,config.types.child)||(carrier&&eq(typeId,config.types.carrierChild)), prefix = (child ? 64 : 32)+(carrier?32:0);
+    check((carrier || child || eq(typeId,config.types.root)) && first > 0n && first <= BigInt(context.admission)
       && bytes.length >= prefix && bytes.length <= 8192 && eq(recordOf(typeId,e.keccak256(body)),recordId),'FILE_PROFILE');
+    check(!carrier||bytes.length===prefix,'FILE_PROFILE');
     const embeddedFile = e.hexlify(bytes.slice(prefix-32,prefix));
     const parent = child ? e.hexlify(bytes.slice(0,32)) : Z;
     check(eq(embeddedFile,file),'FILE_ID');
@@ -255,17 +270,69 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     check(Number(admission[0]) === 1 && eq(admission[6],e.keccak256(body)) && eq(admission[7],typeId),'FILE_ADMISSION');
     if (child) {
       const [pt,pf,,pb] = await call('ledger','record',[parent],context), pbytes = e.getBytes(pb);
-      const pp = eq(pt,config.types.root) ? 32 : eq(pt,config.types.child) ? 64 : 0;
+      const parentCarrier=carriers&&(eq(pt,config.types.carrierRoot)||eq(pt,config.types.carrierChild));
+      const pp = eq(pt,config.types.root) ? 32 : eq(pt,config.types.child) ? 64 : carrier&&parentCarrier ? (eq(pt,config.types.carrierRoot)?64:96) : 0;
       check(pp && pf > 0n && pf < first && pbytes.length >= pp && pbytes.length <= 8192
+        &&(!parentCarrier||pbytes.length===pp)
         && eq(recordOf(pt,e.keccak256(pb)),parent) && eq(e.hexlify(pbytes.slice(pp-32,pp)),file),'FILE_PARENT');
     }
-    const document = e.hexlify(bytes.slice(prefix));
-    return {recordId,typeId,file,parent,document,documentHash:e.keccak256(document),...await protocol.revisionEvidence(admission[2],context),
+    const document = carrier?null:e.hexlify(bytes.slice(prefix));
+    const descriptorRecord=carrier?e.hexlify(bytes.slice(prefix-64,prefix-32)):null;
+    return {recordId,typeId,file,parent,document,documentHash:carrier?null:e.keccak256(document),
+      ...(carrier?{profile:'carrier-v1',descriptorRecord,content:await descriptorAt(descriptorRecord,context,first)}:{profile:'legacy-inline'}),...await protocol.revisionEvidence(admission[2],context),
       firstAdmission:String(first),occurrences:String(occurrences),maintenance:'RETAINED_OCCURRENCE_COUNT',validity:'NOT_ASSESSED'};
   }
+  async function retainedAt(id,type,context,through=BigInt(context.admission)) {
+    const [t,first,,body]=await call('ledger','record',[id],context);
+    check(eq(t,type)&&first>0n&&first<=through&&eq(recordOf(t,e.keccak256(body)),id),'CONTENT_INTEGRITY');
+    const a=await call('ledger','admission',[first],context);
+    check(Number(a[0])===1&&eq(a[6],e.keccak256(body))&&eq(a[7],type),'CONTENT_INTEGRITY');
+    return {body,firstAdmission:String(first)};
+  }
+  async function descriptorAt(id,context,through) {
+    const retained=await retainedAt(id,config.types.content,context,through);
+    let descriptor;try{descriptor=contentCodec.decodeDescriptor(e.getBytes(retained.body));}catch{fail('CONTENT_INTEGRITY');}
+    return {...descriptor,recordId:id,firstAdmission:retained.firstAdmission};
+  }
+  async function readContent(args) {
+    check(carriers,'CONTENT_PROFILE');await guard(args.context);
+    let revision,selection=null;
+    if(args.record)revision=await revisionAt(args.record,args.file,args.context);
+    else {const point=await fileAt({...args,authors:await protocol.selectors(args,args.context)});revision=point.value.revision;selection=point.value.selection;
+      if(!revision)return {state:'UNAVAILABLE',reason:point.reason??point.knowledge,basis:point.basis,selection};}
+    const extra={basis:args.context,file:args.file,recordId:revision.recordId,selection};
+    if(revision.profile==='legacy-inline')return {...extra,state:'AVAILABLE_VERIFIED',bytes:e.getBytes(revision.document),plaintextVerified:true,profile:'legacy-inline'};
+    const d=revision.content;
+    const loadCarrier=async(descriptor,limits)=>{
+      if(descriptor.carrier===1){check(args.loadCarrier,'CARRIER_UNAVAILABLE');return args.loadCarrier(descriptor,limits);}
+      const stored=await retainedAt('0x'+descriptor.inline,config.types.bytes,args.context,BigInt(d.firstAdmission));
+      const body=e.getBytes(stored.body);check(body.length>=32&&eq(e.hexlify(body.slice(0,32)),'0x'+descriptor.digest),'CONTENT_INTEGRITY');return body.slice(32);
+    };
+    return {...extra,descriptor:d,...await contentCodec.openContent(d,{loadCarrier,signal:args.signal,maxBytes:args.maxBytes,key:args.key})};
+  }
+  function conceptBody(namespace,label) {
+    check(/^0x[0-9a-f]{64}$/i.test(namespace)&&!eq(namespace,Z)&&typeof label==='string'&&/^[\x20-\x7e]{1,128}$/.test(label),'CONCEPT_LABEL');
+    return e.concat([namespace,e.toUtf8Bytes(label)]);
+  }
+  function conceptId({namespace,label}) {check(carriers,'CONTENT_PROFILE');return recordOf(config.types.concept,e.keccak256(conceptBody(namespace,label)));}
+  async function conceptAt(concept,context) {
+    try {
+      const [t,first]=await call('ledger','record',[concept],context);
+      if(eq(t,Z)&&first===0n)return result(basisFor(context),'UNKNOWN','PARTIAL',null,{reason:'CONCEPT_MISSING',legacyHashedTextNotReinterpreted:true});
+      const retained=await retainedAt(concept,config.types.concept,context),bytes=e.getBytes(retained.body);
+      const namespace=e.hexlify(bytes.slice(0,32)),label=e.toUtf8String(bytes.slice(32));conceptBody(namespace,label);
+      return result(basisFor(context),'PRESENT','COMPLETE',{concept,namespace,label,firstAdmission:retained.firstAdmission,authority:'NOT_INFERRED'});
+    }catch(error){if(!isRpcUnavailable(error)&&!/^COMPACT_/.test(error.message))throw error;
+      return result(basisFor(context),isRpcUnavailable(error)?'UNKNOWN':'INVALID','PARTIAL',null,{reason:'CONCEPT_UNAVAILABLE_OR_INVALID'});}
+  }
+  async function readConcept({concept,context}) {check(carriers,'CONTENT_PROFILE');await guard(context);return freeze(await conceptAt(concept,context));}
+  async function readTag(args) {await guard(args.context);const authors=await protocol.selectors(args,args.context);
+    try {return freeze(result(basisFor(args.context,authors),'PRESENT','COMPLETE',await tagAt(authors,args.subject,args.concept,args.target,args.context)));}
+    catch(error){if(!isRpcUnavailable(error))throw error;return freeze(result(basisFor(args.context,authors),'UNKNOWN','PARTIAL',{subject:args.subject,concept:args.concept,evaluated:false,present:false}));}}
   async function tagAt(authors,subject,concept,file,context) {
     const s = await resolve(authors,purpose.tag,subject,concept,context);
-    return {subject,concept,evaluated:true,present:s.status === 1 && eq(s.target,file),selection:s};
+    return {subject,concept,evaluated:true,present:s.status === 1 && eq(s.target,file),selection:s,
+      ...(carriers&&!eq(concept,Z)?{label:await conceptAt(concept,context)}:{legacy:true})};
   }
   async function fileAt({file,authors,concept=Z,context,policy='ordered'}) {
     check(policy === 'ordered' || policy === 'no-tiebreak','LENS_POLICY');
@@ -379,7 +446,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       if(!guardPositions.has(position))guardPositions.set(position,{position,purpose:p,subject:s,role:r,meaning,
         selection:selected??await resolve(authors,p,s,r,context)});
     };
-    let file = args.file, newRevision = null;
+    let file = args.file, newRevision = null,concept=args.concept;
     const push = (fields,body='0x') => {actions.push(action(fields)); bodies.push(e.hexlify(body));};
     const ownHead = async (p,s,r) => {
       const position = positionOf(p,s,r), key = bindingOf(author,position);
@@ -410,7 +477,22 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       }
       return role;
     };
-    const publishRevision = (document,parent) => {
+    const retain=async(type,body)=>{
+      const hash=e.keccak256(body),id=recordOf(type,hash),[t,first,,stored]=await call('ledger','record',[id],context);
+      if(eq(t,Z)&&first===0n)push({kind:1,typeId:type,bodyHashOrRecordId:hash},body);
+      else check(eq(t,type)&&first>0n&&first<=BigInt(context.admission)&&eq(stored,e.hexlify(body)),'CONTENT_INTEGRITY');return id;
+    };
+    const publishRevision = async(document,parent,content) => {
+      if(content){
+        check(carriers,'CONTENT_PROFILE');
+        let d=content.descriptor??await contentCodec.describe(bytesOf(content.bytes),{media:content.media??0});
+        const raw=d.carrier===0?bytesOf(content.bytes):new Uint8Array();
+        if(d.carrier===0)check(raw.length<=8160&&raw.length===d.length&&await contentCodec.digest(raw)===d.digest,'CONTENT_INTEGRITY');
+        const inline=await retain(config.types.bytes,e.concat(['0x'+await contentCodec.digest(raw),raw]));d={...d,inline:inline.slice(2)};
+        const descriptor=await retain(config.types.content,contentCodec.encodeDescriptor(d));
+        const body=e.concat(parent?[parent,descriptor,file]:[descriptor,file]),type=parent?config.types.carrierChild:config.types.carrierRoot;
+        newRevision=recordOf(type,e.keccak256(body));push({kind:1,typeId:type,bodyHashOrRecordId:e.keccak256(body)},body);return;
+      }
       const body = e.concat(parent ? [parent,file,document] : [file,document]);
       check(e.getBytes(body).length <= 8192,'BODY_LIMIT');
       const type = parent ? config.types.child : config.types.root, bodyHash = e.keccak256(body);
@@ -439,7 +521,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       if(operation==='createDirectory'){
         const body=coder.encode(['bytes32'],[file]);file=recordOf(config.types.directory,e.keccak256(body));
         push({kind:1,typeId:config.types.directory,bodyHashOrRecordId:e.keccak256(body)},body);
-      }else publishRevision(bytesOf(args.document),null);
+      }else await publishRevision(args.content?null:bytesOf(args.document),null,args.content);
       const role = await retainName(args.name);
       const folder=await folderFor(args.folder,context);await destination(folder,role);
       if(operation==='create')await binding(purpose.head,file,Z,newRevision);
@@ -447,14 +529,18 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     } else {
       check(file && !eq(file,Z),'FILE_ID');
       const placementOperation=['move','rename','remove','restorePlacement'].includes(operation);
-      if(directories&&placementOperation)check((await targetAt(file,context)).knowledge==='PRESENT','TARGET_UNAVAILABLE');
+      if(directories&&(placementOperation||(carriers&&['addTag','removeTag'].includes(operation)&&args.scope==='directory')))check((await targetAt(file,context)).knowledge==='PRESENT','TARGET_UNAVAILABLE');
       else {const created = await scalar('ledger','subjectCreatedAt',[file],context);
         check(created > 0n && created <= BigInt(context.admission),'FILE_SUBJECT');}
       if (operation === 'edit' || operation === 'restoreContents') {
         const current = await selected();
-        const document = operation === 'edit' ? bytesOf(args.document)
-          : e.getBytes((await revisionAt(args.record,file,context)).document);
-        publishRevision(document,current.recordId);
+        const historical=operation==='restoreContents'?await revisionAt(args.record,file,context):null;
+        let content=args.content,document;
+        if(historical?.profile==='carrier-v1'){
+          const d=historical.content;content={descriptor:d,bytes:d.carrier===0?e.getBytes((await retainedAt('0x'+d.inline,config.types.bytes,context)).body).slice(32):undefined};
+        }else {document=historical?e.getBytes(historical.document):content?null:bytesOf(args.document);
+          if(!content&&current.profile==='carrier-v1')content={bytes:document};}
+        await publishRevision(document,current.recordId,content);
         await binding(purpose.head,file,Z,newRevision);
       } else if (operation === 'move' || operation === 'rename') {
         const from = await folderFor(args.fromFolder ?? args.folder,context), to = await folderFor(args.toFolder ?? args.folder,context);
@@ -481,10 +567,12 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
         }
         await binding(purpose.folder,folder,role,file,operation === 'remove');
       } else if (operation === 'addTag' || operation === 'removeTag') {
-        check(args.scope === 'file' || args.scope === 'revision','TAG_SCOPE');
-        check(args.concept && !eq(args.concept,Z),'TAG_CONCEPT');
-        const subject = args.scope === 'file' ? file : (await selected()).recordId;
-        await binding(purpose.tag,subject,args.concept,file,operation === 'removeTag');
+        check(args.scope === 'file' || args.scope === 'revision'||(carriers&&args.scope==='directory'&&(await directoryAt(file,context)).knowledge==='PRESENT'),'TAG_SCOPE');
+        if(args.conceptLabel!==undefined){check(carriers,'CONTENT_PROFILE');concept=await retain(config.types.concept,conceptBody(args.conceptNamespace??principalId,args.conceptLabel));}
+        check(concept && !eq(concept,Z),'TAG_CONCEPT');
+        if(carriers&&args.conceptLabel===undefined)check((await conceptAt(concept,context)).knowledge==='PRESENT','CONCEPT_UNAVAILABLE');
+        const subject = args.scope === 'revision' ? (await selected()).recordId : file;
+        await binding(purpose.tag,subject,concept,file,operation === 'removeTag');
       } else fail('OPERATION');
     }
     const actionsHash = hash([interfaces.ledger.getFunction('execute').inputs[0]],[actions]);
@@ -495,7 +583,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     const authorization = await protocol.authorization({intent,actionsHash,actions,authors,principalId,context,guardPositions:[...guardPositions.values()]});
     const {publicationId} = authorization;
     const id = hash(['uint256','address','bytes32'],[context.chainId,addresses.ledger,publicationId]);
-    const plan = freeze(plain({id,operation,file,newRevision,authors,basis:context,intent,actions,bodies,actionsHash,...authorization,
+    const plan = freeze(plain({id,operation,file,newRevision,concept,authors,basis:context,intent,actions,bodies,actionsHash,...authorization,
       startingHeads:[...startingHeads.values()],expectedHeads:[...expectedHeads.values()],selectionDependencies}));
     plans.add(plan); return plan;
   }
@@ -647,6 +735,6 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       receipt,receiptObservation,receiptAttribution,...(reason?{reason}:{})};
     await journal.put(plain(outcome)); return outcome;
   }
-  return Object.freeze({pin,listFolder,readFile,readName,readDirectory,readPlacement,prepare,authorize,submit,reconcile,
+  return Object.freeze({pin,listFolder,readFile,readName,readDirectory,readPlacement,readContent,readConcept,readTag,conceptId,prepare,authorize,submit,reconcile,
     capabilities:()=>freeze(plain({...protocol.capabilities,typedDirectories:directories,globalTree:false}))});
 }

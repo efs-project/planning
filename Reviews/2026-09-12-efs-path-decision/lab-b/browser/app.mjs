@@ -10,7 +10,36 @@ const pretty = value => Number(value).toLocaleString('en-US');
 const state = {config:null,sdk:null,folder:null,context:null,page:null,rows:[],selected:null,busy:false,
   keys:null,wallet:null,filterConcept:'',history:{},removed:null,entries:[],economics:null,editedEconomics:false,
   rpc:{calls:0,bytes:0,ms:0,errors:0},operation:null,prefix:null,storageIssue:null,paths:null,segments:[],route:null,
-  navigation:null,readGeneration:0,routeLoading:false};
+  navigation:null,readGeneration:0,routeLoading:false,contentRequest:null,contentResult:null,previewUrl:null};
+const hasCarriers=()=>!!state.config?.manifest.contentProfile;
+const actionLabel=operation=>({createDirectory:'create directory',restorePlacement:'restore placement',restoreContents:'restore contents',addTag:'add tag',removeTag:'remove tag'}[operation]??operation);
+function clearContent(){state.contentRequest?.abort.abort();state.contentRequest=null;state.contentResult=null;if(state.previewUrl)URL.revokeObjectURL(state.previewUrl);state.previewUrl=null;}
+function conceptFor(label){return /^0x[0-9a-f]{64}$/i.test(label)?label:hasCarriers()?state.sdk.conceptId({namespace:state.config.manifest.folder,label}):ethers.id(label);}
+function verifiedBytes(row=selectedRow()){
+  if(!row)return null;
+  if(row.point?.value?.revision?.profile==='carrier-v1')return state.contentResult?.state==='AVAILABLE_VERIFIED'&&state.contentResult.recordId===row.point.value.revision.recordId?state.contentResult.bytes:null;
+  return canOpen(row.point)?ethers.getBytes(row.point.value.revision.document):null;
+}
+function contentMessage(result){return result?.reason==='AUTHENTICATION_FAILED'?'The key could not authenticate this file':({AVAILABLE_VERIFIED:'Verified file bytes',UNAVAILABLE:'File bytes are unavailable',CORRUPT:'File integrity check failed',OPAQUE:'Encrypted file — key needed',UNSUPPORTED:'This content format is not supported'}[result?.state]??'File bytes have not been opened');}
+async function openContent(){
+  clearContent();const row=selectedRow(),navigation=state.navigation,generation=state.readGeneration,position=state.selected,record=row?.point?.value?.revision?.recordId;
+  if(!record)return;
+  const request={abort:new AbortController()};state.contentRequest=request;
+  const current=()=>routeCurrent(navigation)&&generation===state.readGeneration&&position===state.selected&&request===state.contentRequest;
+  const keyText=$('content-key')?.value.trim(),key=keyText?ethers.getBytes(keyText.startsWith('0x')?keyText:'0x'+keyText):undefined;
+  const useExternal=$('allow-carrier')?.checked===true;
+  renderDetail();controls();
+  try {
+    const result=await state.sdk.readContent({file:row.file,record,authors:authors(),context:state.context,key,signal:request.abort.signal,
+      ...(useExternal&&state.config.carrierOrigin?{loadCarrier:state.paths.content.createRawTransport({origin:state.config.carrierOrigin,maxBytes:1048576,timeoutMs:5000})}:{})});
+    if(!current())return;state.contentResult=result;
+    if(result.state==='AVAILABLE_VERIFIED'){
+      try{const preview=await state.paths.content.verifyPng(result.bytes,{signal:request.abort.signal});if(!current())return;state.previewUrl=URL.createObjectURL(preview.blob);}
+      catch{if(!current())return;} // Unsupported/decode-failed images remain exact inert downloads.
+    }
+  }catch(error){if(current())state.contentResult={state:'UNAVAILABLE',reason:error.message};}
+  finally{if(current()){state.contentRequest=null;renderDetail();controls();}}
+}
 
 function notice(message,kind='') {
   $('notice').textContent=message; $('notice').className=`notice ${kind}`; $('notice').hidden=!message;
@@ -89,6 +118,7 @@ async function refresh(continuing=false) {
   if(state.paths&&!routeCurrent(state.navigation)) return handleRoute();
   if(state.navigation?.invalid)throw state.navigation.invalid;
   const navigation=state.navigation,generation=++state.readGeneration;
+  clearContent();
   const check=()=>{checkRoute(navigation);if(generation!==state.readGeneration)throw Object.assign(new Error('Observation superseded.'),{code:'ROUTE_CHANGED'});};
   const lens=authors(),policy=$('lens').value==='conflict'?'no-tiebreak':'ordered';
   let context=state.context,page=state.page,folder=state.folder,route=state.route;
@@ -114,11 +144,13 @@ async function refresh(continuing=false) {
       continuation=page.continuation;
       if(!continuation) break;
     }
-    const concept=state.filterConcept ? ethers.id(state.filterConcept) : ethers.ZeroHash;
+    const concept=state.filterConcept ? conceptFor(state.filterConcept) : ethers.ZeroHash;
     const rows=[];
     for(const row of page.value) {
       let point;
-      if(state.paths&&row.kind!=='file'){rows.push({...row,point:{knowledge:row.knowledge,coverage:row.knowledge==='PRESENT'?'COMPLETE':'PARTIAL',reason:row.kind==='directory'?'Directory · no File HEAD required':'Target kind unavailable'}});continue;}
+      if(state.paths&&row.kind!=='file'){
+        const tag=hasCarriers()&&row.kind==='directory'&&state.filterConcept?await state.sdk.readTag({subject:row.file,target:row.file,concept,authors:lens,context}):null;check();
+        rows.push({...row,point:{knowledge:row.knowledge,coverage:row.knowledge==='PRESENT'?(tag?.coverage??'COMPLETE'):'PARTIAL',value:{fileTag:tag?.value,revisionTag:{evaluated:true,present:false,applicable:false}},reason:row.kind==='directory'?'Directory · no File HEAD required':'Target kind unavailable'}});continue;}
       try { point=await state.sdk.readFile({file:row.file,authors:lens,concept,context,policy});check(); remember(point); }
       catch(error) { check();point={knowledge:'UNKNOWN',coverage:'PARTIAL',reason:error.message,value:{file:row.file}}; }
       rows.push({...row,point});
@@ -140,6 +172,7 @@ function handleRoute() {
   if(!state.paths||!state.sdk)return;
   if(routeCurrent(state.navigation))return state.navigation.pending;
   const navigation={hash:location.hash,ready:false};state.navigation=navigation;
+  clearContent();
   Object.assign(state,{folder:null,context:null,page:null,rows:[],selected:null,route:null,segments:[],operation:null,routeLoading:false});
   $('editor').close();
   const refuse=error=>{
@@ -160,7 +193,7 @@ function renderRows() {
   $('rows').innerHTML=filtered.rows.map(row=>{
     const point=row.point, revision=point?.value?.revision;
     const name=row.name?.knowledge==='PRESENT'?row.name.value:`Name ${row.name?.knowledge?.toLowerCase()??'unavailable'} · ${short(row.file)}`;
-    return `<button class="file-row ${state.selected===row.position?'active':''}" data-action="select" data-position="${escape(row.position)}" aria-pressed="${state.selected===row.position}"><span class="file-icon" aria-hidden="true">${row.kind==='directory'?'▱':'▤'}</span><span class="row-main"><span class="filename">${escape(name)}</span><span class="row-subtitle">${row.kind==='directory'?'Directory':row.kind==='unknown'?'Unknown kind':'File'} ${escape(short(row.file))}</span></span><span class="row-state">${revision?escape(authorName(point.value.selection.author)):`<span class="badge warning">${escape(point?.knowledge??'UNKNOWN')}</span>`}<span class="row-subtitle">${revision?`${pretty(ethers.getBytes(revision.document).length)} bytes · #${revision.firstAdmission}`:escape(point?.reason??'No selected bytes')}</span></span></button>`;
+    return `<button class="file-row ${state.selected===row.position?'active':''}" data-action="select" data-position="${escape(row.position)}" aria-pressed="${state.selected===row.position}"><span class="file-icon" aria-hidden="true">${row.kind==='directory'?'▱':'▤'}</span><span class="row-main"><span class="filename">${escape(name)}</span><span class="row-subtitle">${row.kind==='directory'?'Directory':row.kind==='unknown'?'Unknown kind':'File'} ${escape(short(row.file))}</span></span><span class="row-state">${revision?escape(authorName(point.value.selection.author)):`<span class="badge warning">${escape(point?.knowledge??'UNKNOWN')}</span>`}<span class="row-subtitle">${revision?`${pretty(revision.content?.length??ethers.getBytes(revision.document).length)} bytes · #${revision.firstAdmission}`:escape(point?.reason??'No selected bytes')}</span></span></button>`;
   }).join('') || `<div class="empty-list">${state.busy&&!state.page?'Reading from the Ledger…':escape(view.kind==='empty'?view.label:state.page?.coverage==='COMPLETE' && view.kind==='complete' ? 'No matches in this complete observed folder.': 'No rows to show yet. This is not evidence of an empty folder.')}</div>`;
   $('continue').hidden=!state.page?.continuation;
   $('basis').textContent=state.page?.basis ? `RPC-observed · block ${state.page.basis.blockNumber} · admission ${state.page.basis.admission} · ${short(state.page.basis.blockHash)}` : 'No qualified observation yet';
@@ -180,9 +213,21 @@ function renderDetail() {
   if(state.paths&&row.kind!=='file'){
     $('detail').innerHTML=`<h2>${escape(name)}</h2><p>${row.kind==='directory'?'Typed Directory · stable descriptor identity. No File HEAD is required.':'Target kind is unavailable or invalid. Membership has not been discarded.'}</p>
       <div class="file-actions">${row.kind==='directory'&&knownName?'<button data-action="enter">Open directory →</button>':''}${action('rename','Rename',!knownName||row.kind!=='directory')}${action('move','Move',!knownName||row.kind!=='directory')}${action('remove','Remove placement',!knownName||row.kind!=='directory')}</div>
-      <p>Placements are links, not ownership. Moving or removing one never rewrites or destroys descendants. A Lens may contain aliases or cycles.</p><details><summary>Descriptor and selected edge</summary><pre>${escape(json(row))}</pre></details>`;return;
+      <p>Placements are links, not ownership. Moving or removing one never rewrites or destroys descendants. A Lens may contain aliases or cycles.</p>${hasCarriers()&&row.kind==='directory'?tagControls(point,true):''}<details><summary>Descriptor and selected edge</summary><pre>${escape(json(row))}</pre></details>`;return;
   }
-  const candidates=(point?.value?.candidates??[]).map(candidate=>`<div class="conflict-card"><strong>${escape(authorName(candidate.selection.author))}</strong> · ${escape(short(candidate.revision?.recordId??candidate.selection.target))}<pre>${escape(candidate.revision?textPreview(candidate.revision.document).text:`${candidate.knowledge??'UNKNOWN'} — candidate bytes unavailable; conflict retained.`)}</pre></div>`).join('');
+  if(revision?.profile==='carrier-v1'){
+    const bytes=verifiedBytes(row),text=bytes?textPreview(bytes):null,d=revision.content,content=state.contentResult;
+    $('detail').innerHTML=`<h2>${escape(name)}</h2><p>${escape(contentMessage(content))}${state.contentRequest?' · opening…':''}</p>
+      <div class="file-actions"><button data-action="openContent">Open verified bytes</button><button data-action="download" data-blocked="${!bytes}" ${bytes?'':'disabled'}>↓ Download bytes</button>${action('edit','Edit as UTF-8 text',!text?.utf8)}${action('rename','Rename',!knownName)}${action('move','Move',!knownName)}${action('remove','Remove placement',!knownName)}</div>
+      ${d.encryption?'<label>Supplied key (64 hexadecimal digits)<input id="content-key" type="password" autocomplete="off"></label><p>Key stays in this open operation; it is not saved to the journal.</p>':''}
+      ${d.carrier===1?`<label><input id="allow-carrier" type="checkbox"> Allow this open to fetch from ${escape(state.config.carrierOrigin??'no configured transport')}</label><p>Explicit raw SHA-256 transport; no credentials or redirects, 1 MiB / 5-second cap.</p>`:''}
+      ${state.previewUrl?`<img class="verified-image" src="${escape(state.previewUrl)}" alt="Verified static PNG preview" style="max-width:100%;max-height:420px">`:''}
+      ${bytes?`<p>${pretty(bytes.length)} verified bytes. ${text.utf8?'UTF-8 interpretation below.':'Binary bytes; download preserves them exactly.'}</p>${text.utf8?`<pre class="document">${escape(text.text)}</pre>`:''}`:''}
+      ${tagControls(point)}<p>Media type is authored metadata, not proof of image syntax. Only bounded, decoded static RGBA PNG is previewed; HTML and SVG are never executed.</p>
+      <details><summary>Content, revision and verification details</summary><pre>${escape(json({revision,content:content?{...content,bytes:undefined}:null}))}</pre></details>
+      <details><summary>Locally witnessed revisions</summary>${(state.history[row.file]??[]).map(item=>`<p>${escape(short(item.recordId))} ${action('restoreContents','Restore these contents',false,`data-record="${escape(item.recordId)}"`)}</p>`).join('')}${action('restoreContents','Use a historical Record ID…')}</details>`;return;
+  }
+  const candidates=(point?.value?.candidates??[]).map(candidate=>`<div class="conflict-card"><strong>${escape(authorName(candidate.selection.author))}</strong> · ${escape(short(candidate.revision?.recordId??candidate.selection.target))}<pre>${escape(candidate.revision?.profile==='carrier-v1'?'Carrier revision known; choose an ordered Lens to open and verify its bytes.':candidate.revision?textPreview(candidate.revision.document).text:`${candidate.knowledge??'UNKNOWN'} — candidate bytes unavailable; conflict retained.`)}</pre></div>`).join('');
   const history=state.history[row.file]??[];
   $('detail').innerHTML=`<h2 class="file-title">${escape(name)}</h2><div class="meta-line"><span class="badge ${open?'':'warning'}">${escape(point?.knowledge??'UNKNOWN')}</span><span>${open?`${escape(authorName(point.value.selection.author))} selected · revision ${escape(short(revision.recordId))}`:escape(point?.reason??'No single selected revision')}</span></div>
     <div class="file-actions">${action('edit','Edit contents',!open||!preview.utf8)}${action('rename','Rename',!knownName)}${action('move','Move',!knownName)}<button data-action="download" data-blocked="${!open}" ${open?'':'disabled'}>↓ Download bytes</button>${action('remove','Remove placement',!knownName,'class="danger"')}</div>
@@ -191,10 +236,15 @@ function renderDetail() {
     <details class="revision-history"><summary>Locally witnessed revisions (${history.length})</summary><p>Not a complete history. Restoring contents publishes a fresh child revision; it does not rewind HEAD.</p>${history.map(item=>`<div class="history-row"><code title="${escape(item.recordId)}">${escape(short(item.recordId))} · admission ${escape(item.firstAdmission)}</code>${action('restoreContents','Restore these contents',!open,`data-record="${escape(item.recordId)}"`)}</div>`).join('')}${action('restoreContents','Use a historical Record ID…',!open)}</details>
     <details class="technical"><summary>Record & observation details</summary><pre>${escape(json({file:row.file,placement:{folder:row.folder,position:row.position,role:row.role,name:row.name},point}))}</pre></details>`;
 }
+function tagControls(point,directory=false){
+  const label=point?.value?.fileTag?.label??point?.value?.revisionTag?.label;
+  return `<section class="file-tags"><strong>${directory?'Directory identity tag':'Tags have a subject'}</strong><div class="tag-editor"><input id="tag-concept" aria-label="Tag concept" placeholder="Label or exact Concept Record ID" value="${escape(state.filterConcept)}"><select id="tag-scope"><option value="${directory?'directory':'file'}">${directory?'Directory':'File'} identity</option>${directory?'':'<option value="revision">Selected revision</option>'}</select><button data-action="addTag" data-write>Add tag</button><button data-action="removeTag" data-write>Remove tag</button></div>
+    <p>${label?.knowledge==='PRESENT'?`Verified label: “${escape(label.value.label)}”`:'Label not yet verified'} · ${tagLabel(point?.value?.fileTag)}${directory?'':` / selected revision ${tagLabel(point?.value?.revisionTag)}`}. Labels are scoped to this root namespace, not global authority.${directory?' This tag does not apply to descendants.':''}</p></section>`;
+}
 function tagLabel(tag) { return !tag?.evaluated?'not evaluated':tag.present?'present':tag.selection?.status===2?'masked':'absent'; }
 function renderActivity() {
   state.entries=journalEntries(); $('activity-count').textContent=state.entries.length?`(${state.entries.length})`:'';
-  $('activity').innerHTML=(state.storageIssue?`<p class="error">${escape(state.storageIssue)}</p>`:'')+(state.entries.slice(0,20).map(entry=>`<div class="activity-item"><strong>${escape(entry.plan.operation)} · ${escape(entry.status)}</strong><code>${escape(short(entry.id))}</code>${entry.error?`<p>${escape(entry.error)}</p>`:''}<br><button data-action="reconcile" data-id="${escape(entry.id)}">Reconcile without re-signing</button><details><summary>Exact signed plan & read-back</summary><pre class="document">${escape(json(entry))}</pre></details></div>`).join('') || '<p>No local signed plans yet.</p>');
+  $('activity').innerHTML=(state.storageIssue?`<p class="error">${escape(state.storageIssue)}</p>`:'')+(state.entries.slice(0,20).map(entry=>`<div class="activity-item"><strong>${escape(actionLabel(entry.plan.operation))} · ${escape(entry.status)}</strong><code>${escape(short(entry.id))}</code>${entry.error?`<p>${escape(entry.error)}</p>`:''}<br><button data-action="reconcile" data-id="${escape(entry.id)}">Reconcile without re-signing</button><details><summary>Exact signed plan & read-back</summary><pre class="document">${escape(json(entry))}</pre></details></div>`).join('') || '<p>No local signed plans yet.</p>');
 }
 function renderCosts() {
   const economics=state.economics;
@@ -249,7 +299,7 @@ async function write(operation,args,navigation=state.navigation) {
   if(!state.wallet||$('lens').value==='conflict') throw new Error('Choose an ordered Lens and explicitly enable a disposable signer first.');
   if(state.paths&&!navigation?.ready)throw Error('A qualified directory observation is required before signing.');
   const wallet=state.wallet,lens=authors();
-  notice(`Preparing exact ${operation} action…`);
+  notice(`Preparing exact ${actionLabel(operation)} action…`);
   if(state.paths){
     const context=await state.sdk.pin();checkRoute(navigation);args={...args,context};
     if(operation==='move'&&args.destinationPath){const {route}=await destinationRoute(args.destinationPath,context,navigation);args.toFolder=route.target;}
@@ -276,8 +326,8 @@ async function write(operation,args,navigation=state.navigation) {
     if(operation==='restorePlacement') {state.removed=null;store('removed',null);}
     await refresh();
     checkRoute(navigation);
-    notice(`${operation}: EFFECTS_VERIFIED — canonical effect read-back matched. RPC-observed, not a state proof.`);
-  } else notice(`${operation}: ${outcome.status}. No success is claimed. Reconcile the saved plan in Local activity; do not sign a replacement blindly.${outcome.error?` ${outcome.error}`:''}`,'warning');
+    notice(`${actionLabel(operation)}: EFFECTS_VERIFIED — canonical effect read-back matched. RPC-observed, not a state proof.`);
+  } else notice(`${actionLabel(operation)}: ${outcome.status}. No success is claimed. Reconcile the saved plan in Local activity; do not sign a replacement blindly.${outcome.error?` ${outcome.error}`:''}`,'warning');
   return outcome;
 }
 function field(label,name,value='',type='input') {
@@ -292,19 +342,20 @@ function openEditor(operation,record) {
   $('editor-help').textContent=`Signed by ${$('signer').value}, using ${$('lens').selectedOptions[0].textContent}. One atomic local-test action batch; no real funds.`;
   let fields='';
   if(['create','createDirectory','rename','move'].includes(operation)) fields+=field('Exact name · lowercase ASCII','name',['create','createDirectory'].includes(operation)?'':name);
-  if(operation==='create'||operation==='edit') fields+=field('Plain-text contents','document',operation==='edit'?textPreview(row.point.value.revision.document).text:'','textarea');
-  if(state.paths&&operation==='create')fields+='<label class="field-label" for="field-upload">Or upload exact bytes (up to 8160 bytes; overrides text)</label><input type="file" id="field-upload">';
+  if(operation==='create'||operation==='edit') fields+=field('Explicit UTF-8 text interpretation','document',operation==='edit'?textPreview(verifiedBytes(row)).text:'','textarea');
+  if(state.paths&&operation==='create')fields+=`<label class="field-label" for="field-upload">Or upload exact bytes (${hasCarriers()?'up to 8160 inline or 1 MiB external':'up to 8160 bytes'}; overrides text, no MIME inferred)</label><input type="file" id="field-upload">`;
+  if(hasCarriers()&&operation==='create')fields+=`<label>Byte storage<select name="carriage"><option value="inline">Onchain inline · up to 8160 stored bytes</option>${state.config.carrierOrigin?`<option value="external">External local fixture · up to 1 MiB stored bytes</option>`:''}</select></label><p>Choosing external explicitly uploads to ${escape(state.config.carrierOrigin??'no configured fixture')}. This ephemeral byte-only fixture is lost when stopped; it is not EFS metadata storage.</p><label>Optional AES-GCM encryption key (64 hexadecimal digits; not saved)<input type="password" name="encryptionKey" autocomplete="off"></label>`;
   if(operation==='move') fields+=state.paths?field('Destination directory path · verified before signing','destinationPath','/')+'<button type="button" data-action="destination">Browse / verify this path</button><div id="destination-children"></div>':`<label class="field-label" for="field-folder">Destination explicit mount</label><select name="toFolder" id="field-folder">${state.config.mounts.filter(mount=>mount.id!==state.folder).map(mount=>`<option value="${escape(mount.id)}">${escape(mount.label)}</option>`).join('')}</select>`;
   if(operation==='remove') fields+=`<p>Remove <strong>${escape(name)}</strong> from this Lens? This adds a placement mask; retained records and other authors' views are not erased.</p>`;
   if(operation==='restorePlacement') fields+=`<p>Restore the locally remembered placement <strong>${escape(state.removed.name)}</strong> in ${escape(state.config.mounts.find(m=>m.id===state.removed.folder)?.label??short(state.removed.folder))}? The SDK will revalidate the retained File and Name.</p>`;
   if(operation==='restoreContents') fields+=field('Historical Record ID · verified against this File before signing','record',record??'');
-  $('editor-fields').innerHTML=fields; $('editor-submit').textContent=`Sign ${operation} locally`;
+  $('editor-fields').innerHTML=fields; $('editor-submit').textContent=`Sign ${actionLabel(operation)} locally`;
   controls(); // A completed prior dialog must not leave the new operation disabled.
   $('editor').showModal(); $('editor-fields').querySelector('input,textarea,select')?.focus();
 }
 function download() {
-  const row=selectedRow(); if(!canOpen(row?.point)) throw new Error('No qualified selected bytes to download.');
-  const url=URL.createObjectURL(new Blob([ethers.getBytes(row.point.value.revision.document)],{type:'application/octet-stream'}));
+  const row=selectedRow(),bytes=verifiedBytes(row); if(!bytes) throw new Error('No qualified selected bytes to download.');
+  const url=URL.createObjectURL(new Blob([bytes],{type:'application/octet-stream'}));
   const link=document.createElement('a'); link.href=url; link.download=row.name?.knowledge==='PRESENT'?row.name.value:`${row.file}.bin`;
   link.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
@@ -328,7 +379,8 @@ document.addEventListener('click',event=>{
   if(state.paths&&!routeCurrent(state.navigation)){handleRoute();return;}
   const action=button.dataset.action;
   if(action==='close') { $('editor').close(); return; }
-  if(action==='select') {state.selected=button.dataset.position;renderDetail();renderRows();controls();return;}
+  if(action==='select') {clearContent();state.selected=button.dataset.position;renderDetail();renderRows();controls();return;}
+  if(action==='openContent'){openContent().catch(error=>notice(error.message,'error'));return;}
   if(['create','createDirectory','edit','rename','move','remove','restorePlacement','restoreContents'].includes(action)) {openEditor(action,button.dataset.record);return;}
   run(async navigation=>{
     if(action==='connect') await connect();
@@ -345,7 +397,8 @@ document.addEventListener('click',event=>{
     if(action==='addTag'||action==='removeTag') {
       const concept=$('tag-concept').value.trim(),scope=$('tag-scope').value;
       if(!concept) throw new Error('Enter the exact tag concept text first.');
-      const outcome=await write(action,{file:selectedRow().file,scope,concept:ethers.id(concept)});
+      const tag=hasCarriers()?(/^0x[0-9a-f]{64}$/i.test(concept)?{concept}:{conceptLabel:concept,conceptNamespace:state.config.manifest.folder}):{concept:ethers.id(concept)};
+      const outcome=await write(action,{file:selectedRow().file,scope,...tag});
       checkRoute(navigation);
       if(outcome.status==='EFFECTS_VERIFIED') {
         state.filterConcept=concept; $('filter-concept').value=concept;await refresh();
@@ -362,7 +415,17 @@ $('editor-form').addEventListener('submit',event=>{
       checkRoute(navigation);let args={...values,file:row?.file,folder:job.folder};
       if(operation==='create'||operation==='createDirectory') args.salt=ethers.hexlify(ethers.randomBytes(32));
       if(state.paths&&operation==='create'){
-        const upload=$('field-upload')?.files?.[0];if(upload){if(upload.size>8160)throw Error('Inline prototype upload limit is 8160 bytes.');args.document=new Uint8Array(await upload.arrayBuffer());}
+        const upload=$('field-upload')?.files?.[0],external=hasCarriers()&&values.carriage==='external',encrypted=!!values.encryptionKey;
+        const limit=(external?1048576:8160)-(encrypted?16:0);
+        if(upload){if(upload.size>limit)throw Error(`This storage choice supports at most ${limit} file bytes.`);args.document=new Uint8Array(await upload.arrayBuffer());checkRoute(navigation);}
+        if(hasCarriers()){
+          const bytes=upload?args.document:ethers.toUtf8Bytes(args.document);if(bytes.length>limit)throw Error(`This storage choice supports at most ${limit} file bytes.`);
+          const carrier=external?1:0;
+          const payload=encrypted?await state.paths.content.encryptContent(bytes,ethers.getBytes(values.encryptionKey.startsWith('0x')?values.encryptionKey:'0x'+values.encryptionKey),{carrier}):{bytes,descriptor:await state.paths.content.describe(bytes,{carrier})};
+          checkRoute(navigation);delete args.encryptionKey;
+          if(external){await state.paths.content.storeRawBytes(payload.bytes,{origin:state.config.carrierOrigin,maxBytes:1048576,timeoutMs:5000});checkRoute(navigation);}
+          args.content=external?{descriptor:payload.descriptor}:payload;
+        }
       }
       if(state.paths&&operation==='move'){const {route}=await destinationRoute(values.destinationPath,undefined,navigation);args.toFolder=route.target;}
       if(operation==='rename'||operation==='move') args={...args,fromName:row.name.value,fromFolder:row.folder};
@@ -402,6 +465,7 @@ await run(async()=>{
     $('create').insertAdjacentHTML('beforebegin','<button id="create-directory" data-action="createDirectory" data-write>＋ New directory</button>');
     document.querySelector('.lab-pill').textContent='GUARDED DIRECTORY LAB · LOCAL';
     document.querySelector('.about').innerHTML='<summary>About this experiment</summary><p>Private local-test typed Directory graph, not a globally acyclic tree. Exact lowercase ASCII paths are Lens-relative routes; aliases and mixed-author cycles are possible. Breadcrumbs are not universal parent ownership. Source/destination guards freeze known positions, not unseen names. Required profile administration remains trusted.</p><p>Inline file bytes only: new files up to 8160 bytes, edits up to 8128. Downloads are inert and exact. No carrier, encryption, production wallet, portable state proof, public deployment, or all-in chain-fee claim.</p>';
+    if(hasCarriers())document.querySelector('.about').innerHTML='<summary>About this experiment</summary><p>Guarded Directory graph with exact byte carriers and retained Concept labels. New inline carriers: 8160 stored bytes, with a checked digest header. External raw SHA-256: up to 1 MiB, explicit origin permission per open, no credentials or redirects. Only decoded bounded static PNG previews. Existing legacy inline revisions keep their original meanings.</p><p>Encryption uses AES-GCM; public names, metadata and plaintext commitments still leak information. No private directory enumeration, key distribution/recovery, production wallet, global tree, portable source-state proof, public deployment or all-in fee guarantee.</p>';
   }
   state.prefix=`efs-compact:${state.config.manifest.chainId}:${state.config.manifest.contracts.ledger.address}:`;
   state.economics=state.config.economics ? structuredClone(state.config.economics):null;
