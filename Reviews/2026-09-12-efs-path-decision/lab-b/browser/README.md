@@ -11,7 +11,11 @@ is then CREATE + PUBLISH, not a magic mounted hash. Config anchors only that
 root, never child labels or a directory inventory. Ctrl-C closes both servers.
 
 Select a Directory row, then **Open directory**. Breadcrumbs and the `#/...` URL
-are exact Lens-relative navigation routes, re-resolved on refresh/Lens changes.
+are exact Lens-relative navigation routes, re-resolved on refresh/Lens changes,
+direct hash edits and browser back/forward. Superseded reads cannot replace the
+current view; a route change closes the old write dialog and prevents any not-yet
+broadcast transaction from that dialog. Already broadcast actions remain in Local
+activity for reconciliation. Malformed routes refuse navigation, not infer empty.
 They are not parent ownership. The new dialog creates directories; moving uses
 an exact destination path with verified child browsing. An occupied selected
 destination or mask requires explicit replacement confirmation before signing.
@@ -50,16 +54,26 @@ typed parents/targets/self-link rejection while attached; malicious administrati
 remains outside that posture. No Core growth, portable source-state proof,
 production wallet, hosted release, fee guarantee or joined-page/scale claim.
 
-Tests: `browser/compact-paths.test.mjs`, `browser/directory.integration.test.mjs`,
+Tests: `browser/compact-paths.test.mjs`, `browser/directory-routing.test.mjs`, `browser/directory.integration.test.mjs`,
 and `test/FilesDirectoryProfile.t.sol`. The separate entrypoint loads new modules;
 the live legacy `app.mjs` imports none of them and its old allowlist is unchanged.
+
+## Legacy explicit-mount runner only
+
+Everything below describes `script/compact-browser.mjs`, the earlier unguarded,
+explicit-mount experiment, including its historical test commands and limitations.
+It is **not** the guarded Directory runner above. Toolchain setup is shared; after
+building the artifacts, select `node script/directory-browser.mjs` for Task 4A and
+use the Directory tests listed above. The preflight-only, synthetic-Prague and
+direct-deployment limitations below belong to the legacy runner, not the guarded
+profile's separately accepted evidence.
 
 September 14, 2026. Disposable integration, not production SDK or protocol bytes.
 This screen uses compact B, not the earlier fuller-model browser. Filenames,
 content, selection and tags are read from the deployed contracts; configuration
 contains no authoritative filename map or file data. No `/api/files` service.
 
-## Run locally
+### Run locally — legacy only
 
 From this code worktree's root:
 
@@ -84,7 +98,7 @@ wallet to this experiment. The local key route is a demo facility, not a hosted
 production API or an authorization system. The native modules are static SPA
 code; a standalone key-free distribution/wallet adapter is not packaged here.
 
-## Try it
+### Try it — legacy only
 
 1. Open `meeting.txt`, switch **Alice → Bob** / **Bob → Alice**, then
    **Advanced: conflict review (diagnostic)**. Ordered Lenses take the first
@@ -118,7 +132,7 @@ does **not** establish real-wallet popup count, sponsorship or account-abstracti
 Receipt matching establishes RPC-observed direct transaction attribution, not
 a state proof. Canonical EFS effect reconciliation remains a separate check.
 
-## Measure and test
+### Measure and test — legacy only
 
 ```sh
 node script/compact-browser.mjs --measure
@@ -142,7 +156,7 @@ tags; lifecycle operations; an unrelated approval-and-publication contract;
 paid reads with 1/8/32/64 authors; and 128 renames of one file beside four other
 live files. It is not a 1,000-live-entry, global-tag or worldwide-scale result.
 
-## Deliberate limits
+### Deliberate limits — legacy only
 
 - Explicit Files and Archive mounts, not a nested Directory/path profile.
 - ASCII lowercase names, inline bytes, 8192-byte record bodies (prefix included).

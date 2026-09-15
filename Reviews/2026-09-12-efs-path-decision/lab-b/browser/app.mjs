@@ -9,7 +9,8 @@ const json = value => JSON.stringify(value,null,2);
 const pretty = value => Number(value).toLocaleString('en-US');
 const state = {config:null,sdk:null,folder:null,context:null,page:null,rows:[],selected:null,busy:false,
   keys:null,wallet:null,filterConcept:'',history:{},removed:null,entries:[],economics:null,editedEconomics:false,
-  rpc:{calls:0,bytes:0,ms:0,errors:0},operation:null,prefix:null,storageIssue:null,paths:null,segments:[],route:null};
+  rpc:{calls:0,bytes:0,ms:0,errors:0},operation:null,prefix:null,storageIssue:null,paths:null,segments:[],route:null,
+  navigation:null,readGeneration:0,routeLoading:false};
 
 function notice(message,kind='') {
   $('notice').textContent=message; $('notice').className=`notice ${kind}`; $('notice').hidden=!message;
@@ -23,7 +24,11 @@ function authorName(address) {
     ||(state.paths&&ethers.zeroPadValue(v,32).toLowerCase()===address?.toLowerCase()))?.[0] ?? short(address);
 }
 function selectedRow() { return state.rows.find(row=>row.position===state.selected); }
-function writesAllowed() { return !!state.wallet && !state.busy && $('lens').value!=='conflict' && (!state.paths||!!state.folder); }
+function routeCurrent(navigation) { return !state.paths || (navigation===state.navigation && navigation?.hash===location.hash); }
+function checkRoute(navigation) {
+  if(!routeCurrent(navigation)) throw Object.assign(new Error('Route changed; obsolete work cancelled.'),{code:'ROUTE_CHANGED'});
+}
+function writesAllowed() { return !!state.wallet && !state.busy && $('lens').value!=='conflict' && (!state.paths||(routeCurrent(state.navigation)&&state.navigation.ready&&!!state.folder)); }
 function readStored(key,fallback) {
   const raw=localStorage.getItem(state.prefix+key);
   return raw === null ? fallback : JSON.parse(raw);
@@ -53,18 +58,19 @@ async function rpc(method,params=[]) {
 }
 async function run(task) {
   if(state.busy) return;
+  const navigation=state.navigation;
   state.busy=true; controls();
-  try { await task(); }
-  catch(error) { notice(error.message ?? String(error),'error'); }
+  try { await task(navigation); }
+  catch(error) { if(error.code!=='ROUTE_CHANGED'&&(routeCurrent(navigation)||(!navigation&&!state.navigation))) notice(error.message ?? String(error),'error'); }
   finally { state.busy=false; render(); }
 }
 function controls() {
-  document.querySelectorAll('[data-action]').forEach(button=>{ button.disabled=state.busy || !state.sdk || button.dataset.blocked==='true'; });
+  document.querySelectorAll('[data-action]').forEach(button=>{ button.disabled=state.busy || state.routeLoading || !state.sdk || button.dataset.blocked==='true'; });
   $('create').disabled=!writesAllowed(); $('restore').disabled=!writesAllowed() || !state.removed;
   $('signer').disabled=!state.keys || state.busy; $('lens').disabled=state.busy || !state.sdk;
   $('connect').hidden=!!state.wallet; $('disconnect').hidden=!state.wallet;
   $('signer-status').textContent=state.wallet ? `${$('signer').value} · disposable test signer` : 'Guest · read only';
-  $('editor-submit').disabled=state.busy || !!state.operation?.pending;
+  $('editor-submit').disabled=state.busy || state.routeLoading || !!state.operation?.pending;
   document.querySelectorAll('[data-write]').forEach(button=>{button.disabled=!writesAllowed() || button.dataset.blocked==='true';});
 }
 function remember(point) {
@@ -80,39 +86,66 @@ function remember(point) {
   try { store('witnessed',state.history); } catch { /* Reads still work without local history storage. */ }
 }
 async function refresh(continuing=false) {
+  if(state.paths&&!routeCurrent(state.navigation)) return handleRoute();
+  if(state.navigation?.invalid)throw state.navigation.invalid;
+  const navigation=state.navigation,generation=++state.readGeneration;
+  const check=()=>{checkRoute(navigation);if(generation!==state.readGeneration)throw Object.assign(new Error('Observation superseded.'),{code:'ROUTE_CHANGED'});};
+  const lens=authors(),policy=$('lens').value==='conflict'?'no-tiebreak':'ordered';
+  let context=state.context,page=state.page,folder=state.folder,route=state.route;
+  if(state.paths){state.routeLoading=true;navigation.ready=false;}
   notice(continuing?'Continuing the same pinned folder traversal…':'Reading a fresh pinned observation…');
-  if(!continuing) {
-    state.context=null; state.page=null; state.rows=[]; renderRows(); state.context=await state.sdk.pin();
-    if(state.paths){
-      state.route=await state.paths.resolvePath({sdk:state.sdk,root:state.config.manifest.folder,segments:state.segments,authors:authors(),context:state.context,budget:64});
-      if(state.route.status!=='PRESENT'||state.route.kind!=='directory'){
-        state.folder=null;state.selected=null;
-        state.page={basis:state.context,knowledge:state.route.status==='PRESENT'?'INVALID':state.route.status,coverage:'PARTIAL',value:[],nameCoverage:'PARTIAL'};
-        notice(`Path ${state.paths.encodePath(state.segments)}: ${state.route.status}. Use a breadcrumb to return; no empty folder is inferred.`,'warning');return;
+  try {
+    if(!continuing) {
+      state.context=null; state.page=null; state.rows=[]; render(); context=await state.sdk.pin();check();
+      if(state.paths){
+        route=await state.paths.resolvePath({sdk:state.sdk,root:state.config.manifest.folder,segments:state.segments,authors:lens,context,budget:64});check();
+        if(route.status!=='PRESENT'||route.kind!=='directory'){
+          state.folder=null;state.selected=null;state.route=route;state.context=context;
+          state.page={basis:context,knowledge:route.status==='PRESENT'?'INVALID':route.status,coverage:'PARTIAL',value:[],nameCoverage:'PARTIAL'};
+          notice(`Path ${state.paths.encodePath(state.segments)}: ${route.status}. Use a breadcrumb to return; no empty folder is inferred.`,'warning');return;
+        }
+        folder=route.target;
       }
-      state.folder=state.route.target;
     }
-  }
-  let continuation=continuing ? state.page?.continuation : undefined;
-  // Finite traversal; any retained continuation remains visibly partial.
-  for(let pages=0;pages<32;pages++) {
-    state.page=await state.sdk.listFolder({folder:state.folder,authors:authors(),budget:64,context:state.context,continuation});
-    continuation=state.page.continuation;
-    if(!continuation) break;
-  }
-  const concept=state.filterConcept ? ethers.id(state.filterConcept) : ethers.ZeroHash;
-  const rows=[];
-  for(const row of state.page.value) {
-    let point;
-    if(state.paths&&row.kind!=='file'){rows.push({...row,point:{knowledge:row.knowledge,coverage:row.knowledge==='PRESENT'?'COMPLETE':'PARTIAL',reason:row.kind==='directory'?'Directory · no File HEAD required':'Target kind unavailable'}});continue;}
-    try { point=await state.sdk.readFile({file:row.file,authors:authors(),concept,context:state.context,
-      policy:$('lens').value==='conflict'?'no-tiebreak':'ordered'}); remember(point); }
-    catch(error) { point={knowledge:'UNKNOWN',coverage:'PARTIAL',reason:error.message,value:{file:row.file}}; }
-    rows.push({...row,point});
-  }
-  state.rows=rows;
-  if(!selectedRow()) state.selected=null;
-  notice('');
+    let continuation=continuing ? page?.continuation : undefined;
+    // Finite traversal; any retained continuation remains visibly partial.
+    for(let pages=0;pages<32;pages++) {
+      page=await state.sdk.listFolder({folder,authors:lens,budget:64,context,continuation});check();
+      continuation=page.continuation;
+      if(!continuation) break;
+    }
+    const concept=state.filterConcept ? ethers.id(state.filterConcept) : ethers.ZeroHash;
+    const rows=[];
+    for(const row of page.value) {
+      let point;
+      if(state.paths&&row.kind!=='file'){rows.push({...row,point:{knowledge:row.knowledge,coverage:row.knowledge==='PRESENT'?'COMPLETE':'PARTIAL',reason:row.kind==='directory'?'Directory · no File HEAD required':'Target kind unavailable'}});continue;}
+      try { point=await state.sdk.readFile({file:row.file,authors:lens,concept,context,policy});check(); remember(point); }
+      catch(error) { check();point={knowledge:'UNKNOWN',coverage:'PARTIAL',reason:error.message,value:{file:row.file}}; }
+      rows.push({...row,point});
+    }
+    check();Object.assign(state,{rows,context,page,folder,route});
+    if(state.paths)navigation.ready=true;
+    if(!selectedRow()) state.selected=null;
+    notice('');
+  } finally { if(routeCurrent(navigation)&&generation===state.readGeneration){state.routeLoading=false;render();} }
+}
+
+// URL changes bypass the action lock: old bounded RPCs may finish, but their
+// generation and exact hash can no longer render or authorize this route.
+function handleRoute() {
+  if(!state.paths||!state.sdk)return;
+  if(routeCurrent(state.navigation))return state.navigation.pending;
+  const navigation={hash:location.hash,ready:false};state.navigation=navigation;
+  Object.assign(state,{folder:null,context:null,page:null,rows:[],selected:null,route:null,segments:[],operation:null,routeLoading:false});
+  $('editor').close();
+  const refuse=error=>{
+    if(!routeCurrent(navigation)||error.code==='ROUTE_CHANGED')return;
+    state.page={knowledge:error.code==='INVALID_PATH'?'INVALID':'UNKNOWN',coverage:'PARTIAL',value:[],nameCoverage:'PARTIAL'};
+    notice(`Path ${state.page.knowledge}: ${error.message}. No qualified directory or empty folder is inferred.`,'warning');render();
+  };
+  try { state.segments=state.paths.decodePath(navigation.hash?navigation.hash.slice(1):'/'); }
+  catch(error){error.code='INVALID_PATH';navigation.invalid=error;refuse(error);return;}
+  navigation.pending=refresh().catch(refuse);return navigation.pending;
 }
 function renderRows() {
   const view=folderState(state.page);
@@ -126,7 +159,7 @@ function renderRows() {
     return `<button class="file-row ${state.selected===row.position?'active':''}" data-action="select" data-position="${escape(row.position)}" aria-pressed="${state.selected===row.position}"><span class="file-icon" aria-hidden="true">${row.kind==='directory'?'▱':'▤'}</span><span class="row-main"><span class="filename">${escape(name)}</span><span class="row-subtitle">${row.kind==='directory'?'Directory':row.kind==='unknown'?'Unknown kind':'File'} ${escape(short(row.file))}</span></span><span class="row-state">${revision?escape(authorName(point.value.selection.author)):`<span class="badge warning">${escape(point?.knowledge??'UNKNOWN')}</span>`}<span class="row-subtitle">${revision?`${pretty(ethers.getBytes(revision.document).length)} bytes · #${revision.firstAdmission}`:escape(point?.reason??'No selected bytes')}</span></span></button>`;
   }).join('') || `<div class="empty-list">${state.busy&&!state.page?'Reading from the Ledger…':escape(view.kind==='empty'?view.label:state.page?.coverage==='COMPLETE' && view.kind==='complete' ? 'No matches in this complete observed folder.': 'No rows to show yet. This is not evidence of an empty folder.')}</div>`;
   $('continue').hidden=!state.page?.continuation;
-  $('basis').textContent=state.page ? `RPC-observed · block ${state.page.basis.blockNumber} · admission ${state.page.basis.admission} · ${short(state.page.basis.blockHash)}` : 'No qualified observation yet';
+  $('basis').textContent=state.page?.basis ? `RPC-observed · block ${state.page.basis.blockNumber} · admission ${state.page.basis.admission} · ${short(state.page.basis.blockHash)}` : 'No qualified observation yet';
 }
 function textPreview(documentBytes) {
   try { return {text:ethers.toUtf8String(documentBytes),utf8:true}; }
@@ -174,6 +207,7 @@ function renderCosts() {
     <div class="rpc-line">RPC work, not gas · ${pretty(state.rpc.calls)} calls · ${(state.rpc.bytes/1024).toFixed(1)} KiB response bodies · ${(state.rpc.ms/1000).toFixed(2)}s summed request time · ${state.rpc.errors} errors<br>Page session only. These reads do not spend transaction gas.</div>`;
 }
 function render() {
+  if(state.paths&&state.sdk&&!routeCurrent(state.navigation)){handleRoute();return;}
   if(!state.config) { controls(); return; }
   $('mounts').innerHTML=state.paths?
     [{label:'Files',segments:[]},...state.segments.map((label,i)=>({label,segments:state.segments.slice(0,i+1)}))].map(item=>`<button data-action="path" data-path="${escape(state.paths.encodePath(item.segments))}" title="Lens-relative navigation route">${escape(item.label)} /</button>`).join(''):
@@ -193,24 +227,30 @@ async function connect() {
   state.keys=keys; state.wallet=wallet;
   notice('Disposable local-test signer enabled. No real wallet was connected.');
 }
-async function sendTransaction(transaction) {
+async function sendTransaction(transaction,navigation,wallet=state.wallet) {
+  checkRoute(navigation);
   if(BigInt(await rpc('eth_chainId'))!==31337n) throw new Error('Chain changed; no transaction signed.');
-  const from=state.wallet.address;
+  checkRoute(navigation);const from=wallet.address;
   const [nonce,price,estimate]=await Promise.all([rpc('eth_getTransactionCount',[from,'pending']),rpc('eth_gasPrice'),rpc('eth_estimateGas',[{...transaction,from}])]);
+  checkRoute(navigation);
   const measured=BigInt(estimate), cap=state.paths?16777216n:30000000n;
   if(measured>cap) throw new Error(`Estimated gas ${measured} exceeds this execution profile's ${cap} transaction cap. No broadcast.`);
   const padded=(measured*120n+99n)/100n;
-  const raw=await state.wallet.signTransaction({...transaction,chainId:31337,type:0,nonce:Number(BigInt(nonce)),gasPrice:BigInt(price),gasLimit:padded>cap?cap:padded});
+  const raw=await wallet.signTransaction({...transaction,chainId:31337,type:0,nonce:Number(BigInt(nonce)),gasPrice:BigInt(price),gasLimit:padded>cap?cap:padded});
+  checkRoute(navigation);
   return rpc('eth_sendRawTransaction',[raw]);
 }
-async function write(operation,args) {
+async function write(operation,args,navigation=state.navigation) {
+  checkRoute(navigation);
   if(!state.wallet||$('lens').value==='conflict') throw new Error('Choose an ordered Lens and explicitly enable a disposable signer first.');
+  if(state.paths&&!navigation?.ready)throw Error('A qualified directory observation is required before signing.');
+  const wallet=state.wallet,lens=authors();
   notice(`Preparing exact ${operation} action…`);
   if(state.paths){
-    const context=await state.sdk.pin();args={...args,context};
-    if(operation==='move'&&args.destinationPath){const {route}=await destinationRoute(args.destinationPath,context);args.toFolder=route.target;}
+    const context=await state.sdk.pin();checkRoute(navigation);args={...args,context};
+    if(operation==='move'&&args.destinationPath){const {route}=await destinationRoute(args.destinationPath,context,navigation);args.toFolder=route.target;}
     if(['create','createDirectory','rename','move','restorePlacement'].includes(operation)){
-      const destination=await state.sdk.readPlacement({folder:args.toFolder??args.folder,name:args.name,authors:authors(),context});
+      const destination=await state.sdk.readPlacement({folder:args.toFolder??args.folder,name:args.name,authors:lens,context});checkRoute(navigation);
       if(!['PRESENT','MASKED','ABSENT'].includes(destination.knowledge))throw Error(`Destination is ${destination.knowledge}; refusing to sign.`);
       if(destination.knowledge!=='ABSENT'){
         const s=destination.value.selection;
@@ -219,17 +259,19 @@ async function write(operation,args) {
       }
     }
   }
-  const plan=await state.sdk.prepare({operation,author:state.wallet.address,authors:authors(),...args});
-  const signed=await state.sdk.authorize(plan,digest=>state.wallet.signingKey.sign(digest).serialized);
+  const plan=await state.sdk.prepare({operation,author:wallet.address,authors:lens,...args});checkRoute(navigation);
+  const signed=await state.sdk.authorize(plan,digest=>{checkRoute(navigation);return wallet.signingKey.sign(digest).serialized;});checkRoute(navigation);
   // submit can throw AFTER the external broadcast (for example quota/storage
   // failure saving its response). Keep the exact plan latched before crossing it.
   if($('editor').open && state.operation) {state.operation.pending=true;state.operation.planId=plan.id;}
-  const submission=await state.sdk.submit(signed,sendTransaction);
+  const submission=await state.sdk.submit(signed,transaction=>sendTransaction(transaction,navigation,wallet));
   const outcome=await state.sdk.reconcile(submission.id);
+  if(!routeCurrent(navigation))return outcome;
   if(outcome.status==='EFFECTS_VERIFIED') {
     if(operation==='remove') {state.removed={file:args.file,name:args.name,folder:args.folder};store('removed',state.removed);}
     if(operation==='restorePlacement') {state.removed=null;store('removed',null);}
     await refresh();
+    checkRoute(navigation);
     notice(`${operation}: EFFECTS_VERIFIED — canonical effect read-back matched. RPC-observed, not a state proof.`);
   } else notice(`${operation}: ${outcome.status}. No success is claimed. Reconcile the saved plan in Local activity; do not sign a replacement blindly.${outcome.error?` ${outcome.error}`:''}`,'warning');
   return outcome;
@@ -238,8 +280,9 @@ function field(label,name,value='',type='input') {
   return `<label class="field-label" for="field-${name}">${label}</label>${type==='textarea'?`<textarea id="field-${name}" name="${name}">${escape(value)}</textarea>`:`<input id="field-${name}" name="${name}" value="${escape(value)}" required ${name==='name'?'pattern="[a-z0-9._-]+" maxlength="255"':''}>`}`;
 }
 function openEditor(operation,record) {
+  if(state.paths&&(!routeCurrent(state.navigation)||!state.navigation?.ready))return;
   const row=selectedRow(), name=row?.name?.value??'';
-  state.operation={operation,row,record}; $('editor-error').textContent='';
+  state.operation={operation,row,record,navigation:state.navigation,folder:state.folder}; $('editor-error').textContent='';
   const titles={create:'New file',createDirectory:'New directory',edit:'Edit contents',rename:'Rename placement',move:state.paths?'Move to a verified directory':'Move to another mount',remove:'Remove this placement',restorePlacement:'Restore last placement',restoreContents:'Restore historical contents'};
   $('editor-title').textContent=titles[operation];
   $('editor-help').textContent=`Signed by ${$('signer').value}, using ${$('lens').selectedOptions[0].textContent}. One atomic local-test action batch; no real funds.`;
@@ -261,41 +304,45 @@ function download() {
   const link=document.createElement('a'); link.href=url; link.download=row.name?.knowledge==='PRESENT'?row.name.value:`${row.file}.bin`;
   link.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-async function navigate(segments){state.segments=segments;state.selected=null;history.replaceState(null,'','#'+state.paths.encodePath(segments));await refresh();}
-async function destinationRoute(path,pinned){
+async function navigate(segments){history.pushState(null,'','#'+state.paths.encodePath(segments));await handleRoute();}
+async function destinationRoute(path,pinned,navigation=state.navigation){
   const context=pinned??await state.sdk.pin(),route=await state.paths.resolvePath({sdk:state.sdk,root:state.config.manifest.folder,segments:state.paths.decodePath(path),authors:authors(),context,budget:64});
+  checkRoute(navigation);
   if(route.status!=='PRESENT'||route.kind!=='directory')throw Error(`Destination ${route.status} (${route.kind}); a verified Directory is required.`);
   return {context,route};
 }
-async function browseDestination(path){
-  $('field-destinationPath').value=path;const {context,route}=await destinationRoute(path);
+async function browseDestination(path,navigation){
+  $('field-destinationPath').value=path;const {context,route}=await destinationRoute(path,undefined,navigation);
   const page=await state.sdk.listFolder({folder:route.target,authors:authors(),context,budget:64});
+  checkRoute(navigation);
   $('destination-children').innerHTML=`<p>Verified ${escape(path)} · ${escape(short(route.target))}. ${page.coverage==='COMPLETE'?'Complete observed page.':'Partial children; enter an exact path to resolve it.'}</p><button type="button" data-action="destination" data-path="/">Files /</button>`+
     page.value.filter(r=>r.kind==='directory'&&r.name.knowledge==='PRESENT').map(r=>`<button type="button" data-action="destination" data-path="${escape(state.paths.encodePath([...route.segments,r.name.value]))}">▱ ${escape(r.name.value)}</button>`).join('');
 }
 
 document.addEventListener('click',event=>{
   const button=event.target.closest('[data-action]'); if(!button||button.disabled)return;
+  if(state.paths&&!routeCurrent(state.navigation)){handleRoute();return;}
   const action=button.dataset.action;
   if(action==='close') { $('editor').close(); return; }
   if(action==='select') {state.selected=button.dataset.position;renderDetail();renderRows();controls();return;}
   if(['create','createDirectory','edit','rename','move','remove','restorePlacement','restoreContents'].includes(action)) {openEditor(action,button.dataset.record);return;}
-  run(async()=>{
+  run(async navigation=>{
     if(action==='connect') await connect();
     if(action==='disconnect') {state.keys=null;state.wallet=null;notice('Guest mode. Demo keys removed from this screen’s active state.');}
     if(action==='mount') {state.folder=button.dataset.folder;state.selected=null;await refresh();}
     if(action==='path')await navigate(state.paths.decodePath(button.dataset.path));
     if(action==='enter')await navigate([...state.segments,selectedRow().name.value]);
-    if(action==='destination')await browseDestination(button.dataset.path??$('field-destinationPath').value);
+    if(action==='destination')await browseDestination(button.dataset.path??$('field-destinationPath').value,navigation);
     if(action==='refresh') await refresh();
     if(action==='continue') await refresh(true);
     if(action==='filter') {state.filterConcept=$('filter-concept').value.trim();await refresh();}
     if(action==='download') download();
-    if(action==='reconcile') {const outcome=await state.sdk.reconcile(button.dataset.id);await refresh();notice(`Saved plan: ${outcome.status}. ${outcome.status==='EFFECTS_VERIFIED'?'Canonical effects matched.':'No success claimed; no replacement signature was made.'}`,outcome.status==='EFFECTS_VERIFIED'?'':'warning');}
+    if(action==='reconcile') {const outcome=await state.sdk.reconcile(button.dataset.id);checkRoute(navigation);await refresh();checkRoute(navigation);notice(`Saved plan: ${outcome.status}. ${outcome.status==='EFFECTS_VERIFIED'?'Canonical effects matched.':'No success claimed; no replacement signature was made.'}`,outcome.status==='EFFECTS_VERIFIED'?'':'warning');}
     if(action==='addTag'||action==='removeTag') {
       const concept=$('tag-concept').value.trim(),scope=$('tag-scope').value;
       if(!concept) throw new Error('Enter the exact tag concept text first.');
       const outcome=await write(action,{file:selectedRow().file,scope,concept:ethers.id(concept)});
+      checkRoute(navigation);
       if(outcome.status==='EFFECTS_VERIFIED') {
         state.filterConcept=concept; $('filter-concept').value=concept;await refresh();
       }
@@ -304,25 +351,29 @@ document.addEventListener('click',event=>{
 });
 $('editor-form').addEventListener('submit',event=>{
   event.preventDefault(); if(state.busy)return;
-  const values=Object.fromEntries(new FormData(event.target)),{operation,row}=state.operation;
+  if(!state.operation)return;
+  const job=state.operation,values=Object.fromEntries(new FormData(event.target)),{operation,row,navigation}=job;
   run(async()=>{
     try {
-      let args={...values,file:row?.file,folder:state.folder};
+      checkRoute(navigation);let args={...values,file:row?.file,folder:job.folder};
       if(operation==='create'||operation==='createDirectory') args.salt=ethers.hexlify(ethers.randomBytes(32));
       if(state.paths&&operation==='create'){
         const upload=$('field-upload')?.files?.[0];if(upload){if(upload.size>8160)throw Error('Inline prototype upload limit is 8160 bytes.');args.document=new Uint8Array(await upload.arrayBuffer());}
       }
-      if(state.paths&&operation==='move'){const {route}=await destinationRoute(values.destinationPath);args.toFolder=route.target;}
+      if(state.paths&&operation==='move'){const {route}=await destinationRoute(values.destinationPath,undefined,navigation);args.toFolder=route.target;}
       if(operation==='rename'||operation==='move') args={...args,fromName:row.name.value,fromFolder:row.folder};
       if(operation==='remove') args.name=row.name.value;
       if(operation==='restorePlacement') args={...state.removed};
-      const outcome=await write(operation,args);
+      const outcome=await write(operation,args,navigation);checkRoute(navigation);
+      if(state.operation!==job)return;
       if(outcome.status==='EFFECTS_VERIFIED') $('editor').close();
       else {state.operation.pending=true;$('editor-error').textContent=`${outcome.status}. Close this dialog and reconcile the saved plan. This dialog cannot re-sign the uncertain action.`;}
-    } catch(error) { $('editor-error').textContent=error.message; throw error; }
+    } catch(error) { if(state.operation===job&&routeCurrent(navigation))$('editor-error').textContent=error.message; throw error; }
   });
 });
 $('search').addEventListener('input',()=>{renderRows();controls();});
+addEventListener('hashchange',handleRoute);
+addEventListener('popstate',handleRoute);
 $('lens').addEventListener('change',()=>run(()=>refresh()));
 $('filter-scope').addEventListener('change',()=>{renderRows();controls();});
 $('signer').addEventListener('change',()=>run(async()=>{
@@ -344,7 +395,6 @@ await run(async()=>{
   state.config=await response.json(); state.folder=state.config.manifest.folder;
   if(state.config.manifest.filesProfile==='typed-directory-v1'){
     state.paths=globalThis.efsCompactDirectoryEntry;if(!state.paths)throw Error('Typed profile requires the separately served guarded entrypoint.');
-    state.segments=state.paths.decodePath(location.hash?location.hash.slice(1):'/');
     $('create').insertAdjacentHTML('beforebegin','<button id="create-directory" data-action="createDirectory" data-write>＋ New directory</button>');
     document.querySelector('.lab-pill').textContent='GUARDED DIRECTORY LAB · LOCAL';
     document.querySelector('.about').innerHTML='<summary>About this experiment</summary><p>Private local-test typed Directory graph, not a globally acyclic tree. Exact lowercase ASCII paths are Lens-relative routes; aliases and mixed-author cycles are possible. Breadcrumbs are not universal parent ownership. Source/destination guards freeze known positions, not unseen names. Required profile administration remains trusted.</p><p>Inline file bytes only: new files up to 8160 bytes, edits up to 8128. Downloads are inert and exact. No carrier, encryption, production wallet, portable state proof, public deployment, or all-in chain-fee claim.</p>';
