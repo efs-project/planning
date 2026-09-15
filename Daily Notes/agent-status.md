@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-14
 
+- @pm (harness codex, session devcon-spine-20260914): Drafted the accepted Devcon talk's story, timed full-stack outline, evidence inventory and rehearsal plan; created the Tuesday 09:00 America/Chicago preparation reminder. EFS remains the running example, with separate absence and compromised-authority tests. / next: James records a two-minute opening; revalidate the bounded demo without changing product milestones or the submitted application.
+
 - @grants (harness codex, session arbitrum-registration-20260914): Recorded James's confirmation of online Buildathon registration in [[Grants/proposals]]. Existing EFS v1 plus one bounded enhancement remains the intended entry, separate from v2. Project creation and final submission are not yet confirmed; no external action or implementation performed. / next: inspect Create Project fields with James and prepare the entry.
 
 - @v2-pm (harness codex, session efs-warroom-query-runner-20260914-0800; bounded runner implementation/review): Shared signed query runner and raw audit implemented; root reproduced22/22 Node tests with the input-pinned v26 executable, and fixed/re-reviewed short-write evidence retention. Whole-plan and finite-launch review underway. / next: one sealed82transaction/25page paid comparison with independent replay, no repeated earlier suites or new normal-price claim; morning cutoff14:00UTC remains in force.

@@ -45,6 +45,22 @@ Ticket, visa, travel, and EFS participation follow-ups are in
 [[attendance-checklist]]. Keep sensitive travel and identity details out of this
 repository.
 
+## Presentation preparation
+
+First working draft created **2026-09-14**:
+
+- [[presentation-spine]]: the human story, full-stack speaking beats and the
+  audience's practical exercise. EFS is the running example; Uniswap provides
+  one brief interface-versus-protocol comparison.
+- [[presentation-evidence]]: sources, existing proof, open verification checks
+  and the bounded demo plan. Historical results are not new rehearsal results.
+- [[preparation-plan]]: early speaking practice, delivery checkpoints and the
+  active Tuesday 9:00 a.m. America/Chicago preparation reminder.
+
+The two questions are whether users can continue without the maintainer and
+whether they can refuse someone using the maintainer's compromised authority.
+The next step is a two-minute spoken opening, not another application rewrite.
+
 ## Acceptance completed
 
 The proposal was submitted before the conservative live-form cutoff. The final

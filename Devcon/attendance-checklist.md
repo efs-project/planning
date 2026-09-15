@@ -116,6 +116,9 @@ earlier requirements.
 
 - [ ] By **2026-09-22**, write the one-page story spine and a source-backed
   inventory of every EFS claim or demonstration the talk may use.
+  First drafts are in [[presentation-spine]] and [[presentation-evidence]] as
+  of **2026-09-14**. Review the story aloud and settle the demonstration scope
+  before marking this target complete; live evidence rechecks remain open.
 - [ ] By **2026-10-06**, have a complete first slide deck and demonstration draft,
   with the live-vs-recorded demonstration decision explicit.
 - [ ] By **2026-10-13**, perform the first full timed run and cut material that
@@ -124,3 +127,7 @@ earlier requirements.
   offline fallback, and test the presentation on a second computer.
 - [ ] By **2026-10-27**, freeze the travel copy, export redundant slide formats,
   and complete multiple timed rehearsals with the Q&A boundary included.
+
+[[preparation-plan]] holds the rehearsal routine and next action. A separate
+Devcon preparation reminder runs Tuesdays at **09:00 America/Chicago** in the
+presentation task. Start short speaking practice now, before the deck exists.
