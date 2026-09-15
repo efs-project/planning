@@ -10,6 +10,15 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**September15 — audit closeout is being implemented:**
+[[../../Reviews/2026-09-12-efs-path-decision/core-closeout-results-20260915|live closeout evidence]]
+tracks the six required packets. The valid-long-name callback failure and
+quadratic substring work are repaired and independently reviewed at`deb2d96`;
+the expensive worst-case32-row search remains a warm diagnostic, not a cheap
+paid-query claim. Coherent in-batch index-backed validation is now being
+implemented. Owner demo and production scope remain unchanged. Use this live
+ledger for current repair status; the audit below records the starting risks.
+
 **September 15 — whole-core audit finds four open limitations:**
 [[../../Reviews/2026-09-12-efs-path-decision/core-design-audit-20260915|the current audit and six-packet prototype finish line]]
 supersede treating the completed smaller passes as whole-prototype completion.

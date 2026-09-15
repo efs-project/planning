@@ -20,7 +20,7 @@
 - Preserve the public Type acceptance ABI and its pre-leaf interpretation. The new index callback phase is intentionally a changed execution dependency; old modules cannot silently qualify. Current rules may resolve `ledger.indexModule()`; rules deliberately pinning an old module retain that explicit meaning.
 - Conditional bytecode extraction is allowed only after measuring need: a small fixed linked library may perform bounded dispatch via DELEGATECALL to preserve Ledger as index caller. Its address/code identity must be recoverable and pinned by execution identity, with dependency mismatch failing closed. No arbitrary delegate target or privileged shared storage helper.
 
-## Task1: Ordered prefix maintenance with final invariants
+## Task 1: Ordered prefix maintenance with final invariants
 
 **Files:** `src/Interfaces.sol`, `src/Ledger.sol`, `src/ExecutionSlots.sol`, `src/IndexModule.sol`; callback overrides in `src/SelectiveReferenceIndexModule.sol`, Files profile/index files and fault fixtures; `test/UpgradeProxy.sol`; focused acceptance tests. Add `src/IndexDispatch.sol` only if measured runtime fit requires it. Evidence: `core-closeout-acceptance-20260915/`.
 
