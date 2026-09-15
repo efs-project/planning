@@ -1,0 +1,25 @@
+✖ bounded scale seed uses real transactions for live churn and contributing-author controls (481.482959ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3569.223084
+
+✖ failing tests:
+
+test at script/joined-harness.test.mjs:19:1
+✖ bounded scale seed uses real transactions for live churn and contributing-author controls (481.482959ms)
+  AssertionError [ERR_ASSERTION]: real seed returns its recipe and identities
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/joined-harness.test.mjs:22:3)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

@@ -1,0 +1,357 @@
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-JxeTpO/joined-cost-control.json
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-G6lo3x/joined-cost-control.json
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-IhTVQt/joined-cost-control.json
+{
+  "status": "PASS",
+  "reports": [
+    {
+      "variant": "legacy-baseline",
+      "path": "/var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-JxeTpO/joined-cost-control.json",
+      "observations": [
+        {
+          "label": "named-create-41B",
+          "operation": "create",
+          "gasUsed": "1626220",
+          "gasLimit": "15000000",
+          "calldataBytes": 2404,
+          "transactionHash": "0xf9052d7f1f4a82b77f04e7a9ef51ed02d9ee818751d102ab9bdff3382b0b5020",
+          "ms": 116.07441699999993,
+          "rpcCalls": 229,
+          "httpRequests": 229,
+          "requestBytes": 71033,
+          "responseBytes": 574161,
+          "actions": [
+            5,
+            1,
+            1,
+            3,
+            3
+          ],
+          "bodyLengths": [
+            0,
+            73,
+            12,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "edit-41B",
+          "operation": "edit",
+          "gasUsed": "761091",
+          "gasLimit": "15000000",
+          "calldataBytes": 1348,
+          "transactionHash": "0x3f121e4a79c5a26ee681cc300b6888fe0e8aad57622604336b08e7e2662155e1",
+          "ms": 102.537917,
+          "rpcCalls": 225,
+          "httpRequests": 225,
+          "requestBytes": 63567,
+          "responseBytes": 564231,
+          "actions": [
+            1,
+            3
+          ],
+          "bodyLengths": [
+            105,
+            0
+          ]
+        },
+        {
+          "label": "file-tag",
+          "operation": "addTag",
+          "gasUsed": "544718",
+          "gasLimit": "15000000",
+          "calldataBytes": 868,
+          "transactionHash": "0x13adf982923fbeb6206b5218f790500b2beb61462c43c3ffcf445de5f45c8dd1",
+          "ms": 89.09658300000001,
+          "rpcCalls": 216,
+          "httpRequests": 216,
+          "requestBytes": 56260,
+          "responseBytes": 557113,
+          "actions": [
+            3
+          ],
+          "bodyLengths": [
+            0
+          ]
+        },
+        {
+          "label": "revision-tag",
+          "operation": "addTag",
+          "gasUsed": "544706",
+          "gasLimit": "15000000",
+          "calldataBytes": 868,
+          "transactionHash": "0x7174364db05016fe24ce820c17085e712b5fecc623be71414f6320f0e54c6fa9",
+          "ms": 92.19633399999998,
+          "rpcCalls": 224,
+          "httpRequests": 224,
+          "requestBytes": 60196,
+          "responseBytes": 560377,
+          "actions": [
+            3
+          ],
+          "bodyLengths": [
+            0
+          ]
+        },
+        {
+          "label": "rename-fresh-name",
+          "operation": "rename",
+          "gasUsed": "818464",
+          "gasLimit": "15000000",
+          "calldataBytes": 1604,
+          "transactionHash": "0x1e333f26dde32f943f79a0bc07958def74946bc21a19e580a80a4fdde41df167",
+          "ms": 90.6199160000001,
+          "rpcCalls": 228,
+          "httpRequests": 228,
+          "requestBytes": 66232,
+          "responseBytes": 567821,
+          "actions": [
+            1,
+            4,
+            3
+          ],
+          "bodyLengths": [
+            11,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "variant": "guarded-inline-control",
+      "path": "/var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-G6lo3x/joined-cost-control.json",
+      "observations": [
+        {
+          "label": "named-create-41B",
+          "operation": "create",
+          "gasUsed": "2259447",
+          "gasLimit": "15000000",
+          "calldataBytes": 2852,
+          "transactionHash": "0xf525c3ab291478433cf1ed6f8cd21916039696f2c100344e4313c09f69c15774",
+          "ms": 131.56766700000003,
+          "rpcCalls": 274,
+          "httpRequests": 274,
+          "requestBytes": 84009,
+          "responseBytes": 862638,
+          "actions": [
+            5,
+            1,
+            1,
+            3,
+            3
+          ],
+          "bodyLengths": [
+            0,
+            73,
+            12,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "edit-41B",
+          "operation": "edit",
+          "gasUsed": "1191659",
+          "gasLimit": "15000000",
+          "calldataBytes": 1796,
+          "transactionHash": "0xaf6964e4a6dd5064a0f14585ae54d3d81b11fb30e46dd5c0eab336fbe54064db",
+          "ms": 111.82216700000004,
+          "rpcCalls": 270,
+          "httpRequests": 270,
+          "requestBytes": 76283,
+          "responseBytes": 852841,
+          "actions": [
+            1,
+            3
+          ],
+          "bodyLengths": [
+            105,
+            0
+          ]
+        },
+        {
+          "label": "file-tag",
+          "operation": "addTag",
+          "gasUsed": "812657",
+          "gasLimit": "15000000",
+          "calldataBytes": 1156,
+          "transactionHash": "0x928d7e8921c34d759d716a64bc357cfd21df31d7aaec5eb96738157ad13ad2f7",
+          "ms": 99.99412500000017,
+          "rpcCalls": 256,
+          "httpRequests": 256,
+          "requestBytes": 66580,
+          "responseBytes": 842572,
+          "actions": [
+            3
+          ],
+          "bodyLengths": [
+            0
+          ]
+        },
+        {
+          "label": "revision-tag",
+          "operation": "addTag",
+          "gasUsed": "998511",
+          "gasLimit": "15000000",
+          "calldataBytes": 1316,
+          "transactionHash": "0xd0c39e5545ef1abe2e4813858cf89b09cc438e40041c0ebc66137e4bd40e320e",
+          "ms": 106.0346669999999,
+          "rpcCalls": 269,
+          "httpRequests": 269,
+          "requestBytes": 73083,
+          "responseBytes": 849148,
+          "actions": [
+            3
+          ],
+          "bodyLengths": [
+            0
+          ]
+        },
+        {
+          "label": "rename-fresh-name",
+          "operation": "rename",
+          "gasUsed": "1324819",
+          "gasLimit": "15000000",
+          "calldataBytes": 2148,
+          "transactionHash": "0xb55736d4283fb7eb0fbe1f5e9c5fd8f6a8454e6f2e5602d973d17367e13c4493",
+          "ms": 118.48245899999984,
+          "rpcCalls": 277,
+          "httpRequests": 277,
+          "requestBytes": 80965,
+          "responseBytes": 858625,
+          "actions": [
+            1,
+            4,
+            3
+          ],
+          "bodyLengths": [
+            11,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "variant": "proxy-directory-concept-inline",
+      "path": "/var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-IhTVQt/joined-cost-control.json",
+      "observations": [
+        {
+          "label": "named-create-41B",
+          "operation": "create",
+          "gasUsed": "2080582",
+          "gasLimit": "15000000",
+          "calldataBytes": 2852,
+          "transactionHash": "0xe696a257acb0d31013caacb6ddfb6768ab7ddfc53eef74c811c4fd5fa9a536b2",
+          "ms": 147.1337080000003,
+          "rpcCalls": 412,
+          "httpRequests": 412,
+          "requestBytes": 121825,
+          "responseBytes": 897903,
+          "actions": [
+            5,
+            1,
+            1,
+            3,
+            3
+          ],
+          "bodyLengths": [
+            0,
+            73,
+            12,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "edit-41B",
+          "operation": "edit",
+          "gasUsed": "1225947",
+          "gasLimit": "15000000",
+          "calldataBytes": 1796,
+          "transactionHash": "0xaad099b1cf14a2477206bc49baf6e52a0e150578b9d02e09ee810b44f40a7a22",
+          "ms": 165.13650000000007,
+          "rpcCalls": 406,
+          "httpRequests": 406,
+          "requestBytes": 113365,
+          "responseBytes": 887077,
+          "actions": [
+            1,
+            3
+          ],
+          "bodyLengths": [
+            105,
+            0
+          ]
+        },
+        {
+          "label": "file-tag",
+          "operation": "addTag",
+          "gasUsed": "1086087",
+          "gasLimit": "15000000",
+          "calldataBytes": 1572,
+          "transactionHash": "0x30ca312bef3258e804f24d39cf2b5d27a684920429960524af65e29ecf448467",
+          "ms": 144.78274999999985,
+          "rpcCalls": 394,
+          "httpRequests": 394,
+          "requestBytes": 107603,
+          "responseBytes": 881590,
+          "actions": [
+            1,
+            3
+          ],
+          "bodyLengths": [
+            35,
+            0
+          ]
+        },
+        {
+          "label": "revision-tag",
+          "operation": "addTag",
+          "gasUsed": "1239078",
+          "gasLimit": "15000000",
+          "calldataBytes": 1732,
+          "transactionHash": "0x2ba95d77c15304a81727b24bcd751ed91446d11838f240f7fe30e70be00c4d7c",
+          "ms": 141.49095799999986,
+          "rpcCalls": 407,
+          "httpRequests": 407,
+          "requestBytes": 113948,
+          "responseBytes": 888011,
+          "actions": [
+            1,
+            3
+          ],
+          "bodyLengths": [
+            40,
+            0
+          ]
+        },
+        {
+          "label": "rename-fresh-name",
+          "operation": "rename",
+          "gasUsed": "1393684",
+          "gasLimit": "15000000",
+          "calldataBytes": 2148,
+          "transactionHash": "0x38bc49bc5070b738f8c24e160e2835e909d7583b88b7f5e5d78cb0b52e5a4377",
+          "ms": 164.528417,
+          "rpcCalls": 419,
+          "httpRequests": 419,
+          "requestBytes": 119963,
+          "responseBytes": 895131,
+          "actions": [
+            1,
+            4,
+            3
+          ],
+          "bodyLengths": [
+            11,
+            0,
+            0
+          ]
+        }
+      ]
+    }
+  ]
+}

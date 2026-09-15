@@ -1,0 +1,51 @@
+✖ joined pages qualify headers and own exact context Lens query continuations (743.484375ms)
+✖ failed Name-coordinate read preserves successful placement provenance (350.07075ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4173.84
+
+✖ failing tests:
+
+test at browser/joined.integration.test.mjs:6:1
+✖ joined pages qualify headers and own exact context Lens query continuations (743.484375ms)
+  AssertionError [ERR_ASSERTION]: bounded joined page API is present
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/joined.integration.test.mjs:19:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at browser/joined.integration.test.mjs:43:1
+✖ failed Name-coordinate read preserves successful placement provenance (350.07075ms)
+  AssertionError [ERR_ASSERTION]: known selected target survives Name failure
+  + actual - expected
+  
+  + undefined
+  - '0xa648d4095721be457eab457a1de392fbbb03538f7943946bd68d6b9b7e94d64d'
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/joined.integration.test.mjs:53:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: '0xa648d4095721be457eab457a1de392fbbb03538f7943946bd68d6b9b7e94d64d',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -3,7 +3,7 @@
  * file contents enter through real Ledger transactions, never through config. */
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
-import {mkdtemp,readFile,writeFile,rename,mkdir} from 'node:fs/promises';
+import {mkdtemp,readFile,writeFile,appendFile,rename,mkdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {pathToFileURL,fileURLToPath} from 'node:url';
@@ -23,7 +23,10 @@ async function freePort() {
   const port = server.address().port; await new Promise(ok => server.close(ok)); return port;
 }
 export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_OUT ?? join(lab,'out'),useLive=process.env.EFS_LISTING_MODE!=='audit',
-  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile}={}) {
+  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile,evidenceMode='snapshot',benchmarkHistory=false}={}) {
+  assert(['snapshot','append'].includes(evidenceMode),'supported evidence mode');
+  assert(!benchmarkHistory||evidenceMode==='append','short history is explicit benchmark-only');
+  const historyPolicy=benchmarkHistory?{states:16,transactionBlocks:32}:{states:256,transactionBlocks:512};
   assert(!contentProfile||(contentProfile==='raw-sha256-aesgcm-v2'&&filesProfile==='typed-directory-v1'),'supported content profile');
   assert(filesProfile===undefined||filesProfile==='typed-directory-v1','supported Files profile');
   assert(!filesProfile||(protocol==='compact-guarded-v2'&&useLive),'typed directories require guarded live profile');
@@ -35,8 +38,8 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
   const port = await freePort(), rpcUrl = `http://127.0.0.1:${port}`;
   const child = spawn(process.env.ANVIL_BIN ?? 'anvil',[
     '--host','127.0.0.1','--port',String(port),'--chain-id','31337','--hardfork',hardfork,
-    '--gas-limit','30000000','--gas-price','2000000000','--prune-history','256',
-    '--transaction-block-keeper','512','--cache-path',join(dir,'anvil-cache'),'--quiet',
+    '--gas-limit','30000000','--gas-price','2000000000','--prune-history',String(historyPolicy.states),
+    '--transaction-block-keeper',String(historyPolicy.transactionBlocks),'--cache-path',join(dir,'anvil-cache'),'--quiet',
   ],{stdio:['ignore','ignore','pipe']});
   let nodeError='', closed=false;
   child.stderr.on('data',chunk => {nodeError=(nodeError+chunk).slice(-8000);});
@@ -49,11 +52,11 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
       if (child.exitCode === null) child.kill('SIGKILL');
     }
   };
-  const metrics = {calls:0,requestBytes:0,responseBytes:0,byMethod:{}};
+  const metrics = {calls:0,httpRequests:0,httpBatches:0,requestBytes:0,responseBytes:0,byMethod:{}};
   let requestId=0;
   const rpc = async (method,params=[]) => {
     const id=++requestId, body=JSON.stringify({jsonrpc:'2.0',id,method,params});
-    ++metrics.calls; metrics.requestBytes+=Buffer.byteLength(body); metrics.byMethod[method]=(metrics.byMethod[method]??0)+1;
+    ++metrics.calls;++metrics.httpRequests; metrics.requestBytes+=Buffer.byteLength(body); metrics.byMethod[method]=(metrics.byMethod[method]??0)+1;
     const response=await fetch(rpcUrl,{method:'POST',headers:{'content-type':'application/json'},body,signal:AbortSignal.timeout(20_000)});
     const text=await response.text(); metrics.responseBytes+=Buffer.byteLength(text);
     assert(response.ok,`RPC HTTP ${response.status}`); const data=JSON.parse(text);
@@ -95,7 +98,12 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
         gasUsed:BigInt(receipt.gasUsed).toString(),effectiveGasPriceWei:BigInt(receipt.effectiveGasPrice).toString(),
         calldataBytes:e.getBytes(tx.data).length,type:Number(BigInt(chainTx.type)),gasLimit:BigInt(chainTx.gas).toString(),rawTransaction:raw,
         status:BigInt(receipt.status)===1n?'SUCCESS':'REVERTED',receipt};
-      transactions.push(row); await writeFile(join(dir,'transactions.json'),json(transactions));
+      pending.delete(hash);
+      if(evidenceMode==='append'){
+        await appendFile(join(dir,'transactions.jsonl'),JSON.stringify(row)+'\n');
+        delete row.rawTransaction; // exact input/receipt evidence stays on disk
+        transactions.push(row);
+      }else{transactions.push(row);await writeFile(join(dir,'transactions.json'),json(transactions));}
       assert(BigInt(row.gasUsed)<=BigInt(row.gasLimit)&&BigInt(row.gasLimit)<=16_777_216n,'receipt gas within target transaction cap');
       return row;
     };
@@ -173,6 +181,7 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
     const lens=await deploy('lens',useLive?'FilesLiveIndex.sol':'LensReader.sol',useLive?'FilesLiveLens':'LensReader',[ledger,index]);
     const files=await deploy('files','FilesJoinedConsumer.sol','FilesJoinedConsumer',[ledger,lens,index,root,childType,ruleHashes.root,ruleHashes.child]);
     await deploy('names','FilesNamesProfile.sol','FilesNameReader',[ledger,ledger,name,ruleHashes.name]);
+    if(contentProfile)await deploy('joined','FilesPageReader.sol','FilesPageReader',[ledger,lens,index]);
     await deploy('application','FilesApplication.sol','FilesApplication',[ledger,files,wallets.alice.address,wallets.alice.address,wallets.alice.address,e.id('approved')]);
     let folder=e.id('compact-demo/root'), archive=e.id('compact-demo/archive');
     if(filesProfile){
@@ -186,7 +195,7 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
       folder=hash(['bytes32','bytes32','bytes32'],[e.id('efs2/record/1'),directoryType,e.keccak256(body)]);
     }
     const manifest={chainId:'31337',listing:useLive?'live-positive':'audit',folder,folders:[folder,archive],authors:{alice:wallets.alice.address,bob:wallets.bob.address},
-      contracts:Object.fromEntries(['ledger','index','lens','registry','files','names'].map(k=>[k,contracts[k]])),
+      contracts:Object.fromEntries(['ledger','index','lens','registry','files','names',...(contentProfile?['joined']:[])].map(k=>[k,contracts[k]])),
       types:{root,child:childType,name},ruleHashes};
     if(filesProfile){manifest.filesProfile=filesProfile;manifest.types.directory=directoryType;manifest.folders=[folder];}
     if(contentProfile){manifest.contentProfile=contentProfile;Object.assign(manifest.types,contentTypes);}
@@ -206,6 +215,6 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
     };
     const writeReport=async (name,value)=>{assert(/^[a-z0-9-]+$/.test(name));const path=join(dir,`${name}.json`);
       await writeFile(path,json({...value,sourceArtifacts:resolve(artifactDirectory),contracts,evidence:'LOCAL_RPC_OBSERVED_NOT_STATE_PROOF'}));console.log(`Report: ${path}`);return path;};
-    return {ethers:e,dir,port,rpcUrl,rpc,metrics,manifest,contracts,wallets,transactions,send,enqueue,observe,call,transact,deploy,close,createJournal,writeReport};
+    return {ethers:e,dir,port,anvilPid:child.pid,evidenceMode,historyPolicy,rpcUrl,rpc,metrics,manifest,contracts,wallets,transactions,send,enqueue,observe,call,transact,deploy,close,createJournal,writeReport};
   } catch(error) {await close();throw error;}
 }

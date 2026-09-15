@@ -105,6 +105,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       ['lens','ledger','ledger'],['lens','index','index'],['index','ledger','ledger'],
       ['files','ledger','ledger'],['files','lensReader','lens'],['files','filesIndex','index'],
       ['names','ledger','ledger'],['names','source','ledger'],
+      ...(config.contracts.joined?[['joined','ledger','ledger'],['joined','lens','lens'],['joined','index','index']]:[]),
     ]) check(eq(await scalar(key,fn,[],context),addresses[target]),'BINDING');
     for (const type of ['root','child','name',...(directories?['directory']:[])]) {
       const id = config.types[type], expected = config.ruleHashes[type];
@@ -174,7 +175,9 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     return text;
   }
   async function nameAt({position,folder,role,context}) {
-    const cell = await call('ledger','positionCell',[position],context);
+    let cell;
+    try {cell = await call('ledger','positionCell',[position],context);}
+    catch(error){if(!isRpcUnavailable(error))throw error;return result(basisFor(context),'UNKNOWN','PARTIAL',null,{reason:'NAME_COORDINATE_UNAVAILABLE'});}
     check(eq(cell[0],purpose.folder) && eq(cell[1],folder) && eq(cell[2],role)
       && eq(position,positionOf(purpose.folder,folder,role)),'POSITION');
     let record;
@@ -373,6 +376,83 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   }
 
   const emptyCursor = () => [0,0,0,Z,Z,Z,Z,0,0,0];
+  // Bounded context-local page cache. Pinning creates a fresh cold context; the
+  // exact block is checked even on hits. No name/body cache crosses a context.
+  const joinedCache=new WeakMap(),joinedContinuations=new WeakMap(),joinedSelectors=new WeakMap();
+  async function listFolderPage(args={}) {
+    check(carriers&&config.contracts.joined,'JOINED_PROFILE');
+    const {context,continuation}=args;check(contexts.has(context),'CONTEXT');
+    check(!('cursor' in args),'CURSOR_NOT_ACCEPTED');
+    const suppliedSelectors=args.authors??args.principals;
+    check(Array.isArray(suppliedSelectors)&&suppliedSelectors.length>0&&suppliedSelectors.length<=64,'LENS');
+    const selectorsKey=JSON.stringify([args.authors,args.principals]);
+    const selectorCache=joinedSelectors.get(context)??new Map();joinedSelectors.set(context,selectorCache);
+    let authors=selectorCache.get(selectorsKey);
+    if(!authors){authors=await protocol.selectors(args,context);if(selectorCache.size>=8)selectorCache.delete(selectorCache.keys().next().value);selectorCache.set(selectorsKey,authors);}
+    const basis=basisFor(context,authors,args.policy??'ordered');
+    check(authors.length<=64,'LENS');
+    const folder=args.folder??config.folder,budget=args.budget??32,concept=args.concept??Z;
+    const scope=args.tagScope??'none',policy=args.policy??'ordered',search=(args.search??'').toLowerCase();
+    check(Number.isInteger(budget)&&budget>=1&&budget<=256,'BUDGET');
+    check(['none','file','revision','either'].includes(scope)&&['ordered','no-tiebreak'].includes(policy)
+      &&typeof search==='string'&&e.toUtf8Bytes(search).length<=255&&(scope==='none'||!eq(concept,Z)),'QUERY');
+    const query=[concept,['none','file','revision','either'].indexOf(scope),policy==='no-tiebreak',search];
+    const queryId=hash(['bytes32','bytes32','bytes32','uint8','bool','string'],[folder,basis.lens.hash,...query]);
+    let walk={cursor:'0x',scanned:0n,selected:0n,retained:0n,rawTotal:null};
+    if(continuation!==undefined){walk=joinedContinuations.get(continuation);
+      check(walk&&walk.context===context&&eq(walk.queryId,queryId),'CONTINUATION');}
+    const unavailable=reason=>freeze({kind:'files-joined-page',basis,pageRows:[],queryKnowledge:walk.retained>0n?'PRESENT':'UNKNOWN',queryCoverage:'UNKNOWN',
+      scanStatus:'UNKNOWN',completeFromOwnedOrigin:false,queryAbsent:false,retainedSoFar:String(walk.retained),reason,
+      nameCoverage:'PARTIAL',kindCoverage:'PARTIAL',headerCoverage:'PARTIAL',tagCoverage:'PARTIAL'});
+    const canonical=await rpc('eth_getBlockByNumber',[e.toQuantity(BigInt(context.blockNumber)),false]);
+    check(eq(canonical?.hash,context.blockHash),'BLOCK_REORG');
+    const cache=joinedCache.get(context)??new Map();joinedCache.set(context,cache);
+    const key=JSON.stringify([queryId,walk.cursor,budget]);
+    let page=cache.get(key);
+    if(!page){
+      try{page=await scalar('joined','readPage',[folder,authors,query,[context.admission,context.generation,context.epoch,context.executionSet],walk.cursor,budget],context);}
+      catch(error){if(!isRpcUnavailable(error))throw error;return unavailable('JOINED_UNAVAILABLE');}
+      if(cache.size>=32)cache.delete(cache.keys().next().value);cache.set(key,page);
+    }
+    const placement=Number(page.scanStatus),scanned=walk.scanned+page.scanned;
+    check(page.startsAtOrigin===(walk.cursor==='0x')&&page.completeFromOrigin===(page.startsAtOrigin&&placement===2&&page.scanned===page.rawTotal),'PAGE_ORIGIN');
+    if(placement===0)return unavailable('INDEX_COVERAGE');
+    check((placement===1||placement===2)&&page.scanned<=BigInt(budget)&&scanned<=page.rawTotal
+      &&page.selectedSoFar>=walk.selected&&(walk.rawTotal===null||walk.rawTotal===page.rawTotal),'PAGE');
+    check(placement===1?page.scanned>0n&&page.continuation!=='0x':scanned===page.rawTotal&&page.continuation==='0x','INCOMPLETE_TRAVERSAL');
+    const selected=s=>({status:Number(s.status),target:s.target,revision:Number(s.revision),author:s.principalId,admission:String(s.admission)});
+    const qualification=q=>({0:'UNKNOWN',1:'PRESENT',2:'NOT_APPLICABLE',3:'INVALID',4:'UNSUPPORTED'})[Number(q)];
+    const tag=t=>({subject:eq(t.subject,Z)?null:t.subject,concept,evaluated:Number(t.qualification)===1||Number(t.qualification)===2,
+      applicable:Number(t.qualification)!==2,knowledge:qualification(t.qualification),present:t.present,selection:selected(t.selection)});
+    const rows=page.rows.map(row=>{
+      const entry=row.placement,n=row.name,h=row.header,kind=Number(row.kind)===1?'file':Number(row.kind)===2?'directory':'unsupported';
+      check(entry.admission>0n&&entry.admission<=BigInt(context.admission)&&authors.some(a=>eq(a,entry.principalId))
+        &&eq(entry.position,positionOf(purpose.folder,folder,row.role)),'MEMBERSHIP');
+      let name=result(basis,qualification(n.qualification),Number(n.qualification)===1?'COMPLETE':'PARTIAL',null,{recordId:n.recordId,firstAdmission:String(n.firstAdmission)});
+      if(Number(n.qualification)===1){name.value=validName(e.getBytes(n.value));check(eq(e.keccak256(n.value),row.role)&&eq(recordOf(config.types.name,row.role),n.recordId),'NAME_INTEGRITY');}
+      const head=selected(row.head),headerKnowledge=qualification(h.qualification);
+      const revision=head.status===1?{recordId:h.recordId,typeId:h.typeId,firstAdmission:String(h.firstAdmission),bodyLength:Number(h.bodyLength),
+        parent:h.parent,file:entry.target,descriptorRecord:eq(h.descriptor,Z)?null:h.descriptor,
+        profile:eq(h.descriptor,Z)?'legacy-inline':'carrier-v1',assurance:Number(h.qualification)===1?'HEADER_VERIFIED_BODY_NOT_FETCHED':'HEADER_UNVERIFIED_BODY_NOT_FETCHED',knowledge:headerKnowledge,carrierAvailability:'NOT_FETCHED'}:null;
+      const knowledge=kind==='directory'?'PRESENT':kind==='unsupported'?'UNSUPPORTED':head.status===1?headerKnowledge:['ABSENT','PRESENT','MASKED','CONFLICT','UNKNOWN'][head.status];
+      const value={file:entry.target,selection:kind==='directory'?null:head,revision,fileTag:tag(row.stableTag),revisionTag:tag(row.revisionTag)};
+      return {file:entry.target,target:entry.target,kind,knowledge:kind==='unsupported'?'UNSUPPORTED':'PRESENT',position:entry.position,folder,role:row.role,
+        selection:{status:1,target:entry.target,revision:Number(entry.revision),author:entry.principalId,admission:String(entry.admission)},name,
+        point:result(basis,knowledge,kind==='directory'||head.status===0||head.status===2||headerKnowledge==='PRESENT'?'COMPLETE':'PARTIAL',value),
+        match:({0:'UNKNOWN',1:'MATCH',2:'NONMATCH'})[Number(row.matchStatus)]};
+    });
+    const retained=walk.retained+BigInt(rows.length),completeFromOwnedOrigin=placement===2&&scanned===page.rawTotal;
+    const extra={scanned:String(page.scanned),scannedSoFar:String(scanned),rawTotal:String(page.rawTotal),selectedSoFar:String(page.selectedSoFar),retainedSoFar:String(retained),hydrations:String(page.hydrations),
+      nameCoverage:rows.every(r=>r.name.knowledge==='PRESENT')?'COMPLETE':'PARTIAL',kindCoverage:rows.every(r=>r.kind!=='unsupported')?'COMPLETE':'PARTIAL',
+      headerCoverage:rows.every(r=>r.kind==='directory'||r.point.value.revision?.knowledge==='PRESENT')?'COMPLETE':'PARTIAL',
+      tagCoverage:rows.every(r=>r.match!=='UNKNOWN')?'COMPLETE':'PARTIAL',filtered:scope!=='none'||search!=='',
+      scanStatus:['UNKNOWN','PARTIAL','EXHAUSTED'][placement],segmentStartsAtOrigin:page.startsAtOrigin,segmentCompleteFromOrigin:page.completeFromOrigin,
+      completeFromOwnedOrigin,queryAbsent:completeFromOwnedOrigin&&retained===0n};
+    if(placement===1){const token=Object.freeze({kind:'compact-joined-page-continuation'});
+      joinedContinuations.set(token,{context,queryId,cursor:page.continuation,scanned,selected:page.selectedSoFar,retained,rawTotal:page.rawTotal});extra.continuation=token;}
+    return freeze({kind:'files-joined-page',basis,pageRows:rows,queryKnowledge:retained>0n?'PRESENT':completeFromOwnedOrigin?'ABSENT':'UNKNOWN',
+      queryCoverage:placement===2?'COMPLETE':'PARTIAL',...extra});
+  }
   async function listFolder(args={}) {
     const {context,continuation} = args;
     check(!('cursor' in args),'CURSOR_NOT_ACCEPTED');
@@ -739,6 +819,6 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       receipt,receiptObservation,receiptAttribution,...(reason?{reason}:{})};
     await journal.put(plain(outcome)); return outcome;
   }
-  return Object.freeze({pin,listFolder,readFile,readName,readDirectory,readPlacement,readContent,readConcept,readTag,conceptId,prepare,authorize,submit,reconcile,
+  return Object.freeze({pin,listFolder,listFolderPage,readFile,readName,readDirectory,readPlacement,readContent,readConcept,readTag,conceptId,prepare,authorize,submit,reconcile,
     capabilities:()=>freeze(plain({...protocol.capabilities,typedDirectories:directories,globalTree:false}))});
 }

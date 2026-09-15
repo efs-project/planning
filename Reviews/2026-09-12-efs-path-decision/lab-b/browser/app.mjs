@@ -12,8 +12,9 @@ const state = {config:null,sdk:null,folder:null,context:null,page:null,rows:[],s
   rpc:{calls:0,bytes:0,ms:0,errors:0},operation:null,prefix:null,storageIssue:null,paths:null,segments:[],route:null,
   navigation:null,readGeneration:0,routeLoading:false,contentRequest:null,contentResult:null,previewUrl:null};
 const hasCarriers=()=>!!state.config?.manifest.contentProfile;
+const hasJoined=()=>!!state.config?.manifest.contracts.joined;
 const actionLabel=operation=>({createDirectory:'create directory',restorePlacement:'restore placement',restoreContents:'restore contents',addTag:'add tag',removeTag:'remove tag'}[operation]??operation);
-function clearContent(){state.contentRequest?.abort.abort();state.contentRequest=null;state.contentResult=null;if(state.previewUrl)URL.revokeObjectURL(state.previewUrl);state.previewUrl=null;}
+function clearContent(){state.contentRequest?.abort.abort();state.contentRequest=null;state.contentResult=null;state.previewSize=null;if(state.previewUrl)URL.revokeObjectURL(state.previewUrl);state.previewUrl=null;}
 function conceptFor(label){return /^0x[0-9a-f]{64}$/i.test(label)?label:hasCarriers()?state.sdk.conceptId({namespace:state.config.manifest.folder,label}):ethers.id(label);}
 function verifiedBytes(row=selectedRow()){
   if(!row)return null;
@@ -36,7 +37,7 @@ async function openContent(){
       ...(useExternal&&state.config.carrierOrigin?{loadCarrier:state.paths.content.createRawTransport({origin:state.config.carrierOrigin,maxBytes:1048576,timeoutMs:5000})}:{})});
     if(!current())return;state.contentResult=result;
     if(result.state==='AVAILABLE_VERIFIED'){
-      try{const preview=await state.paths.content.verifyPng(result.bytes,{signal:request.abort.signal});if(!current())return;state.previewUrl=URL.createObjectURL(preview.blob);}
+      try{const preview=await state.paths.content.verifyPng(result.bytes,{signal:request.abort.signal});if(!current())return;state.previewUrl=URL.createObjectURL(preview.blob);state.previewSize={width:preview.width,height:preview.height};}
       catch{if(!current())return;} // Unsupported/decode-failed images remain exact inert downloads.
     }
   }catch(error){if(current())state.contentResult={state:'UNAVAILABLE',reason:error.message};}
@@ -140,6 +141,16 @@ async function refresh(continuing=false) {
       }
     }
     let continuation=continuing ? page?.continuation : undefined;
+    if(hasJoined()){
+      const concept=state.filterConcept?conceptFor(state.filterConcept):ethers.ZeroHash;
+      const joinedPage=await state.sdk.listFolderPage({folder,authors:lens,budget:32,context,continuation,concept,policy,
+        tagScope:state.filterConcept?$('filter-scope').value:'none',search:$('search').value});check();
+      const fresh=joinedPage.pageRows.map(row=>({...row})),rows=continuing?[...state.rows,...fresh]:fresh;
+      page={...joinedPage,value:rows,coverage:joinedPage.queryCoverage,knowledge:rows.length?'PRESENT':joinedPage.queryKnowledge,
+        ...Object.fromEntries(['nameCoverage','kindCoverage','headerCoverage','tagCoverage'].map(key=>[key,continuing&&state.page?.[key]==='PARTIAL'?'PARTIAL':joinedPage[key]]))};
+      Object.assign(state,{rows,context,page,folder,route});if(state.paths)navigation.ready=true;
+      if(!selectedRow())state.selected=null;notice('');return;
+    }
     // Finite traversal; any retained continuation remains visibly partial.
     for(let pages=0;pages<32;pages++) {
       page=await state.sdk.listFolder({folder,authors:lens,budget:64,context,continuation});check();
@@ -188,14 +199,15 @@ function handleRoute() {
 }
 function renderRows() {
   const view=folderState(state.page);
-  const filtered=filterRows(state.rows,{search:$('search').value,tag:!!state.filterConcept,scope:$('filter-scope').value});
+  const filtered=hasJoined()?{rows:state.rows,uncertain:state.rows.filter(row=>row.match==='UNKNOWN').length}
+    :filterRows(state.rows,{search:$('search').value,tag:!!state.filterConcept,scope:$('filter-scope').value});
   $('coverage').className=`coverage ${view.kind!=='complete' && view.kind!=='empty' ? 'warning':''}`;
   $('coverage').textContent=state.busy && !state.page ? 'Reading qualified folder membership…'
     : `${view.label}${state.page ? ` · ${filtered.rows.length} shown / ${state.rows.length} observed placements`:''}${filtered.uncertain ? ` · ${filtered.uncertain} uncertain matches retained`:''}${state.filterConcept ? ` · tag “${state.filterConcept}” (${ $('filter-scope').selectedOptions[0].textContent})`:''}${$('lens').value==='conflict'?' · HEAD conflict review; Alice-first placements':''}`;
   $('rows').innerHTML=filtered.rows.map(row=>{
     const point=row.point, revision=point?.value?.revision;
     const name=row.name?.knowledge==='PRESENT'?row.name.value:`Name ${row.name?.knowledge?.toLowerCase()??'unavailable'} · ${short(row.file)}`;
-    return `<button class="file-row ${state.selected===row.position?'active':''}" data-action="select" data-position="${escape(row.position)}" aria-pressed="${state.selected===row.position}"><span class="file-icon" aria-hidden="true">${row.kind==='directory'?'▱':'▤'}</span><span class="row-main"><span class="filename">${escape(name)}</span><span class="row-subtitle">${row.kind==='directory'?'Directory':row.kind==='unknown'?'Unknown kind':'File'} ${escape(short(row.file))}</span></span><span class="row-state">${revision?escape(authorName(point.value.selection.author)):`<span class="badge warning">${escape(point?.knowledge??'UNKNOWN')}</span>`}<span class="row-subtitle">${revision?`${pretty(revision.content?.length??ethers.getBytes(revision.document).length)} bytes · #${revision.firstAdmission}`:escape(point?.reason??'No selected bytes')}</span></span></button>`;
+    return `<button class="file-row ${state.selected===row.position?'active':''}" data-action="select" data-position="${escape(row.position)}" aria-pressed="${state.selected===row.position}"><span class="file-icon" aria-hidden="true">${row.kind==='directory'?'▱':'▤'}</span><span class="row-main"><span class="filename">${escape(name)}</span><span class="row-subtitle">${row.kind==='directory'?'Directory':row.kind==='unknown'?'Unknown kind':'File'} ${escape(short(row.file))}</span></span><span class="row-state">${revision?escape(authorName(point.value.selection.author)):`<span class="badge warning">${escape(point?.knowledge??'UNKNOWN')}</span>`}<span class="row-subtitle">${revision?`${revision.assurance?'Header only':`${pretty(revision.content?.length??ethers.getBytes(revision.document).length)} bytes`} · #${revision.firstAdmission}`:escape(point?.reason??'No selected bytes')}</span></span></button>`;
   }).join('') || `<div class="empty-list">${state.busy&&!state.page?'Reading from the Ledger…':escape(view.kind==='empty'?view.label:state.page?.coverage==='COMPLETE' && view.kind==='complete' ? 'No matches in this complete observed folder.': 'No rows to show yet. This is not evidence of an empty folder.')}</div>`;
   $('continue').hidden=!state.page?.continuation;
   $('basis').textContent=state.page?.basis ? `RPC-observed · block ${state.page.basis.blockNumber} · admission ${state.page.basis.admission} · ${short(state.page.basis.blockHash)}` : 'No qualified observation yet';
@@ -217,13 +229,14 @@ function renderDetail() {
       <div class="file-actions">${row.kind==='directory'&&knownName?'<button data-action="enter">Open directory →</button>':''}${action('rename','Rename',!knownName||row.kind!=='directory')}${action('move','Move',!knownName||row.kind!=='directory')}${action('remove','Remove placement',!knownName||row.kind!=='directory')}</div>
       <p>Placements are links, not ownership. Moving or removing one never rewrites or destroys descendants. A Lens may contain aliases or cycles.</p>${hasCarriers()&&row.kind==='directory'?tagControls(point,true):''}<details><summary>Descriptor and selected edge</summary><pre>${escape(json(row))}</pre></details>`;return;
   }
+  if(revision?.assurance){$('detail').innerHTML=`<h2>${escape(name)}</h2><p>Selected revision header · content bytes not fetched. ${escape(revision.knowledge??'PRESENT')}.</p><button data-action="openSelected">Open selected file</button><pre>${escape(json(point))}</pre>`;return;}
   if(revision?.profile==='carrier-v1'){
     const bytes=verifiedBytes(row),text=bytes?textPreview(bytes):null,d=revision.content,content=state.contentResult;
     $('detail').innerHTML=`<h2>${escape(name)}</h2><p>${escape(contentMessage(content))}${state.contentRequest?' · opening…':''}</p>
       <div class="file-actions"><button data-action="openContent">Open verified bytes</button><button data-action="download" data-blocked="${!bytes}" ${bytes?'':'disabled'}>↓ Download bytes</button>${action('edit','Edit as UTF-8 text',!text?.utf8||d.encryption===1)}${action('rename','Rename',!knownName)}${action('move','Move',!knownName)}${action('remove','Remove placement',!knownName)}</div>
       ${d.encryption?'<label>Supplied key (64 hexadecimal digits)<input id="content-key" type="password" autocomplete="off"></label><p>Key stays in this open operation; it is not saved to the journal. Encrypted files are read-only in this text editor; opening or downloading does not publish plaintext.</p>':''}
       ${d.carrier===1?`<label><input id="allow-carrier" type="checkbox"> Allow this open to fetch from ${escape(state.config.carrierOrigin??'no configured transport')}</label><p>Explicit raw SHA-256 transport; no credentials or redirects, 1 MiB / 5-second cap.</p>`:''}
-      ${state.previewUrl?`<img class="verified-image" src="${escape(state.previewUrl)}" alt="Verified static PNG preview" style="max-width:100%;max-height:420px">`:''}
+      ${state.previewUrl?`<figure style="margin:12px 0"><div style="min-height:160px;max-height:420px;width:100%;display:grid;place-items:center;background:repeating-conic-gradient(#e6e6e6 0% 25%,#fafafa 0% 50%) 50% / 20px 20px;border:1px solid #aaa;overflow:hidden"><img class="verified-image" src="${escape(state.previewUrl)}" alt="Verified static PNG preview" style="width:${Math.max(64,Math.min(640,state.previewSize.width))}px;max-width:100%;max-height:420px;object-fit:contain;image-rendering:pixelated"></div><figcaption>${state.previewSize.width} × ${state.previewSize.height} intrinsic pixels · bounded inert preview</figcaption></figure>`:''}
       ${bytes?`<p>${pretty(bytes.length)} verified bytes. ${text.utf8?'UTF-8 interpretation below.':'Binary bytes; download preserves them exactly.'}</p>${text.utf8?`<pre class="document">${escape(text.text)}</pre>`:''}`:''}
       ${tagControls(point)}<p>Media type is authored metadata, not proof of image syntax. Only bounded, decoded static RGBA PNG is previewed; HTML and SVG are never executed.</p>
       <details><summary>Content, revision and verification details</summary><pre>${escape(json({revision,content:content?{...content,bytes:undefined}:null}))}</pre></details>
@@ -363,6 +376,15 @@ function download() {
   link.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 async function navigate(segments){history.pushState(null,'','#'+state.paths.encodePath(segments));await handleRoute();}
+async function openSelected(){
+  const row=selectedRow(),navigation=state.navigation,generation=state.readGeneration,context=state.context,position=state.selected;
+  if(!row||row.kind!=='file')return;
+  try{const point=await state.sdk.readFile({file:row.file,authors:authors(),context,concept:state.filterConcept?conceptFor(state.filterConcept):ethers.ZeroHash,
+    policy:$('lens').value==='conflict'?'no-tiebreak':'ordered'});
+    if(!routeCurrent(navigation)||generation!==state.readGeneration||position!==state.selected)return;
+    row.point=point;remember(point);renderDetail();renderRows();controls();
+  }catch(error){if(routeCurrent(navigation)&&generation===state.readGeneration&&position===state.selected)notice(error.message,'error');}
+}
 async function destinationRoute(path,pinned,navigation=state.navigation){
   const context=pinned??await state.sdk.pin(),route=await state.paths.resolvePath({sdk:state.sdk,root:state.config.manifest.folder,segments:state.paths.decodePath(path),authors:authors(),context,budget:64});
   checkRoute(navigation);
@@ -371,7 +393,8 @@ async function destinationRoute(path,pinned,navigation=state.navigation){
 }
 async function browseDestination(path,navigation){
   $('field-destinationPath').value=path;const {context,route}=await destinationRoute(path,undefined,navigation);
-  const page=await state.sdk.listFolder({folder:route.target,authors:authors(),context,budget:64});
+  const observed=await state.sdk[hasJoined()?'listFolderPage':'listFolder']({folder:route.target,authors:authors(),context,budget:32});
+  const page=hasJoined()?{value:observed.pageRows,coverage:observed.queryCoverage}:observed;
   checkRoute(navigation);
   $('destination-children').innerHTML=`<p>Verified ${escape(path)} · ${escape(short(route.target))}. ${page.coverage==='COMPLETE'?'Complete observed page.':'Partial children; enter an exact path to resolve it.'}</p><button type="button" data-action="destination" data-path="/">Files /</button>`+
     page.value.filter(r=>r.kind==='directory'&&r.name.knowledge==='PRESENT').map(r=>`<button type="button" data-action="destination" data-path="${escape(state.paths.encodePath([...route.segments,r.name.value]))}">▱ ${escape(r.name.value)}</button>`).join('');
@@ -382,7 +405,8 @@ document.addEventListener('click',event=>{
   if(state.paths&&!routeCurrent(state.navigation)){handleRoute();return;}
   const action=button.dataset.action;
   if(action==='close') { $('editor').close(); return; }
-  if(action==='select') {clearContent();state.selected=button.dataset.position;renderDetail();renderRows();controls();return;}
+  if(action==='select') {clearContent();state.selected=button.dataset.position;renderDetail();renderRows();controls();if(hasJoined())openSelected();return;}
+  if(action==='openSelected'){openSelected();return;}
   if(action==='openContent'){openContent().catch(error=>notice(error.message,'error'));return;}
   if(['create','createDirectory','edit','rename','move','remove','restorePlacement','restoreContents'].includes(action)) {openEditor(action,button.dataset.record);return;}
   run(async navigation=>{
@@ -441,11 +465,11 @@ $('editor-form').addEventListener('submit',event=>{
     } catch(error) { if(state.operation===job&&routeCurrent(navigation))$('editor-error').textContent=error.message; throw error; }
   });
 });
-$('search').addEventListener('input',()=>{renderRows();controls();});
+$('search').addEventListener('input',()=>{if(hasJoined())run(()=>refresh());else{renderRows();controls();}});
 addEventListener('hashchange',handleRoute);
 addEventListener('popstate',handleRoute);
 $('lens').addEventListener('change',()=>run(()=>refresh()));
-$('filter-scope').addEventListener('change',()=>{renderRows();controls();});
+$('filter-scope').addEventListener('change',()=>{if(hasJoined())run(()=>refresh());else{renderRows();controls();}});
 $('signer').addEventListener('change',()=>run(async()=>{
   const wallet=new ethers.Wallet(state.keys[$('signer').value]);
   if(wallet.address.toLowerCase()!==state.config.manifest.authors[$('signer').value].toLowerCase()) throw new Error('Signer mismatch.');

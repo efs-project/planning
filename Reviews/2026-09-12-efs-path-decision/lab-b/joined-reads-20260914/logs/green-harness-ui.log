@@ -1,0 +1,29 @@
+✔ joined app lists headers without point bodies and hydrates only the selected file (15.422583ms)
+✔ verified tiny PNG has a visible bounded frame and intrinsic dimensions (3.656041ms)
+✔ direct hash edits and browser back/forward re-resolve actual app rows and breadcrumbs (2.390208ms)
+✔ malformed and unavailable routes clear old actionable rows and can recover without reload (2.328542ms)
+✔ superseded folder reads cannot render after a newer URL has resolved (1.328292ms)
+✔ route change during preparation cancels the obsolete dialog before intent authorization (2.611709ms)
+✔ route change after intent authorization still blocks the obsolete outer broadcast (3.441959ms)
+✔ a cold malformed route refuses and refresh cannot silently select root (1.137833ms)
+✔ late content hydration cannot replace the current route observation (1.274458ms)
+✔ the exact hash guard cancels authorization before the browser delivers hashchange (1.915542ms)
+✔ current-route writes still authorize, broadcast and reconcile normally (3.02575ms)
+✔ legacy explicit-mount app ignores Directory URL routing without new dependencies (3.274542ms)
+✔ rejected superseded same-URL Lens read cannot overwrite newer qualification (2.362667ms)
+✔ current-generation rejected route read remains visibly unqualified and non-actionable (1.549209ms)
+✔ carrier list never fetches payload and explicit open downloads exact invalid UTF-8 bytes (1.43775ms)
+✔ opened encrypted UTF-8 keeps the actual app ordinary editor disabled (2.637625ms)
+✔ malformed supplied key clears the open lifecycle and a corrected key can retry (1.614958ms)
+✔ late carrier success or rejection cannot overwrite a new route or selection (3.398166ms)
+✔ explicit external upload carries more than Core inline limit without lossy text conversion (3.165292ms)
+✔ same-route selection or Lens change cancels late carrier results and releases an old preview URL (4.974ms)
+✔ benchmark mode retains append-only real receipt/input evidence without raw transactions in memory (311.344958ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3393.642208

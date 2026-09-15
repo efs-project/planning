@@ -1,0 +1,50 @@
+✔ joined app lists headers without point bodies and hydrates only the selected file (15.979792ms)
+✔ joined app retains query-qualified uncertain rows without a second local filter (3.318ms)
+✔ verified tiny PNG has a visible bounded frame and intrinsic dimensions (2.451375ms)
+✔ direct hash edits and browser back/forward re-resolve actual app rows and breadcrumbs (2.398625ms)
+✔ malformed and unavailable routes clear old actionable rows and can recover without reload (2.5495ms)
+✔ superseded folder reads cannot render after a newer URL has resolved (2.196959ms)
+✔ route change during preparation cancels the obsolete dialog before intent authorization (3.081792ms)
+✔ route change after intent authorization still blocks the obsolete outer broadcast (3.81425ms)
+✔ a cold malformed route refuses and refresh cannot silently select root (1.523834ms)
+✔ late content hydration cannot replace the current route observation (1.579834ms)
+✔ the exact hash guard cancels authorization before the browser delivers hashchange (1.915292ms)
+✔ current-route writes still authorize, broadcast and reconcile normally (3.38475ms)
+✔ legacy explicit-mount app ignores Directory URL routing without new dependencies (4.066541ms)
+✔ rejected superseded same-URL Lens read cannot overwrite newer qualification (2.344916ms)
+✔ current-generation rejected route read remains visibly unqualified and non-actionable (1.654375ms)
+✔ carrier list never fetches payload and explicit open downloads exact invalid UTF-8 bytes (2.091875ms)
+✔ opened encrypted UTF-8 keeps the actual app ordinary editor disabled (2.246333ms)
+✔ malformed supplied key clears the open lifecycle and a corrected key can retry (1.560209ms)
+✔ late carrier success or rejection cannot overwrite a new route or selection (3.758ms)
+✔ explicit external upload carries more than Core inline limit without lossy text conversion (3.960583ms)
+✔ same-route selection or Lens change cancels late carrier results and releases an old preview URL (3.669708ms)
+✔ typed directory unknown kind qualifies membership without claiming an empty folder (0.710125ms)
+✔ exhaustive filtered empty query is not described as an empty folder (0.106041ms)
+✔ cost projection leads with Base and maps old config by ID without changing edited assumptions (11.153584ms)
+✔ recent action table includes unknown and reverted receipts, deduplicates hashes, and qualifies the total (0.369833ms)
+✔ no receipts or missing assumptions never imply measured zero spending (0.479958ms)
+✔ contradictory observations render once as unknown and table text cannot inject markup (0.118708ms)
+✔ recent rows are bounded but totals cover every unique recorded action (0.203834ms)
+✔ overflowing edited assumptions remain unknown instead of displaying infinite dollars (0.045875ms)
+✔ unknown and partial zero-row observations never become empty folders (0.082833ms)
+✔ known members survive unavailable or invalid names (0.12875ms)
+✔ tag filter distinguishes File from revision and retains unevaluated subjects (0.1035ms)
+✔ only qualified selected bytes can be opened or downloaded (0.065667ms)
+✔ network estimate uses measured gas, gwei, ETH USD and explicit extra fee only (0.040166ms)
+✔ cost totals deduplicate receipts, include reverted gas, and retain unknown costs (0.085333ms)
+✔ contradictory receipts for one hash do not become a fabricated total (0.043291ms)
+✔ parseable damaged journal hashes become unknown cost without breaking the screen (0.043334ms)
+✔ joined pages qualify headers and own exact context Lens query continuations (1220.520833ms)
+✔ failed Name-coordinate read preserves successful placement provenance (429.435083ms)
+✔ benchmark mode retains append-only real receipt/input evidence without raw transactions in memory (310.40375ms)
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-2FWEsq/joined-batch-preflight.json
+✔ bounded scale seed uses real transactions for live churn and contributing-author controls (601.570791ms)
+ℹ tests 41
+ℹ suites 0
+ℹ pass 41
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10063.31775

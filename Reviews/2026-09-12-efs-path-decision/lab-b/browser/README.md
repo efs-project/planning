@@ -1,5 +1,84 @@
 # Clickable compact Files prototype
 
+## Bounded joined Files pages (Task 5A)
+
+The fresh carrier-profile runner now deploys `FilesPageReader`, an external
+periphery projection over the existing mandatory live Lens. Core, Directory,
+carrier rules and the shared ordered placement/masking worker are unchanged.
+The browser requests one candidate-budget32 page per refresh/Continue; rows
+join retained Name, target kind, selected HEAD/header and requested tag results.
+It loads a full revision only for the selected inspector, and external bytes
+only after **Open verified bytes**. Tiny verified PNGs get a bounded visible
+checker frame and an intrinsic-dimensions caption; decoder limits are unchanged.
+
+`sdk.listFolderPage({folder, authors|principals, context, budget=32,
+concept?, tagScope='none'|'file'|'revision'|'either', search?,
+policy='ordered'|'no-tiebreak', continuation?})` returns a discriminated
+`{kind:'files-joined-page', pageRows, queryKnowledge, queryCoverage, basis, ...}`
+with **only new rows** and no generic `value/knowledge/coverage` fields.
+Placement selection is always ordered. The diagnostic `no-tiebreak` option
+assesses HEAD conflicts only, retains conflicted placements and stable File-tag
+evidence, and leaves revision-tag assessment UNKNOWN when no revision is selected.
+Directory rows have a stable descriptor tag subject and NOT_APPLICABLE revision
+assessment, not a synthetic File HEAD. Name/kind/header/tag/carrier qualifications
+remain separate; header verification does not establish a full-body digest.
+
+Budget counts candidates, not visible rows. A masked or filtered page can have
+zero rows and still be PARTIAL. Continue using the returned opaque token in the
+same SDK instance, pinned canonical context, folder, ordered Lens and query.
+Changed filters/Lens/policy/context require a restart. Every page/cache hit
+rechecks the pinned block hash. Cache bounds are32 pages and8 selector domains
+per owned context, with no cross-context Name/body cache; a traversal larger
+than the page cache need not become faster on an immediate second traversal.
+The API accepts1–256 candidates and1–64 principals, but these are input bounds,
+not a promise that every combination fits an RPC or paid transaction gas cap.
+
+Solidity `readPage` exposes `scanStatus` UNKNOWN/PARTIAL/EXHAUSTED,
+`startsAtOrigin`, and `completeFromOrigin`. EXHAUSTED from a supplied continuation
+means only suffix exhaustion: its domain hash is **not authentication**.
+`completeFromOrigin` requires empty input continuation, exhaustion and
+`scanned == rawTotal`. `FilesPagePaid.queryAbsent` additionally requires zero
+retained rows. Caller-forged terminal/skipped-prefix cursors cannot establish
+whole-query absence. SDK COMPLETE is composed only through its own origin-started,
+contiguous accumulated scan, checked against the pinned total; it exposes
+`completeFromOwnedOrigin` separately from the segment's origin flags.
+`retainedSoFar` counts retained rows along that owned chain (including uncertain
+rows), and `queryAbsent` requires complete owned-origin coverage and a zero
+retained count. `queryKnowledge` describes that accumulated query observation while
+`pageRows` contains only this page's new rows: an empty terminal suffix is not an
+empty query when earlier pages retained matches.
+Unsupported and uncertain rows remain visible rather than authorizing an
+empty-result proof. These are local qualified reads, not portable state proofs.
+
+The real-chain measurement runner `script/measure-joined.mjs` seeds1,000 live
+entries, then10,000 lifetime names with one live placement, flushing measured
+reads after each phase. A separate sequential fixture has64 genuinely
+contributing authors and four shared names with competing HEADs and a higher
+placement mask. Sparse controls explicitly place empty authors before Alice.
+It reports first/full traversal, cold/warm cache, pin overhead, logical RPC/HTTP
+counts, bytes, time, actual paid receipt gas and resource checkpoints.
+
+Measured wide-selector cliffs are retained, not hidden: page32/width32 runs out
+of gas at the30M local call bound; some smaller direct calls still exceed the
+16,777,216 signed paid-wrapper cap. The measured runner therefore uses page32
+for widths1/8, page8 for32 and page4 for64. These are fixture-specific starting
+recommendations, not universal guarantees; the ordinary two-author UI keeps32.
+More conservative pages mean more HTTP/traversal overhead, not weaker coverage.
+
+Setup is actual signed `execute` batching (live4, lifetime12; maximum action
+count asserted before sending), at15M gas/transaction under the unchanged30M
+block budget. A failed55-action batch at15M is retained with an `E_GAS`
+pre-state replay; it is a setup-reserve cliff, not an ordinary single-File failure.
+Benchmark-only append evidence avoids quadratic JSON rewriting and uses ephemeral
+RPC history16/transaction keeper32; normal demo defaults stay256/512. This does
+not shorten Ledger history. No mining occurs during any pinned traversal.
+Each fixture stops at15min,256MiB output,768MiB Node RSS or1.5GiB Anvil RSS.
+Loopback timings are not public-RPC latency; execution gas is not total chain fees.
+
+Focused tests: `test/FilesPageReader.t.sol`, `browser/joined.integration.test.mjs`,
+`browser/directory-routing.test.mjs`, and `script/joined-harness.test.mjs`.
+Evidence and limitations: [joined reads report](../joined-reads-20260914/README.md).
+
 ## Guarded byte carriers and Concept labels (Task 4B)
 
 Run `node script/carrier-browser.mjs` with the existing ethers/Anvil/artifact

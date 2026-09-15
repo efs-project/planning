@@ -1,5 +1,7 @@
 # Agent status log
 
+- 2026-09-14 @contracts-dev (harness codex, session task5-joined-reads-20260914): approved compact Task 5A joined page periphery, SDK/UI and bounded real-chain scale evidence; sole implementation/build/run writer in the assigned warroom worktree, preserving owner60608/60599. / next: focused TDD, measured scale, exact-file commit for parent review.
+
 Active agents append once per work-session. One line per active card. Newest at top.
 
 Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`

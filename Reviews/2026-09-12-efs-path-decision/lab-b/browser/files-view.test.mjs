@@ -5,6 +5,10 @@ test('typed directory unknown kind qualifies membership without claiming an empt
 import assert from 'node:assert/strict';
 import {folderState, filterRows, canOpen, estimateUsd, receiptTotals} from './files-view.mjs';
 import * as view from './files-view.mjs';
+test('exhaustive filtered empty query is not described as an empty folder',()=>{
+  const state=folderState({knowledge:'ABSENT',coverage:'COMPLETE',nameCoverage:'COMPLETE',kindCoverage:'COMPLETE',filtered:true,value:[]});
+  assert.match(state.label,/No matches/);assert.doesNotMatch(state.label,/folder is empty/);
+});
 
 const costSnapshot = {ethUsd:3000,asOf:'2026-09-14T19:45:15Z',source:'https://example.com/snapshot',networks:[
   {id:'ethereum',label:'Ethereum',gasGwei:2,extraUsd:0},

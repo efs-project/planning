@@ -1,0 +1,34 @@
+{"phase":"live","n":100,"elapsedMs":1304,"nodeRss":172015616,"nodePeakRss":172015616,"anvilRss":46743552,"outputBytes":1398596}
+{"phase":"live","n":200,"elapsedMs":2085,"nodeRss":176766976,"nodePeakRss":176766976,"anvilRss":63897600,"outputBytes":2267259}
+{"phase":"live","n":300,"elapsedMs":2854,"nodeRss":177307648,"nodePeakRss":177307648,"anvilRss":78135296,"outputBytes":3130986}
+{"phase":"live","n":400,"elapsedMs":3641,"nodeRss":177733632,"nodePeakRss":177733632,"anvilRss":98566144,"outputBytes":3994730}
+{"phase":"live","n":500,"elapsedMs":4428,"nodeRss":177913856,"nodePeakRss":177913856,"anvilRss":106905600,"outputBytes":4858474}
+{"phase":"live","n":600,"elapsedMs":5203,"nodeRss":178274304,"nodePeakRss":178307072,"anvilRss":123715584,"outputBytes":5722269}
+{"phase":"live","n":700,"elapsedMs":5992,"nodeRss":179208192,"nodePeakRss":179208192,"anvilRss":126533632,"outputBytes":6586064}
+{"phase":"live","n":800,"elapsedMs":7158,"nodeRss":179748864,"nodePeakRss":179748864,"anvilRss":171196416,"outputBytes":7449859}
+{"phase":"live","n":900,"elapsedMs":8480,"nodeRss":179748864,"nodePeakRss":179748864,"anvilRss":177045504,"outputBytes":8313702}
+{"phase":"live","n":1000,"elapsedMs":9856,"nodeRss":179896320,"nodePeakRss":179896320,"anvilRss":178077696,"outputBytes":9178098}
+{"phase":"read/live-sparse-1","n":1,"elapsedMs":10425,"nodeRss":300318720,"nodePeakRss":300335104,"anvilRss":181501952,"outputBytes":9186424}
+{"phase":"read/live-sparse-8","n":8,"elapsedMs":11056,"nodeRss":305856512,"nodePeakRss":305856512,"anvilRss":206585856,"outputBytes":9195209}
+JOINED_REPORT /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-IWONBE/joined-measurement.json
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: unavailable live-sparse-32
+    at sample (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:123:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async onSeed (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:141:11)
+    at async seedJoinedScale (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:52:11)
+    at async measureCase (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:137:10)
+    at async measureJoined (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:157:110)
+    at async file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:158:79 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v26.0.0

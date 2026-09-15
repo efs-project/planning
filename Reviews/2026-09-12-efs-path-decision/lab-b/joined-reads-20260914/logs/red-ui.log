@@ -1,0 +1,73 @@
+✖ joined app lists headers without point bodies and hydrates only the selected file (28.9765ms)
+✖ verified tiny PNG has a visible bounded frame and intrinsic dimensions (6.238916ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 215.844208
+
+✖ failing tests:
+
+test at browser/directory-routing.test.mjs:70:1
+✖ joined app lists headers without point bodies and hydrates only the selected file (28.9765ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/directory-routing.test.mjs:71:57)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at browser/directory-routing.test.mjs:75:1
+✖ verified tiny PNG has a visible bounded frame and intrinsic dimensions (6.238916ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /1 × 1/. Input:
+  
+  '<h2>root.txt</h2><p>Verified file bytes</p>\n' +
+    '      <div class="file-actions"><button data-action="openContent">Open verified bytes</button><button data-action="download" data-blocked="false" >↓ Download bytes</button><button data-action="edit" data-write data-blocked="true" disabled >Edit as UTF-8 text</button><button data-action="rename" data-write data-blocked="false"  >Rename</button><button data-action="move" data-write data-blocked="false"  >Move</button><button data-action="remove" data-write data-blocked="false"  >Remove placement</button></div>\n' +
+    '      \n' +
+    '      \n' +
+    '      <img class="verified-image" src="blob:test" alt="Verified static PNG preview" style="max-width:100%;max-height:420px">\n' +
+    '      <p>4 verified bytes. Binary bytes; download preserves them exactly.</p>\n' +
+    '      <section class="file-tags"><strong>Tags have a subject</strong><div class="tag-editor"><input id="tag-concept" aria-label="Tag concept" placeholder="Label or exact Concept Record ID" value=""><select id="tag-scope"><option value="file">File identity</option><option value="revision">Selected revision</option></select><button data-action="addTag" data-write>Add tag</button><button data-action="removeTag" data-write>Remove tag</button></div>\n' +
+    '    <p>Label not yet verified · absent / selected revision absent. Labels are scoped to this root namespace, not global authority.</p></section><p>Media type is authored metadata, not proof of image syntax. Only bounded, decoded static RGBA PNG is previewed; HTML and SVG are never executed.</p>\n' +
+    '      <details><summary>Content, revision and verification details</summary><pre>{\n' +
+    '  &quot;revision&quot;: {\n' +
+    '    &quot;file&quot;: &quot;root-root.txt&quot;,\n' +
+    '    &quot;recordId&quot;: &quot;record&quot;,\n' +
+    '    &quot;document&quot;: null,\n' +
+    '    &quot;profile&quot;: &quot;carrier-v1&quot;,\n' +
+    '    &quot;content&quot;: {\n' +
+    '      &quot;length&quot;: 4,\n' +
+    '      &quot;media&quot;: 0,\n' +
+    '      &quot;encryption&quot;: 0\n' +
+    '    },\n' +
+    '    &quot;firstAdmission&quot;: &quot;9&quot;\n' +
+    '  },\n' +
+    '  &quot;content&quot;: {\n' +
+    '    &quot;state&quot;: &quot;AVAILABLE_VERIFIED&quot;,\n' +
+    '    &quot;file&quot;: &quot;root-root.txt&quot;,\n' +
+    '    &quot;recordId&quot;: &quot;record&quot;\n' +
+    '  }\n' +
+    '}</pre></details>\n' +
+    '      <details><summary>Locally witnessed revisions</summary><p>record…ecord <button data-action="restoreContents" data-write data-blocked="false"  data-record="record">Restore these contents</button></p><button data-action="restoreContents" data-write data-blocked="false"  >Use a historical Record ID…</button></details>'
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/directory-routing.test.mjs:77:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '<h2>root.txt</h2><p>Verified file bytes</p>\n      <div class="file-actions"><button data-action="openContent">Open verified bytes</button><button data-action="download" data-blocked="false" >↓ Download bytes</button><button data-action="edit" data-write data-blocked="true" disabled >Edit as UTF-8 text</button><button data-action="rename" data-write data-blocked="false"  >Rename</button><button data-action="move" data-write data-blocked="false"  >Move</button><button data-action="remove" data-write data-blocked="false"  >Remove placement</button></div>\n      \n      \n      <img class="verified-image" src="blob:test" alt="Verified static PNG preview" style="max-width:100%;max-height:420px">\n      <p>4 verified bytes. Binary bytes; download preserves them exactly.</p>\n      <section class="file-tags"><strong>Tags have a subject</strong><div class="tag-editor"><input id="tag-concept" aria-label="Tag concept" placeholder="Label or exact Concept Record ID" value=""><select id="tag-scope"><option value="file">File identity</option><option value="revision">Selected revision</option></select><button data-action="addTag" data-write>Add tag</button><button data-action="removeTag" data-write>Remove tag</button></div>\n    <p>Label not yet verified · absent / selected revision absent. Labels are scoped to this root namespace, not global authority.</p></section><p>Media type is authored metadata, not proof of image syntax. Only bounded, decoded static RGBA PNG is previewed; HTML and SVG are never executed.</p>\n      <details><summary>Content, revision and verification details</summary><pre>{\n  &quot;revision&quot;: {\n    &quot;file&quot;: &quot;root-root.txt&quot;,\n    &quot;recordId&quot;: &quot;record&quot;,\n    &quot;document&quot;: null,\n    &quot;profile&quot;: &quot;carrier-v1&quot;,\n    &quot;content&quot;: {\n      &quot;length&quot;: 4,\n      &quot;media&quot;: 0,\n      &quot;encryption&quot;: 0\n    },\n    &quot;firstAdmission&quot;: &quot;9&quot;\n  },\n  &quot;content&quot;: {\n    &quot;state&quot;: &quot;AVAILABLE_VERIFIED&quot;,\n    &quot;file&quot;: &quot;root-root.txt&quot;,\n    &quot;recordId&quot;: &quot;record&quot;\n  }\n}</pre></details>\n      <details><summary>Locally witnessed revisions</summary><p>record…ecord <button data-action="restoreContents" data-write data-blocked="false"  data-record="record">Restore these contents</button></p><button data-action="restoreContents" data-write data-blocked="false"  >Use a historical Record ID…</button></details>',
+    expected: /1 × 1/,
+    operator: 'match',
+    diff: 'simple'
+  }

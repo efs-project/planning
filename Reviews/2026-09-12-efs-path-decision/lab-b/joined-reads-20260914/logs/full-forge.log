@@ -1,0 +1,758 @@
+Compiling 32 files with Solc 0.8.30
+Solc 0.8.30 finished in 92.48s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:88:21:
+   |
+88 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:93:29:
+   |
+93 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:113:22:
+    |
+113 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:25:
+    |
+117 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (8760): This declaration has the same name as another declaration.
+   --> test/FaultyReads.sol:121:83:
+    |
+121 |         returns (uint8 status, bytes32 selected, uint32 revision, address author, uint64 admission)
+    |                                                                                   ^^^^^^^^^^^^^^^^
+Note: The other declaration is here:
+  --> test/FaultyReads.sol:67:5:
+   |
+67 |     function admission(uint64 ordinal)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> test/FilesJoined.t.sol:487:14:
+    |
+487 |             (uint8 status, uint64 from, uint64 through) = filesIndex.coverage(filesIndex.FAMILY_FILES_PARENT(), 0);
+    |              ^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> test/FilesJoined.t.sol:512:10:
+    |
+512 |         (uint8 status, uint64 from, uint64 through) =
+    |          ^^^^^^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> test/FilesJoined.t.sol:487:28:
+    |
+487 |             (uint8 status, uint64 from, uint64 through) = filesIndex.coverage(filesIndex.FAMILY_FILES_PARENT(), 0);
+    |                            ^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> test/FilesJoined.t.sol:512:24:
+    |
+512 |         (uint8 status, uint64 from, uint64 through) =
+    |                        ^^^^^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> test/FilesJoined.t.sol:487:41:
+    |
+487 |             (uint8 status, uint64 from, uint64 through) = filesIndex.coverage(filesIndex.FAMILY_FILES_PARENT(), 0);
+    |                                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> test/FilesJoined.t.sol:512:37:
+    |
+512 |         (uint8 status, uint64 from, uint64 through) =
+    |                                     ^^^^^^^^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> test/FilesNames.t.sol:297:14:
+    |
+297 |             (bool ok, bytes memory err) = address(reader).staticcall(abi.encodeCall(reader.readName, (position, MOUNT, role, bad)));
+    |              ^^^^^^^
+Note: The shadowed declaration is here:
+   --> test/FilesNames.t.sol:301:10:
+    |
+301 |         (bool ok, bytes memory err) = address(reader).staticcall(abi.encodeCall(reader.readName,
+    |          ^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> test/FilesNames.t.sol:297:23:
+    |
+297 |             (bool ok, bytes memory err) = address(reader).staticcall(abi.encodeCall(reader.readName, (position, MOUNT, role, bad)));
+    |                       ^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> test/FilesNames.t.sol:301:19:
+    |
+301 |         (bool ok, bytes memory err) = address(reader).staticcall(abi.encodeCall(reader.readName,
+    |                   ^^^^^^^^^^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> test/IndexConfigExpectation.t.sol:146:14:
+    |
+146 |             (uint64 publication, uint64 first) = bob.execute(one(aPublish(BINARY, bobBodies[0])), bobBodies);
+    |              ^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> test/IndexConfigExpectation.t.sol:168:10:
+    |
+168 |         (uint64 publication, uint64 first) = ledger.executeSigned(intent, actions, bodies, signature);
+    |          ^^^^^^^^^^^^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> test/IndexConfigExpectation.t.sol:146:34:
+    |
+146 |             (uint64 publication, uint64 first) = bob.execute(one(aPublish(BINARY, bobBodies[0])), bobBodies);
+    |                                  ^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> test/IndexConfigExpectation.t.sol:168:30:
+    |
+168 |         (uint64 publication, uint64 first) = ledger.executeSigned(intent, actions, bodies, signature);
+    |                              ^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+  --> test/LedgerImport.t.sol:46:42:
+   |
+46 |         (Ledger.Action[] memory rebuilt, bytes32 h, bytes32 digest, address recovered, bool ok) = fresh.reconstruct(ledger, pub);
+   |                                          ^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/FoundationGuard.t.sol:60:5:
+   |
+60 |     function testReadSetRejectsDuplicatesLengthsAndBounds() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 102204 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/Falsify.t.sol:61:1:
+   |
+61 | contract FalsifyTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 176555 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesJoined.t.sol:14:1:
+   |
+14 | contract FilesJoinedTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 192724 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesApplication.t.sol:18:1:
+   |
+18 | contract FilesApplicationTest is FilesJoinedTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 129916 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesNames.t.sol:30:1:
+   |
+30 | contract FilesNamesTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 166249 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+ --> test/FilesLiveIndex.t.sol:9:1:
+  |
+9 | contract FilesLiveIndexTest is FilesNamesTest {
+  | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 184471 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesPaidRead.t.sol:20:1:
+   |
+20 | contract FilesPaidReadTest is FilesJoinedTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 76626 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesParentBudget.t.sol:70:1:
+   |
+70 | contract ColdParentReadBudgetTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 194113 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesWithdrawal.t.sol:12:1:
+   |
+12 | contract FilesWithdrawalTest is FilesJoinedTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 71831 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+ --> test/FoundationCost.t.sol:9:1:
+  |
+9 | contract FoundationCostTest is LabBase {
+  | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 110194 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FoundationFiles.t.sol:14:1:
+   |
+14 | contract FoundationFilesTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 78955 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+ --> test/FoundationGuard.t.sol:9:1:
+  |
+9 | contract FoundationGuardTest is LabBase {
+  | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 73782 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FoundationIdentity.t.sol:26:1:
+   |
+26 | contract FoundationIdentityTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 135456 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FoundationUpgrade.t.sol:36:1:
+   |
+36 | contract FoundationUpgradeTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 74122 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/IdentityTransition.t.sol:15:1:
+   |
+15 | contract IdentityTransitionTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 137044 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/IncomingQuotes.t.sol:18:1:
+   |
+18 | contract IncomingQuotesTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 91583 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/IndexConfigExpectation.t.sol:27:1:
+   |
+27 | contract IndexConfigExpectationTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 151866 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/JoinedConsumer.t.sol:15:1:
+   |
+15 | contract JoinedConsumerTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 93666 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/LabelType.t.sol:16:1:
+   |
+16 | contract LabelTypeTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 81913 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/LedgerImport.t.sol:14:1:
+   |
+14 | contract LedgerImportTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 102064 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/LedgerMatrix.t.sol:14:1:
+   |
+14 | contract LedgerMatrixTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 78344 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+ --> test/LensReview.t.sol:9:1:
+  |
+9 | contract LensReviewTest is LabBase {
+  | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 100509 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/MatchedRollback.t.sol:35:1:
+   |
+35 | contract MatchedRollbackTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 132432 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/SignedClaimArchive.t.sol:31:1:
+   |
+31 | contract SignedClaimArchiveTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 13 tests for test/FilesCarrierProfile.t.sol:FilesCarrierProfileTest
+[PASS] test_bytes_and_concept_limits() (gas: 3345694)
+[PASS] test_bytes_maximum_payload_admission() (gas: 1428922)
+[PASS] test_bytes_supplied_digest_must_match_payload() (gas: 515185)
+[PASS] test_descriptor_extra_missing_length_rejected() (gas: 1426071)
+[PASS] test_empty_and_binary_descriptor_accepted() (gas: 2322233)
+[PASS] test_encrypted_public_plaintext_fingerprint_rejected_direct_core() (gas: 1948836)
+[PASS] test_encryption_canonical_parameters_required() (gas: 1934515)
+[PASS] test_external_requires_empty_inline_sentinel() (gas: 2111200)
+[PASS] test_inline_target_length_hash_and_type_rejected() (gas: 2403697)
+[PASS] test_maximum_inline_descriptor_inside_mandatory_budget() (gas: 2044922)
+[PASS] test_root_child_exact_lineage_and_finite_parent_profiles() (gas: 6433789)
+[PASS] test_signed_batch_rejection_rolls_back_prior_create_and_publication() (gas: 1264287)
+[PASS] test_unsupported_algorithm_carrier_media_rejected() (gas: 1628162)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 17.96ms (9.11ms CPU time)
+
+Ran 12 tests for test/FilesDirectoryProfile.t.sol:FilesDirectoryProfileTest
+[PASS] test_directory_exact_body_length_required() (gas: 897242)
+[PASS] test_directory_pin_rejects_wrong_rule_hash() (gas: 25885)
+[PASS] test_file_subject_parent_raw_ingress_rejected() (gas: 2155833)
+[PASS] test_lookalike_type_with_wrong_rule_is_not_a_directory() (gas: 3160354)
+[PASS] test_missing_zero_and_wrong_length_directory_seeds_rejected() (gas: 1522803)
+[PASS] test_nonexistent_parent_raw_ingress_rejected() (gas: 1823534)
+[PASS] test_required_index_failure_rolls_back_whole_signed_batch() (gas: 1439305)
+[PASS] test_self_link_raw_ingress_rejected() (gas: 2293796)
+[PASS] test_unrelated_record_parent_raw_ingress_rejected() (gas: 2281839)
+[PASS] test_unrelated_record_target_raw_ingress_rejected() (gas: 2751450)
+[PASS] test_valid_directory_bootstrap_and_nested_file_without_head() (gas: 4470938)
+[PASS] test_withdrawn_descriptor_remains_valid_and_bind_before_name_parent_publish_is_atomic() (gas: 2783755)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 18.91ms (9.74ms CPU time)
+
+Ran 13 tests for test/FilesCarrierProfile.t.sol:FilesCarrierIndexTest
+[PASS] test_carrier_child_reverse_parent_postings_and_reuse() (gas: 3232998)
+[PASS] test_directory_exact_body_length_required() (gas: 897722)
+[PASS] test_directory_pin_rejects_wrong_rule_hash() (gas: 25907)
+[PASS] test_file_subject_parent_raw_ingress_rejected() (gas: 2159330)
+[PASS] test_lookalike_type_with_wrong_rule_is_not_a_directory() (gas: 3164835)
+[PASS] test_missing_zero_and_wrong_length_directory_seeds_rejected() (gas: 1522825)
+[PASS] test_nonexistent_parent_raw_ingress_rejected() (gas: 1826551)
+[PASS] test_required_index_failure_rolls_back_whole_signed_batch() (gas: 1439409)
+[PASS] test_self_link_raw_ingress_rejected() (gas: 2297338)
+[PASS] test_unrelated_record_parent_raw_ingress_rejected() (gas: 2285381)
+[PASS] test_unrelated_record_target_raw_ingress_rejected() (gas: 2755495)
+[PASS] test_valid_directory_bootstrap_and_nested_file_without_head() (gas: 4477284)
+[PASS] test_withdrawn_descriptor_remains_valid_and_bind_before_name_parent_publish_is_atomic() (gas: 2788863)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 19.20ms (9.31ms CPU time)
+
+Ran 10 tests for test/FoundationGuard.t.sol:FoundationGuardTest
+[PASS] testDifferentGuardsDoNotAliasAtSameNonce() (gas: 900540)
+[PASS] testGuardedBindingEpochAndIndexABAAreStale() (gas: 761346)
+[PASS] testGuardedRequiredIndexFailureRollsBackReadSetAndAllEffects() (gas: 1144312)
+[PASS] testGuardedSignatureRetainsFullReadSetAndCannotBeStripped() (gas: 864179)
+[PASS] testReadSetMutationOmissionAndPrincipalOrderRejected() (gas: 212533)
+[PASS] testReadSetRejectsDuplicatesLengthsAndBounds() (gas: 666699)
+[PASS] testRetainsNativePrincipalWithoutAccountReclassification() (gas: 616700)
+[PASS] testSamePublicationMultipleWritesCheckOnlyPreState() (gas: 1572481)
+[PASS] testSameTargetNewRevisionAndLowerIncludedAuthorAreStale() (gas: 2110390)
+[PASS] testSelectedSourceAndDestinationGuardEveryIncludedHead() (gas: 2171276)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 19.14ms (10.35ms CPU time)
+
+Ran 11 tests for test/Falsify.t.sol:FalsifyTest
+[PASS] test_F1a_grade0_import_is_unsupported_and_mints_nothing() (gas: 778652)
+[PASS] test_F1b_grade0_import_by_contract_is_unsupported_and_mints_nothing() (gas: 430921)
+[PASS] test_F2_signed_source_packet_authorizes_nothing_at_the_destination() (gas: 2769786)
+[PASS] test_F3_type_identity_is_exact_and_immutable() (gas: 2752160)
+[PASS] test_F4_policy_activation_is_separate_from_identity_and_basis_is_recorded() (gas: 2260148)
+[PASS] test_F5a_activate_zero_keeps_the_mandatory_rule() (gas: 2008082)
+[PASS] test_F5b_permissive_policy_keeps_the_mandatory_rule() (gas: 2108943)
+[PASS] test_F5c_policy_adds_constraints_but_cannot_remove_them() (gas: 2437355)
+[PASS] test_F5d_mutable_mandatory_acceptor_is_a_documented_gap_not_detected() (gas: 1439762)
+[PASS] test_R3_import_reruns_destination_policy_and_retains_source_basis() (gas: 9788168)
+[PASS] test_R3_signature_under_epoch_N_rejected_after_activation_old_evidence_reconstructs() (gas: 1567062)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 22.96ms (13.68ms CPU time)
+
+Ran 6 tests for test/FoundationIdentity.t.sol:FoundationIdentityTest
+[PASS] testBindingOnlySignedPolicyDriftRejected() (gas: 676824)
+[PASS] testConstructorNativeIngressRejectedBeforeState() (gas: 92489)
+[PASS] testDirectKeyCheckedIngressAndConstructorSignatureRelay() (gas: 1237342)
+[PASS] testExplicitHistorySurvivesAccountReclassification() (gas: 1213501)
+[PASS] testRealmOriginSeparatesIdenticalDeployments() (gas: 4938685)
+[PASS] testSameAddressDifferentKindCannotWithdrawHistoricalContractAdmission() (gas: 1044151)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 4.76ms (3.80ms CPU time)
+
+Ran 7 tests for test/FoundationUpgrade.t.sol:FoundationUpgradeTest
+[PASS] testExplicitListConflictAndHistoricalKeysNeverReclassifyAccounts() (gas: 2236649)
+[PASS] testGenesisChainChangeRefusesIngressButNotHistoricalOrigin() (gas: 41148)
+[PASS] testPopulatedUpgradePreservesRootsMaskHistoryAndWithdrawal() (gas: 3170146)
+[PASS] testProxyExplicitlyRejectsEmptyCallsAndEther() (gas: 50188)
+[PASS] testProxyLegacyIngressExplicitlyUnsupportedDirectStillSupported() (gas: 720292)
+[PASS] testRollbackAndSameCodeReactivationCannotReviveSignedPlan() (gas: 160088)
+[PASS] testUpgradeRejectsUnauthorizedAndIncompatibleTargetsAtomically() (gas: 26041795)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 5.23ms (2.88ms CPU time)
+
+Ran 1 test for test/GuardedDelegate.t.sol:GuardedDelegateTest
+[PASS] testNonSelfCallerCannotPublishThroughDelegate() (gas: 5883014)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 627.25µs (331.04µs CPU time)
+
+Ran 12 tests for test/LedgerMatrix.t.sol:LedgerMatrixTest
+[PASS] test_binding_role_demands_target_type() (gas: 3438082)
+[PASS] test_checked_references_direct_batch_dedup_reuse() (gas: 4597341)
+[PASS] test_failed_acceptance_rolls_back_publication() (gas: 3612647)
+[PASS] test_failed_index_module_reverts_and_coverage_is_honest() (gas: 2141276)
+[PASS] test_folder_listing_mask_count_and_paging() (gas: 5305278)
+[PASS] test_history_as_of_tombstone_and_rebind() (gas: 3204705)
+[PASS] test_native_single_author_lifecycle() (gas: 2574412)
+[PASS] test_native_two_authors_lens_mask_fallthrough() (gas: 2394950)
+[PASS] test_signed_single_author() (gas: 1850648)
+[PASS] test_signed_two_authors_and_reconstruction() (gas: 2154691)
+[PASS] test_stale_cas_and_not_live() (gas: 2985354)
+[PASS] test_two_authors_identical_record_and_withdraw() (gas: 2027649)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 13.76ms (11.18ms CPU time)
+
+Ran 8 tests for test/FilesNames.t.sol:FilesNamesTest
+[PASS] test_guarded_name_basis_tracks_execution_without_admission_change() (gas: 1920534)
+[PASS] test_names_ascii_grammar_refuses_unsupported_bytes_without_normalizing() (gas: 6828006)
+[PASS] test_names_forged_earlier_metadata_refuses_without_membership_change() (gas: 3646502)
+[PASS] test_names_last_occurrence_withdrawal_preserves_name_membership_and_contents() (gas: 3032844)
+[PASS] test_names_missing_signed_and_generic_ingress_roll_back() (gas: 3160891)
+[PASS] test_names_multiple_positions_and_reused_name_without_republication() (gas: 3844187)
+[PASS] test_names_response_faults_preserve_membership_and_reject_mixed_basis() (gas: 13767293)
+[PASS] test_names_signed_name_after_bind_and_parent_maintenance() (gas: 2751572)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 33.28ms (24.02ms CPU time)
+
+Ran 6 tests for test/IdentityTransition.t.sol:IdentityTransitionTest
+[PASS] test_delegate_replacement_clear_and_reinstall_preserve_key_namespace() (gas: 2250421)
+[PASS] test_native_delegated_ingress_keeps_native_evidence_not_action_signature() (gas: 1212011)
+[PASS] test_only_exact_delegation_indicator_is_key_identity() (gas: 31945)
+[PASS] test_signed_head_survives_account_code_transition() (gas: 2260379)
+[PASS] test_signed_removal_mask_does_not_fall_through_after_account_code_transition() (gas: 2582060)
+[PASS] test_withdrawal_releases_original_authors_occurrence_count() (gas: 2535245)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 6.64ms (5.26ms CPU time)
+
+Ran 4 tests for test/MatchedRollback.t.sol:MatchedRollbackTest
+[PASS] test_direct_late_index_call_remains_ledger_only() (gas: 1120897)
+[PASS] test_scale_seven_complete_a1_reverts_with_full_mandatory_error_and_s0() (gas: 3234409)
+[PASS] test_scale_six_complete_a1_late_tag_refusal_rolls_back_full_prefix() (gas: 4366874)
+[PASS] test_scale_six_complete_a1_zero_poison_calibrates_full_state() (gas: 4364833)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 8.11ms (6.63ms CPU time)
+
+Ran 7 tests for test/LensReview.t.sol:LensReviewTest
+[PASS] testAddressAndPrincipalSelectionMaskConflictAndPagingParity() (gas: 5085054)
+[PASS] testAddressAndPrincipalUnknownCoverageParity() (gas: 7712150)
+[PASS] testExplicitAdmissionPinRemainsStricterThanLegacyAuditCursor() (gas: 2191679)
+[PASS] testQualifiedHistoryRejectsOtherLedgersCompleteEmptyIndex() (gas: 9841711)
+[PASS] testQualifiedListRejectsOtherLedgersCompleteEmptyIndex() (gas: 9849145)
+[PASS] testQualifiedOwnershipValidDetachedAndZeroIndexControls() (gas: 4061093)
+[PASS] testZeroExecutionRejectsEveryNoncanonicalFirstCursorField() (gas: 1441082)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 9.44ms (7.83ms CPU time)
+
+Ran 7 tests for test/LedgerEvidence.t.sol:LedgerEvidenceTest
+[PASS] test_exact_native_retry_is_noop() (gas: 847729)
+[PASS] test_page_across_mutation_cursor_law() (gas: 5473797)
+[PASS] test_reconstruction_from_state_only_all_kinds() (gas: 2252137)
+[PASS] test_rename_move_recreate_old_path_keeps_identity() (gas: 6161667)
+[PASS] test_same_batch_typed_reference_and_wrong_type() (gas: 1914652)
+[PASS] test_signature_binds_every_field() (gas: 1939145)
+[PASS] test_subject_id_portable_across_fresh_deployment() (gas: 6826646)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 12.23ms (10.77ms CPU time)
+
+Ran 6 tests for test/FilesParentBudget.t.sol:ColdParentReadBudgetTest
+[PASS] test_cold_64_parent_permits_valid_child() (gas: 1630383)
+[PASS] test_cold_8192_extsload_same_file_accepts_and_indexes() (gas: 2865877)
+[PASS] test_cold_8192_extsload_wrong_file_rejects_and_rolls_back() (gas: 2394371)
+[PASS] test_cold_8192_parent_refuses_exactly_and_rolls_back() (gas: 2354111)
+[PASS] test_cold_short_extsload_matching_padded_word_still_rejects_and_rolls_back() (gas: 1120599)
+[PASS] test_warm_fresh_8192_parent_permits_valid_child() (gas: 2312848)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 6.78ms (5.23ms CPU time)
+
+Ran 5 tests for test/LedgerImport.t.sol:LedgerImportTest
+[PASS] test_contract_principal_is_origin_qualified() (gas: 6056081)
+[PASS] test_cursor_rejects_stale_basis_and_dedupes_names() (gas: 4034856)
+[PASS] test_fresh_reader_reconstructs_identical_digest_with_negatives() (gas: 2250404)
+[PASS] test_import_of_native_source_is_unsupported_and_fails_closed() (gas: 6098756)
+[PASS] test_import_requires_destination_authorization_and_keeps_identity() (gas: 12242619)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 11.46ms (10.07ms CPU time)
+
+Ran 21 tests for test/JoinedConsumer.t.sol:JoinedConsumerTest
+[PASS] test_consumer_exposes_no_quote_on_absent_masked_wrong_type_or_unknown_page() (gas: 2574139)
+[PASS] test_faulty_actual_reply_admission_not_a_bind_is_refused() (gas: 4488318)
+[PASS] test_faulty_actual_reply_admission_outside_its_publication_range_is_refused() (gas: 4503980)
+[PASS] test_faulty_actual_reply_cursor_generation_epoch_core_scope_and_packed_lens_context_are_refused() (gas: 4821368)
+[PASS] test_faulty_actual_reply_imported_signed_and_native_publications_are_refused_as_local_fixture_evidence() (gas: 4627105)
+[PASS] test_faulty_actual_reply_mismatched_or_wrapping_admission_revision_is_refused() (gas: 4713248)
+[PASS] test_faulty_actual_reply_missing_pair_is_refused() (gas: 4620748)
+[PASS] test_faulty_actual_reply_partial_page_claiming_ended_is_refused() (gas: 4524180)
+[PASS] test_faulty_actual_reply_same_author_and_target_at_wrong_head_or_folder_coordinate_is_refused() (gas: 4600965)
+[PASS] test_faulty_actual_reply_short_evidence_fails_closed() (gas: 4498439)
+[PASS] test_faulty_actual_reply_wrong_selected_revision_is_refused() (gas: 4480163)
+[PASS] test_faulty_actual_reply_wrong_type_item_is_refused() (gas: 4546102)
+[PASS] test_faulty_actual_reply_zero_or_future_record_first_admission_is_refused_for_quote_pair_and_both_items() (gas: 5037193)
+[PASS] test_faulty_actual_reply_zero_or_future_selected_and_placement_admissions_are_refused() (gas: 4678185)
+[PASS] test_joined_step_6_move_replace_remove_restore_keeps_identity() (gas: 7204896)
+[PASS] test_joined_steps_1_to_5_point_list_tag_history() (gas: 4990007)
+[PASS] test_paid_slice_point_and_list_agree_under_both_lenses_with_A_placement_provenance() (gas: 4874842)
+[PASS] test_paid_slice_refuses_extra_placement_wrong_provenance_and_incomplete_coverage() (gas: 7197425)
+[PASS] test_paid_slice_refuses_wrong_author_proof_category_pair_items_and_mantissa() (gas: 6621964)
+[PASS] test_quote_acceptor_pins_shape_scale_bounds_and_pair_reference() (gas: 4409618)
+[PASS] test_stateless_twin_commits_exactly_what_the_storing_consumer_stores() (gas: 2378458)
+Suite result: ok. 21 passed; 0 failed; 0 skipped; finished in 68.57ms (59.64ms CPU time)
+
+Ran 3 tests for test/LabelType.t.sol:LabelTypeTest
+[PASS] test_label_acceptor_is_a_lab_convention_utf8_1_to_255() (gas: 149167)
+[PASS] test_label_admission_rejects_non_utf8_empty_and_over_255() (gas: 2336920)
+[PASS] test_label_fresh_republished_omitted_and_hash_only_retrieval() (gas: 5985958)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 3.81ms (2.91ms CPU time)
+
+Ran 23 tests for test/FilesPageReader.t.sol:FilesPageReaderTest
+[PASS] test_carrier_child_reverse_parent_postings_and_reuse() (gas: 3233009)
+[PASS] test_directory_exact_body_length_required() (gas: 897843)
+[PASS] test_directory_pin_rejects_wrong_rule_hash() (gas: 26127)
+[PASS] test_file_subject_parent_raw_ingress_rejected() (gas: 2159451)
+[PASS] test_lookalike_type_with_wrong_rule_is_not_a_directory() (gas: 3164846)
+[PASS] test_missing_zero_and_wrong_length_directory_seeds_rejected() (gas: 1522946)
+[PASS] test_nonexistent_parent_raw_ingress_rejected() (gas: 1826573)
+[PASS] test_page_conflict_keeps_file_tag_and_unknown_revision_tag() (gas: 11677536)
+[PASS] test_page_continuations_bind_caller_filter_basis_and_swap_removal() (gas: 12844338)
+[PASS] test_page_forged_terminal_cannot_license_whole_query_absence() (gas: 13518121)
+[PASS] test_page_header_helper_refuses_unguarded_external_use() (gas: 9789788)
+[PASS] test_page_masked_budget_exhaustion_is_partial_not_empty() (gas: 11821090)
+[PASS] test_page_name_header_and_tag_failures_keep_known_axes() (gas: 11107796)
+[PASS] test_page_partial_family_coverage_is_unknown() (gas: 9842135)
+[PASS] test_page_unavailable_head_keeps_selected_placement_name_and_file_tag() (gas: 10506528)
+[PASS] test_page_uncertain_join_cannot_license_filtered_empty_origin() (gas: 11050193)
+[PASS] test_page_unsupported_header_cannot_disappear_under_filter() (gas: 10837627)
+[PASS] test_required_index_failure_rolls_back_whole_signed_batch() (gas: 1439824)
+[PASS] test_self_link_raw_ingress_rejected() (gas: 2297547)
+[PASS] test_unrelated_record_parent_raw_ingress_rejected() (gas: 2285590)
+[PASS] test_unrelated_record_target_raw_ingress_rejected() (gas: 2755616)
+[PASS] test_valid_directory_bootstrap_and_nested_file_without_head() (gas: 4477517)
+[PASS] test_withdrawn_descriptor_remains_valid_and_bind_before_name_parent_publish_is_atomic() (gas: 2789263)
+Suite result: ok. 23 passed; 0 failed; 0 skipped; finished in 47.87ms (46.23ms CPU time)
+
+Ran 17 tests for test/SignedClaimArchive.t.sol:SignedClaimArchiveTest
+[PASS] test_any_account_can_complete_claim_without_changing_first_importer() (gas: 596521)
+[PASS] test_arbitrary_signed_tuples_and_unknown_type_are_claims_not_admissions() (gas: 687389)
+[PASS] test_claim_local_coverage_requires_explicit_attachment_after_global_cache_hit() (gas: 1017593)
+[PASS] test_codeblob_retry_preserves_event_location_codehash_and_creation_nonce() (gas: 1941211)
+[PASS] test_conflicting_same_nonce_signed_claims_remain_distinct() (gas: 901092)
+[PASS] test_joined_diverged_cas_current_rejection_and_missing_body() (gas: 3857397)
+[PASS] test_leaf_63_round_trips_and_wrong_leaf_reverts() (gas: 11913717)
+[PASS] test_maximum_vector_and_exact_calldata_ceilings() (gas: 16219294)
+[PASS] test_packed_and_codeblob_reconstruct_identical_1_2_64_vectors() (gas: 42368913)
+[PASS] test_paid_consumer_emits_exact_first_last_action_hash_without_storage() (gas: 26052604)
+[PASS] test_record_postings_are_per_leaf_even_for_repeated_record_id() (gas: 809207)
+[PASS] test_rejects_zero_actions_65_actions_65_bodies_duplicate_body_leaf_and_8193_bytes() (gas: 644986)
+[PASS] test_retry_keeps_first_importer_vector_and_posting_counts() (gas: 612294)
+[PASS] test_reuse_rejects_conflicting_type_or_body() (gas: 1597128)
+[PASS] test_signature_rejects_empty_bad_v_high_s_wrong_author_and_expired_is_archivable() (gas: 525088)
+[PASS] test_staged_attachments_only_set_requested_bits() (gas: 10338971)
+[PASS] test_valid_empty_body_is_present_and_attached() (gas: 497603)
+Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 45.82ms (44.64ms CPU time)
+
+Ran 5 tests for test/IndexConfigExpectation.t.sol:IndexConfigExpectationTest
+[PASS] test_actual_module_replacement_rejects_old_signature() (gas: 1894685)
+[PASS] test_default_unset_index_keeps_zero_obligation_and_unknown_listing() (gas: 8287654)
+[PASS] test_internal_required_declarations_are_constructor_only() (gas: 1132694)
+[PASS] test_required_downgrade_refuses_without_invalidating_signed_publication() (gas: 1480623)
+[PASS] test_signed_write_survives_other_author_optional_and_generation_progress() (gas: 3414226)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 6.58ms (5.17ms CPU time)
+
+Ran 9 tests for test/FoundationCost.t.sol:FoundationCostTest
+[PASS] testCostGuarded1x1() (gas: 1457838)
+[PASS] testCostGuarded32x2() (gas: 4967388)
+[PASS] testCostGuarded64x1() (gas: 6818953)
+[PASS] testCostGuarded64x2() (gas: 9222301)
+[PASS] testCostGuarded64x4() (gas: 14057826)
+[PASS] testCostGuarded8x1() (gas: 1919331)
+[PASS] testCostGuarded8x2() (gas: 2241744)
+[PASS] testCostGuardedZero() (gas: 1308839)
+[PASS] testCostLegacyCreate() (gas: 686403)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 34.88ms (33.58ms CPU time)
+
+Ran 1 test for test/FoundationFiles.t.sol:FoundationFilesTest
+[PASS] testSameApplicationUsesRetainedSelectorsAndNewExecutionAfterUpgrade() (gas: 6978957)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 2.67ms (973.21µs CPU time)
+
+Ran 16 tests for test/IncomingQuotes.t.sol:IncomingQuotesTest
+[PASS] test_64_returned_ids_fit_Page_4096_bound() (gas: 35933891)
+[PASS] test_B_only_auxiliary_zero_occurrence_record_still_returned() (gas: 3456486)
+[PASS] test_binding_backlink_rebind_unbind_preserved_and_retained_membership_unchanged() (gas: 4394735)
+[PASS] test_each_cursor_commitment_mutation_and_same_graph_cross_mode_replay_rejected() (gas: 9804090)
+[PASS] test_exactly_one_pair_reference_and_reciprocal_ledger_required() (gas: 6223317)
+[PASS] test_full_signed_schedule_old_and_current_against_current_tail() (gas: 9923886)
+[PASS] test_gapped_and_optional_family_never_complete() (gas: 4456363)
+[PASS] test_generation_invalidation_and_changed_attachment_rejected() (gas: 9925421)
+[PASS] test_invalid_budget_basis_absent_or_wrong_target_rejected() (gas: 2065675)
+[PASS] test_late_attachment_exhausted_partial_never_complete() (gas: 7377643)
+[PASS] test_max64_action_distinct_quote_targets_existing_callback_allowance() (gas: 51021276)
+[PASS] test_required_family_downgrades_refuse_and_queries_remain_complete() (gas: 2449723)
+[PASS] test_retained_revisions_and_cross_page_reuse_both_readers() (gas: 5185593)
+[PASS] test_runtime_pins_rechecked_for_ledger_index_and_rule() (gas: 1795559)
+[PASS] test_scan_works_with_original_nonselective_index() (gas: 12258995)
+[PASS] test_wrong_source_ordinal_rule_shape_and_code_constructor_rejected() (gas: 1712760)
+Suite result: ok. 16 passed; 0 failed; 0 skipped; finished in 72.46ms (80.81ms CPU time)
+
+Ran 17 tests for test/FilesJoined.t.sol:FilesJoinedTest
+[PASS] test_absent_masked_and_wrong_target_tags_remain_qualified() (gas: 6817118)
+[PASS] test_cold_large_root_and_child_headers_accept() (gas: 5071011)
+[PASS] test_complete_one_page_folder_tag_join_is_not_point_evidence() (gas: 8996496)
+[PASS] test_conflict_preserves_both_exact_revisions() (gas: 7508391)
+[PASS] test_index_constructor_pins_exact_reviewed_profile() (gas: 4462663)
+[PASS] test_missing_unrelated_and_wrong_file_parents_roll_back() (gas: 8383953)
+[PASS] test_partial_stale_and_wrong_index_reads_fail_closed() (gas: 8747707)
+[PASS] test_point_selection_applies_revision_tag_after_head() (gas: 8591758)
+[PASS] test_reader_rechecks_parent_and_scope_coverage() (gas: 9035564)
+[PASS] test_reader_rejects_nonprofile_and_wrong_file_selected_records() (gas: 7622736)
+[PASS] test_real_files_move_reuse_whiteout_restore() (gas: 20200994)
+[PASS] test_real_files_two_name_churn_requires_four_scans() (gas: 10259624)
+[PASS] test_required_parent_callback_failure_rolls_back() (gas: 7101085)
+[PASS] test_reuse_does_not_duplicate_parent_membership() (gas: 4975429)
+[PASS] test_revision_acceptance_history() (gas: 4913424)
+[PASS] test_revision_acceptance_history_and_parent_backlinks() (gas: 4965739)
+[PASS] test_root_requires_existing_nonzero_file_and_shape() (gas: 3318471)
+Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 109.74ms (102.30ms CPU time)
+
+Ran 20 tests for test/FilesWithdrawal.t.sol:FilesWithdrawalTest
+[PASS] test_absent_masked_and_wrong_target_tags_remain_qualified() (gas: 6817270)
+[PASS] test_cold_large_root_and_child_headers_accept() (gas: 5071033)
+[PASS] test_complete_one_page_folder_tag_join_is_not_point_evidence() (gas: 8996614)
+[PASS] test_conflict_preserves_both_exact_revisions() (gas: 7508563)
+[PASS] test_index_constructor_pins_exact_reviewed_profile() (gas: 4462729)
+[PASS] test_missing_unrelated_and_wrong_file_parents_roll_back() (gas: 8384355)
+[PASS] test_partial_stale_and_wrong_index_reads_fail_closed() (gas: 8747768)
+[PASS] test_point_selection_applies_revision_tag_after_head() (gas: 8591980)
+[PASS] test_reader_rechecks_parent_and_scope_coverage() (gas: 9035662)
+[PASS] test_reader_rejects_nonprofile_and_wrong_file_selected_records() (gas: 7622756)
+[PASS] test_real_files_move_reuse_whiteout_restore() (gas: 20202437)
+[PASS] test_real_files_two_name_churn_requires_four_scans() (gas: 10259570)
+[PASS] test_required_parent_callback_failure_rolls_back() (gas: 7100846)
+[PASS] test_reuse_does_not_duplicate_parent_membership() (gas: 4975523)
+[PASS] test_revision_acceptance_history() (gas: 4913421)
+[PASS] test_revision_acceptance_history_and_parent_backlinks() (gas: 4965800)
+[PASS] test_root_requires_existing_nonzero_file_and_shape() (gas: 3318659)
+[PASS] test_withdraw_other_author_reuse_does_not_toggle_selected_reads() (gas: 11647900)
+[PASS] test_withdraw_parent_keeps_descendants_and_new_child_admissible() (gas: 13646422)
+[PASS] test_withdraw_selected_revision_retained_and_readable() (gas: 10072766)
+Suite result: ok. 20 passed; 0 failed; 0 skipped; finished in 63.83ms (134.62ms CPU time)
+
+Ran 18 tests for test/FilesPaidRead.t.sol:FilesPaidReadTest
+[PASS] test_absent_masked_and_wrong_target_tags_remain_qualified() (gas: 6817253)
+[PASS] test_cold_large_root_and_child_headers_accept() (gas: 5071011)
+[PASS] test_complete_one_page_folder_tag_join_is_not_point_evidence() (gas: 8996784)
+[PASS] test_conflict_preserves_both_exact_revisions() (gas: 7508521)
+[PASS] test_index_constructor_pins_exact_reviewed_profile() (gas: 4462685)
+[PASS] test_missing_unrelated_and_wrong_file_parents_roll_back() (gas: 8383975)
+[PASS] test_paid_files_emits_six_exact_real_results_without_storage() (gas: 8910739)
+[PASS] test_partial_stale_and_wrong_index_reads_fail_closed() (gas: 8747740)
+[PASS] test_point_selection_applies_revision_tag_after_head() (gas: 8591942)
+[PASS] test_reader_rechecks_parent_and_scope_coverage() (gas: 9035667)
+[PASS] test_reader_rejects_nonprofile_and_wrong_file_selected_records() (gas: 7622736)
+[PASS] test_real_files_move_reuse_whiteout_restore() (gas: 20201858)
+[PASS] test_real_files_two_name_churn_requires_four_scans() (gas: 10259696)
+[PASS] test_required_parent_callback_failure_rolls_back() (gas: 7101085)
+[PASS] test_reuse_does_not_duplicate_parent_membership() (gas: 4975429)
+[PASS] test_revision_acceptance_history() (gas: 4913424)
+[PASS] test_revision_acceptance_history_and_parent_backlinks() (gas: 4965761)
+[PASS] test_root_requires_existing_nonzero_file_and_shape() (gas: 3318471)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 49.34ms (88.25ms CPU time)
+
+Ran 16 tests for test/FilesLiveIndex.t.sol:FilesLiveIndexTest
+[PASS] test_explicit_live_swap_removal_invalidates_unpinned_continuation() (gas: 3701399)
+[PASS] test_guarded_name_basis_tracks_execution_without_admission_change() (gas: 1994329)
+[PASS] test_live_32_renames_scan_one_not_33() (gas: 26818205)
+[PASS] test_live_address_explicit_parity_after_swap_removal() (gas: 5217080)
+[PASS] test_live_higher_mask_still_suppresses_lower_positive_candidate() (gas: 2840289)
+[PASS] test_live_late_attachment_never_claims_complete_empty() (gas: 6960626)
+[PASS] test_live_rebind_is_not_duplicate_and_restore_readds_once() (gas: 3131809)
+[PASS] test_live_removal_swaps_dense_candidate_without_erasing_audit() (gas: 5100869)
+[PASS] test_live_swap_removal_invalidates_unpinned_continuation() (gas: 3672876)
+[PASS] test_names_ascii_grammar_refuses_unsupported_bytes_without_normalizing() (gas: 6829080)
+[PASS] test_names_forged_earlier_metadata_refuses_without_membership_change() (gas: 3720763)
+[PASS] test_names_last_occurrence_withdrawal_preserves_name_membership_and_contents() (gas: 3177029)
+[PASS] test_names_missing_signed_and_generic_ingress_roll_back() (gas: 3165397)
+[PASS] test_names_multiple_positions_and_reused_name_without_republication() (gas: 3949285)
+[PASS] test_names_response_faults_preserve_membership_and_reject_mixed_basis() (gas: 13767919)
+[PASS] test_names_signed_name_after_bind_and_parent_maintenance() (gas: 2829969)
+Suite result: ok. 16 passed; 0 failed; 0 skipped; finished in 116.08ms (70.20ms CPU time)
+
+Ran 29 tests for test/FilesApplication.t.sol:FilesApplicationTest
+[PASS] test_absent_masked_and_wrong_target_tags_remain_qualified() (gas: 6817471)
+[PASS] test_app_actual_foreign_file_selection_rejected_without_effects() (gas: 9611686)
+[PASS] test_app_adopts_verified_revision_under_its_own_author() (gas: 9399820)
+[PASS] test_app_current_policy_refusal_rolls_back() (gas: 8946290)
+[PASS] test_app_file_tag_does_not_authorize_selected_revision() (gas: 7217059)
+[PASS] test_app_required_index_failure_rolls_back_every_effect() (gas: 12117136)
+[PASS] test_app_root_fits_but_child_prefix_exceeds_body_limit_and_rolls_back() (gas: 10856861)
+[PASS] test_app_stale_basis_rolls_back() (gas: 8407727)
+[PASS] test_app_stale_own_cas_rolls_back_child_and_app_state() (gas: 9038886)
+[PASS] test_app_unauthorized_caller_has_no_effect() (gas: 8510748)
+[PASS] test_app_withdrawn_parent_still_readable() (gas: 9725786)
+[PASS] test_app_wrong_approval_author_has_no_effect() (gas: 12688339)
+[PASS] test_app_wrong_selected_revision_has_no_effect() (gas: 8502909)
+[PASS] test_cold_large_root_and_child_headers_accept() (gas: 5071304)
+[PASS] test_complete_one_page_folder_tag_join_is_not_point_evidence() (gas: 8996899)
+[PASS] test_conflict_preserves_both_exact_revisions() (gas: 7508883)
+[PASS] test_index_constructor_pins_exact_reviewed_profile() (gas: 4463005)
+[PASS] test_missing_unrelated_and_wrong_file_parents_roll_back() (gas: 8384413)
+[PASS] test_partial_stale_and_wrong_index_reads_fail_closed() (gas: 8748108)
+[PASS] test_point_selection_applies_revision_tag_after_head() (gas: 8592158)
+[PASS] test_reader_rechecks_parent_and_scope_coverage() (gas: 9036053)
+[PASS] test_reader_rejects_nonprofile_and_wrong_file_selected_records() (gas: 7623092)
+[PASS] test_real_files_move_reuse_whiteout_restore() (gas: 20202670)
+[PASS] test_real_files_two_name_churn_requires_four_scans() (gas: 10260163)
+[PASS] test_required_parent_callback_failure_rolls_back() (gas: 7101371)
+[PASS] test_reuse_does_not_duplicate_parent_membership() (gas: 4975705)
+[PASS] test_revision_acceptance_history() (gas: 4913669)
+[PASS] test_revision_acceptance_history_and_parent_backlinks() (gas: 4966099)
+[PASS] test_root_requires_existing_nonzero_file_and_shape() (gas: 3318720)
+Suite result: ok. 29 passed; 0 failed; 0 skipped; finished in 116.13ms (132.09ms CPU time)
+
+╭----------------------------+--------+--------+---------╮
+| Test Suite                 | Passed | Failed | Skipped |
++========================================================+
+| FalsifyTest                | 11     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FilesApplicationTest       | 29     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FilesCarrierIndexTest      | 13     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FilesCarrierProfileTest    | 13     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FilesDirectoryProfileTest  | 12     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FilesJoinedTest            | 17     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FilesLiveIndexTest         | 16     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FilesNamesTest             | 8      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FilesPageReaderTest        | 23     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FilesPaidReadTest          | 18     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| ColdParentReadBudgetTest   | 6      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FilesWithdrawalTest        | 20     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FoundationCostTest         | 9      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FoundationFilesTest        | 1      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FoundationGuardTest        | 10     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FoundationIdentityTest     | 6      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| FoundationUpgradeTest      | 7      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| GuardedDelegateTest        | 1      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| IdentityTransitionTest     | 6      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| IncomingQuotesTest         | 16     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| IndexConfigExpectationTest | 5      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| JoinedConsumerTest         | 21     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| LabelTypeTest              | 3      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| LedgerEvidenceTest         | 7      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| LedgerImportTest           | 5      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| LedgerMatrixTest           | 12     | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| LensReviewTest             | 7      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| MatchedRollbackTest        | 4      | 0      | 0       |
+|----------------------------+--------+--------+---------|
+| SignedClaimArchiveTest     | 17     | 0      | 0       |
+╰----------------------------+--------+--------+---------╯
+

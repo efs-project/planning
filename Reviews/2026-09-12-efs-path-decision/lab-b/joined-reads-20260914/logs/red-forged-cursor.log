@@ -1,0 +1,73 @@
+Compiling 1 files with Solc 0.8.30
+Solc 0.8.30 finished in 8.94s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:88:21:
+   |
+88 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:93:29:
+   |
+93 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:113:22:
+    |
+113 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:25:
+    |
+117 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/FilesDirectoryProfile.t.sol:60:5:
+   |
+60 |     function test_directory_pin_rejects_wrong_rule_hash() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 166203 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesPageReader.t.sol:12:1:
+   |
+12 | contract FilesPageReaderTest is FilesCarrierIndexTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 1 test for test/FilesPageReader.t.sol:FilesPageReaderTest
+[FAIL: fabricated terminal cursor licensed full-query COMPLETE/absence] test_page_forged_terminal_cannot_license_whole_query_absence() (gas: 12277036)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 11.39ms (2.00ms CPU time)
+
+Ran 1 test suite in 20.12ms (11.39ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/FilesPageReader.t.sol:FilesPageReaderTest
+[FAIL: fabricated terminal cursor licensed full-query COMPLETE/absence] test_page_forged_terminal_cannot_license_whole_query_absence() (gas: 12277036)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test

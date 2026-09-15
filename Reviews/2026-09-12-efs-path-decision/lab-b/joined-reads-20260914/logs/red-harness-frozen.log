@@ -1,0 +1,82 @@
+✖ joined app lists headers without point bodies and hydrates only the selected file (20.147292ms)
+✔ verified tiny PNG has a visible bounded frame and intrinsic dimensions (2.438625ms)
+✔ direct hash edits and browser back/forward re-resolve actual app rows and breadcrumbs (2.436791ms)
+✔ malformed and unavailable routes clear old actionable rows and can recover without reload (2.319541ms)
+✔ superseded folder reads cannot render after a newer URL has resolved (1.648292ms)
+✔ route change during preparation cancels the obsolete dialog before intent authorization (2.892166ms)
+✔ route change after intent authorization still blocks the obsolete outer broadcast (3.859ms)
+✔ a cold malformed route refuses and refresh cannot silently select root (1.456167ms)
+✔ late content hydration cannot replace the current route observation (1.227333ms)
+✔ the exact hash guard cancels authorization before the browser delivers hashchange (1.734417ms)
+✔ current-route writes still authorize, broadcast and reconcile normally (2.987625ms)
+✔ legacy explicit-mount app ignores Directory URL routing without new dependencies (3.923042ms)
+✔ rejected superseded same-URL Lens read cannot overwrite newer qualification (2.387958ms)
+✔ current-generation rejected route read remains visibly unqualified and non-actionable (1.630541ms)
+✔ carrier list never fetches payload and explicit open downloads exact invalid UTF-8 bytes (2.146875ms)
+✔ opened encrypted UTF-8 keeps the actual app ordinary editor disabled (2.995ms)
+✔ malformed supplied key clears the open lifecycle and a corrected key can retry (2.459667ms)
+✔ late carrier success or rejection cannot overwrite a new route or selection (4.684708ms)
+✔ explicit external upload carries more than Core inline limit without lossy text conversion (3.607667ms)
+✔ same-route selection or Lens change cancels late carrier results and releases an old preview URL (9.010708ms)
+✖ benchmark mode retains append-only real receipt/input evidence without raw transactions in memory (335.803709ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 19
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3411.090416
+
+✖ failing tests:
+
+test at browser/directory-routing.test.mjs:70:1
+✖ joined app lists headers without point bodies and hydrates only the selected file (20.147292ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Open verified bytes/. Input:
+  
+  '<h2>root.txt</h2><p>Selected revision header · content bytes not fetched. PRESENT.</p><button data-action="openSelected">Open selected file</button><pre>{\n' +
+    '  &quot;knowledge&quot;: &quot;PRESENT&quot;,\n' +
+    '  &quot;coverage&quot;: &quot;COMPLETE&quot;,\n' +
+    '  &quot;value&quot;: {\n' +
+    '    &quot;selection&quot;: {\n' +
+    '      &quot;author&quot;: &quot;0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A&quot;\n' +
+    '    },\n' +
+    '    &quot;revision&quot;: {\n' +
+    '      &quot;recordId&quot;: &quot;record&quot;,\n' +
+    '      &quot;firstAdmission&quot;: &quot;9&quot;,\n' +
+    '      &quot;profile&quot;: &quot;carrier-v1&quot;,\n' +
+    '      &quot;bodyLength&quot;: 64,\n' +
+    '      &quot;assurance&quot;: &quot;HEADER_VERIFIED_BODY_NOT_FETCHED&quot;\n' +
+    '    }\n' +
+    '  }\n' +
+    '}</pre>'
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/directory-routing.test.mjs:73:72)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '<h2>root.txt</h2><p>Selected revision header · content bytes not fetched. PRESENT.</p><button data-action="openSelected">Open selected file</button><pre>{\n  &quot;knowledge&quot;: &quot;PRESENT&quot;,\n  &quot;coverage&quot;: &quot;COMPLETE&quot;,\n  &quot;value&quot;: {\n    &quot;selection&quot;: {\n      &quot;author&quot;: &quot;0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A&quot;\n    },\n    &quot;revision&quot;: {\n      &quot;recordId&quot;: &quot;record&quot;,\n      &quot;firstAdmission&quot;: &quot;9&quot;,\n      &quot;profile&quot;: &quot;carrier-v1&quot;,\n      &quot;bodyLength&quot;: 64,\n      &quot;assurance&quot;: &quot;HEADER_VERIFIED_BODY_NOT_FETCHED&quot;\n    }\n  }\n}</pre>',
+    expected: /Open verified bytes/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at script/joined-harness.test.mjs:6:1
+✖ benchmark mode retains append-only real receipt/input evidence without raw transactions in memory (335.803709ms)
+  AssertionError [ERR_ASSERTION]: benchmark mode is explicit
+  + actual - expected
+  
+  + undefined
+  - 'append'
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/joined-harness.test.mjs:8:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'append',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

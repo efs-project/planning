@@ -1,0 +1,22 @@
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-EE5aoZ/joined-read-diagnostic.json
+{"width":32,"budget":32,"coverage":"UNKNOWN","failure":"eth_call: EVM error OutOfGas","paidFailure":"eth_call: execution reverted"}
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-EE5aoZ/joined-read-diagnostic.json
+{"width":32,"budget":16,"coverage":"PARTIAL","scanned":"16","paidFailure":"eth_call: execution reverted"}
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-EE5aoZ/joined-read-diagnostic.json
+{"width":32,"budget":8,"coverage":"PARTIAL","scanned":"8","paidGas":"8818456"}
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-EE5aoZ/joined-read-diagnostic.json
+{"width":32,"budget":4,"coverage":"PARTIAL","scanned":"4","paidGas":"4581432"}
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-EE5aoZ/joined-read-diagnostic.json
+{"width":32,"budget":1,"coverage":"PARTIAL","scanned":"1","paidGas":"1417062"}
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-EE5aoZ/joined-read-diagnostic.json
+{"width":64,"budget":32,"coverage":"UNKNOWN","failure":"eth_call: EVM error OutOfGas","paidFailure":"eth_call: execution reverted"}
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-EE5aoZ/joined-read-diagnostic.json
+{"width":64,"budget":16,"coverage":"UNKNOWN","failure":"eth_call: EVM error OutOfGas","paidFailure":"eth_call: execution reverted"}
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-EE5aoZ/joined-read-diagnostic.json
+{"width":64,"budget":8,"coverage":"PARTIAL","scanned":"8","paidFailure":"eth_call: execution reverted"}
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-EE5aoZ/joined-read-diagnostic.json
+{"width":64,"budget":4,"coverage":"PARTIAL","scanned":"4","paidGas":"8600867"}
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-EE5aoZ/joined-read-diagnostic.json
+{"width":64,"budget":1,"coverage":"PARTIAL","scanned":"1","paidGas":"2575292"}
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-EE5aoZ/joined-read-diagnostic.json
+READ_DIAGNOSTIC /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-EE5aoZ

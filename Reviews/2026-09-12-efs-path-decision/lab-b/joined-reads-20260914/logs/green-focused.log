@@ -1,0 +1,31 @@
+✔ joined app lists headers without point bodies and hydrates only the selected file (19.256916ms)
+✔ verified tiny PNG has a visible bounded frame and intrinsic dimensions (3.259625ms)
+✔ direct hash edits and browser back/forward re-resolve actual app rows and breadcrumbs (2.607125ms)
+✔ malformed and unavailable routes clear old actionable rows and can recover without reload (2.339792ms)
+✔ superseded folder reads cannot render after a newer URL has resolved (3.744583ms)
+✔ route change during preparation cancels the obsolete dialog before intent authorization (13.743333ms)
+✔ route change after intent authorization still blocks the obsolete outer broadcast (49.958667ms)
+✔ a cold malformed route refuses and refresh cannot silently select root (3.23425ms)
+✔ late content hydration cannot replace the current route observation (14.430125ms)
+✔ the exact hash guard cancels authorization before the browser delivers hashchange (5.646833ms)
+✔ current-route writes still authorize, broadcast and reconcile normally (5.475708ms)
+✔ legacy explicit-mount app ignores Directory URL routing without new dependencies (6.052708ms)
+✔ rejected superseded same-URL Lens read cannot overwrite newer qualification (4.947ms)
+✔ current-generation rejected route read remains visibly unqualified and non-actionable (3.388708ms)
+✔ carrier list never fetches payload and explicit open downloads exact invalid UTF-8 bytes (3.352666ms)
+✔ opened encrypted UTF-8 keeps the actual app ordinary editor disabled (3.639375ms)
+✔ malformed supplied key clears the open lifecycle and a corrected key can retry (3.350833ms)
+✔ late carrier success or rejection cannot overwrite a new route or selection (7.880583ms)
+✔ explicit external upload carries more than Core inline limit without lossy text conversion (6.381542ms)
+✔ same-route selection or Lens change cancels late carrier results and releases an old preview URL (14.449667ms)
+✔ joined pages qualify headers and own exact context Lens query continuations (1209.927541ms)
+✔ failed Name-coordinate read preserves successful placement provenance (404.571ms)
+✔ benchmark mode retains append-only real receipt/input evidence without raw transactions in memory (439.991625ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4712.551667

@@ -6,7 +6,7 @@ export function folderState(result) {
   if (result.coverage !== 'COMPLETE' || result.nameCoverage === 'PARTIAL' || result.kindCoverage === 'PARTIAL') {
     return {kind:'partial',label:'Partial observation — absence is not established'};
   }
-  if (result.knowledge === 'ABSENT' && result.value.length === 0) return {kind:'empty',label:'This mounted folder is empty in this Lens'};
+  if (result.knowledge === 'ABSENT' && result.value.length === 0) return {kind:'empty',label:result.filtered?'No matches in this complete observed query':'This mounted folder is empty in this Lens'};
   if (result.knowledge !== 'PRESENT') return {kind:'unknown',label:'Folder unavailable — not empty'};
   return {kind:'complete',label:'Complete folder traversal'};
 }

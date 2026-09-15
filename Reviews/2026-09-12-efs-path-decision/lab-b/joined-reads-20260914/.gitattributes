@@ -1,0 +1,2 @@
+# Verbatim, hash-indexed tool output retains its original blank-line whitespace.
+logs/*.log -whitespace

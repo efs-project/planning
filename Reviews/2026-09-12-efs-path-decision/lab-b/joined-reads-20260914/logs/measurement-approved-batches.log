@@ -1,0 +1,41 @@
+{"phase":"live","n":100,"elapsedMs":1699,"nodeRss":170639360,"nodePeakRss":170639360,"anvilRss":48349184,"outputBytes":1389929}
+{"phase":"live","n":200,"elapsedMs":2590,"nodeRss":171540480,"nodePeakRss":175816704,"anvilRss":75153408,"outputBytes":2258495}
+{"phase":"live","n":300,"elapsedMs":3426,"nodeRss":164315136,"nodePeakRss":175816704,"anvilRss":79020032,"outputBytes":3122221}
+{"phase":"live","n":400,"elapsedMs":4297,"nodeRss":166313984,"nodePeakRss":175816704,"anvilRss":143572992,"outputBytes":3985965}
+{"phase":"live","n":500,"elapsedMs":5145,"nodeRss":166789120,"nodePeakRss":175816704,"anvilRss":232439808,"outputBytes":4849710}
+{"phase":"live","n":600,"elapsedMs":5999,"nodeRss":168050688,"nodePeakRss":175816704,"anvilRss":324026368,"outputBytes":5713505}
+{"phase":"live","n":700,"elapsedMs":7288,"nodeRss":166674432,"nodePeakRss":175816704,"anvilRss":195002368,"outputBytes":6577300}
+{"phase":"live","n":800,"elapsedMs":9050,"nodeRss":167411712,"nodePeakRss":175816704,"anvilRss":238059520,"outputBytes":7441095}
+{"phase":"live","n":900,"elapsedMs":10581,"nodeRss":167886848,"nodePeakRss":175816704,"anvilRss":358793216,"outputBytes":8304914}
+{"phase":"live","n":1000,"elapsedMs":12096,"nodeRss":166838272,"nodePeakRss":175816704,"anvilRss":479313920,"outputBytes":9169311}
+{"phase":"lifetime","n":1000,"elapsedMs":19324,"nodeRss":158334976,"nodePeakRss":175816704,"anvilRss":461701120,"outputBytes":13641049}
+{"phase":"lifetime","n":2000,"elapsedMs":25706,"nodeRss":163528704,"nodePeakRss":175816704,"anvilRss":841957376,"outputBytes":18114287}
+{"phase":"lifetime","n":3000,"elapsedMs":32904,"nodeRss":165511168,"nodePeakRss":175816704,"anvilRss":945963008,"outputBytes":22641409}
+{"phase":"lifetime","n":4000,"elapsedMs":43206,"nodeRss":163594240,"nodePeakRss":175816704,"anvilRss":302497792,"outputBytes":27114647}
+{"phase":"lifetime","n":5000,"elapsedMs":52632,"nodeRss":169181184,"nodePeakRss":175816704,"anvilRss":801947648,"outputBytes":31587885}
+{"phase":"lifetime","n":6000,"elapsedMs":63997,"nodeRss":171655168,"nodePeakRss":175816704,"anvilRss":524468224,"outputBytes":36115009}
+{"phase":"lifetime","n":7000,"elapsedMs":77060,"nodeRss":173277184,"nodePeakRss":175816704,"anvilRss":530710528,"outputBytes":40588245}
+{"phase":"lifetime","n":8000,"elapsedMs":92685,"nodeRss":179552256,"nodePeakRss":179552256,"anvilRss":949321728,"outputBytes":45061481}
+{"phase":"lifetime","n":9000,"elapsedMs":108546,"nodeRss":180813824,"nodePeakRss":180912128,"anvilRss":576815104,"outputBytes":49588641}
+{"phase":"lifetime","n":10000,"elapsedMs":124863,"nodeRss":184958976,"nodePeakRss":184958976,"anvilRss":1398521856,"outputBytes":54081791}
+{"phase":"dense-authors","n":8,"elapsedMs":127967,"nodeRss":186269696,"nodePeakRss":186269696,"anvilRss":1419509760,"outputBytes":54295882}
+{"phase":"dense-authors","n":16,"elapsedMs":130888,"nodeRss":188416000,"nodePeakRss":188416000,"anvilRss":1779171328,"outputBytes":54494355}
+JOINED_REPORT /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-RVskvM/joined-measurement.json
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: RUN_SAFETY_STOP
+    at checkpoint (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:107:5)
+    at async seedJoinedScale (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:79:40)
+    at async measureJoined (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:110:16)
+    at async file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:148:79 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v26.0.0

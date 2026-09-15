@@ -1,0 +1,82 @@
+✔ joined app lists headers without point bodies and hydrates only the selected file (14.378959ms)
+✖ joined app retains query-qualified uncertain rows without a second local filter (2.411583ms)
+✔ verified tiny PNG has a visible bounded frame and intrinsic dimensions (1.865ms)
+✔ direct hash edits and browser back/forward re-resolve actual app rows and breadcrumbs (2.170083ms)
+✔ malformed and unavailable routes clear old actionable rows and can recover without reload (2.332209ms)
+✔ superseded folder reads cannot render after a newer URL has resolved (1.3645ms)
+✔ route change during preparation cancels the obsolete dialog before intent authorization (2.708875ms)
+✔ route change after intent authorization still blocks the obsolete outer broadcast (3.377333ms)
+✔ a cold malformed route refuses and refresh cannot silently select root (0.958083ms)
+✔ late content hydration cannot replace the current route observation (1.192ms)
+✔ the exact hash guard cancels authorization before the browser delivers hashchange (1.678ms)
+✔ current-route writes still authorize, broadcast and reconcile normally (2.947875ms)
+✔ legacy explicit-mount app ignores Directory URL routing without new dependencies (3.177208ms)
+✔ rejected superseded same-URL Lens read cannot overwrite newer qualification (2.22575ms)
+✔ current-generation rejected route read remains visibly unqualified and non-actionable (1.491292ms)
+✔ carrier list never fetches payload and explicit open downloads exact invalid UTF-8 bytes (1.353834ms)
+✔ opened encrypted UTF-8 keeps the actual app ordinary editor disabled (2.242667ms)
+✔ malformed supplied key clears the open lifecycle and a corrected key can retry (1.459041ms)
+✔ late carrier success or rejection cannot overwrite a new route or selection (2.88875ms)
+✔ explicit external upload carries more than Core inline limit without lossy text conversion (2.482708ms)
+✔ same-route selection or Lens change cancels late carrier results and releases an old preview URL (4.13275ms)
+✔ typed directory unknown kind qualifies membership without claiming an empty folder (0.631875ms)
+✖ exhaustive filtered empty query is not described as an empty folder (0.792417ms)
+✔ cost projection leads with Base and maps old config by ID without changing edited assumptions (10.706167ms)
+✔ recent action table includes unknown and reverted receipts, deduplicates hashes, and qualifies the total (0.658291ms)
+✔ no receipts or missing assumptions never imply measured zero spending (0.165583ms)
+✔ contradictory observations render once as unknown and table text cannot inject markup (0.167166ms)
+✔ recent rows are bounded but totals cover every unique recorded action (0.202ms)
+✔ overflowing edited assumptions remain unknown instead of displaying infinite dollars (0.056417ms)
+✔ unknown and partial zero-row observations never become empty folders (0.094959ms)
+✔ known members survive unavailable or invalid names (0.130083ms)
+✔ tag filter distinguishes File from revision and retains unevaluated subjects (0.111917ms)
+✔ only qualified selected bytes can be opened or downloaded (0.053541ms)
+✔ network estimate uses measured gas, gwei, ETH USD and explicit extra fee only (0.062875ms)
+✔ cost totals deduplicate receipts, include reverted gas, and retain unknown costs (0.082917ms)
+✔ contradictory receipts for one hash do not become a fabricated total (0.041791ms)
+✔ parseable damaged journal hashes become unknown cost without breaking the screen (0.044542ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 35
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1293.277333
+
+✖ failing tests:
+
+test at browser/directory-routing.test.mjs:75:1
+✖ joined app retains query-qualified uncertain rows without a second local filter (2.411583ms)
+  AssertionError [ERR_ASSERTION]: server-retained uncertain row must not be filtered again
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/directory-routing.test.mjs:78:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '<div class="empty-list">No matches in this complete observed folder.</div>',
+    expected: /root\.txt/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at browser/files-view.test.mjs:8:1
+✖ exhaustive filtered empty query is not described as an empty folder (0.792417ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /No matches/. Input:
+  
+  'This mounted folder is empty in this Lens'
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/files-view.test.mjs:10:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'This mounted folder is empty in this Lens',
+    expected: /No matches/,
+    operator: 'match',
+    diff: 'simple'
+  }

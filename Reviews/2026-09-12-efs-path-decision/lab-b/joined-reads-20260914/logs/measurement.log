@@ -1,0 +1,25 @@
+JOINED_REPORT /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-9KJD1L/joined-measurement.json
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: setup/live/10
++ actual - expected
+
++ 'REVERTED'
+- 'SUCCESS'
+
+    at send (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/compact-environment.mjs:110:14)
+    at async flush (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:32:5)
+    at async seedJoinedScale (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:46:33)
+    at async measureJoined (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:108:16)
+    at async file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-joined.mjs:146:79 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'REVERTED',
+  expected: 'SUCCESS',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v26.0.0
