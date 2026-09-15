@@ -47,10 +47,21 @@ test('joined pages qualify headers and own exact context Lens query continuation
   const negativeEnd=await sdk.listFolderPage({...args,search:'no-match',continuation:negative.continuation});
   assert.equal(negativeEnd.retainedSoFar,'0');assert.equal(negativeEnd.queryAbsent,true);assert.equal(negativeEnd.queryKnowledge,'ABSENT');
   const pageSelector=new e.Interface(manifest.contracts.joined.abi).getFunction('readPage').selector;
-  const unavailable=createFilesCompactSdk({ethers:e,manifest,rpc:(method,params)=>{if(method==='eth_call'&&params[0].data.startsWith(pageSelector))throw Error('joined read unavailable');return rpc(method,params);}});
-  const unknown=await unavailable.listFolderPage({authors,context:await unavailable.pin()});
+  let failPage=true;
+  const unavailable=createFilesCompactSdk({ethers:e,manifest,rpc:(method,params)=>{if(failPage&&method==='eth_call'&&params[0].data.startsWith(pageSelector))throw Error('joined read unavailable');return rpc(method,params);}});
+  const failureContext=await unavailable.pin(),unknown=await unavailable.listFolderPage({authors,context:failureContext});
   assert.equal(unknown.kind,'files-joined-page');assert.equal(unknown.queryCoverage,'UNKNOWN');assert.equal(unknown.queryAbsent,false);
+  assert.equal(unknown.segmentStartsAtOrigin,true);assert.equal(unknown.segmentCompleteFromOrigin,false);
+  assert.equal(unknown.scanned,null);assert.equal(unknown.hydrations,null);assert.equal(unknown.rawTotal,null);
+  assert.equal(unknown.scannedSoFar,'0');assert.equal(unknown.selectedSoFar,'0');
   for(const field of ['value','knowledge','coverage'])assert.equal(field in unknown,false,'UNKNOWN cannot be a generic empty result');
+  failPage=false;const prefix=await unavailable.listFolderPage({authors,context:failureContext,budget:1});failPage=true;
+  const failedSuffix=await unavailable.listFolderPage({authors,context:failureContext,budget:1,continuation:prefix.continuation});
+  assert.equal(failedSuffix.segmentStartsAtOrigin,false);assert.equal(failedSuffix.segmentCompleteFromOrigin,false);
+  assert.equal(failedSuffix.scanned,null);assert.equal(failedSuffix.hydrations,null);
+  for(const field of ['scannedSoFar','selectedSoFar','rawTotal','retainedSoFar'])assert.equal(failedSuffix[field],prefix[field],`preserve known ${field}`);
+  assert.equal(failedSuffix.completeFromOwnedOrigin,false);assert.equal(failedSuffix.queryAbsent,false);
+  assert.equal(failedSuffix.queryKnowledge,'PRESENT','known prefix match survives an unavailable suffix');
   for(const changes of [{authors:[...authors].reverse()},{tagScope:'revision'},{concept:e.id('other')},{search:'a'},{policy:'no-tiebreak'},{context:await sdk.pin()}])
     await assert.rejects(sdk.listFolderPage({...args,continuation:first.continuation,...changes}),/CONTINUATION/);
   const cold=createFilesCompactSdk({ethers:e,manifest,rpc});
@@ -86,4 +97,78 @@ test('failed Name-coordinate read preserves successful placement provenance',{ti
   assert.equal(partial.value.target,plan.file,'known selected target survives Name failure');
   assert.equal(partial.value.selection.status,1);assert.equal(partial.value.selection.author,e.zeroPadValue(wallets.alice.address,32));
   assert.equal(partial.value.kind,'file');assert.equal(partial.value.name.knowledge,'UNKNOWN');
+});
+
+test('joined rows match independent placement Name File and tag observations across pinned cases',{timeout:120000},async t=>{
+  const env=await createEnvironment(profile);t.after(()=>env.close());
+  const {ethers:e,manifest,rpc,wallets}=env,authors=[wallets.alice.address,wallets.bob.address];
+  const sdk=createFilesCompactSdk({ethers:e,manifest,rpc,journal:await env.createJournal('parity')});
+  const run=async(operation,args,who='alice')=>{
+    const p=await sdk.prepare({operation,author:wallets[who].address,authors,...args});
+    const signed=await sdk.authorize(p,d=>wallets[who].signingKey.sign(d).serialized);
+    await sdk.submit(signed,tx=>env.send(operation,tx,who));return p;
+  };
+  const a=await run('create',{name:'a.txt',salt:e.id('parity-a'),document:'alpha'});
+  const dir=await run('createDirectory',{name:'b-dir',salt:e.id('parity-dir')});
+  const masked=await run('create',{name:'c.txt',salt:e.id('parity-mask'),document:'masked'});
+  const tag=await run('addTag',{file:a.file,scope:'file',conceptLabel:'approved'});
+  await run('addTag',{file:a.file,scope:'revision',concept:tag.concept});
+  await run('addTag',{file:dir.file,scope:'directory',concept:tag.concept});
+  const F=e.id('efs2/purpose/folder/1');
+  await env.transact('ledger','bind',[F,manifest.folder,e.id('c.txt'),masked.file,0],'lower-placement','bob');
+  await run('remove',{file:masked.file,name:'c.txt'});
+  const compareTag=(joined,point)=>{
+    for(const key of ['subject','concept','evaluated','present'])assert.equal(joined[key],point[key],key);
+    if(point.selection)assert.deepEqual(joined.selection,point.selection);
+  };
+  const checkCase=async({label,expected,policy='ordered',tagScope='none',search='',reverse=false,knowledge='PRESENT'})=>t.test(label,async()=>{
+    const context=await sdk.pin(),selectedAuthors=reverse?[...authors].reverse():authors;
+    const args={authors:selectedAuthors,context,budget:1,concept:tag.concept,policy,tagScope,search};
+    let page;const rows=[];
+    do{page=await sdk.listFolderPage({...args,continuation:page?.continuation});rows.push(...page.pageRows);}while(page.continuation);
+    assert.equal(page.queryCoverage,'COMPLETE');assert.equal(page.queryKnowledge,knowledge);
+    assert.equal(page.queryAbsent,expected.length===0);
+    assert.deepEqual(rows.map(r=>r.name.value).sort(),expected);
+    const mask=await sdk.readPlacement({name:'c.txt',authors:selectedAuthors,context});
+    assert.equal(mask.knowledge,reverse?'PRESENT':'MASKED');
+    for(const row of rows){
+      const placement=await sdk.readPlacement({name:row.name.value,authors:selectedAuthors,context});
+      assert.equal(placement.value.target,row.target);assert.equal(placement.value.kind,row.kind);
+      assert.equal(placement.value.position,row.position);assert.equal(placement.value.role,row.role);
+      assert.deepEqual(placement.value.selection,row.selection);
+      const name=await sdk.readName({position:row.position,folder:manifest.folder,role:row.role,context});
+      for(const key of ['knowledge','coverage','value','recordId','firstAdmission'])assert.equal(row.name[key],name[key],`Name ${key}`);
+      const stable=await sdk.readTag({subject:row.target,target:row.target,concept:tag.concept,authors:selectedAuthors,context});
+      compareTag(row.point.value.fileTag,stable.value);
+      if(row.kind==='directory'){
+        const point=await sdk.readDirectory({directory:row.target,context});assert.equal(point.knowledge,row.point.knowledge);
+        assert.equal(row.point.value.selection,null);assert.equal(row.point.value.revision,null);
+        assert.equal(row.point.value.revisionTag.knowledge,'NOT_APPLICABLE');assert.equal(row.point.value.revisionTag.applicable,false);
+      }else{
+        const point=await sdk.readFile({file:row.target,authors:selectedAuthors,context,concept:tag.concept,policy});
+        assert.equal(row.point.knowledge,point.knowledge);assert.equal(row.point.value.selection.status,point.value.selection.status);
+        compareTag(row.point.value.fileTag,point.value.fileTag);
+        if(point.value.revision){
+          assert.deepEqual(row.point.value.selection,point.value.selection);
+          for(const key of ['recordId','typeId','firstAdmission','parent','file'])assert.equal(row.point.value.revision[key],point.value.revision[key],`revision ${key}`);
+          assert.equal(row.point.value.revision.bodyLength,e.getBytes(point.value.revision.document).length+(point.value.revision.parent===e.ZeroHash?32:64));
+          assert.equal(row.point.value.revision.assurance,'HEADER_VERIFIED_BODY_NOT_FETCHED');
+          compareTag(row.point.value.revisionTag,point.value.revisionTag);
+        }else{
+          assert.equal(row.point.value.revision,null);assert.equal(row.point.value.revisionTag.evaluated,false);
+          assert.equal(row.point.value.revisionTag.knowledge,'UNKNOWN');
+        }
+      }
+    }
+  });
+  for(const tagScope of ['none','file','revision','either'])await checkCase({label:`mixed masked/${tagScope}`,tagScope,expected:tagScope==='revision'?['a.txt']:['a.txt','b-dir']});
+  await run('edit',{file:a.file,document:'alice next'});
+  await checkCase({label:'new HEAD drops selected revision tag',tagScope:'revision',expected:[],knowledge:'ABSENT'});
+  await checkCase({label:'new HEAD retains stable tag',tagScope:'file',expected:['a.txt','b-dir']});
+  await run('edit',{file:a.file,document:'bob competing'},'bob');
+  await checkCase({label:'ordered Alice then Bob',expected:['a.txt','b-dir']});
+  await checkCase({label:'ordered Bob then Alice',reverse:true,expected:['a.txt','b-dir','c.txt']});
+  await checkCase({label:'diagnostic conflict retains independent stable tag',policy:'no-tiebreak',tagScope:'revision',expected:['a.txt'],knowledge:'UNKNOWN'});
+  await checkCase({label:'definite Directory match after an uncertain File',policy:'no-tiebreak',tagScope:'file',expected:['a.txt','b-dir']});
+  await checkCase({label:'unknown-only predicate is not a known match',policy:'no-tiebreak',search:'no-match',expected:['a.txt'],knowledge:'UNKNOWN'});
 });

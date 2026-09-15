@@ -398,11 +398,13 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       &&typeof search==='string'&&e.toUtf8Bytes(search).length<=255&&(scope==='none'||!eq(concept,Z)),'QUERY');
     const query=[concept,['none','file','revision','either'].indexOf(scope),policy==='no-tiebreak',search];
     const queryId=hash(['bytes32','bytes32','bytes32','uint8','bool','string'],[folder,basis.lens.hash,...query]);
-    let walk={cursor:'0x',scanned:0n,selected:0n,retained:0n,rawTotal:null};
+    let walk={cursor:'0x',scanned:0n,selected:0n,retained:0n,knownMatch:false,rawTotal:null};
     if(continuation!==undefined){walk=joinedContinuations.get(continuation);
       check(walk&&walk.context===context&&eq(walk.queryId,queryId),'CONTINUATION');}
-    const unavailable=reason=>freeze({kind:'files-joined-page',basis,pageRows:[],queryKnowledge:walk.retained>0n?'PRESENT':'UNKNOWN',queryCoverage:'UNKNOWN',
-      scanStatus:'UNKNOWN',completeFromOwnedOrigin:false,queryAbsent:false,retainedSoFar:String(walk.retained),reason,
+    const unavailable=reason=>freeze({kind:'files-joined-page',basis,pageRows:[],queryKnowledge:walk.knownMatch?'PRESENT':'UNKNOWN',queryCoverage:'UNKNOWN',
+      scanStatus:'UNKNOWN',segmentStartsAtOrigin:walk.cursor==='0x',segmentCompleteFromOrigin:false,
+      scanned:null,scannedSoFar:String(walk.scanned),rawTotal:walk.rawTotal===null?null:String(walk.rawTotal),selectedSoFar:String(walk.selected),hydrations:null,
+      completeFromOwnedOrigin:false,queryAbsent:false,retainedSoFar:String(walk.retained),filtered:scope!=='none'||search!=='',reason,
       nameCoverage:'PARTIAL',kindCoverage:'PARTIAL',headerCoverage:'PARTIAL',tagCoverage:'PARTIAL'});
     const canonical=await rpc('eth_getBlockByNumber',[e.toQuantity(BigInt(context.blockNumber)),false]);
     check(eq(canonical?.hash,context.blockHash),'BLOCK_REORG');
@@ -441,7 +443,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
         point:result(basis,knowledge,kind==='directory'||head.status===0||head.status===2||headerKnowledge==='PRESENT'?'COMPLETE':'PARTIAL',value),
         match:({0:'UNKNOWN',1:'MATCH',2:'NONMATCH'})[Number(row.matchStatus)]};
     });
-    const retained=walk.retained+BigInt(rows.length),completeFromOwnedOrigin=placement===2&&scanned===page.rawTotal;
+    const retained=walk.retained+BigInt(rows.length),knownMatch=walk.knownMatch||rows.some(row=>row.match==='MATCH'),completeFromOwnedOrigin=placement===2&&scanned===page.rawTotal;
     const extra={scanned:String(page.scanned),scannedSoFar:String(scanned),rawTotal:String(page.rawTotal),selectedSoFar:String(page.selectedSoFar),retainedSoFar:String(retained),hydrations:String(page.hydrations),
       nameCoverage:rows.every(r=>r.name.knowledge==='PRESENT')?'COMPLETE':'PARTIAL',kindCoverage:rows.every(r=>r.kind!=='unsupported')?'COMPLETE':'PARTIAL',
       headerCoverage:rows.every(r=>r.kind==='directory'||r.point.value.revision?.knowledge==='PRESENT')?'COMPLETE':'PARTIAL',
@@ -449,8 +451,8 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       scanStatus:['UNKNOWN','PARTIAL','EXHAUSTED'][placement],segmentStartsAtOrigin:page.startsAtOrigin,segmentCompleteFromOrigin:page.completeFromOrigin,
       completeFromOwnedOrigin,queryAbsent:completeFromOwnedOrigin&&retained===0n};
     if(placement===1){const token=Object.freeze({kind:'compact-joined-page-continuation'});
-      joinedContinuations.set(token,{context,queryId,cursor:page.continuation,scanned,selected:page.selectedSoFar,retained,rawTotal:page.rawTotal});extra.continuation=token;}
-    return freeze({kind:'files-joined-page',basis,pageRows:rows,queryKnowledge:retained>0n?'PRESENT':completeFromOwnedOrigin?'ABSENT':'UNKNOWN',
+      joinedContinuations.set(token,{context,queryId,cursor:page.continuation,scanned,selected:page.selectedSoFar,retained,knownMatch,rawTotal:page.rawTotal});extra.continuation=token;}
+    return freeze({kind:'files-joined-page',basis,pageRows:rows,queryKnowledge:knownMatch?'PRESENT':completeFromOwnedOrigin&&retained===0n?'ABSENT':'UNKNOWN',
       queryCoverage:placement===2?'COMPLETE':'PARTIAL',...extra});
   }
   async function listFolder(args={}) {

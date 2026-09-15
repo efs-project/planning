@@ -94,7 +94,15 @@ async function run(task) {
   state.busy=true; controls();
   try { await task(navigation); }
   catch(error) { if(error.code!=='ROUTE_CHANGED'&&(routeCurrent(navigation)||(!navigation&&!state.navigation))) notice(error.message ?? String(error),'error'); }
-  finally { state.busy=false; render(); }
+  finally { state.busy=false; render();flushJoinedQuery(); }
+}
+const joinedQueryKey=()=>JSON.stringify([$('search').value,$('filter-scope').value,state.filterConcept,$('lens').value]);
+function flushJoinedQuery(){
+  if(!state.queryRefreshPending||state.busy)return;
+  state.queryRefreshPending=false;run(()=>refresh());
+}
+function refreshJoinedQuery(){
+  state.queryRefreshPending=true;++state.readGeneration;flushJoinedQuery();
 }
 function controls() {
   document.querySelectorAll('[data-action]').forEach(button=>{ button.disabled=state.busy || state.routeLoading || !state.sdk || button.dataset.blocked==='true'; });
@@ -120,9 +128,9 @@ function remember(point) {
 async function refresh(continuing=false) {
   if(state.paths&&!routeCurrent(state.navigation)) return handleRoute();
   if(state.navigation?.invalid)throw state.navigation.invalid;
-  const navigation=state.navigation,generation=++state.readGeneration;
+  const navigation=state.navigation,generation=++state.readGeneration,queryKey=hasJoined()?joinedQueryKey():null;
   clearContent();
-  const check=()=>{checkRoute(navigation);if(generation!==state.readGeneration)throw Object.assign(new Error('Observation superseded.'),{code:'ROUTE_CHANGED'});};
+  const check=()=>{checkRoute(navigation);if(generation!==state.readGeneration||(queryKey!==null&&queryKey!==joinedQueryKey()))throw Object.assign(new Error('Observation superseded.'),{code:'ROUTE_CHANGED'});};
   const lens=authors(),policy=$('lens').value==='conflict'?'no-tiebreak':'ordered';
   let context=state.context,page=state.page,folder=state.folder,route=state.route;
   if(state.paths){state.routeLoading=true;navigation.ready=false;}
@@ -146,7 +154,7 @@ async function refresh(continuing=false) {
       const joinedPage=await state.sdk.listFolderPage({folder,authors:lens,budget:32,context,continuation,concept,policy,
         tagScope:state.filterConcept?$('filter-scope').value:'none',search:$('search').value});check();
       const fresh=joinedPage.pageRows.map(row=>({...row})),rows=continuing?[...state.rows,...fresh]:fresh;
-      page={...joinedPage,value:rows,coverage:joinedPage.queryCoverage,knowledge:rows.length?'PRESENT':joinedPage.queryKnowledge,
+      page={...joinedPage,value:rows,coverage:joinedPage.queryCoverage,knowledge:joinedPage.queryKnowledge,
         ...Object.fromEntries(['nameCoverage','kindCoverage','headerCoverage','tagCoverage'].map(key=>[key,continuing&&state.page?.[key]==='PARTIAL'?'PARTIAL':joinedPage[key]]))};
       Object.assign(state,{rows,context,page,folder,route});if(state.paths)navigation.ready=true;
       if(!selectedRow())state.selected=null;notice('');return;
@@ -203,7 +211,7 @@ function renderRows() {
     :filterRows(state.rows,{search:$('search').value,tag:!!state.filterConcept,scope:$('filter-scope').value});
   $('coverage').className=`coverage ${view.kind!=='complete' && view.kind!=='empty' ? 'warning':''}`;
   $('coverage').textContent=state.busy && !state.page ? 'Reading qualified folder membership…'
-    : `${view.label}${state.page ? ` · ${filtered.rows.length} shown / ${state.rows.length} observed placements`:''}${filtered.uncertain ? ` · ${filtered.uncertain} uncertain matches retained`:''}${state.filterConcept ? ` · tag “${state.filterConcept}” (${ $('filter-scope').selectedOptions[0].textContent})`:''}${$('lens').value==='conflict'?' · HEAD conflict review; Alice-first placements':''}`;
+    : `${view.label}${state.page ? hasJoined()?` · ${state.rows.length} retained query rows · ${state.page.selectedSoFar??'unknown'} selected placements`:` · ${filtered.rows.length} shown / ${state.rows.length} observed placements`:''}${filtered.uncertain ? ` · ${filtered.uncertain} uncertain matches retained`:''}${state.filterConcept ? ` · tag “${state.filterConcept}” (${ $('filter-scope').selectedOptions[0].textContent})`:''}${$('lens').value==='conflict'?' · HEAD conflict review; Alice-first placements':''}`;
   $('rows').innerHTML=filtered.rows.map(row=>{
     const point=row.point, revision=point?.value?.revision;
     const name=row.name?.knowledge==='PRESENT'?row.name.value:`Name ${row.name?.knowledge?.toLowerCase()??'unavailable'} · ${short(row.file)}`;
@@ -229,7 +237,7 @@ function renderDetail() {
       <div class="file-actions">${row.kind==='directory'&&knownName?'<button data-action="enter">Open directory →</button>':''}${action('rename','Rename',!knownName||row.kind!=='directory')}${action('move','Move',!knownName||row.kind!=='directory')}${action('remove','Remove placement',!knownName||row.kind!=='directory')}</div>
       <p>Placements are links, not ownership. Moving or removing one never rewrites or destroys descendants. A Lens may contain aliases or cycles.</p>${hasCarriers()&&row.kind==='directory'?tagControls(point,true):''}<details><summary>Descriptor and selected edge</summary><pre>${escape(json(row))}</pre></details>`;return;
   }
-  if(revision?.assurance){$('detail').innerHTML=`<h2>${escape(name)}</h2><p>Selected revision header · content bytes not fetched. ${escape(revision.knowledge??'PRESENT')}.</p><button data-action="openSelected">Open selected file</button><pre>${escape(json(point))}</pre>`;return;}
+  if(revision?.assurance){$('detail').innerHTML=`<h2>${escape(name)}</h2><p>Selected revision header · content bytes not fetched. ${escape(revision.knowledge??'PRESENT')}.</p><button data-action="openSelected">Open selected file</button><details><summary>Header and basis details</summary><pre>${escape(json(point))}</pre></details>`;return;}
   if(revision?.profile==='carrier-v1'){
     const bytes=verifiedBytes(row),text=bytes?textPreview(bytes):null,d=revision.content,content=state.contentResult;
     $('detail').innerHTML=`<h2>${escape(name)}</h2><p>${escape(contentMessage(content))}${state.contentRequest?' · opening…':''}</p>
@@ -465,11 +473,11 @@ $('editor-form').addEventListener('submit',event=>{
     } catch(error) { if(state.operation===job&&routeCurrent(navigation))$('editor-error').textContent=error.message; throw error; }
   });
 });
-$('search').addEventListener('input',()=>{if(hasJoined())run(()=>refresh());else{renderRows();controls();}});
+$('search').addEventListener('input',()=>{if(hasJoined())refreshJoinedQuery();else{renderRows();controls();}});
 addEventListener('hashchange',handleRoute);
 addEventListener('popstate',handleRoute);
 $('lens').addEventListener('change',()=>run(()=>refresh()));
-$('filter-scope').addEventListener('change',()=>{if(hasJoined())run(()=>refresh());else{renderRows();controls();}});
+$('filter-scope').addEventListener('change',()=>{if(hasJoined())refreshJoinedQuery();else{renderRows();controls();}});
 $('signer').addEventListener('change',()=>run(async()=>{
   const wallet=new ethers.Wallet(state.keys[$('signer').value]);
   if(wallet.address.toLowerCase()!==state.config.manifest.authors[$('signer').value].toLowerCase()) throw new Error('Signer mismatch.');

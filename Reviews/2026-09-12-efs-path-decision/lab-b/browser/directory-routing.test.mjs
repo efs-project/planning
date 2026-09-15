@@ -14,7 +14,7 @@ const source=(await readFile(new URL('./app.mjs',import.meta.url),'utf8')).repla
 const ethers=await loadEthers(),key='0x'+'11'.repeat(32),wallet=new ethers.Wallet(key);
 const tick=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};
 const deferred=()=>{let resolve,reject;const promise=new Promise((r,j)=>{resolve=r;reject=j;});return {promise,resolve,reject};};
-async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,initial='#/',typed=true,carriers=false,image=false,encrypted=false,joined=false}={}){
+async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedRead,initial='#/',typed=true,carriers=false,image=false,encrypted=false,joined=false}={}){
   const listeners=new Map(),elements=new Map();
   const element=id=>{
     if(!elements.has(id))elements.set(id,{id,value:'',textContent:'',innerHTML:'',dataset:{},disabled:false,hidden:false,open:false,
@@ -49,7 +49,7 @@ async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,initial
   const config={rpcUrl:'http://127.0.0.1:12346',manifest:{chainId:'31337',folder:'root',filesProfile:'typed-directory-v1',authors:{alice:wallet.address,bob:'0x00000000000000000000000000000000000000b2'},contracts:{ledger:{address:wallet.address}}},mounts:[{id:'root',label:'Files'}]};
   if(!typed)delete config.manifest.filesProfile;
   if(carriers){config.manifest.contentProfile='raw-sha256-aesgcm-v2';config.carrierOrigin='http://127.0.0.1:12347';}
-  if(joined){config.manifest.contracts.joined={address:wallet.address};sdk.listFolderPage=async args=>{stats.joined++;const {value,coverage,knowledge,...page}=await sdk.listFolder(args);return {...page,kind:'files-joined-page',queryKnowledge:knowledge,queryCoverage:coverage,pageRows:value.map(r=>Object.freeze({...r,match:args.search?'UNKNOWN':'MATCH',point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{selection:{author:wallet.address},revision:{recordId:'record',firstAdmission:'9',profile:'carrier-v1',bodyLength:64,assurance:'HEADER_VERIFIED_BODY_NOT_FETCHED'}}}}))};};}
+  if(joined){config.manifest.contracts.joined={address:wallet.address};sdk.listFolderPage=async args=>{stats.joined++;const {value,coverage,knowledge,...page}=await sdk.listFolder(args);const result={...page,kind:'files-joined-page',queryKnowledge:knowledge,queryCoverage:coverage,selectedSoFar:'6',scannedSoFar:'6',rawTotal:'6',pageRows:value.map(r=>Object.freeze({...r,match:args.search?'UNKNOWN':'MATCH',point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{selection:{author:wallet.address},revision:{recordId:'record',firstAdmission:'9',profile:'carrier-v1',bodyLength:64,assurance:'HEADER_VERIFIED_BODY_NOT_FETCHED'}}}}))};return joinedRead?joinedRead(args,result):result;};}
   const stored=new Map();const localStorage={getItem:k=>stored.get(k)??null,setItem:(k,v)=>stored.set(k,v)};
   const fetch=async(url,options)=>({ok:true,async json(){return url==='/config.json'?config:{alice:key};},async text(){const req=JSON.parse(options.body);
     if(req.method==='eth_sendRawTransaction')stats.broadcast++;
@@ -76,6 +76,37 @@ test('joined app retains query-qualified uncertain rows without a second local f
   const a=await app({carriers:true,joined:true});a.element('search').value='no-match';
   a.element('search').listeners.get('input')();await tick();
   assert.match(a.element('rows').innerHTML,/root\.txt/,'server-retained uncertain row must not be filtered again');
+});
+test('joined query changes during a busy read coalesce and never install an obsolete continuation',async()=>{
+  const first=deferred(),latest=deferred(),queries=[];
+  const a=await app({carriers:true,joined:true,joinedRead:async(args,result)=>{
+    queries.push({search:args.search,scope:args.tagScope,continuation:args.continuation});
+    if(args.search==='old')await first.promise;
+    if(args.search==='latest')await latest.promise;
+    return {...result,queryCoverage:'PARTIAL',continuation:{query:args.search,scope:args.tagScope},pageRows:[{...result.pageRows[0],name:{knowledge:'PRESENT',value:(args.search||'initial')+'.txt'}}]};
+  }});
+  a.element('filter-concept').value=ethers.id('approved');await a.click('filter');
+  a.element('search').value='old';a.element('search').listeners.get('input')();await tick();
+  a.element('search').value='middle';a.element('search').listeners.get('input')();
+  a.element('search').value='latest';a.element('search').listeners.get('input')();
+  a.element('filter-scope').value='revision';a.element('filter-scope').listeners.get('change')();
+  first.resolve();await tick();assert.doesNotMatch(a.element('rows').innerHTML,/old\.txt/,'obsolete rows must not install while latest read is pending');
+  latest.resolve();await tick();assert.match(a.element('rows').innerHTML,/latest\.txt/);
+  assert.equal(queries.some(q=>q.search==='middle'),false,'coalesce intermediate query');
+  await a.click('continue');assert.equal(queries.at(-1).continuation.query,'latest');
+  assert.equal(queries.at(-1).scope,'revision');
+  assert.equal(queries.at(-1).continuation.scope,queries.at(-1).scope);
+});
+test('joined counts identify retained rows and selected placements separately',async()=>{
+  const a=await app({carriers:true,joined:true});assert.match(a.element('coverage').textContent,/retained query rows/);
+  assert.match(a.element('coverage').textContent,/6 selected placements/);assert.doesNotMatch(a.element('coverage').textContent,/2 observed placements/);
+});
+test('header-only inspector keeps qualification visible and technical payload collapsed',async()=>{
+  const hold=deferred(),a=await app({carriers:true,joined:true,holdRead:hold,initial:'#/slow'});
+  await a.click('select',{position:'slow/slow.txt'});
+  const html=a.element('detail').innerHTML;assert.match(html,/content bytes not fetched/);assert.match(html,/Open selected file/);
+  assert.match(html,/<details><summary>[^<]+<\/summary><pre>/);assert.doesNotMatch(html,/<details[^>]*\bopen\b/);
+  hold.resolve();await tick();
 });
 test('verified tiny PNG has a visible bounded frame and intrinsic dimensions',async()=>{
   const a=await app({carriers:true,image:true});await a.click('select',{position:'root/root.txt'});await a.click('openContent');

@@ -4,7 +4,9 @@ import {FilesCarrierIndexTest} from "./FilesCarrierProfile.t.sol";
 import {FilesCarrierIndex} from "./FilesCarrierProfile.sol";
 import {FilesPageReader,FilesPagePaid} from "./FilesPageReader.sol";
 import {FilesLiveLens} from "./FilesLiveIndex.sol";
-import {FilesLayout} from "./FilesJoinedProfile.sol";
+import {FilesLayout,FilesParentIndex} from "./FilesJoinedProfile.sol";
+import {FilesJoinedConsumer} from "./FilesJoinedConsumer.sol";
+import {FilesNameReader} from "./FilesNamesProfile.sol";
 import {Ledger} from "../src/Ledger.sol";
 import {LensReader} from "../src/LensReader.sol";
 import {Keys} from "../src/Keys.sol";
@@ -61,6 +63,34 @@ contract FilesPageReaderTest is FilesCarrierIndexTest {
         probe.mockCallRevert(address(r.lens()),abi.encodeWithSelector(r.lens().resolvePrincipals.selector,selectors(),TAG,revision,tag,ledger.executionSet()),hex"01");
         q.tagScope=2;p=r.readPage(folder,selectors(),q,basis(),"",8);
         require(p.rows.length==1&&p.rows[0].matchStatus==0&&p.rows[0].revisionTag.qualification==0,"unknown tag filtered as false");
+    }
+    function test_page_fault_matrix_matches_independent_point_and_name_oracles() public {
+        FilesPageReader r=reader();bytes32 folder=_directory(1);(bytes32 f,bytes32 revision)=file(folder,"a",2);
+        FilesNameReader names=new FilesNameReader(ledger,address(ledger),nt,r.index().expectedNameRuleHash());
+        FilesJoinedConsumer points=new FilesJoinedConsumer(ledger,r.lens(),FilesParentIndex(address(index)),rt,ct,r.index().expectedRootRuleHash(),r.index().expectedChildRuleHash());
+        bytes32 tag=bytes32(uint256(99));ledger.bind(TAG,f,tag,f,0);ledger.bind(TAG,revision,tag,f,0);
+        FilesPageReader.Basis memory pinned=basis();
+        FilesPageReader.Query memory q=FilesPageReader.Query(tag,3,false,"");
+        // Same immutable basis, three independent source conditions. Header-slot
+        // unavailability need not prevent the full-body point oracle from reading
+        // its different source; compare preserved axes without upgrading the page.
+        for(uint256 fault;fault<3;fault++){
+            if(fault==1)probe.mockCallRevert(address(ledger),abi.encodeCall(ledger.record,(Keys.recordFromHash(nt,keccak256("a")))),hex"01");
+            if(fault==2)probe.mockCallRevert(address(ledger),abi.encodeCall(ledger.extsload,(FilesLayout.recordBase(revision))),hex"01");
+            FilesPageReader.Page memory page=r.readPage(folder,selectors(),q,pinned,"",8);
+            require(page.rows.length==1&&page.completeFromOrigin,"fault erased selected placement");
+            FilesPageReader.Row memory row=page.rows[0];
+            FilesNameReader.Name memory name=names.readNameAt(row.placement.position,folder,row.role,FilesNameReader.ExecutionBasis(pinned.admission,pinned.epoch,pinned.executionSet));
+            require(row.name.qualification==name.status&&row.name.recordId==name.recordId&&row.name.firstAdmission==name.firstAdmission&&keccak256(row.name.value)==keccak256(name.value),"independent Name mismatch");
+            FilesJoinedConsumer.FilePoint memory point=points.readFilePointPrincipals(f,selectors(),tag,FilesJoinedConsumer.PrincipalBasis(pinned.admission,pinned.generation,pinned.epoch,pinned.executionSet));
+            require(row.placement.target==point.file&&row.head.status==point.status&&row.head.target==point.revision.recordId&&row.header.recordId==point.revision.recordId,"independent point mismatch");
+            require(row.stableTag.subject==point.fileTag.subject&&row.stableTag.present==point.fileTag.present&&row.stableTag.selection.status==point.fileTag.status,"independent stable tag mismatch");
+            require(row.revisionTag.subject==point.revisionTag.subject&&row.revisionTag.present==point.revisionTag.present&&row.revisionTag.selection.status==point.revisionTag.status,"independent revision tag mismatch");
+            if(fault==2)require(row.header.qualification==0&&point.revision.document.length==5,"unavailable header silently upgraded");
+            else require(row.header.qualification==1&&row.header.typeId==point.revision.typeId&&row.header.parent==point.revision.parent&&row.header.bodyLength==point.revision.document.length+32,"independent header mismatch");
+            require(row.matchStatus==(fault==0?1:0),"fault filtered or represented as definite match");
+            probe.clearMockedCalls();
+        }
     }
     function test_page_header_helper_refuses_unguarded_external_use() public {
         FilesPageReader r=reader();bytes32 folder=_directory(1);(bytes32 f,bytes32 revision)=file(folder,"a",2);

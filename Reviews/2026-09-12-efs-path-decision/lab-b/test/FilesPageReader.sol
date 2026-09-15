@@ -131,24 +131,19 @@ contract FilesPageReader {
             ||(row.head.status==1&&row.header.qualification!=1))return 0;
         // A requested unavailable join remains observable even when another
         // predicate is negative; it cannot manufacture a filtered empty proof.
+        bool tagMatch=true;
         if(query.tagScope!=0){
             bool stable=query.tagScope==1||query.tagScope==3;bool revision=query.tagScope==2||query.tagScope==3;
-            bool yes=(stable&&row.stableTag.present)||(revision&&row.revisionTag.present);
+            tagMatch=(stable&&row.stableTag.present)||(revision&&row.revisionTag.present);
             bool known=(!stable||row.stableTag.qualification==1)&&(!revision||row.revisionTag.qualification==1||row.revisionTag.qualification==2);
-            if(!yes&&!known)return 0;
+            if(!tagMatch&&!known)return 0;
         }
-        bool unknown;
         bytes memory needle=bytes(query.search);
-        if(needle.length!=0){if(row.name.qualification!=1)unknown=true;else{
+        if(needle.length!=0){
             bool found;for(uint256 i;i+needle.length<=row.name.value.length;i++){bool same=true;for(uint256 j;j<needle.length;j++)if(row.name.value[i+j]!=needle[j]){same=false;break;}if(same){found=true;break;}}
-            if(!found)return 2;}}
-        if(query.tagScope!=0){
-            bool stable=query.tagScope==1||query.tagScope==3;bool revision=query.tagScope==2||query.tagScope==3;
-            bool yes=(stable&&row.stableTag.present)||(revision&&row.revisionTag.present);
-            bool known=(!stable||row.stableTag.qualification==1)&&(!revision||row.revisionTag.qualification==1||row.revisionTag.qualification==2);
-            if(!yes&&!known)unknown=true;else if(!yes)return 2;
+            if(!found)return 2;
         }
-        return unknown?0:1;
+        return tagMatch?1:2;
     }
 }
 

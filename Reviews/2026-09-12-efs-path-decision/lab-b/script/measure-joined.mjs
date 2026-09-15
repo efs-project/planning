@@ -99,9 +99,10 @@ export async function sourcePins(env){
   return {gitHead:execFileSync('git',['rev-parse','HEAD'],{cwd:lab,encoding:'utf8'}).trim(),artifacts,files:Object.fromEntries(files),compiler,
     anvil:execFileSync(process.env.ANVIL_BIN??'anvil',['--version'],{encoding:'utf8'}).trim(),node:process.version,hardfork:'cancun',contentProfile:'raw-sha256-aesgcm-v2'};
 }
-async function measureCase(caseName){
-  const started=Date.now(),env=await createEnvironment({protocol:'compact-guarded-v2',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v2',evidenceMode:'append',benchmarkHistory:true});
-  const report={status:'RUNNING',caseName,runDirectory:env.dir,safety:cap,rpcHistory:env.historyPolicy,sourcePins:await sourcePins(env),checkpoints:[],reads:[],paid:[],setup:null};
+export async function measureCase(caseName,{environment=createEnvironment,pinSource=sourcePins}={}){
+  const started=Date.now(),env=await environment({protocol:'compact-guarded-v2',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v2',evidenceMode:'append',benchmarkHistory:true});
+  try{
+  const report={status:'RUNNING',caseName,runDirectory:env.dir,safety:cap,rpcHistory:env.historyPolicy,sourcePins:await pinSource(env),checkpoints:[],reads:[],paid:[],setup:null};
   const write=()=>writeFile(join(env.dir,'joined-measurement.json'),stringify(report));
   const checkpoint=async(phase,n)=>{
     const anvilRss=Number(execFileSync('ps',['-o','rss=','-p',String(env.anvilPid)],{encoding:'utf8'}).trim())*1024;
@@ -157,7 +158,7 @@ async function measureCase(caseName){
     report.limits=['Loopback latency only, no public RPC SLA.','No total chain fees or ZKsync gas inference.','Cold pin cost separated from page cost; warm cache remains exact-context and bounded to 32 pages.','Headers never establish full content-body digest verification.','Signed gasLimit cap is an execution constraint, not a Core action-count or product limit.'];
     await checkpoint('complete',report.reads.length);await write();console.log('JOINED_REPORT '+join(env.dir,'joined-measurement.json'));return report;
   }catch(error){report.status='STOPPED';report.error=error.message;report.lastTransaction=env.transactions.at(-1);report.elapsedMs=Date.now()-started;await write();console.error('JOINED_REPORT '+join(env.dir,'joined-measurement.json'));throw error;}
-  finally{await env.close();}
+  }finally{await env.close();}
 }
 export async function measureJoined(){const reports=[];for(const name of ['live-churn','dense'])reports.push(await measureCase(name));return reports;}
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))await measureJoined();

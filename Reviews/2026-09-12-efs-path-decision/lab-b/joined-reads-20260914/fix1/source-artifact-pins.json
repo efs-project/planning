@@ -1,0 +1,39 @@
+{
+  "sources": {
+    "browser/app.mjs": "0c4b42259a04568dd028ec84951a9a6562904780829c1d697209716469c1bbfc",
+    "browser/compact-sdk.mjs": "bbebdaf2eba5ae1ea9d5e85a2c93b4be2654a58ed470eb90c8fc48ee67c70d72",
+    "browser/directory-routing.test.mjs": "6fe8d9f73194c5089fe2c1677df944a0e68d288398a8a930ad4ac8910bb203b9",
+    "browser/joined.integration.test.mjs": "5c44655b380d41a2dd5ea6c3a8aef327d620e5550d2c46c487bc090f118e32c0",
+    "script/measure-joined.mjs": "bb2283a664974a2da147e5daeb4216bf8433cf8af1112f87050ed27632292927",
+    "script/diagnose-joined-read.mjs": "7f991a825f01f626bf8c8a19a3ef756defe653eca8d7adfad26780dccd25955b",
+    "script/joined-cleanup.test.mjs": "9e23508ed5b722a316e278a42a5f237d3c9910bfb740e3d0bb87bce21ec6c201",
+    "test/FilesPageReader.sol": "e53095e6182ae63b72e885cd816a7e174b36452a72ad7ded710d5773beae33ca",
+    "test/FilesPageReader.t.sol": "92a52f051afd7dd5c073037ff52970f894e0061e4df76f2ef9c3df96f92d3440"
+  },
+  "artifacts": {
+    "Ledger": {
+      "artifactSha256": "94118d37296b6a8a69518903cb2071415b07d2664509acf78e56510895344c69",
+      "creationBytes": 24892,
+      "runtimeBytes": 24173
+    },
+    "TypeRegistry": {
+      "artifactSha256": "bb8cba57d08e9f4b65443eb8a9f9ecf512d528d71761b2d44ba34f1bd5e67d24",
+      "creationBytes": 3329,
+      "runtimeBytes": 3270
+    },
+    "FilesPageReader": {
+      "artifactSha256": "75c918201287425c9c920c48cc810a9651690ad4bfd17ad986e1e8ec54e819f8",
+      "creationBytes": 16373,
+      "runtimeBytes": 15791
+    },
+    "FilesPagePaid": {
+      "artifactSha256": "543e9c161ec2dd7ae3548ed7f5e598e91eb94a2ce8056ebb2efd10a5f68011fb",
+      "creationBytes": 3161,
+      "runtimeBytes": 3135
+    }
+  },
+  "coreUnchanged": {
+    "Ledger": "ABI/init/runtime exact equality",
+    "TypeRegistry": "ABI/init/runtime exact equality"
+  }
+}

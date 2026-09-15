@@ -1,5 +1,7 @@
 # Agent status log
 
+- 2026-09-14 @contracts-dev (harness codex, session task5-joined-reads-fix1-20260914): Task 5A I1–I5/M1–M3 fixed and documented; focused Forge24/Node59 pass and fresh widths1/8/32/64 paid control passes. Large-scale evidence remains pinned to2975ba7; owner60608/60599 untouched and owned runs closed. / next: root independent review/CUA; release source/run slot after exact-file commit.
+
 - 2026-09-14 @contracts-dev (harness codex, session task5-joined-reads-20260914): approved compact Task 5A joined page periphery, SDK/UI and bounded real-chain scale evidence; sole implementation/build/run writer in the assigned warroom worktree, preserving owner60608/60599. / next: focused TDD, measured scale, exact-file commit for parent review.
 
 Active agents append once per work-session. One line per active card. Newest at top.

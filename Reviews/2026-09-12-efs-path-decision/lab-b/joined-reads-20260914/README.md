@@ -1,5 +1,7 @@
 # Task 5A — bounded joined Files reads
 
+Review follow-up: [fix round 1](fix1/README.md) records I1–I5/M1–M3, fresh final-reader controls and separate source pins. The original campaign below remains historical at2975ba7; its receipts were not relabelled.
+
 **Status:** implementation and local evidence complete; parent independent review and actual CUA remain separate.
 **Scope:** disposable compact prototype; contracts-dev / codex / task5-joined-reads-20260914. No public deployment, push, Core policy change or production SDK claim.
 **Source:** accepted parent `4dec0c9a5ea2e6a855613bb149181ce4660cf74e`; final working-source keccak pins and compiler metadata are recorded before deployment. The commit containing this report supplies the final source history.

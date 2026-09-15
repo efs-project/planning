@@ -44,9 +44,15 @@ contiguous accumulated scan, checked against the pinned total; it exposes
 `completeFromOwnedOrigin` separately from the segment's origin flags.
 `retainedSoFar` counts retained rows along that owned chain (including uncertain
 rows), and `queryAbsent` requires complete owned-origin coverage and a zero
-retained count. `queryKnowledge` describes that accumulated query observation while
+retained count. `queryKnowledge` is PRESENT only if the owned chain has a definite
+MATCH, ABSENT only on complete coverage with zero retained rows, and UNKNOWN
+otherwise. Retained uncertain candidates do not establish a predicate match.
 `pageRows` contains only this page's new rows: an empty terminal suffix is not an
-empty query when earlier pages retained matches.
+empty query when earlier pages retained matches. UNKNOWN pages retain the same
+origin and counter fields: accumulated observations survive, while unavailable
+current-segment `scanned`/`hydrations` and an as-yet unknown `rawTotal` are null.
+Both completion flags stay false on failure. Rapid search/scope changes supersede
+an in-flight read and coalesce into the latest query before rows/cursors install.
 Unsupported and uncertain rows remain visible rather than authorizing an
 empty-result proof. These are local qualified reads, not portable state proofs.
 
