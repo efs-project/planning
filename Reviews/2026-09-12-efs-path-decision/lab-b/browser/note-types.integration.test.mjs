@@ -94,6 +94,27 @@ test('distinct Note Types: mandatory refusal, qualified exact projections and pa
     const r=await createNoteReader({ethers:e,sdk:badSdk,profiles}).readNote({record:records.v1,context:c});
     assert.equal(r.knowledge,fault==='unavailable'?'UNKNOWN':'INVALID',fault);assert.equal(r.value,null);assert.equal(r.coverage,'PARTIAL');
   }
+  // Missing historical evidence and an orphaned pinned basis are uncertainty,
+  // not a verdict that the retained Record or its Note bytes are invalid.
+  for(const fault of ['missing-publication-context','reorged-context'])await t.test(fault,async()=>{
+    let active=false;
+    const ledgerAbi=new e.Interface(env.contracts.ledger.abi);
+    const rpc=async(method,args)=>{
+      const out=await env.rpc(method,args);if(!active)return out;
+      if(fault==='reorged-context'&&method==='eth_getBlockByNumber')return {...out,hash:e.id('controlled orphaned Note basis')};
+      if(fault==='missing-publication-context'&&method==='eth_call'&&args[0].to.toLowerCase()===env.contracts.ledger.address.toLowerCase()
+        &&ledgerAbi.parseTransaction({data:args[0].data}).name==='publicationContext'){
+        const retained=Array.from(ledgerAbi.decodeFunctionResult('publicationContext',out)[0]);retained[0]=e.ZeroHash;
+        return ledgerAbi.encodeFunctionResult('publicationContext',[retained]);
+      }return out;
+    };
+    const badSdk=createGuardedCompactSdk({ethers:e,manifest:env.manifest,rpc}),c=await badSdk.pin();active=true;
+    const r=await createNoteReader({ethers:e,sdk:badSdk,profiles}).readNote({record:records.v1,context:c});
+    assert.equal(r.knowledge,'UNKNOWN');assert.equal(r.coverage,'PARTIAL');assert.equal(r.value,null);
+    assert.equal(r.source.knowledge,'UNKNOWN');assert.equal(r.source.coverage,'PARTIAL');assert.equal(r.source.value,null);
+    assert.equal(r.reason,fault==='missing-publication-context'?'COMPACT_HISTORY_UNAVAILABLE':'COMPACT_BLOCK_REORG');
+    assert.equal(r.basis,c);assert.equal(r.source.basis,c);
+  });
   // Contract consumer has its own reviewed pins and real normal-limit deployment.
   const ts=Object.values(profiles).map(p=>p.typeId),hs=Object.values(profiles).map(p=>p.ruleHash);
   const point=await env.deploy('notePoint','NoteProfile.sol','NotePointReader',[env.contracts.ledger.address,ts,hs]);

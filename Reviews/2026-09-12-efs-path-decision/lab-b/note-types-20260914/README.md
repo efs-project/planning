@@ -134,3 +134,24 @@ dependency semantics for stateful validators; generic evolution/discovery/migrat
 multilingual/richer schemas; upgrade-aware paid Notes consumers; source-state proof;
 production packaging. RPC observations and immutable retained bytes do not establish
 present endorsement, trust, portability authority, or generic future compatibility.
+
+## Review fix 1 — uncertainty is not invalidity
+
+Starting from `035f9b9`, the raw point reader now maps the known
+`COMPACT_HISTORY_UNAVAILABLE` and `COMPACT_BLOCK_REORG` errors to UNKNOWN/PARTIAL
+before its generic integrity-error fallback. Original reason and pinned basis
+remain attached; raw and projected values are null. Actual body/descriptor/code/
+admission mismatches remain INVALID/PARTIAL.
+
+Two focused controls alter only provider observations beneath the real SDK:
+a missing publication principal and a different canonical hash after pinning.
+Both failed RED with actual INVALID versus expected UNKNOWN; final Note + shared
+SDK run passed **42/42**, including unchanged corruption controls. These simulate
+missing historical evidence/reorg observations, not actual pruning or a chain
+reorganization. No Solidity/artifact changes; earlier costs and evidence remain
+historically pinned to `035f9b9` rather than silently rewritten.
+
+Fixed source SHA-256: `browser/compact-sdk.mjs`
+`22d4706d79eedafd8a96702a51f9ba74993e7d688119df0ded80efc1875ffdf1`;
+`browser/note-types.integration.test.mjs`
+`f7be54e44528a41ff2ed593db1e4416d8df1142a4b782d2b81841bca53109f48`.

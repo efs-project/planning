@@ -320,6 +320,8 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
           ...await protocol.revisionEvidence(a[2],context)},validity:'NOT_ASSESSED',maintenance:'RETAINED_OCCURRENCE_COUNT'});
     }catch(error){
       if(isRpcUnavailable(error))return answer('UNKNOWN','PARTIAL',null,'RECORD_UNAVAILABLE');
+      if(['COMPACT_HISTORY_UNAVAILABLE','COMPACT_BLOCK_REORG'].includes(error.message))
+        return answer('UNKNOWN','PARTIAL',null,error.message);
       if(error.message?.startsWith('COMPACT_'))return answer('INVALID','PARTIAL',null,error.message);
       throw error;
     }
