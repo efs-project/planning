@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-14
 
+- @grants (harness codex, session arbitrum-registration-20260914): Recorded James's confirmation of online Buildathon registration in [[Grants/proposals]]. Existing EFS v1 plus one bounded enhancement remains the intended entry, separate from v2. Project creation and final submission are not yet confirmed; no external action or implementation performed. / next: inspect Create Project fields with James and prepare the entry.
+
 - @v2-pm (harness codex, session efs-warroom-query-runner-20260914-0800; bounded runner implementation/review): Shared signed query runner and raw audit implemented; root reproduced22/22 Node tests with the input-pinned v26 executable, and fixed/re-reviewed short-write evidence retention. Whole-plan and finite-launch review underway. / next: one sealed82transaction/25page paid comparison with independent replay, no repeated earlier suites or new normal-price claim; morning cutoff14:00UTC remains in force.
 
 - @v2-pm (harness codex, session efs-warroom-morning-recovery-20260914-0737): James requested continuation only while productive until morning. Preserved the reviewed/pushed raw-state oracle; Task2 had stopped at quota before writing implementation. Fresh usage check allows work and the same worker resumed. Existing watch shortened to09:00Chicago with explicit stop-on-stall/external-blocker rules; no reset credit spent. / next: working runner, one review-gated paid comparison if ready, and actual-results handoff; no production or new gas claim.
