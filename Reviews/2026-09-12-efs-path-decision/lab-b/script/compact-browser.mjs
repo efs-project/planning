@@ -50,7 +50,7 @@ export async function startBrowser(env,{seed=true,directory=false,carrierFixture
   if(carrierFixture)config.carrierOrigin=carrierFixture.origin;
   const mime={'.html':'text/html','.mjs':'text/javascript','.css':'text/css'};
   const allowed=new Set(['index.html','app.mjs','files.css','compact-sdk.mjs','files-view.mjs']);
-  if(directory)for(const asset of ['directory-entry.mjs','compact-sdk-v2.mjs','compact-paths.mjs'])allowed.add(asset);
+  if(directory)for(const asset of ['directory-entry.mjs','compact-sdk-v2.mjs','compact-paths.mjs','guarded-archive.mjs','compact-content.mjs'])allowed.add(asset);
   const carriers=!!env.manifest.contentProfile;assert(!carriers||directory,'carrier profile requires guarded entrypoint');
   if(carriers)for(const asset of ['carrier-entry.mjs','compact-files-sdk.mjs','compact-content.mjs','compact-carrier-host.mjs'])allowed.add(asset);
   const server=createServer(async(req,res)=>{

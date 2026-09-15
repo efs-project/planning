@@ -23,7 +23,8 @@ async function freePort() {
   const port = server.address().port; await new Promise(ok => server.close(ok)); return port;
 }
 export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_OUT ?? join(lab,'out'),useLive=process.env.EFS_LISTING_MODE!=='audit',
-  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile,evidenceMode='snapshot',benchmarkHistory=false}={}) {
+  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile,evidenceMode='snapshot',benchmarkHistory=false,chainId=31337}={}) {
+  assert([31337,31338].includes(chainId),'owned fixture chainId is 31337 or 31338');
   assert(['snapshot','append'].includes(evidenceMode),'supported evidence mode');
   assert(!benchmarkHistory||evidenceMode==='append','short history is explicit benchmark-only');
   const historyPolicy=benchmarkHistory?{states:16,transactionBlocks:32}:{states:256,transactionBlocks:512};
@@ -37,7 +38,7 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
   const e = await loadEthers(), dir = await mkdtemp(join(tmpdir(),'efs-compact-demo-'));
   const port = await freePort(), rpcUrl = `http://127.0.0.1:${port}`;
   const child = spawn(process.env.ANVIL_BIN ?? 'anvil',[
-    '--host','127.0.0.1','--port',String(port),'--chain-id','31337','--hardfork',hardfork,
+    '--host','127.0.0.1','--port',String(port),'--chain-id',String(chainId),'--hardfork',hardfork,
     '--gas-limit','30000000','--gas-price','2000000000','--prune-history',String(historyPolicy.states),
     '--transaction-block-keeper',String(historyPolicy.transactionBlocks),'--cache-path',join(dir,'anvil-cache'),'--quiet',
   ],{stdio:['ignore','ignore','pipe']});
@@ -66,7 +67,7 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
   try {
     const until=Date.now()+10_000;
     while(true) {
-      try {assert.equal(await rpc('eth_chainId'), '0x7a69');break;}
+      try {assert.equal(await rpc('eth_chainId'), e.toQuantity(chainId));break;}
       catch(error) {if(Date.now()>until || child.exitCode !== null)throw new Error(`Anvil did not start: ${nodeError || error.message}`); await delay(50);}
     }
     const wallets=Object.fromEntries(['deployer','alice','bob'].map((name,index)=>[name,e.HDNodeWallet.fromPhrase(mnemonic,undefined,`m/44'/60'/0'/0/${index}`)]));
@@ -80,7 +81,7 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
       const nonce=tx.nonce??Number(BigInt(await rpc('eth_getTransactionCount',[wallet.address,'pending'])));
       const type=tx.type??0;
       const raw=await wallet.signTransaction({to:tx.to??null,data:tx.data??'0x',value:BigInt(tx.value??0),
-        nonce,chainId:31337,type,gasLimit,
+        nonce,chainId,type,gasLimit,
         ...(type===4?{authorizationList:tx.authorizationList,maxFeePerGas:2_000_000_000n,maxPriorityFeePerGas:1_000_000_000n}
           :{gasPrice:2_000_000_000n})});
       const hash=e.keccak256(raw), observed=await rpc('eth_sendRawTransaction',[raw]); assert.equal(observed,hash);
@@ -194,7 +195,7 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
       await transact('ledger','execute',[[{...base,kind:5,salt},{...base,kind:1,typeId:directoryType,bodyHashOrRecordId:e.keccak256(body)}],['0x',body],0],'directory/root-bootstrap');
       folder=hash(['bytes32','bytes32','bytes32'],[e.id('efs2/record/1'),directoryType,e.keccak256(body)]);
     }
-    const manifest={chainId:'31337',listing:useLive?'live-positive':'audit',folder,folders:[folder,archive],authors:{alice:wallets.alice.address,bob:wallets.bob.address},
+    const manifest={chainId:String(chainId),listing:useLive?'live-positive':'audit',folder,folders:[folder,archive],authors:{alice:wallets.alice.address,bob:wallets.bob.address},
       contracts:Object.fromEntries(['ledger','index','lens','registry','files','names',...(contentProfile?['joined']:[])].map(k=>[k,contracts[k]])),
       types:{root,child:childType,name},ruleHashes};
     if(filesProfile){manifest.filesProfile=filesProfile;manifest.types.directory=directoryType;manifest.folders=[folder];}

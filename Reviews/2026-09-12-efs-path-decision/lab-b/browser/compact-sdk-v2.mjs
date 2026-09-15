@@ -1,8 +1,10 @@
 import {createCompactEngine} from './compact-sdk.mjs';
+import {createGuardedArchiveReader} from './guarded-archive.mjs';
 
 export function createGuardedCompactSdk(options) {
   if (options.manifest.protocol !== 'compact-guarded-v2') throw new Error('COMPACT_PROTOCOL');
-  return createCompactEngine(options, guardedProtocol);
+  const engine=createCompactEngine(options, guardedProtocol);
+  return Object.freeze({...engine,...createGuardedArchiveReader(options)});
 }
 
 // Only protocol/context/identity codecs live here. Files construction, traversals,
@@ -77,7 +79,7 @@ function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fail,plain
     watchPositions:true,
     unavailable:error=>/HISTORY_UNAVAILABLE|UNSUPPORTED/.test(String(error?.message)),
     capabilities:{protocol:'compact-guarded-v2',guardedWrites:true,explicitPrincipalHistory:true,legacyReading:false,
-      guardedImport:false,guardedArchive:false,addressConvenience:'authors-at-pinned-basis',evidence:'RPC_OBSERVED'},
+      guardedImport:false,guardedArchive:'SIGNED_CLAIMS_WITH_EXPLICIT_CLOSURE',addressConvenience:'authors-at-pinned-basis',evidence:'RPC_OBSERVED'},
     lensFields:principals=>({principals}),lensHash:principals=>hash(['bytes32[]'],[principals]),
     async selectors(args,context) {
       check(!(args.authors&&args.principals),'LENS_INPUT');

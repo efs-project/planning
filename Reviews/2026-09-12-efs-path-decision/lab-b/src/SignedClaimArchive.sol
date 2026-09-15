@@ -19,6 +19,7 @@ abstract contract SignedClaimArchiveBase {
         uint16 leafCount;
         uint8 v;
         ProofLevel proof;
+        uint8 format;
     }
     struct CachedBody { bool exists; bytes data; }
     struct Posting { bytes32 claimId; uint16 leaf; }
@@ -26,6 +27,8 @@ abstract contract SignedClaimArchiveBase {
     error E_BOUNDS(uint8 code);
     error E_SIGNATURE();
     error E_SOURCE_UNSUPPORTED();
+    error E_CONTEXT(uint8 code);
+    error E_READSET_SHAPE();
     error E_UNKNOWN_CLAIM(bytes32 claimId);
     error E_LEAF(uint16 leaf);
     error E_BODY_LEAF(uint16 leaf);
@@ -38,20 +41,32 @@ abstract contract SignedClaimArchiveBase {
     uint256 public constant MAX_BODY_INPUTS = 64;
     uint256 public constant MAX_BODY_BYTES_PER_CALL = 8192;
     uint256 public constant MAX_RETAIN_CALLDATA = 37_316;
+    uint256 public constant MAX_GUARDED_RETAIN_CALLDATA = 48_292;
     uint256 public constant MAX_ATTACH_CALLDATA = 18_468;
+    bytes32 public constant SUPPORTED_LAYOUT = keccak256("efs.lab.ledger-layout/2:roots-0-12-preserved:context-13:execution-14:readsets-15");
+    bytes32 public constant READ_SET_V2 = keccak256("efs.lab.read-set/2:ordered-first-binding");
+    bytes32 public constant EXECUTION_DOMAIN = keccak256("efs.lab.execution-set/2");
+    bytes32 public constant GUARDED_INTENT_TYPEHASH = keccak256("IntentV2(bytes32 realmId,bytes32 realmOrigin,bytes32 executionSet,address author,uint64 nonce,uint64 deadline,bytes32 acceptanceProfile,bytes32 indexObligations,bytes32 readSetHash,bytes32 actionsHash)");
 
     bytes32 private constant INTENT_TYPEHASH = keccak256(
         "PublicationIntent(bytes32 realmId,bytes32 coreCodeCommitment,address author,uint64 nonce,uint64 deadline,bytes32 acceptanceProfile,bytes32 indexObligations,bytes32 actionsHash)"
     );
-    bytes32 private immutable DOMAIN_SEPARATOR = keccak256(abi.encode(
+    bytes32 public immutable DOMAIN_SEPARATOR = keccak256(abi.encode(
         keccak256("EIP712Domain(string name,string version)"),
         keccak256("EFS2-RoadB-Lab"),
         keccak256("1")
+    ));
+    bytes32 public immutable GUARDED_DOMAIN_SEPARATOR = keccak256(abi.encode(
+        keccak256("EIP712Domain(string name,string version)"), keccak256("EFS2-RoadB-Lab"), keccak256("2")
     ));
     uint256 private constant SECP256K1_N_HALF =
         0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0;
 
     mapping(bytes32 => ClaimCell) private _claims;
+    mapping(bytes32 => Ledger.IntentV2) private _guardedSources;
+    mapping(bytes32 => address) private _readSets;
+    struct ExecutionCell { bool exists; Ledger.ExecutionInfo info; }
+    mapping(bytes32 => ExecutionCell) private _executions;
     mapping(bytes32 => CachedBody) private _bodies;
     mapping(bytes32 => Posting[]) private _recordClaims;
 
@@ -71,7 +86,58 @@ abstract contract SignedClaimArchiveBase {
 
         bytes32 actionsHash = keccak256(abi.encode(actions));
         claimId = _intentDigest(source, actionsHash);
-        (bytes32 r, bytes32 s, uint8 v) = _verifySignature(claimId, source.author, signature);
+        bool fresh = _retain(claimId, source.author, actionsHash, actions, signature, bodies);
+        if (fresh) { _claims[claimId].source = source; _claims[claimId].format = 1; }
+    }
+
+    /// Exact author-signed context, NOT authenticated historical execution, guards,
+    /// source admission/currentness, or destination authority. No Ledger calls.
+    function retainGuardedSignedClaim(
+        Ledger.IntentV2 calldata source, Ledger.Action[] calldata actions,
+        Ledger.ReadSetV2 calldata readSet, Ledger.ExecutionInfo calldata execution,
+        bytes calldata signature, BodyInput[] calldata bodies
+    ) external returns (bytes32 claimId) {
+        if (msg.data.length > MAX_GUARDED_RETAIN_CALLDATA) revert E_BOUNDS(4);
+        if (actions.length == 0 || actions.length > MAX_ACTIONS) revert E_BOUNDS(1);
+        if (signature.length == 0) revert E_SOURCE_UNSUPPORTED();
+        if (signature.length != 65) revert E_SIGNATURE();
+        _checkBodyBounds(bodies);
+        _checkReadSet(readSet);
+        if (source.readSetHash != keccak256(abi.encode(READ_SET_V2, readSet))) revert E_CONTEXT(1);
+        if (source.realmOrigin != execution.origin || source.executionSet != keccak256(abi.encode(
+            EXECUTION_DOMAIN, SUPPORTED_LAYOUT, DOMAIN_SEPARATOR, GUARDED_DOMAIN_SEPARATOR, execution
+        ))) revert E_CONTEXT(2);
+        bytes32 actionsHash = keccak256(abi.encode(actions));
+        claimId = keccak256(abi.encodePacked(hex"1901", GUARDED_DOMAIN_SEPARATOR,
+            keccak256(abi.encode(GUARDED_INTENT_TYPEHASH, source, actionsHash))));
+        // Shared validation completes before the first storage write or CREATE.
+        if (_retain(claimId, source.author, actionsHash, actions, signature, bodies)) {
+            _claims[claimId].format = 2;
+            _guardedSources[claimId] = source;
+            if (_readSets[source.readSetHash] == address(0))
+                _readSets[source.readSetHash] = address(new ActionCodeBlob(abi.encode(readSet)));
+            if (!_executions[source.executionSet].exists)
+                _executions[source.executionSet] = ExecutionCell(true, execution);
+        }
+    }
+
+    function _checkReadSet(Ledger.ReadSetV2 calldata rs) private pure {
+        uint256 n = rs.principalIds.length;
+        uint256 m = rs.positions.length;
+        if (n > 64 || m > 4 || rs.expectedHeads.length != n * m || (n == 0) != (m == 0)) revert E_READSET_SHAPE();
+        for (uint256 i; i < n; ++i) {
+            if (rs.principalIds[i] == 0) revert E_READSET_SHAPE();
+            for (uint256 j; j < i; ++j) if (rs.principalIds[i] == rs.principalIds[j]) revert E_READSET_SHAPE();
+        }
+        for (uint256 i; i < m; ++i) {
+            if (rs.positions[i] == 0) revert E_READSET_SHAPE();
+            for (uint256 j; j < i; ++j) if (rs.positions[i] == rs.positions[j]) revert E_READSET_SHAPE();
+        }
+    }
+
+    function _retain(bytes32 claimId, address author, bytes32 actionsHash, Ledger.Action[] calldata actions,
+        bytes calldata signature, BodyInput[] calldata bodies) private returns (bool fresh) {
+        (bytes32 r, bytes32 s, uint8 v) = _verifySignature(claimId, author, signature);
 
         _checkBodyLeaves(bodies, uint16(actions.length));
         Ledger.Action[] memory bodyActions = new Ledger.Action[](bodies.length);
@@ -80,7 +146,7 @@ abstract contract SignedClaimArchiveBase {
 
         ClaimCell storage c = _claims[claimId];
         if (c.proof == ProofLevel.NONE) {
-            c.source = source;
+            fresh = true;
             c.actionsHash = actionsHash;
             c.r = r;
             c.s = s;
@@ -119,8 +185,37 @@ abstract contract SignedClaimArchiveBase {
         ProofLevel proof, address firstImporter, uint64 retainedAt
     ) {
         ClaimCell storage c = _knownClaim(claimId);
+        if (c.format != 1) revert E_SOURCE_UNSUPPORTED();
         return (c.source, c.actionsHash, c.leafCount, c.r, c.s, c.v,
             c.bodyCoverage, c.proof, c.firstImporter, c.retainedAt);
+    }
+
+    /// 0 = unknown, 1 = legacy signed claim, 2 = guarded signed claim.
+    function claimFormat(bytes32 claimId) external view returns (uint8) { return _claims[claimId].format; }
+
+    function guardedClaim(bytes32 claimId) external view returns (
+        Ledger.IntentV2 memory source, bytes32 actionsHash, uint16 leafCount,
+        bytes32 r, bytes32 s, uint8 v, uint64 bodyCoverage,
+        ProofLevel proof, address firstImporter, uint64 retainedAt
+    ) {
+        ClaimCell storage c = _knownClaim(claimId);
+        if (c.format != 2) revert E_SOURCE_UNSUPPORTED();
+        return (_guardedSources[claimId], c.actionsHash, c.leafCount, c.r, c.s, c.v,
+            c.bodyCoverage, c.proof, c.firstImporter, c.retainedAt);
+    }
+
+    /// Presence is separate from a canonical empty read set (224 bytes).
+    function readSetBytes(bytes32 key) external view returns (bool exists, bytes memory raw) {
+        address blob = _readSets[key];
+        exists = blob != address(0);
+        if (!exists) return (false, raw);
+        raw = new bytes(blob.code.length - 1);
+        assembly ("memory-safe") { extcodecopy(blob, add(raw, 32), 1, mload(raw)) }
+    }
+
+    function executionInfo(bytes32 key) external view returns (bool exists, Ledger.ExecutionInfo memory info) {
+        ExecutionCell storage cell = _executions[key];
+        return (cell.exists, cell.info);
     }
 
     function actionAt(bytes32 claimId, uint16 leaf) external view returns (Ledger.Action memory) {
