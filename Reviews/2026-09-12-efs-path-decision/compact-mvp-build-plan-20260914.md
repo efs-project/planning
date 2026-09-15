@@ -11,11 +11,40 @@ We do not need another hundred design pages before implementation. We need two
 small foundation changes tested before copying Core into the production repo,
 then a sequenced vertical build. “Ready to code” is not “freeze for 100 years.”
 
+**Completion checkpoint, September 15, 00:11 UTC:** code worktree
+`codex/efs-warroom-b-run` at `0fcb9dd` has independently reviewed stable
+identity/execution context, bounded transaction-time read assertions and the
+shared guarded Files SDK. 262 Solidity executions and 97 Node executions pass,
+including real mined-order controls, populated compatible proxy activation and
+rollback, same-block historical recovery, and actual Prague delegation
+install/change/clear. Recursive storage-layout comparison preserves the original
+13 roots. Review also caught and fixed two recovery defects: available receipts
+were hidden by failed EFS reads, and malformed local envelopes could be persisted
+as UNKNOWN. Ordinary typed Directory/navigation is now implemented and reviewed:
+274 Solidity and 113 combined Node executions passed, followed by 67 covering
+tests for the JS-only route fixes. A real browser created a nested file, renamed
+and moved its parent, then cold-recovered the unchanged child. Browser testing
+also caught and fixed stale same-document routing; direct paths, Back/Forward
+and malformed-route refusal now work, including superseded-read/signing guards.
+Binary/carrier profiles are active; joined-scale reads, guarded signed-claim
+export, durable cooperating-tab host and the exact-Type Note example remain.
+The existing owner browser and chain are preserved. UI labels Alice → Bob / Bob →
+Alice and uses a Base-first drawer with Ethereum L1/Base execution models and an
+explicitly unmeasured ZKsync column. No production repository or public testnet
+was created; software-signed local transactions do not establish real-wallet
+approval counts, total public-network fees or native cross-chain source proofs.
+
 ## 1. Close two foundation gates in the existing prototype
 
 ### A. Stable identity, honest execution versions
 
-**Problem:** current native contract identity depends on `chainId + Ledger
+**Prototype status:** implemented and independently reviewed at `f2a086f`, with
+the guarded SDK and actual upgrade/delegation controls accepted at `dfea63f`.
+The following problem describes the earlier baseline, not an open defect in
+that tested control. Production packaging and stronger native source proofs
+remain separate work.
+
+**Baseline problem:** native contract identity depended on `chainId + Ledger
 codehash`; a new implementation can change whose binding history a reader sees.
 Conversely, putting this Ledger behind a proxy and continuing to hash only the
 proxy runtime would fail to identify implementation changes. A constructor-time
@@ -44,7 +73,13 @@ what was checked then. Do not market codehash as a proof of the whole dependency
 
 ### B. Transaction-time dependencies, not only browser preflight
 
-**Problem:** a user can sign an edit/move while looking at Bob's revision or
+**Prototype status:** implemented and independently reviewed through `dfea63f`.
+The controls mine both transaction orders and check zero partial effects. These
+assertions freeze declared positions, not unknown future names or whole-graph
+membership; Directory traversal therefore reports Lens-relative cycles rather
+than promising a globally acyclic tree.
+
+**Baseline problem:** a user can sign an edit/move while looking at Bob's revision or
 placement. Bob can change it after preflight but before inclusion. Own authored
 HEAD CAS does not necessarily guard the selected source.
 
@@ -119,6 +154,11 @@ permanent agent orchestration system is needed for this prototype.
    honestly provide it. Failure/unknown outcomes must remain visible and recoverable.
 6. **Price and demonstrate a public testnet slice.** Whole transactions, calldata,
    L1-data/operator charges, latency and RPC work, not local execution models alone.
+   Check the target's per-transaction cap separately from its block budget:
+   [EIP-7825](https://eips.ethereum.org/EIPS/eip-7825) and
+   [current Base limits](https://docs.base.org/specifications/transactions/throughput-and-limits)
+   specify 16,777,216 gas per ordinary transaction. The prototype's 30M local
+   block ceiling alone is not a target-network compatibility check.
    Add the small Arcade or contract-backed live-value use case after Files works.
    Show source-preserving signed import into a second fresh deployment, separately
    from native source proofs and destination permission. Ship a clean static artifact

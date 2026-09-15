@@ -2,6 +2,12 @@
 
 September 14, 2026 · v2 PM · disposable engineering evidence, not protocol adoption.
 
+**Pinned measurement snapshot: source `67f92c5`.** The later completion pass
+adds guarded execution/identity and SDK work; its current checkpoint is in the
+[[compact-mvp-build-plan-20260914|build plan]]. The gas, runtime sizes and test
+counts below remain this initial recipe's evidence, not measurements of the
+later guarded contracts. Do not mix the two checkpoints into one cost claim.
+
 **Recommendation: keep compact B and its separate mandatory live-folder index
 as the one implementation direction.** The next work is the short
 [[compact-mvp-build-plan-20260914|MVP build plan]], not another architecture

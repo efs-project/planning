@@ -15,8 +15,10 @@ without passing the greenfield requirements and product traces.
 It exercises real named Files, Lenses, lifecycle operations, a third-party
 contract and a separate mandatory live-folder index. Start with the
 [[../../Reviews/2026-09-12-efs-path-decision/compact-mvp-build-plan-20260914|concrete MVP build plan]]:
-stable identity/execution-version and atomic dependency gates, then the
-Directory/carrier/read/SDK/SPA vertical. Compact B is the recommendation, not
+the stable identity/execution-version and atomic dependency gates are now joined
+to the reviewed guarded SDK; the Directory/carrier/read/SDK/SPA vertical is in
+progress. The build plan carries the exact checkpoint and remaining gates.
+Compact B is the recommendation, not
 a permanent freeze. The [[../../Reviews/2026-09-12-efs-path-decision/README|three-road comparison]]
 is retained evidence, not authority to restart Claude work or another tournament.
 
@@ -60,15 +62,15 @@ checkpoints and a 15-minute walkthrough. Upgradeability is required;
 Transparent proxies are a recommendation, not an adopted permanent policy.
 The full browser and upgrade tests are not implemented by this planning pass.
 
-**This README is the phone summary.** Read through “Current technical
-candidate,” then stop unless you want the engineering detail. For a deep pass:
+**This README is the phone summary.** Read through “The current shape,” then
+stop unless you want the engineering detail. For a deep pass:
 
 1. [[system-constitution]] — detailed requirements synthesis;
 2. [[core-architecture-candidate]] — technical model, alternatives, and falsifiers;
 3. [[owner-rulings]] — what James actually adopted; and
 4. [[owner-decision-inbox]] — evidence gates, not a questionnaire.
 
-Current bounded experiment: [[disposable-mvp-profile]] with the ordered
+Earlier bounded control: [[disposable-mvp-profile]] with the ordered
 [[mvp-c0-genesis-manifest]]. The earlier focused review prompt remains
 [[fable-efs2-core-engineering-kickoff]].
 
@@ -104,9 +106,15 @@ flowchart TB
 - **EFS OS** is the optional higher environment for rich personal policy,
   local/encrypted state, accounts/recovery, sandboxed apps, agents, and signing.
 
-## Current technical candidate
+## Earlier technical candidate and retained semantic reference
 
-The current comparison target is deliberately smaller than the July design:
+The C0 mechanism descriptions below explain earlier design experiments; they
+are not the current compact prototype's storage layout, signed ABI or execution
+instructions. Use the September 14 build plan above for current implementation
+work. Semantic requirements remain subject to the owner rulings; no passing
+prototype silently freezes or waives them.
+
+That comparison target was deliberately smaller than the July design:
 
 ```text
 immutable Type Schema
@@ -206,7 +214,11 @@ These are inputs, not competing active architectures:
 | [2026-08-13 venue/L1 evidence](../../Reviews/2026-08-13-claude-evidence-round/README.md#realm-venue-and-l1-evidence) | Dated Realm/Commons inputs for reconstruction, DA retention, shutdown/read-path, governance, exit, node-operation, and cost gates. Read its correction register; it selects no venue, requirement, or mechanism. |
 | [Nanda pressure](../../Brainstorms/2026-07-29-pm-nanda-neutral-agent-infrastructure-pressure.md) | Provider/skill/release/closure/discovery needs without Nanda-specific Core kinds. |
 
-## Build order
+## Earlier C0 build order (historical)
+
+Retained for tracing the earlier experiment. The current sequence is the
+[[../../Reviews/2026-09-12-efs-path-decision/compact-mvp-build-plan-20260914|compact MVP build plan]];
+this list does not restart a bakeoff, Fable run or freeze ceremony.
 
 1. Instantiate [[disposable-mvp-profile]] through the ordered
    [[mvp-c0-genesis-manifest]] on a fresh local Realm with synthetic data.
