@@ -2,6 +2,15 @@
 
 September 14, 2026 · v2 PM recommendation · no repository/deployment authority implied.
 
+**September 15 whole-core audit update:** [[core-design-audit-20260915]] is now
+the current prototype closeout queue. It reproduces four composition/resource
+limitations missed by the smaller journeys and names six finite packets, led by
+acceptance/read-phase coherence, the full required index bundle and evolution,
+joint resource bounds, and busy-Realm contract utility. Do not interpret the
+completed scoped passes below as a fully de-risked prototype or dispatch only
+the earlier live-file next step. The compact direction remains recommended;
+no owner requirement, permanent interface or deployment is waived/selected.
+
 **One path: compact Ledger + separate required index + explicit Files profiles
 + qualified SDK + static SPA.** The [[compact-prototype-results-20260914|working
 prototype and measurements]] now support that choice. Keep the fuller prototype

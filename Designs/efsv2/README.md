@@ -10,6 +10,17 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**September 15 — whole-core audit finds four open limitations:**
+[[../../Reviews/2026-09-12-efs-path-decision/core-design-audit-20260915|the current audit and six-packet prototype finish line]]
+supersede treating the completed smaller passes as whole-prototype completion.
+Focused reproductions show stale index-backed validation within a batch,
+single-action index exhaustion for a valid long filename, a severe long-name
+filter cost cliff, and continued contract listings invalidated by unrelated
+Realm writes. No runtime behavior was changed. Keep the compact direction,
+but close these composition/resource gaps and the explicit index, Type and
+authority-profile requirements before claiming the prototype is de-risked.
+Earlier working evidence below remains valid within its stated scope.
+
 **September 15 — source-off recovery now works in a bounded slice:**
 [[../../Reviews/2026-09-12-efs-path-decision/original-author-recovery-20260915|nine signed Files operations were restored on another deployment]],
 then read and extended by the original owner and a native application. Ledger
