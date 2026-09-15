@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-14
 
+- @pm (harness codex, session devcon-layer-examples-20260914): Integrated James's direction to use non-EFS examples throughout the talk, added a sourced comparison bank and expanded layer checks with improvement paths and tradeoffs. Updated the existing Tuesday reminder to preserve that teaching goal. / next: rehearse the same 20-minute story and select comparisons by the design choices they clarify; no live project audit or new product deadline.
+
 - @pm (harness codex, session devcon-spine-20260914): Drafted the accepted Devcon talk's story, timed full-stack outline, evidence inventory and rehearsal plan; created the Tuesday 09:00 America/Chicago preparation reminder. EFS remains the running example, with separate absence and compromised-authority tests. / next: James records a two-minute opening; revalidate the bounded demo without changing product milestones or the submitted application.
 
 - @grants (harness codex, session arbitrum-registration-20260914): Recorded James's confirmation of online Buildathon registration in [[Grants/proposals]]. Existing EFS v1 plus one bounded enhancement remains the intended entry, separate from v2. Project creation and final submission are not yet confirmed; no external action or implementation performed. / next: inspect Create Project fields with James and prepare the entry.

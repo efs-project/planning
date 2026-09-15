@@ -50,15 +50,22 @@ repository.
 First working draft created **2026-09-14**:
 
 - [[presentation-spine]]: the human story, full-stack speaking beats and the
-  audience's practical exercise. EFS is the running example; Uniswap provides
-  one brief interface-versus-protocol comparison.
+  audience's practical exercise. EFS is the running example, with comparisons
+  from other projects wherever they sharpen the lesson.
 - [[presentation-evidence]]: sources, existing proof, open verification checks
-  and the bounded demo plan. Historical results are not new rehearsal results.
+  and the bounded demo plan, including improvement paths and tradeoffs across
+  the stack. Historical results are not new rehearsal results.
+- [[presentation-examples]]: sourced non-EFS examples to select while shaping
+  each layer, with narrow claims and limits rather than whole-project ratings.
 - [[preparation-plan]]: early speaking practice, delivery checkpoints and the
   active Tuesday 9:00 a.m. America/Chicago preparation reminder.
 
 The two questions are whether users can continue without the maintainer and
 whether they can refuse someone using the maintainer's compromised authority.
+James's direction is to help developers recognize failures and decide which
+ones their own apps should defend against. Coverage includes usable recovery,
+build dependencies and the people and budgets behind apparently separate
+services, as well as the app, network and blockchain.
 The next step is a two-minute spoken opening, not another application rewrite.
 
 ## Acceptance completed

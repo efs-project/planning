@@ -10,6 +10,9 @@ personal organizer requirements remain in [[attendance-checklist]].
 - First written story and timed beats drafted in [[presentation-spine]].
 - Sources, historical EFS proof and open verification work separated in
   [[presentation-evidence]].
+- [[presentation-examples]] supplies non-EFS comparisons across the stack.
+  Use them where they teach a different failure or improvement. EFS remains
+  the main journey, rather than the only system the audience learns from.
 - No slide deck, new demo recording or spoken rehearsal completed by this
   drafting session. The most important risk is now whether the story works
   aloud and fits the time, not whether we can add more subjects.
@@ -72,6 +75,11 @@ Each check-in reads these files and identifies:
 - One concrete action James can finish that week.
 - Any organizer requirement that needs James's attention.
 
+Also check whether the current draft teaches a useful choice at each layer:
+what can fail, how to notice it, what improvement is possible, and what it
+costs or still relies on. Look for a non-EFS example that sharpens the point.
+Do not equate more project names with better coverage or add time to the slot.
+
 It must not assume a rehearsal, portal check, visa step or travel booking was
 completed. Official updates stay distinct from internal targets. After James
 confirms the talk was delivered, ask whether to retire this preparation
@@ -81,6 +89,11 @@ reminder. This reminder is separate from the broader weekly EFS PM review.
 
 - A clear explanation of EFS within the opening few minutes.
 - One concrete user task connecting app, network, contracts and blockchain.
+- Useful outside comparisons, with sources and deployment/version boundaries
+  checked before use. Each comparison must add a lesson rather than a logo.
+- An improvement path and its costs for each taught failure. A rehearsal
+  listener can say which risk they would defend against in their own app and
+  why, including cases where accepting a dependency is reasonable.
 - Both disappearance and compromised-authority cases, with the distinction
   between a failed hash check and a valid malicious update made clear.
 - A demonstration whose recorded outputs support exactly the claim spoken.
