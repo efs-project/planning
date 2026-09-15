@@ -21,11 +21,11 @@ Evidence is retained with source in `lab-b/core-closeout-bytework-20260915/` on 
 | Packet | Current state | Evidence still needed |
 | --- | --- | --- |
 | 1. Ordered acceptance and application atomicity | Implementing coherent prefix indexes plus final Files checks. | Batch singleton/live quota, eight-ref game predicate, mutable dependency, atomic app rollback, normal deployment/runtime fit. |
-| 2. Full required index bundle and evolution | Concrete source preflight in progress. | Complete manifest, generic role/target references without duplicate Files appends, declaration semantics, populated replay/catch-up/cutover, joint costs. |
+| 2. Full required index bundle and evolution | [[core-closeout-index-plan-20260915|Source-grounded implementation plan]] ready. | Complete manifest, generic role/target references without duplicate Files appends, declaration semantics, populated replay/catch-up/cutover, joint costs. |
 | 3. Resource envelope and avoidable overhead | Name/search waste repaired and reviewed. | Cold paid joint body/ref/name/Lens bounds, full required-profile callback costs and same-guarantee storage/evidence decomposition. |
 | 4. Contract query progress and live-backed Files | [[core-closeout-query-plan-20260915|Query implementation plan]] ready. | Owned paid continuation, retained-origin HEAD/tag joins, scope-mutation limits, typed live provider and immutable snapshot cost comparison. |
-| 5. Type interpretation, participation and authority | Type/registration preflight in progress. | Recoverable third-party descriptors/compatibility, non-griefable public registration, smart-wallet evidence, authenticated native provenance and honest private/external boundaries. |
-| 6. Integrated access and complete economics | Earlier small local journeys remain source-pinned. | Final cold Files/native-app journey, bounded SDK transport, actual public-provider access and all-in network fees. |
+| 5. Type interpretation, participation and authority | Finite Type, smart-authority and native-proof implementation boundaries identified; not yet implemented. | Recoverable third-party descriptors/compatibility, non-griefable public registration, smart-wallet evidence, authenticated native provenance and honest private/external boundaries. |
+| 6. Integrated access and complete economics | [[core-closeout-sdk-plan-20260915|Bounded transport and read-set experiment plan]] ready. Earlier small journeys remain source-pinned. | Final cold Files/native-app journey, measured SDK transport, actual public-provider access and all-in network fees. |
 
 ## Engineering direction from this pass
 

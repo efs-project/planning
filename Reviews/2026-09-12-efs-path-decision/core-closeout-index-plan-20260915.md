@@ -1,0 +1,66 @@
+# Core closeout: complete index profile and reproducible replacement
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans.
+
+**Goal:** Materialize and price the required generic discovery bundle, avoid duplicate/needless index writes, and rebuild a populated replacement without fabricated completeness.
+
+**Architecture:** Separate Index owns all query structures. One internal ordered effect fold serves live prefix maintenance and detached canonical replay. Immutable manifest semantics are distinct from physical layout and mutable progress. Tiny lists keep their first ordinal in the existing header until a second entry requires a packed word.
+
+**Tech Stack:** Existing compact Solidity0.8.30/Cancun lab, optimizer200 via-IR, Foundry, bounded Node paid runner. Execute after reviewed ordered-acceptance repair.
+
+**Spec:** [[core-design-audit-20260915]], packet2 and the resource portion of packet3. Retained source requirements: [[../../Designs/efsv2/owner-rulings]], [[../../Designs/efsv2/system-constitution]], [[../../Designs/efsv2/core-architecture-candidate]]. No protocol promotion or requirement waiver.
+
+## Global Constraints
+
+- Existing prototype/worktree; one source/build/chain worker, no owner-demo changes, production repos, public deployment, dependency installs, Fable or unbounded logs. Parent owns canonical main documents and publication; exact task commits only.
+- Keep ordinary15M transaction allowance, hard16,777,216 cap, runtime24,576/initcode49,152. Preserve mandatory Type rules, ordered-prefix coherence, final Files invariants and publication/configuration lock. All index failure rolls back the whole publication.
+- No index-family name may hide its unit. Retained Record relationships remain retained after occurrence withdrawal. Current occurrence and binding-target counts retain their distinct meanings. Never claim exact-Type completeness over an unbounded future Type universe.
+- A declaration is not maintained data. Required manifest is immutable at runtime; optional declarations cannot downgrade it or claim COMPLETE without materialization. Mutable coverage/replay/generation/progress is excluded from semantic obligation identity. Physical module/code/layout and execution pins still invalidate old plans on replacement.
+- Try storage representation savings before increasing the callback allowance. If the expanded required bundle still needs more than the old smaller-bundle allowance, use an explicitly measured finite profile work model, not a hidden cap increase. Shared prefix/final spending remains bounded inside unchanged venue limits. Report all-in transaction costs and the supported joint envelope.
+- No direct public injection of arbitrary effects or client-asserted coverage. Replay uses canonical retained admissions and its own contiguous cursor/shadow fold. Reject replay/cutover while source publication is staged. Never synthesize historical effects from current heads, current occurrence counts or mutable current withdrawal flags.
+
+## Task 1: Full generic materialization and economical posting representation
+
+**Files:** `src/IndexModule.sol`, `src/Keys.sol`, `src/Interfaces.sol`, bounded manifest/field-profile helper if useful, minimal `src/Ledger.sol` obligation/work-model integration; existing Files and selective-reference overrides; focused tests and paid evidence in `core-closeout-index-20260915/`.
+
+### Required units
+
+| Family | Unit and maintained meaning |
+| --- | --- |
+| Existing by-Type and by-Principal | Every PUBLISH/REUSE occurrence; lifetime count and not-withdrawn live count. |
+| New by-Record | Same authored-occurrence unit; not a substitute for the existing Record occurrence counter. |
+| New unique-by-Type | First admission of each retained Record once, even if every occurrence is later withdrawn. |
+| Existing scope/history/binding backlinks | Distinct binding coordinates, retained head changes, and historical/current target relationships respectively. |
+| Generic checked-reference role/target | First admission of each unique source Record at each declared leading reference ordinal, keyed by exact source Type/ordinal/target. Up to8 checked refs. |
+| Declared scalar equality | Retained unique Records, exact Type/spec ordinal/canonical scalar kind/value. |
+| Declared content digest | Retained unique content descriptors, algorithm-qualified digest. Not a fetched-byte or current-File assertion. |
+
+- [ ] Capture missing-family/tiny-list behavior before implementation. Preserve existing by-Type occurrence keys; allocate collision-separated new keys. Reference membership uses existing `referenceList` logical keys so old Files relationships remain queryable.
+- [ ] Implement inline singleton: first append writes header only; `postingAt(key,0)`/`postingWord(key,0)` synthesize `last` while count1. On1→2 materialize both first and second ordinals correctly, then use existing five-per-word packing. Preserve out-of-range zeros, withdrawal of singleton, ordinal bounds, audit flags, failed-transition rollback and getter word equivalence at counts0/1/2/5/6. Declare physical layout/profile change honestly.
+- [ ] Materialize generic families once in shared internal effect helpers. Add by-Record occurrence release on WITHDRAW. Unique/typed-reference/scalar/digest postings append only on original first admission, never on reuse/republish. Retained reference lists keep audit `live==count`, not active-Record semantics. Current occurrence counts remain separately qualified.
+- [ ] Remove duplicate physical reference appends in FilesParent/Carrier and selective-Quote indexes, retaining their exact-profile validations and family aliases. Every checked reference of every registered Type is indexed; do not keep a special one-Pair fixture as the generic implementation.
+- [ ] Add a small immutable exact-Type field-spec profile: canonical bytes32/uint256 equality and at most one algorithm-qualified digest field per Type initially, with explicit bounds. Out-of-range or malformed declared values fail required indexing. Digest for encrypted content is ciphertext digest, never a leaked plaintext index. Demonstrate digest→descriptor→revision→Lens-selected File without confusing each unit.
+- [ ] Expose bounded manifest enumeration/hash with key recipes, units/count semantics, extraction specs, required status, limits and callback ABI. Baseline generic obligations cover newly registered Types without per-Type runtime mutation. Include semantic manifest in signed index obligations; exclude ordinary progress. Unknown/undeclared data remains UNKNOWN/PARTIAL.
+- [ ] Measure original350k allowance with full cold8-ref and scalar/digest cases after singleton savings. If insufficient, retain that evidence and implement a finite immutable work-model allowance covering action/body/reference/declaration/prefix/final work. Bound quote output and pin helper/profile; no arbitrary module-requested gas. Avoid demanding all unused joint allowance as an unnecessary reserve near the end of a cheap batch.
+- [ ] Verify8 refs (same target at distinct roles and distinct cold targets), hot shared keys, same scalar across Types/codecs, digest algorithm separation, publish/reuse/dedup/withdraw, and full rollback. Price first/second/list-word-boundary inserts and a whole native/guarded publication separately. Report constructor/deployment and affected runtime/initcode sizes.
+- [ ] Self-review, commit exact task files, return detailed report and release ownership for independent review. No push.
+
+## Task 2: Detached genesis replay and atomic populated cutover
+
+**Files:** shared Index internal fold and a bounded canonical replay driver, minimal Ledger checked replacement API, Files final validation parameterization, read qualification currently relying on `attachedFrom==1`, focused tests/independent paid replay runner. No second handwritten family implementation.
+
+- [ ] Start a detached replacement at replay frontier0 while the old complete index stays active. Distinguish actual deployment admission from proven materialization origin. Behind/unfinished/gapped data is PARTIAL. Never administratively clear a gap or equate bumpGeneration with a rebuild.
+- [ ] Replay contiguous complete publications from canonical evidence/admissions and retained publication Principal IDs. Validate first/leaf/count bounds and exact order. PUBLISH/REUSE derive immutable Record identity; WITHDRAW processes its historical target once using a shadow withdrawal fold, ignoring today's withdrawn bit. BIND/UNBIND derive oldTarget/live/revision/fresh binding from shadow heads, not current source heads. Imported CREATE uses retained source creator where applicable.
+- [ ] Reuse the exact live materialization and final Files checks. Final Name/Directory qualification uses that publication's terminal admission; later metadata cannot repair an earlier invalid state. Do not rerun historical developer predicates against today's mutable policy or eligibility.
+- [ ] Update completed replay cursor only after final checks succeed; reject replay while source publication lock is active. Source layout/execution parsing must stay supported. No middle-leaf start, skipped cursor or caller-supplied effect/coverage bypass.
+- [ ] Add atomic admin `replaceIndexWhenReady` with expected old module, current admission/publication, required manifest, source Ledger, supported physical/callback profile, completed all-family genesis coverage and no active source publication. A concurrent source write after observed readiness must reject cutover. Replay suffix and retry; next new write reaches replacement exactly once. Legacy diagnostic setter is not advertised as safe cutover.
+- [ ] Replace deployment-time `attachedFrom==1` read qualification with proven genesis coverage while retaining attachment/code/execution/generation/current-frontier checks. New physical replacement invalidates stale signatures/cursors; replay progress alone does not change semantic obligation hash.
+- [ ] Compare every touched family against an independently implemented canonical-history fold through overwrite/removal/rebind, republish/reuse/withdraw, Name-after-BIND and full8-ref fields, while old index keeps accepting writes. Include false/missing manifest, bad source, incomplete final publication, active-lock replay and stale old-module/frontier controls.
+- [ ] Measure real bounded replay and cutover receipts. Include the largest supported old publication as a falsifier: expanding required work may make atomic replay exceed15M. Do not silently split an atomic publication or call small replay fixtures universal rebuild. If needed, report quarantined multi-transaction publication staging as the exact next engineering extension.
+- [ ] Run focused relevant Files, authority/guard, index and bytework covering tests; record sources, sizes, full costs and remaining joint bounds. Commit exact task paths and hand off for independent review.
+
+## Cost hypotheses to prove, not savings already earned
+
+Under the old physical representation,12 fresh posting lists for8 refs require24 fresh slots, approximately530,400gas in cold zero→nonzero storage charges alone. Inline singletons reduce that representation estimate to12 slots, approximately265,200; scalar+digest make14 slots, approximately309,400 before other work. These are not receipts or an irreducible EFS floor. The second append defers some cost, and the full transaction includes logical data, evidence, rules, dispatch and other indexes.
+
+Query progress/live Files, finite Type interpretation/authority and final SDK/network evidence remain subsequent packets. This plan does not reopen the architecture tournament or waive costly retained requirements.
