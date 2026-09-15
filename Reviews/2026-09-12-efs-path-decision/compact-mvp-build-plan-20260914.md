@@ -11,8 +11,8 @@ We do not need another hundred design pages before implementation. The two
 foundation changes below are now tested in the prototype; the remaining work is
 a sequenced vertical build. “Ready to code” is not “freeze for 100 years.”
 
-**Completion checkpoint, September 15, 03:04 UTC:** code worktree
-`codex/efs-warroom-b-run` at `9248feb` has independently reviewed stable
+**Completion checkpoint, September 15, 03:55 UTC:** code worktree
+`codex/efs-warroom-b-run` at `3ffa279` has independently reviewed stable
 identity/execution context, bounded transaction-time read assertions and the
 shared guarded Files SDK. 262 Solidity executions and 97 Node executions pass,
 including real mined-order controls, populated compatible proxy activation and
@@ -56,9 +56,29 @@ or false presence. Parent independently reran 59 covering Node tests and 24
 reader Solidity tests. Real browser QA showed 32/PARTIAL then 36/COMPLETE rows,
 rapid search followed by the correct continued result, Bob→Alice fallback, and
 verified bytes. The external reader is 15,791 runtime bytes; Ledger ABI/code are
-unchanged by this slice. Guarded signed-claim export, the exact-Type Note example
-and a core feasibility synthesis remain; the owner's scope clarification below
-defers normal host/UI hardening.
+unchanged by this slice.
+
+Guarded signed-claim recovery is now implemented and reviewed at `3ffa279`.
+The retained `e397df9` control exports five Files/Directory/revision/tag/name
+claims in a cold process, stops the source chain, verifies the bundle offline,
+and retains it through unrelated accounts on a distinct-chain archive without
+changing that destination's Ledger. The bundle preserves exact Type/rule/reference
+material; the archive alone is PARTIAL for missing meaning closure. A signature
+still does not prove source admission, historical guard truth, native authority,
+or destination permission. Independent review caught a zero-reference completeness
+overclaim; a focused real-signed-claim counterexample now rejects omitted evidence
+or preserves an explicit PARTIAL result. Parent independently verified the cold
+flow, relevant archive regressions, source/artifact pins and 125 raw signed
+transactions; no unrelated application test campaign was added.
+
+The archive maximum is a real limit, not a passing checkbox: 64 actions plus the
+maximum read set and 8,192 body bytes exhaust the 16,777,216-gas cap in one call.
+Staged retention succeeds at 12,342,925 plus 9,078,577 gas, excluding deployment
+and independent retention of the bundle's meaning closure. The failed one-shot
+costs gas too. Smaller ordinary claims are separately priced in the retained
+`lab-b/guarded-archive-20260914` evidence; these measurements remain pinned to
+`e397df9`, not relabelled after the JS-only fix. The exact-Type Note example and
+final core feasibility synthesis remain; normal host/UI hardening is deferred.
 The existing owner browser and chain are preserved. UI labels Alice → Bob / Bob →
 Alice and uses a Base-first drawer with Ethereum L1/Base execution models and an
 explicitly unmeasured ZKsync column. No production repository or public testnet

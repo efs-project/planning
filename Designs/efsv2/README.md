@@ -20,7 +20,11 @@ to the reviewed guarded SDK. Typed directories, binary uploads, verified PNG
 opening, retained tag labels and bounded encrypted-content handling are also
 reviewed in the prototype. Bounded joined pages and scale tests are also reviewed,
 including real paid-reader limits and fixes for uncertain/continued results.
-Cold signed-claim recovery, the exact-Type Note example and a core feasibility
+Cold signed-claim recovery is now reviewed too: the source can be stopped after
+export, another account can retain the bundle without taking destination
+authority, and missing Type/rule material stays explicitly incomplete. The
+maximum archive call fails the transaction cap; bounded staging succeeds and
+its full cost is retained. The exact-Type Note example and final core feasibility
 verdict remain. James has deferred ordinary multi-tab host/UI hardening: this
 prototype must establish what works, what is costly, and what remains unproved,
 not become a production application. The build plan carries the exact gates.
