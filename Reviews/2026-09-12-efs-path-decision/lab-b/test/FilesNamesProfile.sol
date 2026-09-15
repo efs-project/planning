@@ -53,7 +53,8 @@ library FilesNameLayout {
         if (offset != 128 || firstWord > type(uint64).max || occurrences > type(uint32).max
             || n > 255 || size != 160 + ((n + 31) / 32) * 32) return (3, bytes32(0), 0, new bytes(0));
         value = new bytes(n);
-        for (uint256 i; i < n; ++i) value[i] = output[160 + i];
+        // Copy only the decoded bytes after the fixed-size ABI response checks.
+        assembly ("memory-safe") { mcopy(add(value, 32), add(output, 192), n) }
         return (1, t, uint64(firstWord), value);
     }
 

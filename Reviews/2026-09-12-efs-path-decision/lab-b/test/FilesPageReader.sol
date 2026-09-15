@@ -62,6 +62,8 @@ contract FilesPageReader {
         page.scanStatus=source.status;page.scanned=source.scanned;page.hydrations=source.hydrations;
         page.rawTotal=source.rawTotal;page.selectedSoFar=source.selectedSoFar;page.rows=new Row[](source.items.length);
         page.completeFromOrigin=page.startsAtOrigin&&source.status==2&&source.scanned==source.rawTotal;
+        bytes memory needle=bytes(query.search);
+        uint256[] memory prefix=_prefix(needle);
         uint256 n;
         for(uint256 k;k<source.items.length;k++){
             Row memory row;row.placement=source.items[k];
@@ -81,7 +83,7 @@ contract FilesPageReader {
                 row.stableTag=_tag(principals,target,target,query.concept,basis.executionSet);
                 if(row.kind==1&&row.head.status==1)row.revisionTag=_tag(principals,row.head.target,target,query.concept,basis.executionSet);
             }
-            row.matchStatus=_match(row,query);
+            row.matchStatus=_match(row,query,needle,prefix);
             if(row.matchStatus!=2)page.rows[n++]=row; // unknown assessments remain visible
         }
         Row[] memory rows=page.rows;assembly("memory-safe"){mstore(rows,n)}
@@ -126,7 +128,7 @@ contract FilesPageReader {
         if(carrier)h.descriptor=FilesLayout.word(ledger,id,prefix-2);
         h.qualification=1;
     }
-    function _match(Row memory row,Query calldata query) private pure returns(uint8){
+    function _match(Row memory row,Query calldata query,bytes memory needle,uint256[] memory prefix) private pure returns(uint8){
         if(row.kind==4||row.name.qualification!=1||row.head.status==3||row.head.status==4
             ||(row.head.status==1&&row.header.qualification!=1))return 0;
         // A requested unavailable join remains observable even when another
@@ -138,12 +140,30 @@ contract FilesPageReader {
             bool known=(!stable||row.stableTag.qualification==1)&&(!revision||row.revisionTag.qualification==1||row.revisionTag.qualification==2);
             if(!tagMatch&&!known)return 0;
         }
-        bytes memory needle=bytes(query.search);
-        if(needle.length!=0){
-            bool found;for(uint256 i;i+needle.length<=row.name.value.length;i++){bool same=true;for(uint256 j;j<needle.length;j++)if(row.name.value[i+j]!=needle[j]){same=false;break;}if(same){found=true;break;}}
-            if(!found)return 2;
-        }
+        if(!_contains(row.name.value,needle,prefix))return 2;
         return tagMatch?1:2;
+    }
+    // KMP preparation is bounded by the validated <=255-byte query and shared
+    // by every row. Each fallback strictly decreases the matched prefix length.
+    function _prefix(bytes memory needle) private pure returns(uint256[] memory prefix){
+        prefix=new uint256[](needle.length);
+        uint256 matched;
+        for(uint256 i=1;i<needle.length;++i){
+            while(matched!=0&&needle[i]!=needle[matched])matched=prefix[matched-1];
+            if(needle[i]==needle[matched])++matched;
+            prefix[i]=matched;
+        }
+    }
+    function _contains(bytes memory value,bytes memory needle,uint256[] memory prefix) private pure returns(bool){
+        if(needle.length==0)return true;
+        if(needle.length>value.length)return false;
+        uint256 matched;
+        for(uint256 i;i<value.length;++i){
+            while(matched!=0&&value[i]!=needle[matched])matched=prefix[matched-1];
+            if(value[i]==needle[matched])++matched;
+            if(matched==needle.length)return true;
+        }
+        return false;
     }
 }
 

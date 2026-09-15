@@ -1,0 +1,134 @@
+Command (lab root):
+/Users/james/.foundry/bin/forge test --match-path 'test/{CoreReadCostAudit,FilesBytework}.t.sol' --match-test 'test_(audit_|bytework_)' --out /tmp/efs-recovery-build-wPDyNv/out --cache-path /tmp/efs-recovery-build-wPDyNv/cache -vv
+Exit: 0; initial GREEN before maximum-pattern/padded-size coverage additions
+Compiling 10 files with Solc 0.8.30
+Solc 0.8.30 finished in 101.27s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:88:21:
+   |
+88 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:93:29:
+   |
+93 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:113:22:
+    |
+113 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:25:
+    |
+117 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/FilesDirectoryProfile.t.sol:60:5:
+   |
+60 |     function test_directory_pin_rejects_wrong_rule_hash() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 96145 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesDirectoryProfile.t.sol:11:1:
+   |
+11 | contract FilesDirectoryProfileTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 79321 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesCarrierProfile.t.sol:10:1:
+   |
+10 | contract FilesCarrierProfileTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 123326 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesCarrierProfile.t.sol:71:1:
+   |
+71 | contract FilesCarrierIndexTest is FilesDirectoryProfileTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 203895 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesPageReader.t.sol:14:1:
+   |
+14 | contract FilesPageReaderTest is FilesCarrierIndexTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 210969 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/CoreReadCostAudit.t.sol:11:1:
+   |
+11 | contract CoreReadCostAuditTest is FilesPageReaderTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 208919 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesBytework.t.sol:10:1:
+   |
+10 | contract FilesByteworkTest is FilesPageReaderTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 2 tests for test/FilesBytework.t.sol:FilesNameByteBoundaryTest
+[PASS] test_bytework_name_copy_exact_lengths() (gas: 1976236)
+[PASS] test_bytework_name_decoder_rejects_malformed_bounds() (gas: 1294252)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 12.12ms (6.48ms CPU time)
+
+Ran 2 tests for test/FilesBytework.t.sol:FilesByteworkTest
+[PASS] test_bytework_nonmatching_search_keeps_unknown_axes() (gas: 11623156)
+[PASS] test_bytework_substring_boundaries() (gas: 13867257)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 41.62ms (42.00ms CPU time)
+
+Ran 3 tests for test/CoreReadCostAudit.t.sol:CoreReadCostAuditTest
+[PASS] test_audit_long_valid_names_filter_cost() (gas: 113006320)
+Logs:
+  candidate budget: 1
+  short-negative warm call gas: 295840
+  long-negative warm call gas: 559725
+  long-negative success: 1
+  candidate budget: 4
+  short-negative warm call gas: 920431
+  long-negative warm call gas: 1702298
+  long-negative success: 1
+  candidate budget: 8
+  short-negative warm call gas: 1760343
+  long-negative warm call gas: 3227519
+  long-negative success: 1
+  candidate budget: 32
+  short-negative warm call gas: 6844113
+  long-negative warm call gas: 12423050
+  long-negative success: 1
+
+[PASS] test_audit_unrelated_admission_invalidates_contract_page() (gas: 12811724)
+Logs:
+  classification: unrelated admission forces paid-current-state page restart; archived RPC snapshots are a separate browser capability
+
+[PASS] test_audit_valid_long_name_single_bind_within_index_bound() (gas: 10353665)
+Logs:
+  Name255 native single bind warm gas: 742700
+
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 292.09ms (294.82ms CPU time)
+
+Ran 3 test suites in 309.58ms (345.83ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)

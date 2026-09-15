@@ -5,7 +5,7 @@ import {FilesPageReaderTest} from "./FilesPageReader.t.sol";
 import {FilesPageReader} from "./FilesPageReader.sol";
 import {Ledger} from "../src/Ledger.sol";
 
-/// Audit reproductions, NOT a claim that the demonstrated limitations are fixed.
+/// A2/A3 regression requirements; A4 remains an open audit reproduction.
 /// Setup is an unconstrained Foundry fixture; every measured read is separately
 /// gas-fenced. Setup has warmed state, so these are not cold transaction receipts.
 contract CoreReadCostAuditTest is FilesPageReaderTest {
@@ -21,8 +21,8 @@ contract CoreReadCostAuditTest is FilesPageReaderTest {
             for (uint256 i; i < 255; ++i) label[i] = "a";
             label[254] = alphabet[k];
             // A legitimate two-action name+placement publication gets the
-            // existing 500k callback bound. The single-action 350k limitation
-            // is reproduced separately below; no protocol cap is changed.
+            // existing 500k callback bound. The single-action 350k requirement
+            // is checked separately below; no protocol cap is changed.
             bytes32 f = ledger.create(bytes32(800 + k));
             bytes32 revision = ledger.publish(rt, bytes.concat(abi.encode(f), bytes("hello")));
             ledger.bind(HEAD, f, 0, revision, 0);
@@ -56,34 +56,35 @@ contract CoreReadCostAuditTest is FilesPageReaderTest {
             (ok, result) = address(r).staticcall{gas: 15_000_000}(input);
             emit log_named_uint("long-negative warm call gas", beforeGas - gasleft());
             emit log_named_uint("long-negative success", ok ? 1 : 0);
-            require(ok == (budgets[k] == 1), "observed cost cliff changed; re-evaluate this open finding");
-            if (ok) {
-                page = abi.decode(result, (FilesPageReader.Page));
-                require(page.scanned == budgets[k] && page.rows.length == 0, "long query scanned different workload or unexpectedly matched");
-            } else {
-                require(result.length == 0, "failure was not an exhausted call");
-                emit log_named_string("classification", "valid query exhausts 15M gas-fenced warm read; not a transaction receipt");
-            }
+            require(ok, "valid difficult search exhausted warm diagnostic allowance");
+            page = abi.decode(result, (FilesPageReader.Page));
+            require(page.scanned == budgets[k] && page.rows.length == 0, "long query scanned different workload or unexpectedly matched");
         }
     }
 
-    function test_audit_valid_long_name_single_bind_exhausts_index_bound() public {
+    function test_audit_valid_long_name_single_bind_within_index_bound() public {
         bytes32 folder = _directory(950);
         bytes32 f = ledger.create(bytes32(uint256(951)));
         bytes32 revision = ledger.publish(rt, bytes.concat(abi.encode(f), bytes("hello")));
         ledger.bind(HEAD, f, 0, revision, 0);
         bytes memory label = new bytes(255);
         for (uint256 i; i < label.length; ++i) label[i] = "a";
-        ledger.publish(nt, label); // Mandatory Name validator ACCEPTS these bytes.
+        bytes32 name = ledger.publish(nt, label); // Native single-action retention.
+        (bytes32 retainedType, uint64 first,, bytes memory retained) = ledger.record(name);
+        require(retainedType == nt && first != 0 && keccak256(retained) == keccak256(label), "Name255 retention changed bytes");
         uint64 beforeCount = admissions();
-        (bool ok, bytes memory reason) = address(ledger).call{gas: 15_000_000}(
+        uint256 beforeGas = gasleft();
+        (bool ok,) = address(ledger).call{gas: 15_000_000}(
             abi.encodeCall(ledger.bind, (FOLDER, folder, keccak256(label), f, uint32(0)))
         );
-        require(!ok && keccak256(reason) == keccak256(abi.encodeWithSelector(Ledger.E_INDEX.selector, bytes(""))), "hypothesis disproved: single bind succeeded or failed differently");
-        require(admissions() == beforeCount, "failed index write did not roll back");
-        ledger.publish(nt, bytes("short"));
-        ledger.bind(FOLDER, folder, keccak256("short"), f, 0);
-        emit log_named_string("classification", "255-byte Name accepted, single placement fails 350k index callback; short-name control succeeds");
+        emit log_named_uint("Name255 native single bind warm gas", beforeGas - gasleft());
+        require(ok, "valid Name255 single bind failed existing index bound");
+        require(admissions() == beforeCount + 1, "single bind admission missing");
+        FilesPageReader.Query memory q;
+        q.search = string(label); // Exact match also prepares the maximum 255-byte prefix table.
+        FilesPageReader.Page memory page = reader().readPage(folder, selectors(), q, basis(), "", 1);
+        require(page.rows.length == 1 && page.rows[0].placement.target == f
+            && page.rows[0].name.qualification == 1 && keccak256(page.rows[0].name.value) == keccak256(label), "native Name255 placement not independently readable");
     }
 
     function test_audit_unrelated_admission_invalidates_contract_page() public {
