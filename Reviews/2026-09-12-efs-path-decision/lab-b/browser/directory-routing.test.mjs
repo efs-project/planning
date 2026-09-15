@@ -13,7 +13,7 @@ import * as view from './files-view.mjs';
 const source=(await readFile(new URL('./app.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'');
 const ethers=await loadEthers(),key='0x'+'11'.repeat(32),wallet=new ethers.Wallet(key);
 const tick=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};
-const deferred=()=>{let resolve;const promise=new Promise(r=>{resolve=r;});return {promise,resolve};};
+const deferred=()=>{let resolve,reject;const promise=new Promise((r,j)=>{resolve=r;reject=j;});return {promise,resolve,reject};};
 async function app({holdList,holdRead,holdPrepare,holdSubmit,initial='#/',typed=true}={}){
   const listeners=new Map(),elements=new Map();
   const element=id=>{
@@ -36,10 +36,10 @@ async function app({holdList,holdRead,holdPrepare,holdSubmit,initial='#/',typed=
   const stats={pin:0,authorize:0,submit:0,prepare:0,broadcast:0},context={blockNumber:'7',admission:'9',blockHash:ethers.id('route-basis')};
   const child=(folder,name)=>folder==='root'&&name==='archive'?'archive':folder==='archive'&&name==='qa-renamed'?'renamed':folder==='root'&&name==='slow'?'slow':null;
   const row=(folder,name,kind='file')=>({file:`${folder}-${name}`,folder,kind,knowledge:'PRESENT',name:{knowledge:'PRESENT',value:name},position:`${folder}/${name}`,selection:{author:wallet.address,revision:1,admission:'9'}});
-  const sdk={async pin(){stats.pin++;return context;},
+  const sdk={async pin(){stats.pin++;return {...context,blockNumber:String(6+stats.pin),admission:String(8+stats.pin)};},
     async readDirectory(){return {knowledge:'PRESENT',coverage:'COMPLETE'};},
     async readPlacement({folder,name}){const target=child(folder,name);return target?{knowledge:'PRESENT',coverage:'COMPLETE',value:{target,kind:'directory',selection:{author:wallet.address,revision:1,admission:'9'}}}:{knowledge:'ABSENT',coverage:'COMPLETE',value:{}};},
-    async listFolder({folder}){if(holdList&&folder==='slow')await holdList.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',basis:context,value:[row(folder,folder==='root'?'root.txt':folder==='renamed'?'child.txt':'slow.txt')]};},
+    async listFolder({folder,authors,context}){if(holdList&&folder==='slow'&&authors[0]===wallet.address)await holdList.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',basis:context,value:[row(folder,authors[0]!==wallet.address?'bob.txt':folder==='root'?'root.txt':folder==='renamed'?'child.txt':'slow.txt')]};},
     async readFile({file}){if(holdRead&&file.startsWith('slow-'))await holdRead.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',value:{file,selection:{author:wallet.address},revision:{file,recordId:'record',document:'0x61',firstAdmission:'9'},fileTag:{evaluated:true},revisionTag:{evaluated:true}}};},
     async prepare(){stats.prepare++;if(holdPrepare)await holdPrepare.promise;return {id:'plan',digest:ethers.id('intent')};},
     async authorize(plan,sign){stats.authorize++;await sign(plan.digest);return {id:'plan',transaction:{}};},
@@ -113,4 +113,24 @@ test('legacy explicit-mount app ignores Directory URL routing without new depend
   const a=await app({typed:false}),pins=a.stats.pin;await a.hash('#/archive/qa-renamed');
   assert.equal(a.stats.pin,pins);assert.match(a.element('rows').innerHTML,/root\.txt/);assert.doesNotMatch(a.element('mounts').innerHTML,/qa-renamed/);
   await a.click('connect');await a.click('create');await a.submit();assert.equal(a.stats.broadcast,1);
+});
+test('rejected superseded same-URL Lens read cannot overwrite newer qualification',async()=>{
+  const hold=deferred(),a=await app({holdList:hold});await a.click('connect');await a.hash('#/slow');
+  assert.equal(a.element('lens').disabled,false,'Lens is available during external route loading');
+  a.element('lens').value='bob';a.element('lens').listeners.get('change')();await tick();
+  assert.equal(a.location.hash,'#/slow');assert.match(a.element('rows').innerHTML,/bob\.txt/);
+  assert.match(a.element('basis').textContent,/block 9 · admission 11/);assert.match(a.element('coverage').textContent,/Complete folder traversal/);
+  assert.equal(a.element('notice').textContent,'');assert.equal(a.element('create').disabled,false);
+  const frame=()=>({rows:a.element('rows').innerHTML,basis:a.element('basis').textContent,coverage:a.element('coverage').textContent,
+    notice:a.element('notice').textContent,noticeHidden:a.element('notice').hidden,createDisabled:a.element('create').disabled});
+  const current=frame();hold.reject(new Error('Old Alice folder RPC failed'));await tick();
+  assert.deepEqual(frame(),current,'all visible qualification and controls stay with the newer Bob observation');
+});
+test('current-generation rejected route read remains visibly unqualified and non-actionable',async()=>{
+  const hold=deferred(),a=await app({holdList:hold});await a.click('connect');await a.hash('#/slow');
+  hold.reject(new Error('Current folder RPC failed'));await tick();
+  assert.match(a.element('notice').textContent,/Path UNKNOWN: Current folder RPC failed/);assert.equal(a.element('notice').hidden,false);
+  assert.match(a.element('coverage').textContent,/Partial observation/);assert.equal(a.element('basis').textContent,'No qualified observation yet');
+  assert.doesNotMatch(a.element('rows').innerHTML,/root\.txt|slow\.txt/);assert.equal(a.element('create').disabled,true);
+  await a.click('create');assert.equal(a.element('editor').open,false);
 });

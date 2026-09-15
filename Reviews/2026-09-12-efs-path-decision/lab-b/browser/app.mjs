@@ -127,6 +127,10 @@ async function refresh(continuing=false) {
     if(state.paths)navigation.ready=true;
     if(!selectedRow()) state.selected=null;
     notice('');
+  } catch(error) {
+    // Rejected awaits must cross the same generation gate as successful reads
+    // before run/handleRoute can publish their error into the current view.
+    check();throw error;
   } finally { if(routeCurrent(navigation)&&generation===state.readGeneration){state.routeLoading=false;render();} }
 }
 
