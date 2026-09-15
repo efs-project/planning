@@ -292,6 +292,38 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     check(Number(a[0])===1&&eq(a[6],e.keccak256(body))&&eq(a[7],type),'CONTENT_INTEGRITY');
     return {body,firstAdmission:String(first)};
   }
+  // Raw exact-Record evidence, NOT a Files revision and NOT application validity.
+  // No Lens selection: callers supply the exact immutable Record. The envelope
+  // retains the pinned basis, original bytes and historical admission provenance.
+  async function readTypedRecord({record,context}) {
+    check(contexts.has(context),'CONTEXT');
+    const answer=(knowledge,coverage,value,reason)=>freeze(result(context,knowledge,coverage,value,reason?{reason}:{}));
+    try {
+      await guard(context);
+      const [typeId,first,occurrences,body]=await call('ledger','record',[record],context);
+      if(first===0n){check(eq(typeId,Z)&&occurrences===0n&&body==='0x','RECORD_INTEGRITY');return answer('ABSENT','COMPLETE',null);}
+      check(first<=BigInt(context.admission)&&e.getBytes(body).length<=8192&&eq(recordOf(typeId,e.keccak256(body)),record),'RECORD_INTEGRITY');
+      const d=await call('registry','descriptor',[typeId],context),refs=Array.from(await scalar('registry','refTypes',[typeId],context));
+      check(refs.length===Number(d[3])&&Number(d[3])<=8,'RECORD_DESCRIPTOR');
+      check(eq(hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/type/1'),d[0],hash(['bytes32[]'],[refs]),d[1]]),typeId),'RECORD_TYPE_ID');
+      if(eq(d[1],Z))check(eq(d[2],e.ZeroAddress),'RECORD_RULE');
+      else {const runtime=await code(d[2],context);check(runtime!=='0x'&&eq(e.keccak256(runtime),d[1]),'RECORD_RULE');}
+      const a=await call('ledger','admission',[first],context),acceptance=await call('ledger','acceptanceBasis',[first],context);
+      check(Number(a[0])===1&&eq(a[6],e.keccak256(body))&&eq(a[7],typeId),'RECORD_ADMISSION');
+      check(eq(acceptance[0],typeId)&&eq(acceptance[2],d[2])&&eq(acceptance[3],d[1])&&acceptance[1]>0n,'RECORD_ACCEPTANCE');
+      const publication=await call('ledger','evidence',[a[2]],context);
+      check(publication[4]+BigInt(a[1])===first&&Number(a[1])<Number(publication[3])&&publication[9]<=BigInt(context.blockNumber),'RECORD_PUBLICATION');
+      await guard(context);
+      return answer('PRESENT','COMPLETE',{recordId:record,typeId,body,bodyHash:e.keccak256(body),firstAdmission:String(first),occurrences:String(occurrences),
+        descriptor:{shape:d[0],ruleId:d[1],mandatoryAcceptor:d[2],refTypes:refs},acceptance:plain(Array.from(acceptance)),
+        provenance:{author:publication[0],proofKind:Number(publication[1]),publication:String(a[2]),leaf:Number(a[1]),withdrawn:a[5],
+          ...await protocol.revisionEvidence(a[2],context)},validity:'NOT_ASSESSED',maintenance:'RETAINED_OCCURRENCE_COUNT'});
+    }catch(error){
+      if(isRpcUnavailable(error))return answer('UNKNOWN','PARTIAL',null,'RECORD_UNAVAILABLE');
+      if(error.message?.startsWith('COMPACT_'))return answer('INVALID','PARTIAL',null,error.message);
+      throw error;
+    }
+  }
   async function descriptorAt(id,context,through) {
     const retained=await retainedAt(id,config.types.content,context,through);
     let descriptor;try{descriptor=contentCodec.decodeDescriptor(e.getBytes(retained.body));}catch{fail('CONTENT_INTEGRITY');}
@@ -821,6 +853,6 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       receipt,receiptObservation,receiptAttribution,...(reason?{reason}:{})};
     await journal.put(plain(outcome)); return outcome;
   }
-  return Object.freeze({pin,listFolder,listFolderPage,readFile,readName,readDirectory,readPlacement,readContent,readConcept,readTag,conceptId,prepare,authorize,submit,reconcile,
+  return Object.freeze({pin,listFolder,listFolderPage,readFile,readName,readDirectory,readPlacement,readContent,readTypedRecord,readConcept,readTag,conceptId,prepare,authorize,submit,reconcile,
     capabilities:()=>freeze(plain({...protocol.capabilities,typedDirectories:directories,globalTree:false}))});
 }

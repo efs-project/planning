@@ -1,0 +1,18 @@
+--- a/test/NoteProfile.sol
++++ b/test/NoteProfile.sol
+@@ -35,9 +35,6 @@
+             }else return(false,"",false,false);
+         }else if(data.length!=end)return(false,"",false,false);
+-        // Cancun MCOPY avoids a second per-byte loop inside the Ledger's fixed
+-        // 300,000 gas mandatory-rule budget. Bounds above cover the exact slice.
+-        bytes memory out=new bytes(length);
+-        assembly("memory-safe"){mcopy(add(out,32),add(add(data,32),start),length)}
++        bytes memory out=new bytes(length);for(uint256 i;i<length;i++)out[i]=data[start+i];
+         return(true,string(out),emphasized,title);
+     }
+ }
+@@ -77,4 +74,3 @@
+     constructor(address core,bytes32[3] memory exactTypes,bytes32[3] memory hashes){
+-        if(Ledger(core).implementationSelf()!=core)revert E_NOTE_PROFILE(); // no proxy-shell pin masquerading as implementation evidence
+         ledger=Ledger(core);registry=TypeRegistry(address(Ledger(core).registry()));
+         ledgerCodeHash=core.codehash;registryCodeHash=address(registry).codehash;

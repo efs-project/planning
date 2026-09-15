@@ -56,6 +56,11 @@ const manifest = {chainId:'31337', folder, authors:{alice:A,bob:B}, contracts, t
 test('legacy factory refuses a guarded manifest instead of silently signing the legacy format', () => {
   assert.throws(() => createCompactSdk({ethers,manifest:{...manifest,protocol:'compact-guarded-v2'}}),/PROTOCOL/);
 });
+test('typed Record evidence has its own qualified point API, without extending Files profiles',async()=>{
+  const {sdk}=fixture();
+  assert.equal(typeof sdk.readTypedRecord,'function');
+  await assert.rejects(sdk.readTypedRecord({record:ra,context:{}}),/CONTEXT/);
+});
 test('guarded Files factory rejects the earlier public-plaintext-fingerprint carrier profile before RPC',()=>{
   let requests=0;
   assert.throws(()=>createFilesCompactSdk({ethers,manifest:{...manifest,protocol:'compact-guarded-v2',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v1'},rpc:()=>{requests++;}}),/CONTENT_PROFILE/);
