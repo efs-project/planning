@@ -4,8 +4,8 @@ import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {createEnvironment} from '../script/compact-environment.mjs';
 
-export async function createTagEnvironment({externalContent=false}={}){
-  const env=await createEnvironment({protocol:'compact-guarded-v2',evidenceMode:'append'});
+export async function createTagEnvironment({externalContent=false,rpcPort=0}={}){
+  const env=await createEnvironment({protocol:'compact-guarded-v2',evidenceMode:'append',rpcPort});
   try{
     const e=env.ethers,Z=e.ZeroHash,coder=e.AbiCoder.defaultAbiCoder();
     const t=env.manifest.types,h=env.manifest.ruleHashes;

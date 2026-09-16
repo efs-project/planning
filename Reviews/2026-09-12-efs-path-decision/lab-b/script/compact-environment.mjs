@@ -20,12 +20,13 @@ export async function loadEthers() {
   const entry = join(resolve(process.env.EFS_ETHERS_PATH),'lib.esm/index.js');
   const e = await import(pathToFileURL(entry)); assert(e.version.startsWith('6.')); return e;
 }
-async function freePort() {
-  const server = createServer(); await new Promise((ok,no) => {server.once('error',no);server.listen(0,'127.0.0.1',ok);});
+async function freePort(requested=0) {
+  assert(Number.isSafeInteger(requested)&&requested>=0&&requested<=65535,'valid local RPC port');
+  const server = createServer(); await new Promise((ok,no) => {server.once('error',no);server.listen(requested,'127.0.0.1',ok);});
   const port = server.address().port; await new Promise(ok => server.close(ok)); return port;
 }
 export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_OUT ?? join(lab,'out'),useLive=process.env.EFS_LISTING_MODE!=='audit',
-  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile,indexFields=false,evidenceMode='snapshot',benchmarkHistory=false,chainId=31337,transportOptions={},blockGasLimit=30_000_000}={}) {
+  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile,indexFields=false,evidenceMode='snapshot',benchmarkHistory=false,chainId=31337,transportOptions={},blockGasLimit=30_000_000,rpcPort=0}={}) {
   assert(Number.isSafeInteger(blockGasLimit)&&blockGasLimit>=15_000_000&&blockGasLimit<=30_000_000,'bounded local block gas limit');
   assert([31337,31338].includes(chainId),'owned fixture chainId is 31337 or 31338');
   assert(['snapshot','append'].includes(evidenceMode),'supported evidence mode');
@@ -40,7 +41,7 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
   assert(['cancun','prague'].includes(hardfork),'supported fixture hardfork');
   assert(deployment==='direct'||protocol==='compact-guarded-v2','proxy refuses legacy signed ingress');
   const e = await loadEthers(), dir = await mkdtemp(join(tmpdir(),'efs-compact-demo-'));
-  const port = await freePort(), rpcUrl = `http://127.0.0.1:${port}`;
+  const port = await freePort(rpcPort), rpcUrl = `http://127.0.0.1:${port}`;
   const child = spawn(process.env.ANVIL_BIN ?? 'anvil',[
     '--host','127.0.0.1','--port',String(port),'--chain-id',String(chainId),'--hardfork',hardfork,
     '--gas-limit',String(blockGasLimit),'--gas-price','2000000000','--prune-history',String(historyPolicy.states),

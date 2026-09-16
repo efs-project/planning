@@ -20,6 +20,13 @@ export const economics={ethUsd:2544.385,asOf:'2026-09-14T19:45:15Z',
     {id:'base',label:'Base',gasGwei:0.006,extraUsd:0,kind:'execution-only estimate; excludes L1 data/operator fees',source:'https://mainnet.base.org'},
     {id:'arbitrum',label:'Arbitrum',gasGwei:0.020146,extraUsd:0,kind:'execution-only estimate; excludes L1 data fees',source:'https://arb1.arbitrum.io/rpc'},
   ]};
+export function browserConfig(env,{directory=false,carrierFixture}={}){
+  const config={manifest:env.manifest,rpcUrl:env.rpcUrl,
+    mounts:[{id:env.manifest.folder,label:'Files'},...(directory?[]:[{id:env.manifest.folders[1],label:'Archive'}])],economics};
+  if(carrierFixture)config.carrierOrigin=carrierFixture.origin;
+  if(env.manifest.workbench)config.localWallet=true;
+  return config;
+}
 export async function connectFixture(env,journalName='seed') {
   const {ethers:e,manifest,rpc,wallets}=env;
   const journal=await env.createJournal(journalName), sdk=createCompactSdk({ethers:e,manifest,rpc,journal});
@@ -45,10 +52,7 @@ export async function startBrowser(env,{seed=true,directory=false,carrierFixture
     await run('edit',{file:shared.file,document:'Bob: meeting at 11:00.'},'bob');
     await run('addTag',{file:shared.file,scope:'file',concept:env.ethers.id('efs')});
   }
-  const config={manifest:env.manifest,rpcUrl:env.rpcUrl,
-    mounts:[{id:env.manifest.folder,label:'Files'},...(directory?[]:[{id:env.manifest.folders[1],label:'Archive'}])],economics};
-  if(carrierFixture)config.carrierOrigin=carrierFixture.origin;
-  if(env.manifest.workbench)config.localWallet=true;
+  const config=browserConfig(env,{directory,carrierFixture});
   const mime={'.html':'text/html','.mjs':'text/javascript','.css':'text/css'};
   const allowed=new Set(['index.html','app.mjs','files.css','compact-sdk.mjs','files-view.mjs']);
   if(directory)for(const asset of ['directory-entry.mjs','compact-sdk-v2.mjs','compact-paths.mjs','guarded-archive.mjs','compact-content.mjs'])allowed.add(asset);

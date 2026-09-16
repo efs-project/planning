@@ -4,14 +4,14 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import {createTagEnvironment} from '../core-closeout-tags-20260915/fixture.mjs';
 import {createFilesCompactSdk} from '../browser/compact-files-sdk.mjs';
-import {startBrowser} from './compact-browser.mjs';
+import {startBrowser,browserConfig} from './compact-browser.mjs';
 import {startRawCarrier} from './raw-carrier-fixture.mjs';
 import {samplePng} from './carrier-fixtures.mjs';
 import {describe,encryptContent} from '../browser/compact-content.mjs';
 import {externalGateways,publicExternalSamples,externalSampleDescriptor} from './external-content-fixtures.mjs';
 
-export async function startWorkbench(){
-  const env=await createTagEnvironment({externalContent:true});let fixture;
+export async function startWorkbench({serve=true,rpcPort=0,uiPort=60627}={}){
+  const env=await createTagEnvironment({externalContent:true,rpcPort});let fixture;
   try{
     const e=env.ethers,c=env.contracts,t=env.manifest.types,h=env.manifest.ruleHashes;
     c.index=c.tagIndex;
@@ -67,7 +67,11 @@ export async function startWorkbench(){
     }
     assert.equal((await sdk.readContent({file,authors,context})).state,'LIVE_SHAPE_OBSERVED');
     console.log('Workbench seeded on final required index. Example decryption key: '+'11'.repeat(32));
-    const browser=await startBrowser(env,{seed:false,directory:true,carrierFixture:fixture});
+    const browser=serve?await startBrowser(env,{seed:false,directory:true,carrierFixture:fixture}):{
+      config:browserConfig(env,{directory:true,carrierFixture:fixture}),
+      close:async()=>{await fixture.close();await env.close();}
+    };
+    if(!serve)fixture.allowUploadOrigin(`http://127.0.0.1:${uiPort}`);
     return {...browser,env,sdk,run,seed:{docs,photos,meeting,image,externalSamples}};
   }catch(error){await fixture?.close();await env.close();throw error;}
 }

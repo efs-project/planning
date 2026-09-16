@@ -5,7 +5,7 @@ import {loadEthers,createReadTransport} from './compact-environment.mjs';
 import {createFilesCompactSdk} from '../browser/compact-files-sdk.mjs';
 import {requestLocalNetwork,verifyWalletEnvironment,fundLocalWallet,signPlanIntent} from '../browser/wallet-session.mjs';
 const configUrl=process.argv[2];
-assert(/^http:\/\/127\.0\.0\.1:\d+\/config\.json$/.test(configUrl),'explicit owned local config URL');
+assert(/^http:\/\/127\.0\.0\.1:\d+\/(?:ipfs\/local-workbench\/)?config\.json$/.test(configUrl),'explicit owned local config URL');
 const config=await(await fetch(configUrl)).json(),e=await loadEthers(),rpc=createReadTransport({url:config.rpcUrl});
 const owner=e.Wallet.createRandom(),address=owner.address,counts={signatures:0,transactions:0};
 const ethereum={request:async({method,params=[]})=>{

@@ -1,0 +1,14 @@
+{
+  "name": "efs-v2-files-prototype",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "chain": "node script/workbench-chain.mjs",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "static": "node script/static-workbench.mjs"
+  },
+  "dependencies": { "ethers": "6.15.0" },
+  "devDependencies": { "vite": "8.3.0" }
+}

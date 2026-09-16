@@ -129,9 +129,10 @@ function controls() {
   document.querySelectorAll('[data-action]').forEach(button=>{ button.disabled=state.busy || state.routeLoading || !state.sdk || button.dataset.blocked==='true'; });
   $('create').disabled=!writesAllowed(); $('restore').disabled=!writesAllowed() || !state.removed;
   $('signer').disabled=!state.keys || state.busy; $('lens').disabled=state.busy || !state.sdk;
-  $('connect').hidden=!!state.wallet; $('disconnect').hidden=!state.wallet;
+  $('connect').hidden=!!state.wallet||state.config?.demoSigners===false; $('disconnect').hidden=!state.wallet;
+  $('signer').hidden=state.config?.demoSigners===false;
   $('connect-wallet').hidden=!!state.wallet;
-  if($('test-funds'))$('test-funds').disabled=!state.wallet?.external||state.busy;
+  if($('test-funds')){$('test-funds').disabled=!state.wallet?.external||state.busy;$('test-funds').hidden=state.config?.localFaucet===false;}
   if($('add-network'))$('add-network').disabled=state.busy;
   $('signer-status').textContent=state.wallet ? state.wallet.external?`${short(state.wallet.address)} · wallet`:`${$('signer').value} · disposable test signer` : 'Guest · read only';
   $('editor-submit').disabled=state.busy || state.routeLoading || !!state.operation?.pending;
@@ -340,7 +341,8 @@ async function connect() {
   const loopback=hostname=>['localhost','127.0.0.1','[::1]','::1'].includes(hostname);
   if(!loopback(location.hostname)||!loopback(new URL(state.config.rpcUrl,location.href).hostname)) throw new Error('Disposable signers are restricted to loopback page and RPC hosts.');
   if(String(state.config.manifest.chainId)!=='31337'||BigInt(await rpc('eth_chainId'))!==31337n) throw new Error('Disposable signer requires local chain 31337.');
-  const response=await fetch('/demo-wallets.json',{cache:'no-store'});
+  if(state.config.demoSigners===false)throw Error('Demo signing is development-only. Connect your own wallet.');
+  const response=await fetch(new URL('./demo-wallets.json',document.baseURI),{cache:'no-store'});
   if(!response.ok) throw new Error('This static artifact has no demo signer route. Guest reads remain available.');
   const keys=await response.json();
   const wallet=new ethers.Wallet(keys[$('signer').value]);
@@ -370,7 +372,7 @@ async function connectWallet(){
   state.walletUnsubscribe=()=>{ethereum.removeListener?.('accountsChanged',changed);ethereum.removeListener?.('chainChanged',changed);};
   applyCustomLens([address,...Object.values(state.config.manifest.authors).filter(a=>a.toLowerCase()!==address.toLowerCase())]);
   await refresh();if($('wallet-setup'))$('wallet-setup').open=true;
-  notice('Wallet connected. Click Get local test ETH, then create files. Each write currently asks for a data signature and a transaction. No real funds needed.');
+  notice(`Wallet connected. ${state.config.localFaucet===false?'Use local test ETH from your development chain.':'Click Get local test ETH, then create files.'} Each write currently asks for a data signature and a transaction. No real funds needed.`);
 }
 async function checkWallet(wallet){
   if(wallet!==state.wallet)throw Error('Writer changed; no further signature or transaction requested.');
@@ -556,13 +558,14 @@ document.addEventListener('click',event=>{
       const ethereum=walletProvider();
       await state.walletTools.requestLocalNetwork({ethereum,config:state.config,pageUrl:location.href,add:true});
       await state.walletTools.verifyWalletEnvironment({ethereum,config:state.config,rpc,keccak256:ethers.keccak256});
-      notice('EFS local network verified. Click Connect wallet, then Get local test ETH.');
+      notice(`EFS local network verified. Click Connect wallet${state.config.localFaucet===false?'.':', then Get local test ETH.'}`);
     }
     if(action==='copyRpc'){
       try{await navigator.clipboard.writeText(state.config.rpcUrl);notice('Local RPC URL copied.');}
       catch{$('wallet-rpc').focus();$('wallet-rpc').select();notice('RPC URL selected — copy it with your keyboard.');}
     }
     if(action==='testFunds'){
+      if(state.config.localFaucet===false)throw Error('Local test faucet is development-only.');
       if(!state.wallet?.external||!state.walletTools)throw Error('Connect a wallet on this local demo first.');
       const wallet=state.wallet;await checkWallet(wallet);
       await state.walletTools.fundLocalWallet({config:state.config,pageUrl:location.href,address:wallet.address,rpc});
@@ -673,7 +676,7 @@ $('cost-body').addEventListener('change',event=>{
 });
 
 await run(async()=>{
-  const response=await fetch('/config.json',{cache:'no-store'});
+  const response=await fetch(new URL('./config.json',document.baseURI),{cache:'no-store'});
   if(!response.ok) throw new Error(`Configuration unavailable (${response.status}).`);
   state.config=await response.json(); state.folder=state.config.manifest.folder;
   if(state.config.manifest.externalContentProfile==='ar-ipfs-locator-v2')state.externalContent=await import('./external-content.mjs');
