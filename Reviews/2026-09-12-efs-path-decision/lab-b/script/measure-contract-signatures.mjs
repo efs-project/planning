@@ -1,23 +1,31 @@
 /** Finite paid ERC1271 matrix. Run from lab-b; no public RPC, fork, install,
  * trace opcode stream, relaxed size cap or owner-demo process access. */
 import assert from 'node:assert/strict';
-import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,lstat} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
-import {gzipSync,gunzipSync} from 'node:zlib';
+import {gzipSync} from 'node:zlib';
 import {createHash} from 'node:crypto';
 import {join} from 'node:path';
 import {createEnvironment,loadEthers} from './compact-environment.mjs';
 import {createGuardedArchiveReader} from '../browser/guarded-archive.mjs';
 import {createContractSignatureCompanion,verifyContractSignatureBundle,encodeContractSignaturePublication,
   encodeContractSignatureRetention,ARCHIVE_ABI,BUNDLE,STORE_ABI} from '../browser/contract-signature-evidence.mjs';
+const out='core-closeout-authority-20260915';
+const targets=[['Ledger.sol','Ledger'],['PublicationSupport.sol','PublicationSupport'],['ContractSignatureEvidenceStore.sol','ContractSignatureEvidenceStore'],
+  ['ContractSignatureEvidenceStore.sol','ContractSignatureCode'],['ContractSignatureEvidenceArchive.sol','ContractSignatureEvidenceArchive'],
+  ['ContractSignatureWallet.sol','ContractSignatureWallet'],['SignaturePaidRead.sol','SignaturePaidRead']];
+// Refuse before ethers/artifact loading, writes, or chain launch. A new run needs
+// an explicitly reviewed fresh destination; the retained packet is never reused.
+for(const name of ['paid.json.gz','paid-progress.json.gz',...targets.map(([,name])=>`artifact-${name}.json.gz`)]){
+  const exists=await lstat(join(out,name)).then(()=>true,error=>{if(error.code==='ENOENT')return false;throw error;});
+  if(exists)throw Error(`EVIDENCE_OUTPUT_EXISTS: ${join(out,name)}`);
+}
 const BASE='ab55ca65bfc5ee983c829e42d421f6382ad66fa1',e=await loadEthers(),coder=e.AbiCoder.defaultAbiCoder(),Z=e.ZeroHash;
 const plain=x=>JSON.parse(JSON.stringify(x,(_,v)=>typeof v==='bigint'?String(v):v));
 const hash=(t,v)=>e.keccak256(coder.encode(t,v)),sha=x=>createHash('sha256').update(x).digest('hex');
-const out='core-closeout-authority-20260915';await mkdir(out,{recursive:true});
+await mkdir(out,{recursive:true});
 const report={base:BASE,sourceCommit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),limits:{runtime:24576,initcode:49152,ordinaryGas:15000000,hardGas:16777216},arms:[],artifacts:{},offline:[]};
-for(const [file,name] of [['Ledger.sol','Ledger'],['PublicationSupport.sol','PublicationSupport'],['ContractSignatureEvidenceStore.sol','ContractSignatureEvidenceStore'],
-  ['ContractSignatureEvidenceStore.sol','ContractSignatureCode'],['ContractSignatureEvidenceArchive.sol','ContractSignatureEvidenceArchive'],
-  ['ContractSignatureWallet.sol','ContractSignatureWallet'],['SignaturePaidRead.sol','SignaturePaidRead']]){
+for(const [file,name] of targets){
   const raw=await readFile(join(process.env.FOUNDRY_OUT,file,`${name}.json`)),a=JSON.parse(raw);
   const m=typeof a.metadata==='string'?JSON.parse(a.metadata):a.metadata;
   assert.equal(m.compiler.version,'0.8.30+commit.73712a01');assert.equal(m.settings.optimizer.runs,200);assert(m.settings.viaIR);assert.equal(m.settings.evmVersion,'cancun');
