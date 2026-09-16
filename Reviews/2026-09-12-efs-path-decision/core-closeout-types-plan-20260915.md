@@ -38,7 +38,7 @@
 
 ## Task 2: Independent interpretation, evolution and source-off meaning
 
-**Execution status September16:** active from reviewed `cb4e8af`. The controller supplies an additional previously unseen measurement/card fixture only after the independent decoder's commit/hash is frozen. Existing literal vectors are public inputs; producer parser/fixture encoder reuse is not independence.
+**Execution status September16:** complete and independently reviewed through `ab55ca6`, including the absent-Type payload-bound fix. The controller supplied two previously unseen linked measurement Types only after the independent decoder's commit/hash was frozen; both passed it unchanged. Actual contract-state reads, source-off interpretation, separate destination relay and qualified evolution are retained in [[core-closeout-results-20260915#Independent Type interpretation and source-off meaning reviewed]]. This does not establish foreign chain-root proof or automatic stateful custom installation.
 
 **Files:** independent `browser/described-type-reader.mjs` and focused tests/literal vectors; bounded descriptor accessor in the SDK; guarded archive sidecars; a bounded paid/source-off integration script. No UI polish.
 

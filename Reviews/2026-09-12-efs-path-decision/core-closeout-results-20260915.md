@@ -4,7 +4,7 @@ September15,2026 · v2 PM · core-closeout-20260915
 
 **Status:** implementation in progress. James authorized finishing the six-packet [[core-design-audit-20260915|Core audit closeout]]. This page separates reviewed fixes from work still being implemented; no whole-prototype completion or permanent protocol claim.
 
-**Latest reviewed checkpoint: `cb4e8af`.** Finite described Types now support public creator-authorized registration, recoverable definitions, mandatory structure plus developer validation, and exact local custom-instance authorization. Unrelated registration preserves existing pending writes and queries. Independent source-off interpretation is next, not already proven. Additive immutable read-set storage cuts the largest measured guarded publication10.62M→5.44Mgas; selection-only reads cut measured64-author ordinary continuation3.10M→2.17Mgas. Both preserve their qualified guarantees but remain workload-specific, not final whole-File prices or cheap arbitrary search. Wallet/native evidence, live Files, stance tags and final integrated economics remain queued.
+**Latest reviewed checkpoint: `ab55ca6`.** Finite described Types now have independently implemented source-off interpretation, including two previously unseen linked definitions, explicit compatible read projections and refusal of unsupported writes. Public registration and mandatory structure/custom validation remain reviewed. This proves recoverable meaning within the finite profile, not arbitrary custom-state recreation or authenticated foreign history. Additive immutable read-set storage cuts the largest measured guarded publication10.62M→5.44Mgas; selection-only reads cut measured64-author ordinary continuation3.10M→2.17Mgas. Both remain workload-specific, not final whole-File prices or cheap arbitrary search. Smart-wallet authority is active; native proofs, live Files, stance tags and final integrated economics remain queued.
 
 ## Reviewed now
 
@@ -195,6 +195,27 @@ The first disposable profile supports0–16 fields, eight required leading refer
 
 Evidence:`lab-b/core-closeout-types-20260915/` on the prototype branch. Original raw packet SHA256`d6edc5c1660b3ca4a2f0202ac7bf9accc8e0ffc4811f7efb53ca31ace94a4090`; lossless gzip SHA256`0cddc685f0ccd5153ac444fd03c219437303116faff45f7ac5c00f0aa4410202`. Source-off independent decoding, a previously unseen Type, explicit additive/breaking read projections and archive interpretation coverage are the next task. No owner-demo change, source-RPC restart, production deployment or requirement waiver.
 
+## Independent Type interpretation and source-off meaning reviewed
+
+**Task2 checkpoint `ab55ca65bfc5ee983c829e42d421f6382ad66fa1`:** an independent finite decoder was frozen before the controller created two unfamiliar linked weather/measurement Types. It decoded both unchanged, including an integer above JavaScript's safe numeric range, optional absence versus present-empty bytes, and checked-reference identities. Actual contract state supplied the descriptor/body; later offline verification used retained bytes after the source RPC stopped, with no producer parser, registry service or creator online.
+
+- A different Realm relayed both unchanged custom-free declarations: same Type/Record identities, different chain/Ledger/wrapper/admissions. The destination publisher remains the actual destination caller, not a fabricated original author. Stateful custom definitions remain interpretable; missing local installation authorization is not repaired by copying their code.
+- Exact consumer-approved projections allow the unchanged old text renderer to read an additive Type, with omitted-field disclosure. A breaking rich-text projection requires a named adapter and loss consent. Old writers reject unfamiliar Types/restrictions; a producer's compatibility claim cannot grant write permission.
+- Eight source-off guarded bundles reproduce: seven have complete interpretation, one retains an opaque legacy referenced Type. Byte/identity closure, interpretation coverage, source acceptance and destination authority remain distinct. Missing descriptors/reference Records stay partial; unknown codecs are unsupported; valid empty bodies are not missing bytes.
+- Independent review found and closed an actual bound bypass: an absent-Type flag had excluded supplied rule-code bytes from limits. The fix counts every supplied payload and checks size before hex parsing. Focused RED0/3→GREEN3/3 and covering10/10 pass; parent fresh3/3 and retained audit pass. No paid evidence or frozen decoder was rewritten.
+
+| Paid local operation | Whole gas | Qualification |
+| --- | ---: | --- |
+| Unfamiliar unlinked / linked Type registration |647,380 /737,491|Setup for distinct descriptors; not per-File prices. |
+| Linked guarded signed publish / signed reuse |1,001,100 /694,791|Actual mandatory described validation and index work. |
+| Native duplicate / native reuse |637,308 /588,296|Same source fixture, distinct operations. |
+| Cold paid raw descriptor/body read |52,914|Contract data retrieval, not a paid generic interpreter. |
+| Destination native linked publication |557,736|Different Realm/index state; not an apples-to-apples cross-chain gas saving. |
+
+One bounded campaign retained80 actual transactions, eight intended refusals and25 normal deployments; both experiment chains closed. Parent audit confirms37 measured source hashes,14 artifacts,193 compiler dependency joins,80 raw receipt/transaction joins,25 constructor/runtime joins and eight offline results. Worker66Node/36Forge covering checks and parent13 targeted pre-fix checks passed; only the amended archive paths were repeated for the fix. Existing compiler/test-harness warnings and dense decoder formatting are deferred review minors, not hidden success claims.
+
+Evidence remains in `lab-b/core-closeout-types-20260915/`, including `interpretation-run1/`. The paid source pins match `a72c272`, while later `2488c5b`/`ab55ca6` contain explicitly hashed offline hardening; the earlier recorded run HEAD is not relabelled. Raw/gzip paid packet SHA256`513dc97767d2a76f9a031d25b39487e47cc829d6ece1ab8d8214685d12f9460b`/`ab5b941cf76eb3aca9a2e85d1388bc1dcc8fae91ef965f0c2650173aa8cecf33`. The paid custom destination refusal combines stale authorization with a wrong-runtime address; it is not substituted for Task1's isolated authorization controls. No Solidity, runtime layout, owner-demo state or permanent protocol choice changed in Task2.
+
 ## Six-packet finish line
 
 | Packet | Current state | Evidence still needed |
@@ -203,7 +224,7 @@ Evidence:`lab-b/core-closeout-types-20260915/` on the prototype branch. Original
 | 2. Full required index bundle and evolution | [[core-closeout-index-plan-20260915|Both tasks]] reviewed through7af2695: canonical populated replay/catchup/cutover and independent family comparisons pass. | Final integrated largest-body replay and joint-envelope refresh; historical source decoders remain explicit supported profiles. |
 | 3. Resource envelope and avoidable overhead | Name/search waste repaired; [[core-closeout-resource-plan-20260915|packed-count repair and preparation extraction]] reviewed at 4c1098f; normal sizes fit and 65 selected checks pass. | Cold paid joint body/ref/name/Lens bounds and same-guarantee storage/evidence decomposition. |
 | 4. Contract query progress and live-backed Files | [[core-closeout-query-plan-20260915|All three query tasks]] reviewed throughf7ce187: origin progress, exact-Type coverage repair and measured selection-only savings. [[core-closeout-live-files-plan-20260915|Typed live Files plan]] queued. | Remaining wide/deep practicality, bounded retained initialization, typed live provider and immutable snapshot comparison. |
-| 5. Type interpretation, participation and authority | [[core-closeout-types-plan-20260915|Finite Type/participation Task1]] reviewed atcb4e8af; independent Task2 active. [[core-closeout-authority-plan-20260915|Wallet/native-proof plan]] ready. | Independent third-party interpretation/compatibility and source-off recovery, smart-wallet evidence, authenticated native provenance and honest private/external boundaries. |
+| 5. Type interpretation, participation and authority | [[core-closeout-types-plan-20260915|Both finite Type tasks]] reviewed throughab55ca6, including independent source-off recovery. [[core-closeout-authority-plan-20260915|Wallet Task1]] active. | Smart-wallet evidence, authenticated native provenance and honest private/external boundaries; arbitrary schema/account/custom-state equivalence is not claimed. |
 | 6. Integrated access and complete economics | [[core-closeout-sdk-plan-20260915|All three bounded SDK tasks]] reviewed through5bc5f17: qualified tags, transport and paid additive read-set storage. [[core-closeout-network-preflight-20260915|Small public-RPC preflight]] passed hash/batch controls on Base/Era; Era root-proof limitation confirmed. | Final cold Files/native-app journey, integrated storage/query tradeoffs, current public-provider access and all-in network fees. |
 
 ## Engineering direction from this pass

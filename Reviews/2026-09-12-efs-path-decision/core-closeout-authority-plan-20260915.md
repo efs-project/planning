@@ -17,6 +17,8 @@
 
 ## Task 1: Deployed ERC1271 wallet ingress and retained historical authorization
 
+**Execution status September16:** active from reviewed prototype `ab55ca6`, sole Astra Extra High source/build/bounded-chain worker. The existing fixed caller-preserving preparation split supersedes the older preflight's standalone-module suggestion where coherent. Task2 waits for final source/layout anchors after live Files and stance tags; no wallet completion claim yet.
+
 **Files:** minimal Ledger ingress/integration, fixed signature module/evidence carrier if runtime requires it, qualified companion SDK/archive support, focused wallet and cost tests.
 
 - [ ] Add an explicit guarded ERC1271 ingress/proof kind3, retaining the existing guarded intent digest and ordinary origin-qualified contract principal. Native calls and signature-authorized calls from the same ordinary wallet share its nonce. Do not collapse EOA signatures, native authority and wallet validation evidence into one proof kind.
