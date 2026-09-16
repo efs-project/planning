@@ -9,7 +9,7 @@ export function createGuardedCompactSdk(options) {
 
 // Only protocol/context/identity codecs live here. Files construction, traversals,
 // capability ownership, journals and receipt attribution remain in one engine.
-function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fail,plain,call,scalar,code,addresses,interfaces,bindingOf}) {
+export function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fail,plain,call,scalar,code,readGroup,addresses,interfaces,bindingOf}) {
   const Z=e.ZeroHash,coder=e.AbiCoder.defaultAbiCoder(),family=config.executionFamily;
   const layout=e.id('efs.lab.ledger-layout/2:roots-0-12-preserved:context-13:execution-14:readsets-15');
   const domain={name:'EFS2-RoadB-Lab',version:'2'};
@@ -95,15 +95,16 @@ function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fail,plain
         // The caller explicitly opts into current account classification through
         // `authors`; prepared plans retain the resulting IDs, never reclassify.
         check(Array.isArray(args.authors),'EXPLICIT_LENS_REQUIRED');
-        ids=await Promise.all(args.authors.map(async account=>isKey(await code(e.getAddress(account),context))
-          ?keyPrincipal(account):contractPrincipal(account,context.origin)));
+        check(args.authors.length>0&&args.authors.length<=255,'LENS');
+        ids=await readGroup(args.authors,async account=>isKey(await code(e.getAddress(account),context))
+          ?keyPrincipal(account):contractPrincipal(account,context.origin));
       }
       check(ids.length>0&&ids.length<=255&&ids.every(p=>/^0x[0-9a-f]{64}$/i.test(p)&&!eq(p,Z))
         &&new Set(ids.map(p=>p.toLowerCase())).size===ids.length,'LENS');return ids;
     },
     async readContext(context) {
       const names=['realmOrigin','realmId','layoutId','domainSeparator','guardedDomainSeparator','executionRevision','implementationSelf','executionSet'];
-      const values=Object.fromEntries(await Promise.all(names.map(async name=>[name,await scalar('ledger',name,[],context)])));
+      const values=Object.fromEntries(await readGroup(names,async name=>[name,await scalar('ledger',name,[],context)]));
       check(eq(values.realmOrigin,family.origin)&&eq(values.realmId,family.realmId)&&eq(values.layoutId,layout)
         &&eq(values.domainSeparator,family.domainSeparator)&&eq(values.guardedDomainSeparator,family.guardedDomainSeparator),'EXECUTION_FAMILY');
       const execution={origin:values.realmOrigin,revision:String(values.executionRevision),shellCodeHash:context.core,
@@ -130,7 +131,7 @@ function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fail,plain
     async authorization({intent:old,actionsHash,authors,principalId,context,guardPositions}) {
       check(authors.length<=64&&guardPositions.length<=4,'READSET_SHAPE');
       const snapshots=[];
-      for(const dep of guardPositions)for(const principal of authors)snapshots.push(await snapshot(principal,dep.position,context));
+      for(const dep of guardPositions)snapshots.push(...await readGroup(authors,principal=>snapshot(principal,dep.position,context)));
       const readSet={principalIds:guardPositions.length?authors:[],positions:guardPositions.map(d=>d.position),expectedHeads:snapshots.map(s=>s.hash)};
       const {coreCodeCommitment,...base}=old;
       const intent={...base,realmOrigin:context.origin,executionSet:context.executionSet,readSetHash:validateReads(readSet)};
@@ -143,10 +144,10 @@ function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fail,plain
     encode,
     async preflight(plan,context) {
       check(eq(context.executionSet,plan.intent.executionSet),'EXECUTION_DRIFT');
-      for(let i=0;i<plan.readSet.positions.length;i++)for(let j=0;j<plan.readSet.principalIds.length;j++) {
-        const now=await snapshot(plan.readSet.principalIds[j],plan.readSet.positions[i],context);
+      for(let i=0;i<plan.readSet.positions.length;i++)await readGroup(plan.readSet.principalIds,async(principal,j)=>{
+        const now=await snapshot(principal,plan.readSet.positions[i],context);
         check(eq(now.hash,plan.readSet.expectedHeads[i*plan.readSet.principalIds.length+j]),'READSET_DRIFT');
-      }
+      });
     },
     verifyJournal:validateJournal,principal:plan=>keyPrincipal(plan.intent.author),
     async verifyRetained(plan,publication,retained,context) {

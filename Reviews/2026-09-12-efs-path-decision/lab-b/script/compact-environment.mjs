@@ -8,6 +8,8 @@ import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import {createServer} from 'node:net';
+import {createReadTransport} from './compact-read-transport.mjs';
+export {createReadTransport} from './compact-read-transport.mjs';
 
 const lab = fileURLToPath(new URL('../',import.meta.url));
 const mnemonic = 'test test test test test test test test test test test junk';
@@ -23,7 +25,7 @@ async function freePort() {
   const port = server.address().port; await new Promise(ok => server.close(ok)); return port;
 }
 export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_OUT ?? join(lab,'out'),useLive=process.env.EFS_LISTING_MODE!=='audit',
-  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile,indexFields=false,evidenceMode='snapshot',benchmarkHistory=false,chainId=31337}={}) {
+  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile,indexFields=false,evidenceMode='snapshot',benchmarkHistory=false,chainId=31337,transportOptions={}}={}) {
   assert([31337,31338].includes(chainId),'owned fixture chainId is 31337 or 31338');
   assert(['snapshot','append'].includes(evidenceMode),'supported evidence mode');
   assert(!benchmarkHistory||evidenceMode==='append','short history is explicit benchmark-only');
@@ -54,17 +56,7 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
       if (child.exitCode === null) child.kill('SIGKILL');
     }
   };
-  const metrics = {calls:0,httpRequests:0,httpBatches:0,requestBytes:0,responseBytes:0,byMethod:{}};
-  let requestId=0;
-  const rpc = async (method,params=[]) => {
-    const id=++requestId, body=JSON.stringify({jsonrpc:'2.0',id,method,params});
-    ++metrics.calls;++metrics.httpRequests; metrics.requestBytes+=Buffer.byteLength(body); metrics.byMethod[method]=(metrics.byMethod[method]??0)+1;
-    const response=await fetch(rpcUrl,{method:'POST',headers:{'content-type':'application/json'},body,signal:AbortSignal.timeout(20_000)});
-    const text=await response.text(); metrics.responseBytes+=Buffer.byteLength(text);
-    assert(response.ok,`RPC HTTP ${response.status}`); const data=JSON.parse(text);
-    if(data.error) throw Object.assign(new Error(`${method}: ${data.error.message}`),{rpcError:data.error});
-    assert.equal(data.id,id,'RPC response ID'); return data.result;
-  };
+  const rpc=createReadTransport({url:rpcUrl,...transportOptions}),metrics=rpc.metrics;
   try {
     const until=Date.now()+10_000;
     while(true) {

@@ -20,9 +20,43 @@ export function createCompactSdk(options) {
   return createCompactEngine(options);
 }
 
+// Raw strings only: decode anew for each caller so ethers Results are never
+// shared mutable cache values. This helper is instantiated inside one engine;
+// neither transport nor profile identity can be changed after construction.
+export function createExactReadCache({identity,enabled=true,maxEntries=512,maxBytes=8*1024*1024,maxInflight=64}={}) {
+  for(const n of [maxEntries,maxBytes,maxInflight])if(!Number.isSafeInteger(n)||n<1)throw Error('COMPACT_CACHE_LIMIT');
+  const entries=new Map(),pending=new Map(),encoder=new TextEncoder();let bytes=0,active=0,generation=0;
+  const totals={attempts:0,hits:0,misses:0,inflightHits:0,evictions:0,oversize:0};
+  const size=value=>encoder.encode(value).byteLength;
+  const remove=key=>{bytes-=entries.get(key).bytes;entries.delete(key);};
+  return Object.freeze({
+    async read(method,params,load,validate=()=>{}) {
+      totals.attempts++;
+      const key=JSON.stringify([identity,method,params]);
+      if(enabled&&entries.has(key)){const entry=entries.get(key);entries.delete(key);entries.set(key,entry);totals.hits++;validate(entry.value);return entry.value;}
+      if(enabled&&pending.has(key)){totals.inflightHits++;const value=await pending.get(key);validate(value);return value;}
+      if(active>=maxInflight)throw Error('COMPACT_CACHE_INFLIGHT_LIMIT');
+      totals.misses++;active++;const atGeneration=generation;
+      const promise=Promise.resolve().then(load).then(value=>{
+        if(typeof value!=='string')throw Error('COMPACT_CACHE_RAW_VALUE');
+        validate(value);const accounted=size(key)+size(value);
+        if(enabled&&atGeneration===generation){
+          if(accounted>maxBytes)totals.oversize++;
+          else {while(entries.size>=maxEntries||bytes+accounted>maxBytes){remove(entries.keys().next().value);totals.evictions++;}
+            entries.set(key,{value,bytes:accounted});bytes+=accounted;}
+        }
+        return value;
+      }).finally(()=>{active--;if(pending.get(key)===promise)pending.delete(key);});
+      if(enabled)pending.set(key,promise);return promise;
+    },
+    clear(){generation++;entries.clear();pending.clear();bytes=0;},
+    stats:()=>({...totals,entries:entries.size,bytes,inflight:active,maxEntries,maxBytes,maxInflight,enabled}),
+  });
+}
+
 // Additive seam: guarded fixtures import this engine. Live-served legacy assets
 // never import a new module (the existing server has a closed asset allowlist).
-export function createCompactEngine({ethers: e, rpc: transport, manifest, journal,contentCodec}, protocolFactory) {
+export function createCompactEngine({ethers: e, rpc: transport, manifest, journal,contentCodec,readCache={},onPhase=()=>{}}, protocolFactory) {
   const Z = e.ZeroHash, coder = e.AbiCoder.defaultAbiCoder();
   // Track transport failures by provenance, not message spelling. Local ABI,
   // journal and programming errors must not become persisted availability claims.
@@ -44,6 +78,17 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     return value;
   };
   const config = freeze(plain(manifest));
+  const cache=createExactReadCache({identity:e.keccak256(e.toUtf8Bytes(JSON.stringify(config))),...readCache});
+  const verifiedContexts=new Map();let contextBytes=0;
+  const contextLimits={maxEntries:8,maxBytes:128*1024};
+  // Chunk inputs rather than constructing an unbounded pending Promise queue.
+  const readGroup=async(values,visit)=>{
+    const out=[];for(let i=0;i<values.length;i+=16){
+      const rows=await Promise.allSettled(values.slice(i,i+16).map((value,j)=>visit(value,i+j)));
+      const failure=rows.find(row=>row.status==='rejected');if(failure)throw failure.reason;
+      out.push(...rows.map(row=>row.value));
+    }return out;
+  };
   const directories=config.filesProfile==='typed-directory-v1';
   check(!config.filesProfile||(directories&&config.protocol==='compact-guarded-v2'),'FILES_PROFILE');
   const carriers=config.contentProfile==='raw-sha256-aesgcm-v2';
@@ -60,12 +105,17 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   // demos retain their original genesis-attachment qualification and code pins.
   const indexOriginGetter=interfaces.index.hasFunction('provenFrom()')?'provenFrom':'attachedFrom';
   const blockArg = context => ({blockHash:context.blockHash,requireCanonical:true});
+  const rawRead=(method,params,validate)=>cache.read(method,params,async()=>{
+    try{return await (transport.read?transport.read(method,params):rpc(method,params));}
+    catch(cause){const error=cause&&typeof cause==='object'?cause:new Error(String(cause));rpcFailures.add(error);throw error;}
+  },validate);
+  const decode=(iface,fn,raw)=>{const value=iface.decodeFunctionResult(fn,raw);check(e.checkResultErrors(value).length===0,'ABI_RESULT');return value;};
   const call = async (key,fn,args,context) => {
     const data = interfaces[key].encodeFunctionData(fn,args);
-    return interfaces[key].decodeFunctionResult(fn,await rpc('eth_call',[{to:config.contracts[key].address,data},blockArg(context)]));
+    return decode(interfaces[key],fn,await rawRead('eth_call',[{to:config.contracts[key].address,data},blockArg(context)],raw=>decode(interfaces[key],fn,raw)));
   };
   const scalar = async (...args) => (await call(...args))[0];
-  const code = (address,context) => rpc('eth_getCode',[address,blockArg(context)]);
+  const code = (address,context) => rawRead('eth_getCode',[address,blockArg(context)],raw=>check(/^0x(?:[0-9a-f]{2})*$/i.test(raw),'CODE_BYTES'));
   const addresses = Object.fromEntries(Object.entries(config.contracts).map(([k,c]) => [k,c.address]));
   const authorsOf = authors => {
     const result = (authors ?? Object.values(config.authors)).map(a => e.getAddress(a));
@@ -100,7 +150,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     principal:plan=>e.zeroPadValue(plan.intent.author,32),
     recoveryError:null,capabilities:{protocol:'compact-legacy-v1',guardedWrites:false},
   };
-  const protocol = {...legacy,...protocolFactory?.({e,rpc,isRpcUnavailable,config,hash,eq,check,fail,plain,freeze,call,scalar,code,addresses,interfaces,blockArg,positionOf,recordOf,bindingOf})};
+  const protocol = {...legacy,...protocolFactory?.({e,rpc,isRpcUnavailable,config,hash,eq,check,fail,plain,freeze,call,scalar,code,readGroup,addresses,interfaces,blockArg,positionOf,recordOf,bindingOf})};
   const basisFor = (context,authors,policy='ordered') => ({...context,
     lens:{address:addresses.lens,codeHash:config.contracts.lens.codeHash,policy,
       ...protocol.lensFields(authors ?? []), hash:authors ? protocol.lensHash(authors) : null},
@@ -108,23 +158,23 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   const result = (context,knowledge,coverage,value,extra={}) => ({basis:context,knowledge,coverage,value,...extra});
 
   async function validateProfile(context) {
-    for (const [key,c] of Object.entries(config.contracts)) {
+    await readGroup(Object.entries(config.contracts),async([key,c])=>{
       check(c.codeHash && !eq(c.codeHash,Z),'MANIFEST_CODE');
       const runtime = await code(c.address,context);
       check(runtime !== '0x' && eq(e.keccak256(runtime),c.codeHash),`CODE_${key}`);
-    }
-    for (const [key,fn,target] of [
+    });
+    await readGroup([
       ['ledger','registry','registry'],['ledger','indexModule','index'],
       ['lens','ledger','ledger'],['lens','index','index'],['index','ledger','ledger'],
       ['files','ledger','ledger'],['files','lensReader','lens'],['files','filesIndex','index'],
       ['names','ledger','ledger'],['names','source','ledger'],
       ...(config.contracts.joined?[['joined','ledger','ledger'],['joined','lens','lens'],['joined','index','index']]:[]),
-    ]) check(eq(await scalar(key,fn,[],context),addresses[target]),'BINDING');
-    for (const type of ['root','child','name',...(directories?['directory']:[])]) {
+    ],async([key,fn,target])=>check(eq(await scalar(key,fn,[],context),addresses[target]),'BINDING'));
+    await readGroup(['root','child','name',...(directories?['directory']:[])],async type=>{
       const id = config.types[type], expected = config.ruleHashes[type];
       check(id && expected && !eq(id,Z) && !eq(expected,Z),'PROFILE');
-      const d = await call('registry','descriptor',[id],context);
-      const refs = Array.from(await scalar('registry','refTypes',[id],context));
+      const [d,refValues] = await Promise.all([call('registry','descriptor',[id],context),scalar('registry','refTypes',[id],context)]);
+      const refs = Array.from(refValues);
       const shape = e.id(`lab/type/files-${type === 'name' ? 'name-raw-ascii' : type==='directory'?'directory':`joined-${type}`}/1`);
       const count = type === 'child' ? 1 : 0;
       check(eq(d[0],shape) && eq(d[1],expected) && Number(d[3]) === count && refs.length === count
@@ -136,22 +186,22 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       }
       if (type === 'child') {
         const iface = new e.Interface(['function rootType() view returns(bytes32)']);
-        const raw = await rpc('eth_call',[{to:d[2],data:iface.encodeFunctionData('rootType')},blockArg(context)]);
+        const raw = await rawRead('eth_call',[{to:d[2],data:iface.encodeFunctionData('rootType')},blockArg(context)],raw=>decode(iface,'rootType',raw));
         check(eq(iface.decodeFunctionResult('rootType',raw)[0],config.types.root),'PROFILE');
       }
-    }
+    });
     check(eq(await scalar('ledger','coreCodeCommitment',[],context),context.core),'CORE');
     check(eq(await scalar('names','coreCodehash',[],context),context.core),'CORE');
-    if(carriers)for(let i=0;i<carrierKeys.length;i++){
-      const key=carrierKeys[i],type=config.types[key],expected=config.ruleHashes[key];
+    if(carriers)await readGroup(carrierKeys,async(key,i)=>{
+      const type=config.types[key],expected=config.ruleHashes[key];
       const shape=e.id(`lab/type/files-${['bytes','content','carrier-root','carrier-child','concept'][i]}/1`);
       const refs=i===1?[config.types.bytes]:i===2?[config.types.content]:i===3?[Z,config.types.content]:[];
-      const d=await call('registry','descriptor',[type],context),actual=Array.from(await scalar('registry','refTypes',[type],context));
+      const [d,refValues]=await Promise.all([call('registry','descriptor',[type],context),scalar('registry','refTypes',[type],context)]),actual=Array.from(refValues);
       check(type&&expected&&!eq(expected,Z)&&eq(d[0],shape)&&eq(d[1],expected)&&Number(d[3])===refs.length
         &&actual.length===refs.length&&actual.every((r,j)=>eq(r,refs[j]))&&eq(e.keccak256(await code(d[2],context)),expected)
         &&eq(hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/type/1'),shape,hash(['bytes32[]'],[refs]),expected]),type),'CONTENT_PROFILE');
       check(eq(await scalar('index','carrierTypes',[i],context),type)&&eq(await scalar('index','carrierRuleHashes',[i],context),expected),'CONTENT_PROFILE');
-    }
+    });
   }
 
   async function pinAt(block) {
@@ -161,19 +211,35 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     const context = {chainId,blockHash:block.hash,blockNumber:String(BigInt(block.number)),
       timestamp:String(BigInt(block.timestamp)), core:config.contracts.ledger.codeHash,
       ledger:addresses.ledger,index:addresses.index,grade:'RPC_OBSERVED'};
+    await canonical(context);
+    const cached=verifiedContexts.get(context.blockHash);
+    if(cached){check(cached.value.blockNumber===context.blockNumber&&cached.value.timestamp===context.timestamp,'BLOCK_METADATA');
+      verifiedContexts.delete(context.blockHash);verifiedContexts.set(context.blockHash,cached);
+      const fresh=freeze({...cached.value});contexts.add(fresh);return fresh;}
+    try {
     [context.admission,context.generation,context.epoch] = (await Promise.all([
       scalar('ledger','counts',[],context),scalar('index','generation',[],context),scalar('registry','epoch',[],context),
     ])).map(String);
     await validateProfile(context);
     await protocol.readContext(context);
+    await canonical(context);
     freeze(context); contexts.add(context);
+    if(readCache.enabled!==false){const bytes=new TextEncoder().encode(JSON.stringify(context)+context.blockHash).byteLength;
+      if(verifiedContexts.has(context.blockHash)){contextBytes-=verifiedContexts.get(context.blockHash).bytes;verifiedContexts.delete(context.blockHash);}
+      if(bytes<=contextLimits.maxBytes){while(verifiedContexts.size>=contextLimits.maxEntries||contextBytes+bytes>contextLimits.maxBytes){
+        const key=verifiedContexts.keys().next().value;contextBytes-=verifiedContexts.get(key).bytes;verifiedContexts.delete(key);}
+        verifiedContexts.set(context.blockHash,{value:context,bytes});contextBytes+=bytes;}}
     return context;
+    }catch(error){cache.clear();throw error;}
   }
   const pin = async () => pinAt(await rpc('eth_getBlockByNumber',['latest',false]));
-  async function guard(context) {
-    check(contexts.has(context),'CONTEXT');
+  async function canonical(context) {
     const canonical = await rpc('eth_getBlockByNumber',[e.toQuantity(BigInt(context.blockNumber)),false]);
     check(eq(canonical?.hash,context.blockHash),'BLOCK_REORG');
+  }
+  async function guard(context) {
+    check(contexts.has(context),'CONTEXT');
+    await canonical(context);
     const [admission,generation,epoch,index] = await Promise.all([
       scalar('ledger','counts',[],context),scalar('index','generation',[],context),
       scalar('registry','epoch',[],context),scalar('ledger','indexModule',[],context),
@@ -428,19 +494,16 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   }
 
   const emptyCursor = () => [0,0,0,Z,Z,Z,Z,0,0,0];
-  // Bounded context-local page cache. Pinning creates a fresh cold context; the
-  // exact block is checked even on hits. No name/body cache crosses a context.
-  const joinedCache=new WeakMap(),joinedContinuations=new WeakMap(),joinedSelectors=new WeakMap();
+  // Page bytes share the finite exact-hash raw-read budget. Continuations remain
+  // private capabilities; they are not transferable serialized cursors.
+  const joinedContinuations=new WeakMap();
   async function listFolderPage(args={}) {
     check(carriers&&config.contracts.joined,'JOINED_PROFILE');
     const {context,continuation}=args;check(contexts.has(context),'CONTEXT');
     check(!('cursor' in args),'CURSOR_NOT_ACCEPTED');
     const suppliedSelectors=args.authors??args.principals;
     check(Array.isArray(suppliedSelectors)&&suppliedSelectors.length>0&&suppliedSelectors.length<=64,'LENS');
-    const selectorsKey=JSON.stringify([args.authors,args.principals]);
-    const selectorCache=joinedSelectors.get(context)??new Map();joinedSelectors.set(context,selectorCache);
-    let authors=selectorCache.get(selectorsKey);
-    if(!authors){authors=await protocol.selectors(args,context);if(selectorCache.size>=8)selectorCache.delete(selectorCache.keys().next().value);selectorCache.set(selectorsKey,authors);}
+    const authors=await protocol.selectors(args,context);
     const basis=basisFor(context,authors,args.policy??'ordered');
     check(authors.length<=64,'LENS');
     const folder=args.folder??config.folder,budget=args.budget??32,concept=args.concept??Z;
@@ -460,14 +523,9 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       nameCoverage:'PARTIAL',kindCoverage:'PARTIAL',headerCoverage:'PARTIAL',tagCoverage:'PARTIAL',tagCoverageScope:'PAGE'});
     const canonical=await rpc('eth_getBlockByNumber',[e.toQuantity(BigInt(context.blockNumber)),false]);
     check(eq(canonical?.hash,context.blockHash),'BLOCK_REORG');
-    const cache=joinedCache.get(context)??new Map();joinedCache.set(context,cache);
-    const key=JSON.stringify([queryId,walk.cursor,budget]);
-    let page=cache.get(key);
-    if(!page){
-      try{page=await scalar('joined','readPage',[folder,authors,query,[context.admission,context.generation,context.epoch,context.executionSet],walk.cursor,budget],context);}
-      catch(error){if(!isRpcUnavailable(error))throw error;return unavailable('JOINED_UNAVAILABLE');}
-      if(cache.size>=32)cache.delete(cache.keys().next().value);cache.set(key,page);
-    }
+    let page;
+    try{page=await scalar('joined','readPage',[folder,authors,query,[context.admission,context.generation,context.epoch,context.executionSet],walk.cursor,budget],context);}
+    catch(error){if(!isRpcUnavailable(error))throw error;return unavailable('JOINED_UNAVAILABLE');}
     const placement=Number(page.scanStatus),scanned=walk.scanned+page.scanned;
     check(page.startsAtOrigin===(walk.cursor==='0x')&&page.completeFromOrigin===(page.startsAtOrigin&&placement===2&&page.scanned===page.rawTotal),'PAGE_ORIGIN');
     if(placement===0)return unavailable('INDEX_COVERAGE');
@@ -580,6 +638,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   const action = fields => ({kind:0,typeId:Z,bodyHashOrRecordId:Z,purpose:Z,subject:Z,role:Z,target:Z,expectedRevision:0,salt:Z,...fields});
   const bytesOf = input => typeof input === 'string' ? e.toUtf8Bytes(input) : e.getBytes(input);
   async function prepare(args) {
+    onPhase('prepare');
     const context = args.context ?? await pin(); await guard(context);
     const author = e.getAddress(args.author), authors = await protocol.selectors(args,context);
     const principalId = await protocol.signedPrincipal(author,context);
@@ -734,10 +793,12 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     const id = hash(['uint256','address','bytes32'],[context.chainId,addresses.ledger,publicationId]);
     const plan = freeze(plain({id,operation,file,newRevision,concept,authors,basis:context,intent,actions,bodies,actionsHash,...authorization,
       startingHeads:[...startingHeads.values()],expectedHeads:[...expectedHeads.values()],selectionDependencies}));
-    plans.add(plan); return plan;
+    await canonical(context);plans.add(plan); return plan;
   }
   async function authorize(plan,signDigest) {
+    onPhase('authorize');
     check(plans.has(plan),'PLAN');
+    await canonical(plan.basis);
     const signature = e.Signature.from(await signDigest(plan.digest,plan)).serialized;
     check(eq(e.recoverAddress(plan.digest,signature),plan.intent.author),'SIGNER');
     const transaction = {to:addresses.ledger,data:protocol.encode(plan,signature),value:'0x0'};
@@ -753,6 +814,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     submissions.set(signed.id,pending);return pending;
   }
   async function submitOnce(signed,sendTransaction) {
+    onPhase('submit-preflight');
     check(journal?.put && journal?.get,'DURABLE_JOURNAL_REQUIRED');
     const prior = await journal.get(signed.id);
     if (prior) return reconcile(signed.id); // no accidental duplicate broadcast
@@ -773,9 +835,11 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
         && eq(now.author,was.author) && now.admission === was.admission,'SELECTION_DRIFT');
     }
     await rpc('eth_call',[signed.transaction,blockArg(context)]); // exact signed atomic batch preflight
+    await canonical(context);
     let entry = plain({...signed,status:'BROADCAST_UNKNOWN',transactionHash:null});
     await journal.put(entry); // write-ahead: response loss cannot erase the authorized plan
     let response;
+    onPhase('send');
     try {response = await sendTransaction(signed.transaction,signed);}
     catch (error) {
       entry = {...entry,error:String(error?.message ?? error)}; await journal.put(entry); return entry;
@@ -787,6 +851,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     return entry;
   }
   async function reconcile(id) {
+    onPhase('reconcile-receipt');
     check(journal?.get && journal?.put,'DURABLE_JOURNAL_REQUIRED');
     const entry = await journal.get(id); check(entry && entry.id === id,'JOURNAL_NOT_FOUND');
     const {plan} = entry;
@@ -826,13 +891,13 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     }
     let status, evidence = null, reason;
     try {
-    context = await pin();
+    onPhase('reconcile-current');context = await pin();
     const publication = await scalar('ledger','publicationOf',[plan.publicationId],context);
     if (publication === 0n) status = receipt ? (BigInt(receipt.status) === 0n ? 'REVERTED' : 'EFFECTS_MISMATCH') : 'BROADCAST_UNKNOWN';
     else {
       const currentEvidence = await call('ledger','evidence',[publication],context);
       const committedBlock = await rpc('eth_getBlockByNumber',[e.toQuantity(currentEvidence[9]),false]);
-      context = await pinAt(committedBlock);
+      onPhase('reconcile-committed');context = await pinAt(committedBlock);
       const retained = await call('ledger','evidence',[publication],context);
       let matches = eq(retained[0],plan.intent.author) && Number(retained[1]) === 2
         && Number(retained[3]) === plan.actions.length && String(retained[7]) === plan.intent.nonce
@@ -875,15 +940,18 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       status = matches ? 'EFFECTS_VERIFIED' : 'EFFECTS_MISMATCH';
       evidence = {publication:String(publication),firstAdmission:String(first),leafCount:plan.actions.length,supersededAtPublicationBlock};
     }
+    await canonical(context);
     } catch(error) {
       const qualification=protocol.recoveryError?.(error);if(!qualification)throw error;
-      ({status,reason}=qualification);
+      ({status,reason}=qualification);evidence=null;
     }
     const outcome = {...entry,status,knowledge:status === 'EFFECTS_VERIFIED' ? 'VERIFIED' : 'UNKNOWN',
       coverage:status === 'EFFECTS_VERIFIED' ? 'COMPLETE' : 'PARTIAL',basis:context?basisFor(context,plan.authors):null,evidence,
       receipt,receiptObservation,receiptAttribution,...(reason?{reason}:{})};
     await journal.put(plain(outcome)); return outcome;
   }
-  return Object.freeze({pin,listFolder,listFolderPage,readFile,readName,readDirectory,readPlacement,readContent,readTypedRecord,readConcept,readTag,conceptId,prepare,authorize,submit,reconcile,
+  const publicRead=fn=>async args=>{const value=await fn(args);await canonical(args.context);return value;};
+  return Object.freeze({pin,...Object.fromEntries(Object.entries({listFolder,listFolderPage,readFile,readName,readDirectory,readPlacement,readContent,readTypedRecord,readConcept,readTag}).map(([name,fn])=>[name,publicRead(fn)])),conceptId,prepare,authorize,submit,reconcile,
+    readMetrics:()=>({...cache.stats(),contexts:verifiedContexts.size,contextBytes,contextLimits:{...contextLimits},groupWidth:16}),
     capabilities:()=>freeze(plain({...protocol.capabilities,typedDirectories:directories,globalTree:false}))});
 }

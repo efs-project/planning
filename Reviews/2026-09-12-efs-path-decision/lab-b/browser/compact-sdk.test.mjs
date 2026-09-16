@@ -87,7 +87,10 @@ function fixture(overrides = {}) {
   const rpc = async (method,params) => {
     calls.push({method,params});
     if (method === 'eth_chainId') return '0x7a69';
-    if (method === 'eth_getBlockByNumber' || method === 'eth_getBlockByHash') return {hash:blockHash,number:'0x2a',timestamp:'0x3e8',transactions:state.blockTransactions??[]};
+    if (method === 'eth_getBlockByNumber' || method === 'eth_getBlockByHash') {
+      if(state.header) return state.header(method,params,calls);
+      return {hash:blockHash,number:'0x2a',timestamp:'0x3e8',transactions:state.blockTransactions??[]};
+    }
     if (method === 'eth_getTransactionReceipt') return state.receipt ?? null;
     if (method === 'eth_getTransactionByHash') return state.transaction ?? null;
     const ctx = params[1];
@@ -158,12 +161,43 @@ function fixture(overrides = {}) {
     return iface.encodeFunctionResult(fn,out);
   };
   const sdkManifest=state.legacyIndexAbi?{...manifest,contracts:{...contracts,index:{...contracts.index,abi:abis.index.filter(fragment=>!(typeof fragment==='string'&&fragment.includes('provenFrom(')))}}}:manifest;
-  const sdk = createCompactSdk({ethers,rpc,manifest:sdkManifest,journal:{
+  // Historical corruption fixtures deliberately mutate observations under one
+  // constant hash. Keep that hostile-provider mode uncached; cache controls opt
+  // in, and real-chain tests use the cache-enabled engine default.
+  const sdk = createCompactSdk({ethers,rpc,manifest:sdkManifest,readCache:{enabled:false},...state.sdkOptions,journal:{
     async put(entry) { journal.set(entry.id,JSON.parse(JSON.stringify(entry))); },
     async get(id) { return journal.get(id); },
   }});
   return {sdk,state,journal,calls,ownHeads,rpc};
 }
+
+test('cache-backed public reads reuse exact bytes but independently fail reorg and final provider checks',async()=>{
+  const {sdk,calls,state}=fixture({sdkOptions:{readCache:{enabled:true}}}),context=await sdk.pin();
+  await sdk.readName({position,folder,role,context});const before=calls.filter(c=>c.method==='eth_call').length;
+  await sdk.readName({position,folder,role,context});assert.equal(calls.filter(c=>c.method==='eth_call').length,before,'repeat is a read cache hit');
+  state.header=()=>({hash:H('reorg'),number:'0x2a',timestamp:'0x3e8'});
+  await assert.rejects(sdk.readName({position,folder,role,context}),/BLOCK_REORG/);
+  let checks=0;state.header=()=>{if(++checks===2)throw Error('final canonical provider failure');return {hash:blockHash,number:'0x2a',timestamp:'0x3e8'};};
+  await assert.rejects(sdk.readName({position,folder,role,context}),/final canonical provider failure/);
+});
+test('verified same-hash context reuse still acquires latest header and chain identity',async()=>{
+  const {sdk,calls}=fixture({sdkOptions:{readCache:{enabled:true}}});await sdk.pin();const before=calls.length;
+  const again=await sdk.pin(),actual=calls.slice(before);assert.equal(again.blockHash,blockHash);
+  assert(actual.some(c=>c.method==='eth_chainId'));assert(actual.some(c=>c.method==='eth_getBlockByNumber'&&c.params[0]==='latest'));
+  assert(!actual.some(c=>['eth_call','eth_getCode'].includes(c.method)));
+});
+test('bounded independent groups preserve global order and indices across the 64-principal fixture',async()=>{
+  let group;compact.createCompactEngine({ethers,rpc:async()=>{},manifest},scope=>{group=scope.readGroup;return {};});
+  const indices=await group(Array.from({length:64},(_,i)=>i),async(value,index)=>[value,index]);
+  assert.deepEqual(indices,Array.from({length:64},(_,i)=>[i,i]));
+});
+test('concurrent same-hash pins keep one accounted evidence entry and distinct owned capabilities',async()=>{
+  const a=fixture({sdkOptions:{readCache:{enabled:true}}}),b=fixture({sdkOptions:{readCache:{enabled:true}}});
+  await a.sdk.pin();const [one,two]=await Promise.all([b.sdk.pin(),b.sdk.pin()]);
+  assert.notEqual(one,two);assert.equal(b.sdk.readMetrics().contexts,1);
+  assert.equal(b.sdk.readMetrics().contextBytes,a.sdk.readMetrics().contextBytes);
+  assert.notEqual(await a.sdk.pin(),await a.sdk.pin(),'evidence reuse does not merge capabilities');
+});
 
 test('late deployment with proven genesis materialization can list, but missing provenance cannot',async()=>{
   const {sdk}=fixture({attachedFrom:21n,provenFrom:1n});
@@ -487,7 +521,7 @@ test('response loss reconciles exact canonical admissions and heads after reload
     if (fn === 'history') return [2,true,revised,1,22];
     if (fn === 'bindingPosition') return [pos(HEAD,file,Z)];
   };
-  const reloaded = createCompactSdk({ethers,rpc:f.rpc,manifest,journal:{async get(id){return journal.get(id);},async put(entry){journal.set(entry.id,entry);}}});
+  const reloaded = createCompactSdk({ethers,rpc:f.rpc,manifest,readCache:{enabled:false},journal:{async get(id){return journal.get(id);},async put(entry){journal.set(entry.id,entry);}}});
   const verified = await reloaded.reconcile(plan.id);
   assert.equal(verified.status,'EFFECTS_VERIFIED');
   assert.equal(verified.knowledge,'VERIFIED');
