@@ -4,6 +4,8 @@ September 15, 2026 · v2 PM · core-audit-20260915
 
 **Status:** audit findings and prototype closeout recommendation; no protocol choice, requirement waiver, public deployment or production-repository authority.
 
+**September16 execution checkpoint:** the findings below describe the pinned audit source, not defects all still present at today's HEAD. [[core-closeout-results-20260915|The live results ledger]] is the current completion map, independently reviewed through`6cffa37`: ordered acceptance, required index/replay, query progress and read work, guarded storage, described Types, deployed-wallet authority and finite live Files are implemented within their stated bounds. Stance tags are active; native state proofs, final integrated resource measurements and whole-branch review remain. Neither the historical red fixtures nor individual green packets constitute whole-prototype completion.
+
 ## Bottom line
 
 **Keep the compact Ledger / separate required index direction, but do not call

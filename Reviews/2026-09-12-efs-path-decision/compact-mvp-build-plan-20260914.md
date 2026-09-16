@@ -2,6 +2,8 @@
 
 September 14, 2026 · v2 PM recommendation · no repository/deployment authority implied.
 
+**Current checkpoint, September16:** implementation has advanced through independently reviewed prototype`6cffa37`; use [[core-closeout-results-20260915|the closeout results]] before reading the dated history below. Ordered acceptance, full required indexing/replay, qualified progressing reads, described Types, wallet signatures and finite live contract-backed Files have passed their scoped gates. Stance tags are being implemented; native proofs, final whole-operation/resource measurements and the final integration review still precede the real-code handoff. The repo boundaries and one-path recommendation below remain the intended build plan, not authorization to create/deploy repos or a claim that every large workload is affordable.
+
 **September 15 whole-core audit update:** [[core-design-audit-20260915]] is now
 the current prototype closeout queue. It reproduces four composition/resource
 limitations missed by the smaller journeys and names six finite packets, led by
