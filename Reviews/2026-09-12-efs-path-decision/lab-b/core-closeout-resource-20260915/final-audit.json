@@ -1398,12 +1398,12 @@
       "gas": "118184929"
     },
     "type-registration": {
-      "transactions": 19,
-      "gas": "3314767"
+      "transactions": 22,
+      "gas": "3710146"
     },
     "other-setup-and-interleaving": {
-      "transactions": 37,
-      "gas": "21375368"
+      "transactions": 34,
+      "gas": "20979989"
     },
     "operation": {
       "transactions": 35,

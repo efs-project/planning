@@ -197,10 +197,21 @@ if(process.env.EFS_RESOURCE_AUDIT==='1'){
       calldataBytes:bytes(v.first.data),nonzeroBytes:e.getBytes(v.first.data).filter(v=>v!==0).length,carrierRuntimeBytes:v.first.carrierRuntimeBytes,carrierInitcodeBytes:v.first.carrierInitcodeBytes}))})),
       upgrade:p.upgrade,offline:p.offline,scope:'Historical exact receipts; logical old-mapping/additive-carrier guarantees and calldata density, not final-build transaction identity.'});
   }
-  const labels=new Set(r.operations.map(x=>x.label)),replays=new Set(r.replays.map(x=>x.receipt.label)),queries=new Set(r.queries.flatMap(q=>q.steps.map(x=>x.receipt.label)));
-  for(const tx of r.transactions){const group=tx.label.startsWith('deploy/')?'deployment':replays.has(tx.label)?'replay':queries.has(tx.label)?'query':labels.has(tx.label)?'operation':tx.label.includes('register')||tx.label.startsWith('setup/type')?'type-registration':'other-setup-and-interleaving';
+  const labels=new Set(r.operations.map(x=>x.label)),replays=new Set(r.replays.map(x=>x.receipt.label)),queries=new Set(r.queries.flatMap(q=>q.steps.map(x=>x.receipt.label))),groups=new Map();
+  const exactByHash=new Map(r.exactTransactions.map(tx=>[tx.transactionHash,tx])),registry=new e.Interface(r.contracts.registry.abi);
+  for(const tx of r.transactions){
+    const retained=exactByHash.get(tx.transactionHash);assert(retained,'accounted transaction has retained signed input');assert.equal(tx.gasUsed,retained.gasUsed);
+    const signed=e.Transaction.from(retained.rawTransaction),registration=signed.to?.toLowerCase()===r.contracts.registry.address.toLowerCase()&&['register','registerDescribed'].includes(registry.parseTransaction(signed)?.name);
+    const group=tx.label.startsWith('deploy/')?'deployment':registration?'type-registration':replays.has(tx.label)?'replay':queries.has(tx.label)?'query':labels.has(tx.label)?'operation':'other-setup-and-interleaving';
+    groups.set(tx.label,group);
     (audit.setup[group]??={transactions:0,gas:0n}).transactions++;audit.setup[group].gas+=BigInt(tx.gasUsed);}
+  // Regression: Note registry calls have no "register" or "setup/type" label.
+  for(const name of ['NoteV1Rule','NoteV11Rule','NoteV2Rule'])assert.equal(groups.get(`setup/note/${name}`),'type-registration',`Note Type registration classification: ${name}`);
+  assert.deepEqual(audit.setup['type-registration'],{transactions:22,gas:3710146n});
+  assert.deepEqual(audit.setup['other-setup-and-interleaving'],{transactions:34,gas:20979989n});
   assert.equal(Object.values(audit.setup).reduce((n,v)=>n+v.transactions,0),r.transactions.length);
+  assert.equal(r.transactions.length,214);
+  assert.equal(Object.values(audit.setup).reduce((n,v)=>n+v.gas,0n),268576960n);
   const sum=rows=>rows.reduce((n,v)=>n+BigInt(v.gasUsed),0n);
   audit.bootstrap={transactions:r.finalProfile.setupThrough,gas:sum(r.transactions.slice(0,r.finalProfile.setupThrough)),qualification:'Contains detached bootstrap readers/profile and seeded sample records; not minimal deployment quote.'};
   await writeFile(`${dir}/final-audit.json`,JSON.stringify(plain(audit),null,2));console.log(JSON.stringify({status:'PASS',transactions:audit.transactions,artifacts:Object.keys(audit.artifacts).length,queries:audit.queryChains.length,attribution:audit.attribution.length}));

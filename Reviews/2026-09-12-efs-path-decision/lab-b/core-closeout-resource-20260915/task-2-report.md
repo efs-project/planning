@@ -100,7 +100,7 @@ Final Ledger24,538runtime/39,310actual initcode: **38B runtime margin**. TagStan
 
 Ledger deployment8,438,528 includes nested support/store CREATE once (support11,880/13,882; store1,824/1,850). Validator+stance-validator+index1,289,407+3,061,747+8,049,898=12,401,052 across3setup tx. Tag Lens4,159,280 and reader4,167,921 are2separate setups.
 
-Totals reconcile214tx/268,576,960gas:51deployments118,184,929;19Type registrations3,314,767;37other setup/interleaving21,375,368;35named operations82,103,600;14query steps21,364,832;58replays22,233,464. First operation follows60tx/72,051,322 bootstrap including obsolete detached readers, seeds/tokens/Concepts and actual Directory. Not minimal deployment quote. Every Directory/Type/target/setup receipt has retained labels.
+Totals reconcile214tx/268,576,960gas:51deployments118,184,929;22Type registrations3,710,146;34other setup/interleaving20,979,989;35named operations82,103,600;14query steps21,364,832;58replays22,233,464. Registrations are classified by retained signed destination and decoded registry function, not labels. First operation follows60tx/72,051,322 bootstrap including obsolete detached readers, seeds/tokens/Concepts and actual Directory. Not minimal deployment quote. Every Directory/Type/target/setup receipt has retained labels.
 
 Historical Tags2 query-paid-final2 remains1a49b74 old-reader evidence; query-fix1-diagnostic remains a3ec1f0 amended evidence. Compared sources: only original reader differs from final2; amended compared sources equal. All6 compared artifact templates/creation bytes differ under coherent metadata/build identities, so fresh representative rows above replace no historical receipts. Original wide/deep prices stay in their packet/QUERY-README; no default-profile/UI adoption.
 
@@ -141,3 +141,15 @@ Logs compressed in task-2-logs.json.gz retain Keys2519,2018mutability, timestamp
 Self-review: aliases/complete recipes, descriptor fetched-byte boundary, readsets/rollback, typed-Record versus selected-path distinction, build/source separation, overlapping attribution, bounded inventories, setup/replay totals and unavailable-not-zero fees checked. Practical only for these finite fixtures; arbitrary dense histories/maxima, public deployment/Era economics, universal recovery affordability and permanent adoption remain unproven. Native recovery joint refusal remains separate. Six-packet/whole-branch review is not declared complete.
 
 All4 disposable children closed; owner Node77526/UI60608 and Anvil77561/RPC60599 untouched/present. No production writes, installs, Fable, subagent, push or broad cleanup. Exact source/evidence commit and explicit lease release follow in task handoff.
+
+## Review fix round1 — Type-registration accounting
+
+Fix base: `a321ba3f30cff39c9c05306ef759ec7f33c855ee`. Important finding verified: the label classifier missed actual registry `register` calls `setup/note/NoteV1Rule`, `NoteV11Rule`, `NoteV2Rule` (131,793gas each). The offline audit now joins each accounted receipt to retained signed input, checks its gas, and identifies registrations by registry destination plus decoded `register`/`registerDescribed`. Derived totals above and `final-audit.json` are corrected; no paid packet, runner snapshot, receipt, source pin, or packet hash changed.
+
+One targeted offline regression asserts all three Note categories, corrected category counts/gas, and the unchanged214tx/268,576,960gas reconciliation. Review-reception/TDD skills led to verifying the finding and adding this assertion before the classifier fix; verification-before-completion required the fresh GREEN result. From lab-b, the same command was used for RED then GREEN:
+
+```sh
+EFS_ETHERS_PATH=/Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers FOUNDRY_OUT=/tmp/efs-recovery-build-wPDyNv/out EFS_RESOURCE_AUDIT=1 /opt/homebrew/opt/node/bin/node script/core-final-resource.mjs
+```
+
+RED exit1: `AssertionError [ERR_ASSERTION]: Note Type registration classification: NoteV1Rule`; actual `other-setup-and-interleaving`, expected `type-registration`. GREEN exit0: `{"status":"PASS","transactions":214,"artifacts":49,"queries":9,"attribution":5}`. Fetch is disabled in this audit. No chain, build, paid/public work or Solidity suite rerun. Review Minor1 trace-unavailable handling, Minor2 future mounted-event assertions, and Minor3 inherited warnings remain deferred to parent final review; current retained measurements are not changed.
