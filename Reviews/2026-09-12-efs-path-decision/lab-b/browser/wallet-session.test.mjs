@@ -30,13 +30,21 @@ test('matching chain ID cannot hide another local chain or mismatched deployment
   await assert.rejects(verifyWalletEnvironment({ethereum:{request:async({method})=>expected[method]},config,rpc,keccak256:()=> 'wrong'}),/deployment/);
   await verifyWalletEnvironment({ethereum:{request:async({method})=>expected[method]},config,rpc,keccak256});
 });
-test('local faucet refuses public origins and never reduces a funded balance',async()=>{
-  const calls=[],rpc=async(m,p)=>{calls.push([m,p]);return m==='eth_getBalance'?'0x'+(200n*10n**18n).toString(16):expected[m];};
+test('local faucet tops up to one ETH, verifies it, and never reduces a larger balance',async()=>{
+  let balance='0x'+(2n*10n**18n).toString(16);
+  const calls=[],rpc=async(m,p)=>{calls.push([m,p]);if(m==='anvil_setBalance')balance=p[1];return m==='eth_getBalance'?balance:expected[m];};
   await assert.rejects(fundLocalWallet({config:{...config,rpcUrl:'https://mainnet.base.org'},pageUrl,address,rpc}),/local/);
   await assert.rejects(fundLocalWallet({config,pageUrl:'https://example.org',address,rpc}),/local/);
   await fundLocalWallet({config,pageUrl,address,rpc});
   assert.equal(calls.filter(([m])=>m==='anvil_setBalance').length,0);
+  calls.length=0;balance='0x0';
+  assert.equal(await fundLocalWallet({config,pageUrl,address,rpc}),10n**18n);
+  assert.deepEqual(calls.find(([m])=>m==='anvil_setBalance'),['anvil_setBalance',[address,'0xde0b6b3a7640000']]);
+  assert.equal(calls.at(-1)[0],'eth_getBalance');
   calls.length=0;
-  await fundLocalWallet({config,pageUrl,address,rpc:async(m,p)=>{calls.push([m,p]);return expected[m];}});
-  assert.deepEqual(calls.find(([m])=>m==='anvil_setBalance'),['anvil_setBalance',[address,'0x56bc75e2d63100000']]);
+  await fundLocalWallet({config,pageUrl,address,rpc});
+  assert.equal(calls.filter(([m])=>m==='anvil_setBalance').length,0);
+});
+test('local faucet does not claim success when the balance was not updated',async()=>{
+  await assert.rejects(fundLocalWallet({config,pageUrl,address,rpc:async m=>expected[m]}),/balance/);
 });

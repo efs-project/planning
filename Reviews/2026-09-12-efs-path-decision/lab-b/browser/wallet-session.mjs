@@ -45,9 +45,12 @@ export async function fundLocalWallet({config,pageUrl,address,rpc}){
   if(!/^0x[0-9a-fA-F]{40}$/.test(address)||/^0x0{40}$/i.test(address))throw Error('Connect a wallet address first.');
   if(BigInt(await rpc('eth_chainId'))!==BigInt(config.manifest.chainId)||!/anvil/i.test(await rpc('web3_clientVersion')))
     throw Error('Test funds are only available from the owned local Anvil.');
-  const balance=BigInt(await rpc('eth_getBalance',[address,'latest'])),target=100n*10n**18n;
-  if(balance<target)await rpc('anvil_setBalance',[address,'0x'+target.toString(16)]);
-  return balance<target?target:balance;
+  const balance=BigInt(await rpc('eth_getBalance',[address,'latest'])),target=10n**18n;
+  if(balance>=target)return balance;
+  await rpc('anvil_setBalance',[address,'0x'+target.toString(16)]);
+  const funded=BigInt(await rpc('eth_getBalance',[address,'latest']));
+  if(funded<target)throw Error('Local test balance was not funded. Reconnect to try again.');
+  return funded;
 }
 export async function signPlanIntent({signer,plan,digest,ethers:e}){
   const domain={name:'EFS2-RoadB-Lab',version:'2'},types={IntentV2:[

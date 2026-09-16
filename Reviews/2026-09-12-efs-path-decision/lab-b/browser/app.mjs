@@ -370,9 +370,20 @@ async function connectWallet(){
   const changed=()=>{state.walletUnsubscribe?.();state.walletUnsubscribe=null;state.wallet=null;state.keys=null;notice('Wallet account or chain changed. Reconnect before writing.','warning');controls();};
   ethereum.on?.('accountsChanged',changed);ethereum.on?.('chainChanged',changed);
   state.walletUnsubscribe=()=>{ethereum.removeListener?.('accountsChanged',changed);ethereum.removeListener?.('chainChanged',changed);};
+  const wallet=state.wallet,autoFund=state.config.localFaucet===true&&!!state.walletTools;
+  if(autoFund){
+    try{
+      await checkWallet(wallet);
+      await state.walletTools.fundLocalWallet({config:state.config,pageUrl:location.href,address,rpc});
+      await checkWallet(wallet);
+    }catch(error){
+      if(state.wallet===wallet){state.walletUnsubscribe?.();state.walletUnsubscribe=null;state.wallet=null;}
+      throw error;
+    }
+  }
   applyCustomLens([address,...Object.values(state.config.manifest.authors).filter(a=>a.toLowerCase()!==address.toLowerCase())]);
   await refresh();if($('wallet-setup'))$('wallet-setup').open=true;
-  notice(`Wallet connected. ${state.config.localFaucet===false?'Use local test ETH from your development chain.':'Click Get local test ETH, then create files.'} Each write currently asks for a data signature and a transaction. No real funds needed.`);
+  notice(`Wallet connected. ${autoFund?'At least 1 local test ETH is ready for gas.':state.config.localFaucet===false?'Use local test ETH from your development chain.':'Click Get local test ETH, then create files.'} Each write currently asks for a data signature and a transaction. No real funds needed.`);
 }
 async function checkWallet(wallet){
   if(wallet!==state.wallet)throw Error('Writer changed; no further signature or transaction requested.');
@@ -558,7 +569,7 @@ document.addEventListener('click',event=>{
       const ethereum=walletProvider();
       await state.walletTools.requestLocalNetwork({ethereum,config:state.config,pageUrl:location.href,add:true});
       await state.walletTools.verifyWalletEnvironment({ethereum,config:state.config,rpc,keccak256:ethers.keccak256});
-      notice(`EFS local network verified. Click Connect wallet${state.config.localFaucet===false?'.':', then Get local test ETH.'}`);
+      notice(`EFS local network verified. Click Connect wallet.${state.config.localFaucet===true?' Local test gas is added automatically.':''}`);
     }
     if(action==='copyRpc'){
       try{await navigator.clipboard.writeText(state.config.rpcUrl);notice('Local RPC URL copied.');}
@@ -569,7 +580,8 @@ document.addEventListener('click',event=>{
       if(!state.wallet?.external||!state.walletTools)throw Error('Connect a wallet on this local demo first.');
       const wallet=state.wallet;await checkWallet(wallet);
       await state.walletTools.fundLocalWallet({config:state.config,pageUrl:location.href,address:wallet.address,rpc});
-      notice('Your wallet now has at least 100 local test ETH. It has no real-world value. You can create files and folders.');
+      await checkWallet(wallet);
+      notice('Your wallet now has at least 1 local test ETH. It has no real-world value. You can create files and folders.');
     }
     if(action==='disconnect') {state.walletUnsubscribe?.();state.keys=null;state.wallet=null;notice('Guest mode. No wallet remains active in this screen.');}
     if(action==='mount') {state.folder=button.dataset.folder;state.selected=null;await refresh();}
