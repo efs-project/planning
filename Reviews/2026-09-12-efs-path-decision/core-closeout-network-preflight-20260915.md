@@ -40,6 +40,30 @@ ZKsync's EVM interpreter maintains virtual EVM gas while transaction limits and 
 
 No new public deployment or emulator installation is authorized by this preflight. These are explicit execution-profile boundaries for the final report, not a silent portability requirement waiver.
 
+### September16 midday availability/input refresh
+
+At13:03:33–34UTC, two further read-only HTTP batches (three logical reads each:
+chain ID, latest header, gas price) returned200. Base8453 block`0x3101b61`,
+hash`0x387e720409b6d3f511a9c93f553c454de5f96b6ff24e1ba1e1a3b3e24b18c9c5`,
+reported6,000,000wei execution gas price,5,000,000wei base fee and400M block limit.
+Era324 block`0x44ad47d`,
+hash`0x7071cebef975308ad28cc8170cfe1f138771c827de3fc5564079ef8b24de6065`,
+reported45,250,000wei gas price and still a zero header state root. Single samples
+were146ms/15,534response bytes and117ms/1,664bytes respectively, not throughput
+benchmarks. No fee oracle, transaction, state proof or reorg control was exercised
+in this small refresh; final-recipe fee inputs still belong to Resource Task2.
+
+Fresh primary-document checks retain the same boundaries:
+[Base transaction limits](https://docs.base.org/specifications/transactions/throughput-and-limits)
+still specify16,777,216per transaction irrespective of the larger block budget;
+[Base fees](https://docs.base.org/specifications/transactions/network-fees)
+expose the serialized-transaction oracle, and
+[OP fees](https://docs.optimism.io/op-stack/transactions/fees) distinguish the
+operator component. The
+[Era interpreter](https://docs.zksync.io/zksync-protocol/era-vm/evm-interpreter/evm-gas-interpretation)
+still distinguishes native ergs from virtual EVM gas. No runtime profile,
+affordable EFS workload or public-chain execution is certified by these reads.
+
 ### Small Base cost-model preflight
 
 Observed2026-09-16T01:19:15.948Z, Base8453 block`0x30fc8d8`, hash`0xc7684bb525953eb098e5f6cd0c06d2dc2b20906f16d63299469198c41c4b66b9`. Two HTTP batches/seven logical reads: chain/latest header/gas price, then exact-hash `getL1Fee` and `getOperatorFee` for two retained Task1 receipts from prototype`af0190a`. Both fee methods returned canonical uint256 values. Execution price observed6,000,000wei/gas; fee calls used the recorded hash with`requireCanonical:true`.
