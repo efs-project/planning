@@ -1,0 +1,156 @@
+✔ raw successful reads deduplicate in-flight, stay immutable, and isolate instances/options (1.397166ms)
+✔ failed validation/rejection is retried and finite entry/byte/inflight budgets are enforced (0.498667ms)
+✔ legacy factory refuses a guarded manifest instead of silently signing the legacy format (0.860167ms)
+✔ typed Record evidence has its own qualified point API, without extending Files profiles (10.227791ms)
+✔ guarded Files factory rejects the earlier public-plaintext-fingerprint carrier profile before RPC (2.514333ms)
+✔ legacy create retains its own-CAS overwrite semantics without adding a selected-destination read (22.816375ms)
+✔ cache-backed public reads reuse exact bytes but independently fail reorg and final provider checks (14.878292ms)
+✔ verified same-hash context reuse still acquires latest header and chain identity (11.872375ms)
+✔ bounded independent groups preserve global order and indices across the 64-principal fixture (4.0205ms)
+✔ late deployment with proven genesis materialization can list, but missing provenance cannot (30.867791ms)
+✔ pinned legacy index ABI preserves genesis attachment qualification without probing a new getter (30.72275ms)
+✔ new provenance RPC refusal never falls back to genesis deployment time (12.436541ms)
+✔ a missing Name preserves the positive member and resumable PARTIAL coverage (16.667875ms)
+✔ corrupt names are integrity failures, never fixture labels or omitted members (14.685083ms)
+✔ a terminal caller cursor cannot certify that the folder is empty (12.086875ms)
+✔ mixed block/index contexts and forged context copies fail closed (12.219208ms)
+✔ a higher author mask never falls through to a lower live HEAD (12.603334ms)
+✔ File and selected revision tags retain their subjects and independent provenance (17.254917ms)
+✔ tag assessments never infer a negative from missing or malformed discriminants (0.078292ms)
+✔ point tag assessments preserve qualified positives negatives and RPC uncertainty (88.619458ms)
+✔ missing conflicting and unavailable revisions have unknown tag assessment, never Directory N/A (38.650125ms)
+✔ no-tiebreak conflicts expose candidates without an overall selected revision (14.62425ms)
+✔ oversized bodies are rejected before authorization (12.075833ms)
+✔ create encodes File then document, retains Name reuse, and publishes atomically (15.110417ms)
+✔ a new higher-author removal mask binds then unbinds using own CAS zero (14.614625ms)
+✔ historical restore creates a child of current selection from historical bytes (17.410917ms)
+✔ a stale own CAS is refused before send without automatic resigning (24.41675ms)
+✔ response loss retains the exact pre-send journal and stays BROADCAST_UNKNOWN (30.246084ms)
+✔ a successful receipt without canonical effects is not semantic success (30.816917ms)
+✔ legacy recovery observes the receipt before preserving its existing context-failure rejection (25.915834ms)
+✔ legacy local malformed envelope codecs reject before any RPC or journal write (25.5575ms)
+✔ an unrelated receipt is not attributed to the authorized action or its cost (281.283583ms)
+✔ edit uses the explicit manifest Lens, not merely the writing author (25.369667ms)
+✔ selected HEAD drift requires fresh authorization even when own CAS stays zero (27.302875ms)
+✔ lower-author source placement drift is checked before removal broadcast (25.35075ms)
+✔ concurrent submit calls share one broadcast within the SDK instance (24.467333ms)
+✔ unavailable no-tiebreak body preserves the known conflict and both authors (15.401708ms)
+✔ an unavailable content response retains selected HEAD as UNKNOWN, never ABSENT (12.28325ms)
+✔ a corrupt selected body is INVALID, not a verified document or absence (12.786541ms)
+✔ durable journal failure prevents the external send (24.133167ms)
+✔ response loss reconciles exact canonical admissions and heads after reload (57.315834ms)
+✔ journal tampering cannot redirect reconciliation to a different publication (23.223584ms)
+✔ first use publishes the exact Name bytes in the same atomic create batch (15.043041ms)
+✔ move removes only the requested source and binds the named destination in one batch (15.262875ms)
+✔ restoring placement binds the retained File without republishing its history or Name (14.454875ms)
+✔ tag writes bind the exact File or selected revision subject (34.5855ms)
+✔ a public direct Name read verifies a preimage without claiming membership (12.745125ms)
+✔ code/index/profile mismatch fails closed instead of producing an empty read (31.314333ms)
+✔ exact-hash caches refresh unchanged-admission blocks, epoch, account code, index and reorgs (456.466458ms)
+✔ failed pin is retryable and final reconciliation canonicality failure cannot persist success (347.011375ms)
+▶ guarded initial-context failure retains only independently refreshed receipt evidence
+  ✔ unavailable/available (16.152708ms)
+  ✔ unavailable/missing (16.031208ms)
+  ✔ unavailable/offline (11.936333ms)
+  ✔ missing-block/available (12.4925ms)
+  ✔ missing-block/missing (11.828375ms)
+  ✔ missing-block/offline (11.757375ms)
+  ✔ unsupported/available (31.406625ms)
+  ✔ unsupported/missing (32.19ms)
+  ✔ unsupported/offline (30.795333ms)
+✔ guarded initial-context failure retains only independently refreshed receipt evidence (653.835458ms)
+▶ guarded malformed local envelope bytes shapes and ranges reject before RPC or journal mutation
+  ✔ body malformed hex (9.157333ms)
+  ✔ body odd hex (8.6705ms)
+  ✔ body wrong type (9.961541ms)
+  ✔ signature malformed hex (9.154083ms)
+  ✔ calldata malformed hex (10.656542ms)
+  ✔ action shape (8.304167ms)
+  ✔ action array shape (8.068792ms)
+  ✔ action uint32 underflow (8.230333ms)
+  ✔ action uint32 overflow (8.662208ms)
+  ✔ intent uint64 overflow (8.420041ms)
+  ✔ intent shape (8.647958ms)
+  ✔ read-set array shape (8.718916ms)
+  ✔ read-set bytes32 shape (8.500084ms)
+  ✔ value quantity shape (8.362125ms)
+✔ guarded malformed local envelope bytes shapes and ranges reject before RPC or journal mutation (443.16475ms)
+✔ guarded environment deploys a reviewed proxy family without changing legacy defaults (236.712292ms)
+▶ mined independent-author competition is rejected after preflight, in both transaction orders
+  ✔ source-edit/competitor-first (234.044375ms)
+  ✔ source-edit/victim-first (213.390375ms)
+  ✔ higher-absent-live/competitor-first (142.269833ms)
+  ✔ higher-absent-live/victim-first (136.407083ms)
+  ✔ higher-mask/competitor-first (139.880167ms)
+  ✔ higher-mask/victim-first (136.702208ms)
+  ✔ included-lower/competitor-first (146.94575ms)
+  ✔ included-lower/victim-first (141.823333ms)
+  ✔ destination-replace/competitor-first (150.890917ms)
+  ✔ destination-replace/victim-first (146.81475ms)
+  ✔ destination-mask/competitor-first (145.211ms)
+  ✔ destination-mask/victim-first (143.359166ms)
+  ✔ policy/competitor-first (131.073959ms)
+  ✔ policy/victim-first (134.175417ms)
+  ✔ unrelated/competitor-first (145.111792ms)
+  ✔ unrelated/victim-first (138.292042ms)
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-uRIpqU/guarded-ordering.json
+✔ mined independent-author competition is rejected after preflight, in both transaction orders (2651.098292ms)
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-naejVf/guarded-engine.json
+✔ guarded Files engine binds complete positions and independently verifies untrusted recovery envelopes (855.185583ms)
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-m3wmEf/guarded-upgrades.json
+✔ populated proxy upgrades preserve native application identity and fresh historical reconstruction across same-block schedules (1174.490417ms)
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-LaMt3u/guarded-prague.json
+✔ real Prague type-4 install change clear and reverted native delegation preserve the key principal (953.656083ms)
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-tSZmrn/guarded-costs.json
+✔ whole-transaction guard retention costs remain within the explicit per-transaction cap (538.600834ms)
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-G3gwpD/guarded-recovery.json
+✔ cold signed Files prefix reconstructs with fresh EOA authority and native carrier use (4092.248625ms)
+▶ unavailable selected header makes positive and negative keyed revision tags unknown
+  ✔ raw keyed presence false (43.504333ms)
+  ✔ raw keyed presence true (45.1365ms)
+✔ unavailable selected header makes positive and negative keyed revision tags unknown (726.209209ms)
+✔ requested tag joins stay partial independently of either and none matches (660.865583ms)
+✖ joined pages qualify headers and own exact context Lens query continuations (661.421166ms)
+✔ failed Name-coordinate read preserves successful placement provenance (437.534167ms)
+▶ joined rows match independent placement Name File and tag observations across pinned cases
+  ✔ mixed masked/none (50.069541ms)
+  ✔ mixed masked/file (19.939542ms)
+  ✔ mixed masked/revision (14.749208ms)
+  ✔ mixed masked/either (17.817291ms)
+  ✔ new HEAD drops selected revision tag (34.104042ms)
+  ✔ new HEAD retains stable tag (24.0715ms)
+  ✔ ordered Alice then Bob (53.192917ms)
+  ✔ ordered Bob then Alice (31.171291ms)
+  ✔ diagnostic conflict retains independent stable tag (13.444625ms)
+  ✔ definite Directory match after an uncertain File (19.657042ms)
+  ✔ unknown-only predicate is not a known match (14.365541ms)
+✔ joined rows match independent placement Name File and tag observations across pinned cases (1152.438833ms)
+✔ read batching correlates shuffled IDs, preserves options, and separates writes/preflight (25.0075ms)
+✔ missing duplicate unknown or malformed batch IDs reject whole batch; item errors remain item-local (0.825958ms)
+✔ explicit unsupported batch falls back with identical request IDs and parameters (0.403167ms)
+✔ finite batch chunks, byte caps, queue caps and timeouts cannot return partial success (7.048417ms)
+ℹ tests 120
+ℹ suites 0
+ℹ pass 119
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 30049.211292
+
+✖ failing tests:
+
+test at browser/joined.integration.test.mjs:89:1
+✖ joined pages qualify headers and own exact context Lens query continuations (661.421166ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/joined.integration.test.mjs:150:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /CONTINUATION/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
