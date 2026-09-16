@@ -45,6 +45,17 @@ This is a reversible implementation boundary needed to complete the authorized c
 
 ## Task 2: Cold integrated receipts, limited attribution and feasible combinations
 
+**Final-profile clarification, September16:** ordinary Files/native measurements
+must use the reviewed `TagStanceIndex` composition, including inherited generic,
+carrier, live and stance obligations. The general environment's older
+`ProfiledFilesIndex` is not equivalent. Reuse the existing tag fixture and wire
+the SDK's selected index/reader/profile manifest to its actual final deployment;
+do not retain aliases to detached bootstrap readers. Disclose all setup. The
+custom eight-ref/four-scalar/digest stress may use its separately declared
+`ProfiledIndexModule` configuration, explicitly labelled; the fixed Content
+field declaration in the Files profile is not an arbitrary four-scalar Type
+declaration. No new index feature or weaker matched comparison is authorized.
+
 **Files:** one `script/core-final-resource.mjs` and bounded evidence packaging using existing environment/SDK/fixtures. Evidence in `core-closeout-resource-20260915/`. Do not build a new benchmark framework.
 
 - [ ] Record exact source/artifact/runtime/execution/manifest/profile hashes, pre/post block hashes/counters, raw signed inputs and receipts, body/ref/field counts, full read-set preimage/dimensions, fresh/hot/dedup conditions, transaction/signature counts and canonical effect readback. Separate deployment, Directory/Type/target registration and all setup totals. All failed receipts remain retained.

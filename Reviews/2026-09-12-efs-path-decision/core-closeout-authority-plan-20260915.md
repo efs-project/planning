@@ -31,6 +31,12 @@
 
 ## Task 2: Actual native state proofs with explicit root and source anchors
 
+**Execution status September16:** active from reviewed prototype`a3ec1f0` after
+the stance-query gate. One Astra Extra High worker owns source/build/bounded
+chains; parent owns main documents and publication. Partial verifier controls
+are not the paid source-off journey or independent task approval. Final results
+will be recorded in [[core-closeout-results-20260915]].
+
 **Files:** separate `RecentStateRootCheckpoint`, `NativePublicationProof`, `NativeClaimArchive`, bounded proof libraries/NOTICE, independent `browser/native-proof.mjs`, focused tests and an actual Anvil export/offline runner. No Ledger growth required.
 
 **Journey sequencing clarification, September16:** actual same-chain checkpoint,
