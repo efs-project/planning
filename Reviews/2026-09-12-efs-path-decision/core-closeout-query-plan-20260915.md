@@ -73,6 +73,8 @@
 
 ## Task 3: One bounded selection-head cost experiment
 
+**Reviewed complete at `f7ce1875044e9c63f762cc57bde3b9dba523f86a`, September16.** Candidate retained after the predeclared finite fit/correctness/materiality gate; [[core-closeout-results-20260915#Selection-only read-cost reduction reviewed|Results and accounting boundaries]]. The task text below remains the original requirements, not a second implementation assignment.
+
 **Added September16 after the reviewed Task1 measurements; renumbered after the incoming-quote repair.** This task does not reopen origin correctness or add a broad query engine. Run after reviewed SDK transport/read-set and incoming-quote work and before final runtime/proof/resource pins; the head projection is independent of later Type/live/tag semantics. The parent used the writing-plans workflow and a read-only Astra High source preflight to select this smaller candidate instead of the initially proposed multi-row join batch.
 
 **Files:** narrow additive view in `src/Ledger.sol`; one shared internal primitive and its selection-only callers in `src/LensReader.sol`; focused `test/SelectionHead.t.sol` and a test-only raw-getter Lens control; bounded `script/core-selection-head-cost.mjs` and evidence in `core-closeout-query-20260915/selection-head/`. Existing raw getters, snapshot/guard codecs, Files index and storage roots remain unchanged.
