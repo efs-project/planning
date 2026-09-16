@@ -90,6 +90,8 @@ These include actual transaction costs, not just inner calls. Session deployment
 
 **Performance follow-up:** the owner-last64-author case can perform64placement/mask head reads plus3×64HEAD/tag reads per candidate. Repeated basis checks, external calls/selector copies and cold slots are source-derived causes, not a trace-based cost allocation. A bounded same-origin batch reader can share qualification and reduce calls; it must retain every authority/history/UNKNOWN rule. Remaining selector work and historical-prefix initialization are not free. Route this as explicit tuning/feasibility evidence before practical wide-Lens promises, not an endless expansion of the completed origin-correctness task.
 
+**September16 refinement, not measured savings:** a source preflight found the raw head getter loads a target word even for absent/masked heads. Canonical mutations leave those targets zero, but changing the raw getter would change malformed-state observability and could diverge from raw guard hashes. The [[core-closeout-query-plan-20260915#Task 2 One bounded selection-head cost experiment|single follow-up experiment]] instead adds a selection-only projection used by Lens, preserving raw reads/guards and historical checks. It is queued after SDK storage work, with a finite paid old/new control and a stop condition. This simpler candidate replaces, rather than accompanies, a broad join-batching campaign. Distinct metadata reads and wide-Lens cost remain.
+
 Evidence: `lab-b/core-closeout-query-20260915/` on the published prototype branch. This query checkpoint itself did not fix the SDK `tagCoverage` aggregation bug; the separately reviewed SDK task below does.
 
 ## Qualified SDK tag assessments reviewed
