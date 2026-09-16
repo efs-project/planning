@@ -6,6 +6,7 @@ test = "test"
 script = "script"
 out = "out"
 libs = []
+remappings = ["src/libraries/=src/vendor/optimism/"]
 solc = "0.8.30"
 evm_version = "cancun"
 optimizer = true
