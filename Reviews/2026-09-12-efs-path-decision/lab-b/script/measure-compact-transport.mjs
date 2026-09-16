@@ -13,6 +13,7 @@ const lab=fileURLToPath(new URL('../',import.meta.url));
 const numeric=['calls','wireCalls','httpRequests','httpBatches','requestBytes','responseBytes','fallbacks'];
 const work=['attempts','hits','misses','inflightHits','evictions','oversize','contextHits','contextMisses'];
 const diff=(a,b,keys)=>Object.fromEntries(keys.map(k=>[k,(a[k]??0)-(b[k]??0)]));
+const methodDiff=(a,b)=>Object.fromEntries(Object.entries(diff(a,b,Object.keys({...a,...b}).sort())).filter(([,count])=>count));
 const reports=[],sourceHead=execFileSync('git',['rev-parse','HEAD'],{cwd:lab,encoding:'utf8'}).trim();
 const files=['browser/compact-sdk.mjs','browser/compact-sdk-v2.mjs','browser/compact-content.mjs',
   'script/compact-environment.mjs','script/compact-read-transport.mjs','script/measure-compact-transport.mjs'];
@@ -38,6 +39,7 @@ for(const profile of ['guarded-inline','directory-carrier'])for(const mode of ['
       mark(label);const before=rpc.snapshot(),beforeCache=sdk.readMetrics(),beforePhases=structuredClone(cachePhases),start=performance.now();
       const value=await fn();mark('between');const after=rpc.snapshot();
       observations.push({label,ms:performance.now()-start,...diff(after,before,numeric),cache:diff(sdk.readMetrics(),beforeCache,work),
+        byMethod:methodDiff(after.byMethod,before.byMethod),
         phases:Object.fromEntries(Object.entries(after.phases).map(([p,row])=>[p,diff(row,before.phases[p]??{},numeric)]).filter(([,r])=>r.calls)),
         cachePhases:Object.fromEntries(Object.entries(cachePhases).map(([p,row])=>[p,diff(row,beforePhases[p]??{},work)]).filter(([,r])=>r.attempts)),
         cacheState:sdk.readMetrics()});return value;
@@ -66,6 +68,7 @@ for(const profile of ['guarded-inline','directory-carrier'])for(const mode of ['
     mark('new-block-cold-instance');const coldBefore=rpc.snapshot(),coldWork=cold.readMetrics(),coldStart=performance.now();
     await read('y'.repeat(41),cold);
     observations.push({label:'new-block-cold-instance',ms:performance.now()-coldStart,...diff(rpc.snapshot(),coldBefore,numeric),
+      byMethod:methodDiff(rpc.snapshot().byMethod,coldBefore.byMethod),
       cache:diff(cold.readMetrics(),coldWork,work),cacheState:cold.readMetrics()});
     // Fresh SDK for each named lower-level workload. The factory seam keeps
     // actual protocol authorization/preflight code under test, not a replica.
@@ -86,7 +89,7 @@ for(const profile of ['guarded-inline','directory-carrier'])for(const mode of ['
         if(first)assert.deepEqual(authorization.readSet,first.readSet);else first=authorization;
         readSets.push({principals:n,positions:m,repeat,scope:'INTERNAL_AUTHORIZATION_AND_PREFLIGHT_ONLY',
           excluded:'Initial pin, fresh chain identity, public entry/final canonicality, signing, exact signed RPC preflight, sends, journals and reconciliation.',
-          ms:performance.now()-start,...diff(rpc.snapshot(),before,numeric),cache:diff(client.readMetrics(),beforeCache,work)});
+          ms:performance.now()-start,...diff(rpc.snapshot(),before,numeric),byMethod:methodDiff(rpc.snapshot().byMethod,before.byMethod),cache:diff(client.readMetrics(),beforeCache,work)});
       }
       const bad=structuredClone(first);bad.readSet.expectedHeads[Math.min(17,n-1)]=e.ZeroHash;
       await assert.rejects(p.preflight(bad,context),/READSET_DRIFT/,'ordered snapshot comparison includes later bounded chunks');
@@ -97,22 +100,39 @@ for(const profile of ['guarded-inline','directory-carrier'])for(const mode of ['
     reports.push({profile,mode,sourceHead,pins,artifactPins,manifest,limits:rpc.limits,historyPolicy:env.historyPolicy,observations,readSets,transactions,signedPayloads,
       metrics:rpc.snapshot(),evidence:'LOCAL_RPC_OBSERVED_NOT_STATE_PROOF',recipe:rich?'Typed Directory;41-byte SHA-256 descriptor-backed inline-carrier create/edit;Alice/Bob ordered Lens;transport.txt;fixed salt transport-matched-primary.'
         :'Guarded inline41-byte create/edit;Alice/Bob ordered Lens;transport.txt;fixed salt transport-matched-primary.'});
-    console.log(JSON.stringify({profile,mode,status:'PASS',rows:observations.map(({label,calls,httpRequests,requestBytes,responseBytes,ms})=>({label,calls,httpRequests,requestBytes,responseBytes,ms})),readSets}));
+    console.log(JSON.stringify({profile,mode,status:'PASS',rows:observations.map(({label,calls,httpRequests,requestBytes,responseBytes,ms,byMethod})=>({label,calls,httpRequests,requestBytes,responseBytes,ms,byMethod})),readSets}));
   }finally{await env.close();}
 }
 // Cross-mode semantic/call controls: batching changes envelopes, not logical
-// EVM work; caching modes share identical read work and plan shape.
+// EVM work; caching modes share identical read work and plan shape. Receipt
+// polling is scheduling-dependent, but remains in all actual traffic totals.
+const output=join(lab,'core-closeout-sdk-20260915/transport-measurements.json.gz');
+const packet={status:'PENDING_COMPARISON',sourceHead,sharedGrouping:true,serialLatencyComparison:false,limitsAreExperimental:true,
+  qualifications:{postWriteRead:'same-block-first-read and new-block-read may reuse evidence warmed by preceding reconciliation; new-block-cold-instance cannot.',
+    zeroNetworkReadSets:'Only internal protocol subphases. Public current operations always acquire fresh headers/chain identity and independently recheck canonicality.',
+    receiptPolling:'Only eth_getTransactionReceipt may differ in the fixed-work comparison; full actual logical/HTTP/bytes/latency totals are never normalized.'},
+  comparisons:[],reports};
+const save=()=>writeFile(output,gzipSync(JSON.stringify(packet,null,2)+'\n'));
+// Retain the observations even if a subsequent comparison fails.
+await save();
+try {
 for(const profile of ['guarded-inline','directory-carrier']){
   const rows=reports.filter(r=>r.profile===profile);
   for(const [a,b] of [[rows[0],rows[2]],[rows[1],rows[3]]]){
-    assert.deepEqual(a.observations.map(r=>r.calls),b.observations.map(r=>r.calls));
+    for(let i=0;i<a.observations.length;i++){
+      const left=a.observations[i],right=b.observations[i];assert.equal(left.label,right.label);
+      for(const row of [left,right])assert.equal(Object.values(row.byMethod).reduce((sum,n)=>sum+n,0),row.calls,'method counts cover all actual calls');
+      const differingMethods=methodDiff(left.byMethod,right.byMethod);
+      packet.comparisons.push({profile,modes:[a.mode,b.mode],operation:left.label,differingMethods,
+        receiptPolls:[left.byMethod.eth_getTransactionReceipt??0,right.byMethod.eth_getTransactionReceipt??0],actualCalls:[left.calls,right.calls]});
+      const fixed=row=>Object.fromEntries(Object.entries(row.byMethod).filter(([method])=>method!=='eth_getTransactionReceipt'));
+      assert.deepEqual(fixed(left),fixed(right),'all non-receipt RPC method counts must match');
+    }
     assert.deepEqual(a.readSets.map(r=>r.calls),b.readSets.map(r=>r.calls));
   }
   for(const row of rows){assert.deepEqual(row.signedPayloads,rows[0].signedPayloads,'byte-identical signed calldata across matched modes');
     assert.deepEqual(row.transactions.map(r=>[r.calldataBytes,r.gasUsed]),rows[0].transactions.map(r=>[r.calldataBytes,r.gasUsed]),'unchanged onchain work');}
 }
-const output=join(lab,'core-closeout-sdk-20260915/transport-measurements.json.gz');
-await writeFile(output,gzipSync(JSON.stringify({status:'PASS',sourceHead,sharedGrouping:true,serialLatencyComparison:false,limitsAreExperimental:true,
-  qualifications:{postWriteRead:'same-block-first-read and new-block-read may reuse evidence warmed by preceding reconciliation; new-block-cold-instance cannot.',
-    zeroNetworkReadSets:'Only internal protocol subphases. Public current operations always acquire fresh headers/chain identity and independently recheck canonicality.'},reports},null,2)+'\n'));
+packet.status='PASS';await save();
+}catch(error){packet.status='FAILED';packet.comparisonFailure=error.message;await save();throw error;}
 console.log(`Evidence: ${output}`);
