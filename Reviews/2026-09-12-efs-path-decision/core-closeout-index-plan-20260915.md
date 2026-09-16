@@ -33,7 +33,7 @@
 | Existing scope/history/binding backlinks | Distinct binding coordinates, retained head changes, and historical/current target relationships respectively. |
 | Generic checked-reference role/target | First admission of each unique source Record at each declared leading reference ordinal, keyed by exact source Type/ordinal/target. Up to8 checked refs. |
 | Declared scalar equality | Retained unique Records, exact Type/spec ordinal/canonical scalar kind/value. |
-| Declared content digest | Retained unique content descriptors, algorithm-qualified digest. Not a fetched-byte or current-File assertion. |
+| Declared content digest | Retained unique content descriptors in one cross-Type `(algorithm,digest)` posting over the finite declared profile universe. Source Type is recovered per Record; no duplicate per-Type mirror. Not a fetched-byte or current-File assertion. |
 
 - [ ] Capture missing-family/tiny-list behavior before implementation. Preserve existing by-Type occurrence keys; allocate collision-separated new keys. Reference membership uses existing `referenceList` logical keys so old Files relationships remain queryable.
 - [ ] Implement inline singleton: first append writes header only; `postingAt(key,0)`/`postingWord(key,0)` synthesize `last` while count1. On1→2 materialize both first and second ordinals correctly, then use existing five-per-word packing. Preserve out-of-range zeros, withdrawal of singleton, ordinal bounds, audit flags, failed-transition rollback and getter word equivalence at counts0/1/2/5/6. Declare physical layout/profile change honestly.
