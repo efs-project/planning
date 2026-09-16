@@ -47,11 +47,26 @@ function checkBodies(e,x){
   }
   return {expected,complete};
 }
+export function checkTypeSidecarBudget(types){
+  let descriptors=0,code=0,other=0;
+  for(const t of types){
+    const take=(value,max,kind)=>{need(hex(value)&&(value.length-2)/2<=max,'TYPE_SIDECAR_BOUNDS');return (value.length-2)/2;};
+    if(t.present!==false)code+=take(t.ruleCode,24576);
+    const s=t.described;if(!s)continue;
+    if(s.descriptor!==undefined)descriptors+=take(s.descriptor,4096);
+    for(const k of ['wrapperInitcode','customCode'])if(s[k]!==undefined)code+=take(s[k],k==='wrapperInitcode'?49152:24576);
+    for(const k of ['declaration','bindingSignature','bindingPreimage'])if(s[k]!==undefined)other+=take(s[k],k==='bindingPreimage'?384:65);
+    need(descriptors<=2_097_152&&code<=4_194_304&&other<=262_144,'TYPE_SIDECAR_AGGREGATE_BOUNDS');
+  }
+  need(code<=4_194_304,'TYPE_SIDECAR_AGGREGATE_BOUNDS');
+  return {descriptors,code,other};
+}
 function checkClosure(e,x,expected){
   const c=x.closure;need(c&&Array.isArray(c.records)&&Array.isArray(c.types)&&Array.isArray(c.roots),'CLOSURE');
   const roots=[...new Set(expected.map(a=>a.recordId.toLowerCase()))];
   need(c.roots.length===roots.length&&c.roots.every((r,i)=>eq(r,roots[i])),'CLOSURE_ROOTS');
   need(c.records.length<=4096&&c.types.length<=512,'CLOSURE_BOUNDS');
+  checkTypeSidecarBudget(c.types);
   const records=new Map(),types=new Map(),{hash,record}=codec(e);let missing=false,total=0;
   for(const t of c.types){
     need(!types.has(t.typeId.toLowerCase()),'TYPE_DUPLICATE');types.set(t.typeId.toLowerCase(),t);
@@ -105,7 +120,7 @@ async function contentEvidence(e,closure){
   }
   return result;
 }
-export async function verifyGuardedClaim(e,x){
+export async function verifyGuardedClaim(e,x,{described}={}){
   need(x?.format===FORMAT&&x.proof===PROOF,'FORMAT_UNSUPPORTED');
   const profile=archiveProfile(e),{hash,coder}=codec(e);
   need(x.profile&&Object.keys(profile).every(k=>eq(x.profile[k],profile[k])),'DOMAIN_UNSUPPORTED');
@@ -123,8 +138,9 @@ export async function verifyGuardedClaim(e,x){
   const principalId=e.zeroPadValue(x.intent.author,32),publicationId=hash(['bytes32','bytes32','bytes32'],[e.id('efs.lab.publication/2'),principalId,claimId]);
   need(eq(claimId,x.claimId)&&eq(principalId,x.principalId)&&eq(publicationId,x.publicationId),'CLAIM_ID');
   const {expected,complete}=checkBodies(e,x),closureCoverage=checkClosure(e,x,expected);
+  const interpretation=described?described.interpretationFor(e,x.closure):{coverage:'PARTIAL',reason:'INTERPRETER_NOT_SUPPLIED'};
   if(x.observations)need(x.observations.grade==='RPC_OBSERVED_NOT_STATE_PROOF','OBSERVATION_GRADE');
-  return {claimId,publicationId,principalId,author:e.getAddress(x.intent.author),proof:PROOF,bodyCoverage:complete?'COMPLETE':'PARTIAL',closureCoverage,content:await contentEvidence(e,x.closure),
+  return {claimId,publicationId,principalId,author:e.getAddress(x.intent.author),proof:PROOF,bodyCoverage:complete?'COMPLETE':'PARTIAL',closureCoverage,interpretationCoverage:interpretation.coverage,interpretation,content:await contentEvidence(e,x.closure),
     missingMeaning:[...x.closure.types.filter(t=>t.present===false).map(t=>`type:${t.typeId}`),...x.closure.records.filter(r=>!r.present).map(r=>`record:${r.recordId}`)],
     authority:'NONE',sourceAdmission:'NOT_PROVEN',guardTruth:'NOT_PROVEN',historicalExecution:'SIGNER_COMMITTED_NOT_AUTHENTICATED',currentness:'NOT_PROVEN'};
 }
@@ -139,7 +155,7 @@ export function encodeGuardedRetention(e,x){
 /** Export all claims from retained state, not transaction input or SDK journal.
  * The caller supplies the immutable lab ABI/address profile. Latest execution,
  * author account code and source digest helpers are never consulted. */
-export function createGuardedArchiveReader({ethers:e,rpc,manifest}){
+export function createGuardedArchiveReader({ethers:e,rpc,manifest,described}){
   need(manifest.protocol==='compact-guarded-v2','FORMAT_UNSUPPORTED');
   const li=new e.Interface(manifest.contracts.ledger.abi),ri=new e.Interface(manifest.contracts.registry.abi),ai=new e.Interface(ARCHIVE_ABI);
   const {hash,record}=codec(e),ledger=manifest.contracts.ledger.address,registry=manifest.contracts.registry.address;
@@ -168,8 +184,11 @@ export function createGuardedArchiveReader({ethers:e,rpc,manifest}){
           const d=await rc('descriptor',[r.typeId],basis),refs=Array.from((await rc('refTypes',[r.typeId],basis))[0]);
           const ruleCode=eq(d[1],e.ZeroHash)?'0x':await rpc('eth_getCode',[d[2],basis.tag]);
           t={typeId:r.typeId,present:true,shape:d[0],ruleId:d[1],refTypes:refs,ruleCode};
+          if(described&&ri.hasFunction('describedStatus'))t.described=await described.captureType({type:t,rc,basis,registry,code:address=>rpc('eth_getCode',[address,basis.tag])});
+          else if(!ri.hasFunction('describedStatus'))t.described={status:0};
         }catch{t={typeId:r.typeId,present:false,reason:'TYPE_PREIMAGE_UNAVAILABLE'};}
         types.set(tkey,t);
+        checkTypeSidecarBudget([...types.values()]);
       }
       if(t.present)for(let i=0;i<t.refTypes.length;i++){
         need(e.getBytes(r.body).length>=32*(i+1),'REFERENCE_LENGTH');const ref=e.dataSlice(r.body,i*32,i*32+32);
@@ -210,7 +229,7 @@ export function createGuardedArchiveReader({ethers:e,rpc,manifest}){
       signature:e.Signature.from({r:evidence[5],s:evidence[6],v:Number(evidence[2])}).serialized,claimId,principalId,publicationId,bodies,closure,
       observations:{grade:'RPC_OBSERVED_NOT_STATE_PROOF',source:{chainId:basis.chainId,ledger,blockHash:basis.blockHash,blockNumber:basis.blockNumber},
         publication:String(publication),firstAdmission:String(first),finalAdmission:String(first+BigInt(leafCount)-1n),publicationContext:plain(retained.toObject())}};
-    await verifyGuardedClaim(e,x);return x;
+    await verifyGuardedClaim(e,x,{described});return x;
   }
   async function exportArchivedClaim({address,claimId,closure,context}={}){
     const basis=await pin(context),ac=(fn,args)=>call(address,ai,fn,args,basis);
@@ -232,7 +251,7 @@ export function createGuardedArchiveReader({ethers:e,rpc,manifest}){
       closure:closure?plain(closure):{roots:[...records.keys()],records:[...records.values()],types:[...types.values()],coverage:types.size?'PARTIAL':'COMPLETE'},
       observations:{grade:'RPC_OBSERVED_NOT_STATE_PROOF',archive:{chainId:basis.chainId,address,blockHash:basis.blockHash,blockNumber:basis.blockNumber},
         firstImporter:c.firstImporter,retainedAt:String(c.retainedAt),bodyCoverage:String(c.bodyCoverage)}};
-    await verifyGuardedClaim(e,x);return x;
+    await verifyGuardedClaim(e,x,{described});return x;
   }
   return Object.freeze({exportPublication,exportArchivedClaim});
 }

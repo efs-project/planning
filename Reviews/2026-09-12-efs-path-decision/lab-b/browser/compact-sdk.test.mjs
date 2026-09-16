@@ -62,6 +62,13 @@ test('typed Record evidence has its own qualified point API, without extending F
   assert.equal(typeof sdk.readTypedRecord,'function');
   await assert.rejects(sdk.readTypedRecord({record:ra,context:{}}),/CONTEXT/);
 });
+test('older registry descriptor accessor is explicitly unsupported and does not reinterpret a Record',async()=>{
+  const {sdk}=fixture(),context=await sdk.pin();
+  await assert.rejects(sdk.readTypeDescriptor({typeId:types.root,context:{}}),/CONTEXT/);
+  const value=await sdk.readTypeDescriptor({typeId:types.root,context});
+  assert.equal(value.knowledge,'UNSUPPORTED');assert.equal(value.coverage,'PARTIAL');assert.equal(value.value,null);
+  assert.equal(value.reason,'DESCRIBED_GETTER_UNSUPPORTED');
+});
 test('guarded Files factory rejects the earlier public-plaintext-fingerprint carrier profile before RPC',()=>{
   let requests=0;
   assert.throws(()=>createFilesCompactSdk({ethers,manifest:{...manifest,protocol:'compact-guarded-v2',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v1'},rpc:()=>{requests++;}}),/CONTENT_PROFILE/);

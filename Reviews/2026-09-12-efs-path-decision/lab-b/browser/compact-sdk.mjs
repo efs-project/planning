@@ -407,6 +407,40 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       throw error;
     }
   }
+  // Raw bounded Type declaration at an owned basis, not a semantic interpreter.
+  // Old deployment ABIs remain supported without probing nonexistent getters.
+  async function readTypeDescriptor({typeId,context}) {
+    check(contexts.has(context),'CONTEXT');
+    const answer=(knowledge,coverage,value,reason)=>freeze(result(context,knowledge,coverage,value,reason?{reason}:{}));
+    try {
+      await guard(context);
+      if(!['describedStatus','descriptorBytes','declarationSignature'].every(fn=>interfaces.registry.hasFunction(fn)))
+        return answer('UNSUPPORTED','PARTIAL',null,'DESCRIBED_GETTER_UNSUPPORTED');
+      const status=Number(await scalar('registry','describedStatus',[typeId],context));
+      check([0,1,2].includes(status),'DESCRIPTOR_STATUS');
+      if(status===0){const row=await call('registry','typeInfo',[typeId],context);
+        return answer(row[0]?'OPAQUE_LEGACY':'ABSENT',row[0]?'PARTIAL':'COMPLETE',null);}
+      const boundedBytes=async(fn,max)=>{
+        const raw=await rawRead('eth_call',[{to:addresses.registry,data:interfaces.registry.encodeFunctionData(fn,[typeId])},blockArg(context)],raw=>{
+          check(/^0x(?:[0-9a-f]{2})*$/i.test(raw)&&(raw.length-2)/2<=64+Math.ceil(max/32)*32,'DESCRIPTOR_RETURN_BOUND');
+        });
+        const value=decode(interfaces.registry,fn,raw)[0];check(e.getBytes(value).length<=max,'DESCRIPTOR_BOUND');
+        check(eq(interfaces.registry.encodeFunctionResult(fn,[value]),raw),'DESCRIPTOR_ABI');return value;
+      };
+      const bytes=await boundedBytes('descriptorBytes',4096),declaration=await boundedBytes('declarationSignature',65);
+      check(bytes!=='0x'&&e.getBytes(declaration).length===65,'DESCRIPTOR_MISSING');
+      const shape=hash(['bytes32','bytes'],[e.id('efs.lab.described-shape/1'),bytes]);let local=null;
+      if(status===2){const row=await call('registry','descriptor',[typeId],context),refs=Array.from(await scalar('registry','refTypes',[typeId],context));
+        check(refs.length<=8&&refs.length===Number(row[3])&&eq(shape,row[0])&&eq(hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/type/1'),shape,hash(['bytes32[]'],[refs]),row[1]]),typeId),'DESCRIPTOR_ID');
+        local={ruleId:row[1],mandatoryAcceptor:row[2],refTypes:refs};}
+      return answer('PRESENT','COMPLETE',{typeId,status,descriptor:bytes,declaration,shape,local,
+        interpretationCoverage:'NOT_INTERPRETED',evidence:'RPC_OBSERVED_NOT_STATE_PROOF',authority:'NONE'});
+    }catch(error){
+      if(isRpcUnavailable(error))return answer('UNKNOWN','PARTIAL',null,'DESCRIPTOR_UNAVAILABLE');
+      if(error.message?.startsWith('COMPACT_'))return answer('INVALID','PARTIAL',null,error.message);
+      throw error;
+    }
+  }
   async function descriptorAt(id,context,through) {
     const retained=await retainedAt(id,config.types.content,context,through);
     let descriptor;try{descriptor=contentCodec.decodeDescriptor(e.getBytes(retained.body));}catch{fail('CONTENT_INTEGRITY');}
@@ -953,7 +987,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     await journal.put(plain(outcome)); return outcome;
   }
   const publicRead=fn=>async args=>{const value=await fn(args);await canonical(args.context);return value;};
-  return Object.freeze({pin,...Object.fromEntries(Object.entries({listFolder,listFolderPage,readFile,readName,readDirectory,readPlacement,readContent,readTypedRecord,readConcept,readTag}).map(([name,fn])=>[name,publicRead(fn)])),conceptId,prepare,authorize,submit,reconcile,
+  return Object.freeze({pin,...Object.fromEntries(Object.entries({listFolder,listFolderPage,readFile,readName,readDirectory,readPlacement,readContent,readTypedRecord,readTypeDescriptor,readConcept,readTag}).map(([name,fn])=>[name,publicRead(fn)])),conceptId,prepare,authorize,submit,reconcile,
     readMetrics:()=>({...cache.stats(),contexts:verifiedContexts.size,contextHits,contextMisses,contextBytes,contextLimits:{...contextLimits},groupWidth:16}),
     capabilities:()=>freeze(plain({...protocol.capabilities,typedDirectories:directories,globalTree:false}))});
 }

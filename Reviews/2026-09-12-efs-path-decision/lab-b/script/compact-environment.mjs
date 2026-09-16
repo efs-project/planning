@@ -25,7 +25,8 @@ async function freePort() {
   const port = server.address().port; await new Promise(ok => server.close(ok)); return port;
 }
 export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_OUT ?? join(lab,'out'),useLive=process.env.EFS_LISTING_MODE!=='audit',
-  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile,indexFields=false,evidenceMode='snapshot',benchmarkHistory=false,chainId=31337,transportOptions={}}={}) {
+  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile,indexFields=false,evidenceMode='snapshot',benchmarkHistory=false,chainId=31337,transportOptions={},blockGasLimit=30_000_000}={}) {
+  assert(Number.isSafeInteger(blockGasLimit)&&blockGasLimit>=15_000_000&&blockGasLimit<=30_000_000,'bounded local block gas limit');
   assert([31337,31338].includes(chainId),'owned fixture chainId is 31337 or 31338');
   assert(['snapshot','append'].includes(evidenceMode),'supported evidence mode');
   assert(!benchmarkHistory||evidenceMode==='append','short history is explicit benchmark-only');
@@ -42,7 +43,7 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
   const port = await freePort(), rpcUrl = `http://127.0.0.1:${port}`;
   const child = spawn(process.env.ANVIL_BIN ?? 'anvil',[
     '--host','127.0.0.1','--port',String(port),'--chain-id',String(chainId),'--hardfork',hardfork,
-    '--gas-limit','30000000','--gas-price','2000000000','--prune-history',String(historyPolicy.states),
+    '--gas-limit',String(blockGasLimit),'--gas-price','2000000000','--prune-history',String(historyPolicy.states),
     '--transaction-block-keeper',String(historyPolicy.transactionBlocks),'--cache-path',join(dir,'anvil-cache'),'--quiet',
   ],{stdio:['ignore','ignore','pipe']});
   let nodeError='', closed=false;
