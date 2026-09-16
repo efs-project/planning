@@ -12,6 +12,39 @@ function setup(reply,limits={}) {
   }});return {rpc,requests};
 }
 const ok=r=>({jsonrpc:'2.0',id:r.id,result:r.params[0].data});
+const ownedArgs=()=>[{to:'0x'+'22'.repeat(20),data:'0x12345678',from:'0x'+'33'.repeat(20),
+  accessList:[{address:'0x'+'44'.repeat(20),storageKeys:['0x'+'55'.repeat(32)]}]},
+  {blockHash:'0x'+'11'.repeat(32),requireCanonical:true},
+  {['0x'+'22'.repeat(20)]:{stateDiff:{['0x'+'66'.repeat(32)]:'0x'+'77'.repeat(32)}}}];
+const mutateArgs=params=>{
+  params[0].to='0x'+'99'.repeat(20);params[0].data='0xdeadbeef';params[0].from='0x'+'88'.repeat(20);
+  params[0].accessList[0].storageKeys[0]='0x'+'aa'.repeat(32);
+  params[2]['0x'+'22'.repeat(20)].stateDiff['0x'+'66'.repeat(32)]='0x'+'bb'.repeat(32);
+  params[1].blockHash='0x'+'cc'.repeat(32);params[1].requireCanonical=false;params[1]='latest';
+};
+test('mutation after enqueue cannot alter admitted calldata nested options selector or diagnostics',async()=>{
+  const {rpc,requests}=setup(r=>Array.isArray(r)?r.map(ok):ok(r));
+  const caller=ownedArgs(),pending=rpc.read('eth_call',caller);
+  mutateArgs(caller);
+  assert.equal(await pending,'0x12345678');assert.deepEqual(requests[0].params,ownedArgs());
+  const report=rpc.snapshot(),metadata=Object.keys(report.byRequest).map(JSON.parse);
+  assert.deepEqual(metadata,[{phase:'unscoped',method:'eth_call',target:'0x'+'22'.repeat(20),selector:'0x12345678',blockHash:'0x'+'11'.repeat(32)}]);
+  assert.equal(report.requestBytes,Buffer.byteLength(JSON.stringify(requests[0])));
+});
+test('mutation during unsupported batch cannot change the owned fallback request identity',async()=>{
+  let release,observeBatch;const batchSeen=new Promise(resolve=>{observeBatch=resolve;});
+  const {rpc,requests}=setup(async request=>{
+    if(!Array.isArray(request))return ok(request);
+    observeBatch();await new Promise(resolve=>{release=resolve;});
+    return {jsonrpc:'2.0',id:null,error:{code:-32600,message:'batch unsupported'}};
+  });
+  const first=ownedArgs(),second=ownedArgs();second[0].data='0x87654321';
+  const pending=Promise.all([rpc.read('eth_call',first),rpc.read('eth_call',second)]);
+  await batchSeen;mutateArgs(first);mutateArgs(second);release();
+  assert.deepEqual(await pending,['0x12345678','0x87654321']);
+  assert.deepEqual(requests[0][0].params,ownedArgs());
+  assert.deepEqual(requests.slice(1),requests[0],'fallback retains complete original envelopes including IDs and all nested options');
+});
 test('read batching correlates shuffled IDs, preserves options, and separates writes/preflight',async()=>{
   const {rpc,requests}=setup(r=>Array.isArray(r)?r.map(ok).reverse():ok(r));
   assert.deepEqual(await Promise.all([rpc.read('eth_call',args(1)),rpc.read('eth_call',args(2))]),['0x1234567801','0x1234567802']);

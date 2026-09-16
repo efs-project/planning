@@ -72,9 +72,16 @@ export function createReadTransport({url,batch=false,limits={},fetchImpl=fetch}=
     }
   }
   function request(method,params=[],read=false) {
+    // Admit one owned JSON graph before inspecting it. The caller may reuse
+    // or mutate its objects while queued or while a batch fallback is pending.
+    // Validation, accounting, diagnostics and every POST must use this graph.
+    let req,serialized;
+    try{serialized=JSON.stringify({jsonrpc:'2.0',id:++id,method,params});req=JSON.parse(serialized);}
+    catch{return Promise.reject(error('REQUEST_JSON'));}
+    ({method,params}=req);
     if(read&&(!['eth_call','eth_getCode'].includes(method)||!/^0x[0-9a-f]{64}$/i.test(params[1]?.blockHash)||params[1]?.requireCanonical!==true))return Promise.reject(error('READ_ONLY_PIN_REQUIRED'));
     if(pending>=bound.maxPending)return Promise.reject(error('QUEUE_LIMIT'));
-    const req={jsonrpc:'2.0',id:++id,method,params};if(Buffer.byteLength(JSON.stringify(req))>bound.requestBytes)return Promise.reject(error('REQUEST_LIMIT'));
+    if(Buffer.byteLength(serialized)>bound.requestBytes)return Promise.reject(error('REQUEST_LIMIT'));
     const p=phase;inc('calls',1,p);metrics.byMethod[method]=(metrics.byMethod[method]??0)+1;
     const key=JSON.stringify({phase:p,method,target:method==='eth_call'?params[0]?.to:method==='eth_getCode'?params[0]:null,
       selector:method==='eth_call'?params[0]?.data?.slice(0,10):null,blockHash:params[1]?.blockHash??null});
