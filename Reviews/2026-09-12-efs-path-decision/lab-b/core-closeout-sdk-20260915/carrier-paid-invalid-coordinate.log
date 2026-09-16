@@ -1,0 +1,18 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected "actual" to be strictly unequal to:
+
+'0xd17a5f4f2e93f9bce77f17de8cc1a0fb2167a5fa5b1d571ce647295c59454269'
+    at file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-readset-carrier.mjs:105:62
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '0xd17a5f4f2e93f9bce77f17de8cc1a0fb2167a5fa5b1d571ce647295c59454269',
+  expected: '0xd17a5f4f2e93f9bce77f17de8cc1a0fb2167a5fa5b1d571ce647295c59454269',
+  operator: 'notStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v26.0.0

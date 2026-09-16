@@ -1,0 +1,92 @@
+Compiling 23 files with Solc 0.8.30
+Solc 0.8.30 finished in 14.99s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:92:21:
+   |
+92 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:97:29:
+   |
+97 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:22:
+    |
+117 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:121:25:
+    |
+121 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 180498 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/IncomingQuotes.t.sol:18:1:
+   |
+18 | contract IncomingQuotesTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 16 tests for test/IncomingQuotes.t.sol:IncomingQuotesTest
+[FAIL: E_COVERAGE()] test_64_returned_ids_fit_Page_4096_bound() (gas: 42582033)
+[FAIL: E_COVERAGE()] test_B_only_auxiliary_zero_occurrence_record_still_returned() (gas: 4157839)
+[FAIL: E_COVERAGE()] test_binding_backlink_rebind_unbind_preserved_and_retained_membership_unchanged() (gas: 5334973)
+[FAIL: E_COVERAGE()] test_each_cursor_commitment_mutation_and_same_graph_cross_mode_replay_rejected() (gas: 10635269)
+[PASS] test_exactly_one_pair_reference_and_reciprocal_ledger_required() (gas: 11380963)
+[FAIL: E_COVERAGE()] test_full_signed_schedule_old_and_current_against_current_tail() (gas: 10633145)
+[FAIL: E_INDEX(0x889b9ddf)] test_gapped_and_optional_family_never_complete() (gas: 6981231)
+[FAIL: E_COVERAGE()] test_generation_invalidation_and_changed_attachment_rejected() (gas: 10632993)
+[PASS] test_invalid_budget_basis_absent_or_wrong_target_rejected() (gas: 2456681)
+[FAIL: E_COVERAGE()] test_late_attachment_exhausted_partial_never_complete() (gas: 10853871)
+[PASS] test_max64_action_distinct_quote_targets_existing_callback_allowance() (gas: 60550476)
+[FAIL: constructor requirement and maintained coverage preserved] test_required_family_downgrades_refuse_and_queries_remain_complete() (gas: 2865457)
+[FAIL: E_COVERAGE()] test_retained_revisions_and_cross_page_reuse_both_readers() (gas: 6063462)
+[PASS] test_runtime_pins_rechecked_for_ledger_index_and_rule() (gas: 2181421)
+[FAIL: E_COVERAGE()] test_scan_works_with_original_nonselective_index() (gas: 16400761)
+[PASS] test_wrong_source_ordinal_rule_shape_and_code_constructor_rejected() (gas: 8577998)
+Suite result: FAILED. 5 passed; 11 failed; 0 skipped; finished in 26.46ms (95.88ms CPU time)
+
+Ran 1 test suite in 27.17ms (26.46ms CPU time): 5 tests passed, 11 failed, 0 skipped (16 total tests)
+
+Failing tests:
+Encountered 11 failing tests in test/IncomingQuotes.t.sol:IncomingQuotesTest
+[FAIL: E_COVERAGE()] test_64_returned_ids_fit_Page_4096_bound() (gas: 42582033)
+[FAIL: E_COVERAGE()] test_B_only_auxiliary_zero_occurrence_record_still_returned() (gas: 4157839)
+[FAIL: E_COVERAGE()] test_binding_backlink_rebind_unbind_preserved_and_retained_membership_unchanged() (gas: 5334973)
+[FAIL: E_COVERAGE()] test_each_cursor_commitment_mutation_and_same_graph_cross_mode_replay_rejected() (gas: 10635269)
+[FAIL: E_COVERAGE()] test_full_signed_schedule_old_and_current_against_current_tail() (gas: 10633145)
+[FAIL: E_INDEX(0x889b9ddf)] test_gapped_and_optional_family_never_complete() (gas: 6981231)
+[FAIL: E_COVERAGE()] test_generation_invalidation_and_changed_attachment_rejected() (gas: 10632993)
+[FAIL: E_COVERAGE()] test_late_attachment_exhausted_partial_never_complete() (gas: 10853871)
+[FAIL: constructor requirement and maintained coverage preserved] test_required_family_downgrades_refuse_and_queries_remain_complete() (gas: 2865457)
+[FAIL: E_COVERAGE()] test_retained_revisions_and_cross_page_reuse_both_readers() (gas: 6063462)
+[FAIL: E_COVERAGE()] test_scan_works_with_original_nonselective_index() (gas: 16400761)
+
+Encountered a total of 11 failing tests, 5 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 11 failed tests

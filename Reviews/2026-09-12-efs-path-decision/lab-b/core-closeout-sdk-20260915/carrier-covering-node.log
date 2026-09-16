@@ -1,0 +1,77 @@
+✔ raw successful reads deduplicate in-flight, stay immutable, and isolate instances/options (1.586083ms)
+✔ failed validation/rejection is retried and finite entry/byte/inflight budgets are enforced (1.174166ms)
+✔ offline guarded verifier derives exact signature evidence without RPC and rejects independent tamper classes (65.770542ms)
+✔ final six argument guarded ABI admits exactly bounded maximal padding and refuses one byte over (30.127709ms)
+✔ guarded source and archive cold readers are distinct from journal recovery (0.069084ms)
+✔ a signed never-admitted claim cannot omit a zero-valued declared Record reference (9.333917ms)
+▶ guarded initial-context failure retains only independently refreshed receipt evidence
+  ✔ unavailable/available (15.190375ms)
+  ✔ unavailable/missing (14.45975ms)
+  ✔ unavailable/offline (16.227292ms)
+  ✔ missing-block/available (13.150917ms)
+  ✔ missing-block/missing (12.366125ms)
+  ✔ missing-block/offline (13.897791ms)
+  ✔ unsupported/available (35.0625ms)
+  ✔ unsupported/missing (46.572625ms)
+  ✔ unsupported/offline (58.649625ms)
+✔ guarded initial-context failure retains only independently refreshed receipt evidence (753.817458ms)
+▶ guarded malformed local envelope bytes shapes and ranges reject before RPC or journal mutation
+  ✔ body malformed hex (9.671958ms)
+  ✔ body odd hex (9.374417ms)
+  ✔ body wrong type (9.352125ms)
+  ✔ signature malformed hex (10.037584ms)
+  ✔ calldata malformed hex (11.404958ms)
+  ✔ action shape (9.213417ms)
+  ✔ action array shape (8.499917ms)
+  ✔ action uint32 underflow (8.304667ms)
+  ✔ action uint32 overflow (8.489042ms)
+  ✔ intent uint64 overflow (8.920583ms)
+  ✔ intent shape (9.356208ms)
+  ✔ read-set array shape (9.749208ms)
+  ✔ read-set bytes32 shape (9.958417ms)
+  ✔ value quantity shape (8.814166ms)
+✔ guarded malformed local envelope bytes shapes and ranges reject before RPC or journal mutation (464.740958ms)
+✔ guarded environment deploys a reviewed proxy family without changing legacy defaults (300.654875ms)
+▶ mined independent-author competition is rejected after preflight, in both transaction orders
+  ✔ source-edit/competitor-first (251.946292ms)
+  ✔ source-edit/victim-first (219.340833ms)
+  ✔ higher-absent-live/competitor-first (159.46075ms)
+  ✔ higher-absent-live/victim-first (148.655625ms)
+  ✔ higher-mask/competitor-first (132.038292ms)
+  ✔ higher-mask/victim-first (151.951375ms)
+  ✔ included-lower/competitor-first (158.13925ms)
+  ✔ included-lower/victim-first (162.547875ms)
+  ✔ destination-replace/competitor-first (151.758167ms)
+  ✔ destination-replace/victim-first (154.888416ms)
+  ✔ destination-mask/competitor-first (164.295291ms)
+  ✔ destination-mask/victim-first (159.993917ms)
+  ✔ policy/competitor-first (147.755084ms)
+  ✔ policy/victim-first (139.910208ms)
+  ✔ unrelated/competitor-first (147.070291ms)
+  ✔ unrelated/victim-first (157.07875ms)
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-tYmwjH/guarded-ordering.json
+✔ mined independent-author competition is rejected after preflight, in both transaction orders (2853.409792ms)
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-cEWnBL/guarded-engine.json
+✔ guarded Files engine binds complete positions and independently verifies untrusted recovery envelopes (843.971833ms)
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-P3OZF1/guarded-upgrades.json
+✔ populated proxy upgrades preserve native application identity and fresh historical reconstruction across same-block schedules (1366.422459ms)
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-P9MsTl/guarded-prague.json
+✔ real Prague type-4 install change clear and reverted native delegation preserve the key principal (1193.09425ms)
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-olYKW9/guarded-costs.json
+✔ whole-transaction guard retention costs remain within the explicit per-transaction cap (588.752125ms)
+✔ new read-set profile must be explicit and a failed exact probe cannot downgrade to legacy (433.152959ms)
+✔ mutation after enqueue cannot alter admitted calldata nested options selector or diagnostics (25.252ms)
+✔ mutation during unsupported batch cannot change the owned fallback request identity (0.521ms)
+✔ read batching correlates shuffled IDs, preserves options, and separates writes/preflight (0.5875ms)
+✔ missing duplicate unknown or malformed batch IDs reject whole batch; item errors remain item-local (0.895917ms)
+✔ explicit unsupported batch falls back with identical request IDs and parameters (0.248333ms)
+✔ finite batch chunks, byte caps, queue caps and timeouts cannot return partial success (6.730333ms)
+✔ HTTP concurrency remains bounded while queued independent read groups drain (22.833875ms)
+ℹ tests 61
+ℹ suites 0
+ℹ pass 61
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15418.499625
