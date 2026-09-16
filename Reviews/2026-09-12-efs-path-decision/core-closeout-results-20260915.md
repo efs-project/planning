@@ -4,7 +4,7 @@ September15,2026 · v2 PM · core-closeout-20260915
 
 **Status:** implementation in progress. James authorized finishing the six-packet [[core-design-audit-20260915|Core audit closeout]]. This page separates reviewed fixes from work still being implemented; no whole-prototype completion or permanent protocol claim.
 
-**Latest reviewed checkpoint: `f7ce187`.** Additive immutable read-set storage cuts the largest measured guarded publication10.62M→5.44Mgas while preserving its exact preimage and populated-upgrade recovery. Small fresh writes/readbacks also improve, but repeats and implementation deployment cost more; these are not final whole-File prices. Earlier SDK reuse/batching reduces local cold-create HTTP286→87 inline and431→104 descriptor-backed at its pinned source. The incoming-quote coverage defect is repaired. A small selection-only getter now cuts the measured64-author ordinary continuation3.10M→2.17Mgas and historical continuation3.24M→2.31M, with equal qualified results. Still expensive, not a practical default. Recoverable Type implementation is active; wallet/native evidence, live Files, stance tags and final integrated economics remain queued.
+**Latest reviewed checkpoint: `cb4e8af`.** Finite described Types now support public creator-authorized registration, recoverable definitions, mandatory structure plus developer validation, and exact local custom-instance authorization. Unrelated registration preserves existing pending writes and queries. Independent source-off interpretation is next, not already proven. Additive immutable read-set storage cuts the largest measured guarded publication10.62M→5.44Mgas; selection-only reads cut measured64-author ordinary continuation3.10M→2.17Mgas. Both preserve their qualified guarantees but remain workload-specific, not final whole-File prices or cheap arbitrary search. Wallet/native evidence, live Files, stance tags and final integrated economics remain queued.
 
 ## Reviewed now
 
@@ -169,6 +169,32 @@ Evidence remains in `lab-b/core-closeout-sdk-20260915/` on the published prototy
 
 Evidence:`lab-b/core-closeout-query-20260915/selection-head/` on the prototype branch; paid packet SHA256`65570efed1ba7d61110493627c990e7e868b62ce20e56f1eb5b0b11f669805fa`. This closes the single candidate above, not all read scalability. Principal/position/history work, lifetime discovery, session storage and final integrated fees remain. The reviewed result is about29–30% lower measured wide-query work, not cheap arbitrary onchain search or authenticated state-proof evidence.
 
+## Finite described Types and public participation reviewed
+
+**Task1 checkpoint `cb4e8af179d46f1e989de990f27ede21f7f0f1ae`:** an unrelated developer can sign an exact recoverable Type definition and a different payer can register it. The finite wrapper validates structure and then any declared custom predicate; permissive Realm policy cannot skip either. STOP-prefixed immutable bytes retain the descriptor. Legacy opaque registrations remain opaque even if a matching descriptor is offered before or after registration.
+
+The first disposable profile supports0–16 fields, eight required leading references, bounded integers/bytes/text, booleans/enums and optional non-reference fields. Zero-field Types require exactly empty bodies. These engineering choices are not permanent schema-language limits or protocol adoption. Semantic descriptions retain the creator's explanation; they do not certify its truth.
+
+- Custom-free definitions can be relayed unchanged into another Realm. Stateful custom installation separately requires creator authorization for the exact local instance and allowed Ledger. Identical runtime does not imply identical state. A CREATE2 wrapper commits that local binding through the existing acceptance profile. If the creator is gone without a retained destination authorization, interpretation remains possible but new custom installation is not promised.
+- New registration advances a separate catalog revision, not the policy epoch. Actual previously serialized signed operations and owned query continuations survive unrelated registration; a real policy change still invalidates them. Unknown Types refuse during initial profile preparation, before callbacks. Raw ECDSA declarations remain a prototype signature profile, not ordinary-wallet UX evidence.
+
+| Paid local operation | Whole gas | Qualification |
+| --- | ---: | --- |
+| First unit / next Note registration |332,181 /358,437|Setup, separate from every admission. |
+| Custom registration |1,729,348|Includes its per-Type wrapper, descriptor and local binding; duplicate relay64,249. |
+| Native short Note / signed Note |671,924 /736,834|One Record, not a complete browser File recipe. |
+| Native custom short Note |665,734|Mandatory validation40,473 of the shared300k budget. |
+| Note1024 + title64 |1,574,386|Mandatory validation152,372; full retained Note domain. |
+| Descriptor4096 / fields16 / refs8 / body8192 |1,770,302|Sparse:265 nonzero bytes and eight copies of one target; not worst-case density or cold-reference cost. |
+|8190 text bytes + length |826,782, **refused**|Structurally legal but exhausts300k validation; no silent cap increase or smaller text domain. |
+| Paid descriptor/body read |46,654|Raw retrieval, not yet independent authenticated interpretation. |
+
+- All normal deployment/transaction caps hold. Ledger runtime remains24,247bytes (329 spare); creation36,314 +64 argument bytes =36,378 initcode. This is30bytes more initcode than the prior checkpoint, not unchanged execution identity. Registry runtime14,914; wrapper4,380. Per-Type custom wrapper deployment is real overhead:876,000gas of runtime-code deposit alone. The1.729M setup amortizes below10% of the measured666k recurring admission after26 uses, not a measured win over an unimplemented alternative.
+- Worker112/112 covering checks and parent fresh20profile+1participation checks pass. Independent Astra Extra High review approved spec/quality with no Critical/Important finding. Parent separately checked21source pins,9complete artifacts,80compiler source joins,55raw transaction/receipt/block/index joins and10actual constructor/runtime joins. These are retained local RPC evidence, not chain-state proofs.
+- Deferred review minors stay explicit: the retained `audit.mjs` checks fewer joins than the parent's separate verifier; the callback non-entry assertion is rollback-sensitive, although direct profile tests/source establish early rejection; compiler/test-harness warnings remain. Do not describe output as pristine or attribute the parent's stronger checks to the worker audit.
+
+Evidence:`lab-b/core-closeout-types-20260915/` on the prototype branch. Original raw packet SHA256`d6edc5c1660b3ca4a2f0202ac7bf9accc8e0ffc4811f7efb53ca31ace94a4090`; lossless gzip SHA256`0cddc685f0ccd5153ac444fd03c219437303116faff45f7ac5c00f0aa4410202`. Source-off independent decoding, a previously unseen Type, explicit additive/breaking read projections and archive interpretation coverage are the next task. No owner-demo change, source-RPC restart, production deployment or requirement waiver.
+
 ## Six-packet finish line
 
 | Packet | Current state | Evidence still needed |
@@ -177,7 +203,7 @@ Evidence:`lab-b/core-closeout-query-20260915/selection-head/` on the prototype b
 | 2. Full required index bundle and evolution | [[core-closeout-index-plan-20260915|Both tasks]] reviewed through7af2695: canonical populated replay/catchup/cutover and independent family comparisons pass. | Final integrated largest-body replay and joint-envelope refresh; historical source decoders remain explicit supported profiles. |
 | 3. Resource envelope and avoidable overhead | Name/search waste repaired; [[core-closeout-resource-plan-20260915|packed-count repair and preparation extraction]] reviewed at 4c1098f; normal sizes fit and 65 selected checks pass. | Cold paid joint body/ref/name/Lens bounds and same-guarantee storage/evidence decomposition. |
 | 4. Contract query progress and live-backed Files | [[core-closeout-query-plan-20260915|All three query tasks]] reviewed throughf7ce187: origin progress, exact-Type coverage repair and measured selection-only savings. [[core-closeout-live-files-plan-20260915|Typed live Files plan]] queued. | Remaining wide/deep practicality, bounded retained initialization, typed live provider and immutable snapshot comparison. |
-| 5. Type interpretation, participation and authority | [[core-closeout-types-plan-20260915|Finite Type/participation Task1]] is implementing; [[core-closeout-authority-plan-20260915|wallet/native-proof plan]] ready. | Recoverable third-party descriptors/compatibility, non-griefable public registration, smart-wallet evidence, authenticated native provenance and honest private/external boundaries. |
+| 5. Type interpretation, participation and authority | [[core-closeout-types-plan-20260915|Finite Type/participation Task1]] reviewed atcb4e8af; independent Task2 active. [[core-closeout-authority-plan-20260915|Wallet/native-proof plan]] ready. | Independent third-party interpretation/compatibility and source-off recovery, smart-wallet evidence, authenticated native provenance and honest private/external boundaries. |
 | 6. Integrated access and complete economics | [[core-closeout-sdk-plan-20260915|All three bounded SDK tasks]] reviewed through5bc5f17: qualified tags, transport and paid additive read-set storage. [[core-closeout-network-preflight-20260915|Small public-RPC preflight]] passed hash/batch controls on Base/Era; Era root-proof limitation confirmed. | Final cold Files/native-app journey, integrated storage/query tradeoffs, current public-provider access and all-in network fees. |
 
 ## Engineering direction from this pass

@@ -17,6 +17,8 @@
 
 ## Task 1: Finite described Types, mandatory custom validation and public registration
 
+**Execution status September16:** complete and independently reviewed at prototype `cb4e8af`; exact evidence and qualifications in [[core-closeout-results-20260915#Finite described Types and public participation reviewed]]. Task2 remains separate; this is not a permanent schema-language or wallet-profile adoption.
+
 **Files:** new focused descriptor/codec/rule files under `src/DescribedTypeProfile.sol` or a small explicit split; `src/TypeRegistry.sol`; narrow unknown-Type refusal in publication-profile calculation; focused tests and evidence under `core-closeout-types-20260915/`.
 
 - [ ] Define one canonical finite descriptor with codec/profile version, declaration key/namespace, bounded retained semantic description, ordered stable field/semantic IDs, kinds/bounds, and optional custom ABI/runtime hash. References are the existing leading32-byte words; derive refs from the descriptor, not a conflicting second input. No self Type ID or destination address in the descriptor.
@@ -35,6 +37,8 @@
 - [ ] Preserve ordinary Node deployment and code caps; self-review, exact commit/report and independent task review.
 
 ## Task 2: Independent interpretation, evolution and source-off meaning
+
+**Execution status September16:** active from reviewed `cb4e8af`. The controller supplies an additional previously unseen measurement/card fixture only after the independent decoder's commit/hash is frozen. Existing literal vectors are public inputs; producer parser/fixture encoder reuse is not independence.
 
 **Files:** independent `browser/described-type-reader.mjs` and focused tests/literal vectors; bounded descriptor accessor in the SDK; guarded archive sidecars; a bounded paid/source-off integration script. No UI polish.
 
