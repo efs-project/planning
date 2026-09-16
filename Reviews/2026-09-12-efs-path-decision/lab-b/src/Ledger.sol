@@ -5,6 +5,7 @@ import {Keys} from "./Keys.sol";
 import {ExecutionSlots} from "./ExecutionSlots.sol";
 import {PublicationSupport} from "./PublicationSupport.sol";
 import {PublicationPreparation as P} from "./PublicationPreparation.sol";
+import {ReadSetStorage} from "./ReadSetStorage.sol";
 import {IAcceptor, IIndexModule, ITypeRegistry,IIndexReadiness,IndexReadinessProfile} from "./Interfaces.sol";
 
 /// @title Ledger — Road B single-pass ingestion kernel
@@ -196,6 +197,8 @@ contract Ledger {
     // recoverable/pinned by every historical ExecutionInfo. No linker configuration.
     address private immutable publicationSupport;
     bytes32 private immutable publicationSupportCodehash;
+    // Compatible root family only. Full read-set physical support additionally
+    // requires readSetStorageProfile plus the exact implementation code identity.
     bytes32 public constant LAYOUT_ID = keccak256("efs.lab.ledger-layout/2:roots-0-12-preserved:context-13:execution-14:readsets-15");
     bytes32 public constant GUARDED_INTENT_TYPEHASH = keccak256("IntentV2(bytes32 realmId,bytes32 realmOrigin,bytes32 executionSet,address author,uint64 nonce,uint64 deadline,bytes32 acceptanceProfile,bytes32 indexObligations,bytes32 readSetHash,bytes32 actionsHash)");
     bytes32 public constant HEAD_SNAPSHOT_V2 = keccak256("efs.lab.head-snapshot/2");
@@ -217,7 +220,7 @@ contract Ledger {
     mapping(uint64 => SourceEvidence) private _source; // 12: publication ordinal => source evidence (imports only)
     mapping(uint64 => PublicationContext) private _context; // 13, never infer old principals from account code
     mapping(bytes32 => ExecutionInfo) private _execution; // 14, first publication records exact components
-    mapping(bytes32 => bytes) private _readSets; // 15, complete immutable ABI-encoded preimages, deduplicated
+    mapping(bytes32 => bytes) private _readSets; // 15, exact legacy dynamic-bytes codec; never a pointer
 
     event Admitted(bytes32 indexed author, bytes32 indexed scope, bytes32 recordId, uint64 admission);
     event Published(uint64 indexed publication, bytes32 indexed publicationId, address indexed author, uint8 proofKind, uint64 firstAdmission, uint16 leafCount);
@@ -512,7 +515,7 @@ contract Ledger {
             p.author32 == Keys.principal(p.author) ? 1 : 2, p.proofKind, p.format);
         if (_execution[p.execution].revision == 0) _execution[p.execution] = _currentExecution();
         if (p.format == 2) {
-            if (_readSets[p.readsHash].length == 0) _readSets[p.readsHash] = p.readBytes;
+            if (_readSets[p.readsHash].length == 0) ReadSetStorage.retain(p.readsHash,p.readBytes);
             emit ReadSetChecked(p.publication, p.readsHash);
         }
         EvidenceCell storage e = _evidence[p.publication];
@@ -948,7 +951,13 @@ contract Ledger {
     function publicationContext(uint64 publication) external view returns (PublicationContext memory) { return _context[publication]; }
     /// Missing hash returns empty bytes (UNKNOWN), not an inferred empty read set.
     /// Maximum preimage is 10,592 bytes (64 principals, 4 positions, 256 heads).
-    function readSetBytes(bytes32 key) external view returns (bytes memory) { return _readSets[key]; }
+    function readSetStorageProfile() external pure returns(bytes32 profile,bytes32 namespace) {
+        return (ReadSetStorage.PROFILE,ReadSetStorage.ROOT);
+    }
+    function readSetBytes(bytes32 key) external view returns (bytes memory) {
+        bytes memory legacy=_readSets[key];
+        return legacy.length!=0?legacy:ReadSetStorage.read(key);
+    }
     function keyPrincipal(address account) external pure returns (bytes32) { return Keys.principal(account); }
     function contractPrincipal(bytes32 origin, address account) external pure returns (bytes32) { return Keys.contractPrincipal(origin, account); }
 

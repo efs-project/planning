@@ -199,6 +199,17 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
         layoutId:(await call('ledger','layoutId'))[0],domainSeparator:(await call('ledger','domainSeparator'))[0],
         guardedDomainSeparator:(await call('ledger','guardedDomainSeparator'))[0],
         implementations:(deployment==='proxy'?['implementationV1','implementationV2']:['ledger']).map(k=>({address:contracts[k].address,codeHash:contracts[k].codeHash}))};
+      // Exact artifact ABI selects the adapter. A failing declared new getter
+      // is never retried as legacy, including on historical-artifact controls.
+      for(const [i,key] of (deployment==='proxy'?['implementationV1','implementationV2']:['ledger']).entries()){
+        const implementation=manifest.executionFamily.implementations[i];
+        if(new e.Interface(contracts[key].abi).getFunction('readSetStorageProfile')){
+          const [profile,namespace]=await call(key,'readSetStorageProfile');
+          const [address,codeHash]=await call(key,'publicationSupportIdentity');
+          assert.equal(e.keccak256(await rpc('eth_getCode',[address,'latest'])),codeHash,'fixed support code');
+          implementation.readSetStorage={profile,namespace};implementation.publicationSupport={address,codeHash};
+        }else implementation.readSetStorage={profile:e.id('efs.lab.read-set-storage/1:root15-bytes'),namespace:e.ZeroHash};
+      }
     }
     await writeFile(join(dir,'manifest.json'),json(manifest));
     const createJournal=async key=>{

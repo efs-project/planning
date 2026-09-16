@@ -27,6 +27,20 @@ export function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fai
   const digest=(intent,actionsHash)=>e.TypedDataEncoder.hash(domain,{IntentV2:fields},{...intent,actionsHash});
   const publicationId=(principal,commitment)=>hash(['bytes32','bytes32','bytes32'],[e.id('efs.lab.publication/2'),principal,commitment]);
   check(family && eq(family.layoutId,layout) && family.implementations?.length>0,'MANIFEST_EXECUTION');
+  // layout is the compatible sequential-root family, NOT a complete physical
+  // read-set codec. Old saved ABIs/manifests retain their root15-only adapter.
+  const legacyReads=e.id('efs.lab.read-set-storage/1:root15-bytes');
+  const carrierReads=e.id('efs.lab.read-set-storage/2:root15-legacy-first:namespaced-stop-code:all-new');
+  const carrierRoot=e.id('efs.lab.ledger.read-set-carriers/1');
+  const profileAbi=new e.Interface(['function readSetStorageProfile() view returns(bytes32,bytes32)',
+    'function publicationSupportIdentity() view returns(address,bytes32)']);
+  for(const implementation of family.implementations){
+    const p=implementation.readSetStorage;
+    check(p || !interfaces.ledger.getFunction('readSetStorageProfile'),'MANIFEST_READSET_PROFILE');
+    if(p)check(eq(p.profile,legacyReads)&&eq(p.namespace,Z)
+      ||eq(p.profile,carrierReads)&&eq(p.namespace,carrierRoot)&&implementation.publicationSupport?.address
+        &&/^0x[0-9a-f]{64}$/i.test(implementation.publicationSupport.codeHash),'MANIFEST_READSET_PROFILE');
+  }
   check(eq(family.guardedDomainSeparator,e.TypedDataEncoder.hashDomain(domain))
     && eq(family.domainSeparator,e.TypedDataEncoder.hashDomain({...domain,version:'1'})),'MANIFEST_DOMAIN');
   const expectedOrigin=hash(['bytes32','uint256','address'],[e.id('efs.lab.realm-origin/2'),config.chainId,addresses.ledger]);
@@ -112,6 +126,17 @@ export function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fai
         registryAddress:addresses.registry,registryCodeHash:config.contracts.registry.codeHash,
         indexAddress:addresses.index,indexCodeHash:config.contracts.index.codeHash,indexGeneration:context.generation};
       reviewExecution(execution);check(eq(executionHash(execution),values.executionSet),'EXECUTION_HASH');
+      const supported=family.implementations.find(i=>eq(i.address,execution.implementation)&&eq(i.codeHash,execution.implementationCodeHash));
+      if(eq(supported.readSetStorage?.profile,carrierReads)){
+        // No exception-to-legacy fallback: unavailable new-profile evidence
+        // invalidates this fresh pin just like unavailable code or execution.
+        const probe=async fn=>profileAbi.decodeFunctionResult(fn,await rpc('eth_call',[
+          {to:addresses.ledger,data:profileAbi.encodeFunctionData(fn)}, {blockHash:context.blockHash,requireCanonical:true}]));
+        const [physical,support]=await Promise.all([probe('readSetStorageProfile'),probe('publicationSupportIdentity')]);
+        check(eq(physical[0],carrierReads)&&eq(physical[1],carrierRoot),'READSET_PROFILE_UNSUPPORTED');
+        check(eq(support[0],supported.publicationSupport.address)&&eq(support[1],supported.publicationSupport.codeHash)
+          &&eq(e.keccak256(await code(support[0],context)),supported.publicationSupport.codeHash),'READSET_SUPPORT_UNSUPPORTED');
+      }
       Object.assign(context,{protocol:'compact-guarded-v2',origin:values.realmOrigin,executionSet:values.executionSet,execution});
     },
     async revisionEvidence(publication,context) {
