@@ -191,8 +191,9 @@ All runtime<=24,576, initcode<=49,152, empty linkReferences, ordinary Node
 ContractFactory deployment. The descriptor compiler's57-byte template is NOT
 its actual runtime: constructor returns STOP plus322 descriptor bytes here.
 Maximum retained blob is4097 bytes. Ledger runtime count remains24,247 (329 spare),
-but fixed-helper change makes creation36,314 versus baseline36,348 (-34); actual
-initcode with64 argument bytes is36,378. Runtime count equality is not a claim
+but the fixed-helper change makes creation36,314 versus baseline36,284 (+30);
+actual initcode with64 argument bytes is36,378 versus baseline36,348 (+30).
+Runtime count equality is not a claim
 that deployment/execution code commitments stayed byte-identical.
 
 | Setup or recurring operation | Paid gas |
