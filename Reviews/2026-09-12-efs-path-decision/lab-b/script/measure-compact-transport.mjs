@@ -42,10 +42,11 @@ for(const profile of ['guarded-inline','directory-carrier'])for(const mode of ['
         cachePhases:Object.fromEntries(Object.entries(cachePhases).map(([p,row])=>[p,diff(row,beforePhases[p]??{},work)]).filter(([,r])=>r.attempts)),
         cacheState:sdk.readMetrics()});return value;
     };
-    const authors=[wallets.alice.address,wallets.bob.address];
+    const authors=[wallets.alice.address,wallets.bob.address],signedPayloads=[];
     const run=async(operation,args)=>{
-      const plan=await sdk.prepare({operation,author:wallets.alice.address,authors,...args});
+      const plan=await sdk.prepare({operation,author:wallets.alice.address,authors,deadline:'2000000000',...args});
       const signed=await sdk.authorize(plan,d=>wallets.alice.signingKey.sign(d).serialized);
+      signedPayloads.push({operation,calldataHash:e.keccak256(signed.transaction.data),actionsHash:plan.actionsHash,readSetHash:plan.intent.readSetHash});
       await sdk.submit(signed,tx=>env.send(operation,tx,'alice'));assert.equal((await sdk.reconcile(plan.id)).status,'EFFECTS_VERIFIED');return plan;
     };
     const created=await measured('first-cold-create',()=>run('create',{name:'transport.txt',salt:e.id('transport-matched-primary'),
@@ -93,7 +94,7 @@ for(const profile of ['guarded-inline','directory-carrier'])for(const mode of ['
     const transactions=env.transactions.filter(row=>['create','edit'].includes(row.label)).map(({label,transactionHash,blockHash,blockNumber,gasUsed,gasLimit,calldataBytes,status})=>
       ({label,transactionHash,blockHash,blockNumber,gasUsed,gasLimit,calldataBytes,status}));
     assert(transactions.length===2);assert.equal(env.historyPolicy.states,256);assert.equal(env.historyPolicy.transactionBlocks,512);
-    reports.push({profile,mode,sourceHead,pins,artifactPins,manifest,limits:rpc.limits,historyPolicy:env.historyPolicy,observations,readSets,transactions,
+    reports.push({profile,mode,sourceHead,pins,artifactPins,manifest,limits:rpc.limits,historyPolicy:env.historyPolicy,observations,readSets,transactions,signedPayloads,
       metrics:rpc.snapshot(),evidence:'LOCAL_RPC_OBSERVED_NOT_STATE_PROOF',recipe:rich?'Typed Directory;41-byte SHA-256 descriptor-backed inline-carrier create/edit;Alice/Bob ordered Lens;transport.txt;fixed salt transport-matched-primary.'
         :'Guarded inline41-byte create/edit;Alice/Bob ordered Lens;transport.txt;fixed salt transport-matched-primary.'});
     console.log(JSON.stringify({profile,mode,status:'PASS',rows:observations.map(({label,calls,httpRequests,requestBytes,responseBytes,ms})=>({label,calls,httpRequests,requestBytes,responseBytes,ms})),readSets}));
@@ -107,7 +108,8 @@ for(const profile of ['guarded-inline','directory-carrier']){
     assert.deepEqual(a.observations.map(r=>r.calls),b.observations.map(r=>r.calls));
     assert.deepEqual(a.readSets.map(r=>r.calls),b.readSets.map(r=>r.calls));
   }
-  for(const row of rows)assert.deepEqual(row.transactions.map(r=>r.calldataBytes),rows[0].transactions.map(r=>r.calldataBytes));
+  for(const row of rows){assert.deepEqual(row.signedPayloads,rows[0].signedPayloads,'byte-identical signed calldata across matched modes');
+    assert.deepEqual(row.transactions.map(r=>[r.calldataBytes,r.gasUsed]),rows[0].transactions.map(r=>[r.calldataBytes,r.gasUsed]),'unchanged onchain work');}
 }
 const output=join(lab,'core-closeout-sdk-20260915/transport-measurements.json.gz');
 await writeFile(output,gzipSync(JSON.stringify({status:'PASS',sourceHead,sharedGrouping:true,serialLatencyComparison:false,limitsAreExperimental:true,

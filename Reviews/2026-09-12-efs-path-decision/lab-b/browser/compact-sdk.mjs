@@ -1,5 +1,5 @@
-/** Disposable compact Files adapter. No wallet, private keys, Node APIs, cache of
- * names, RPC URL, or document fixtures live here. Inject ethers v6 and raw RPC.
+/** Disposable compact Files adapter. No wallet, private keys, Node APIs, name
+ * catalog, RPC URL, or document fixtures live here. Inject ethers v6 and raw RPC.
  * All evidence is RPC_OBSERVED, not a portable source-state proof.
  * Contexts/plans/continuations are immutable, instance-owned capabilities.
  * Journal entries are JSON-safe and must be durably stored by put() before it
