@@ -1,0 +1,1779 @@
+{
+  "packet": {
+    "path": "core-closeout-resource-20260915/attempt-4.json.gz",
+    "sha256": "d7b25e8dd961e31f194d572314d8dfbb6959b2c8c3e9f66b01098dac476f051c",
+    "paidRunnerSha256": "f64c73583e767425aac09d918e007ba968faff41197104183fa8c86070afa2ce"
+  },
+  "transactions": 214,
+  "queryChains": [
+    {
+      "key": "scan-folder-1-1",
+      "totalGas": "1689934",
+      "complete": true,
+      "refused": false,
+      "pages": 3,
+      "scanned": "3",
+      "rows": 1,
+      "commitment": "0x7f22671af183c6ec00fc2ddb9dc766a1459a23f1ddfbd31651ab61b215a473b4"
+    },
+    {
+      "key": "scan-stance-1-1",
+      "totalGas": "460923",
+      "complete": true,
+      "refused": false,
+      "pages": 1,
+      "scanned": "1",
+      "rows": 1,
+      "commitment": "0x74d254baeaf72baffffa62879ddda949078d24fba7d245b633f127df3e7ba955"
+    },
+    {
+      "key": "scan-folder-1-4",
+      "totalGas": "934517",
+      "complete": true,
+      "refused": false,
+      "pages": 1,
+      "scanned": "3",
+      "rows": 1,
+      "commitment": "0x0a10494d7b83774d7978cfffe6c7eef7dccefa583a2e773b2af0662af1bc8678"
+    },
+    {
+      "key": "scan-stance-1-4",
+      "totalGas": "461732",
+      "complete": true,
+      "refused": false,
+      "pages": 1,
+      "scanned": "1",
+      "rows": 1,
+      "commitment": "0x360f0bf70c8e586dd7873b72c8af7f99b404e640f2ee9020d6bbbe1b4b652f2e"
+    },
+    {
+      "key": "scan-folder-64-1",
+      "totalGas": "6931663",
+      "complete": true,
+      "refused": false,
+      "pages": 3,
+      "scanned": "3",
+      "rows": 1,
+      "commitment": "0x54d520d02a3a671717c604b86037b1530aa00b743a77961925917689c72b0a80"
+    },
+    {
+      "key": "scan-stance-64-1",
+      "totalGas": "2689018",
+      "complete": true,
+      "refused": false,
+      "pages": 1,
+      "scanned": "1",
+      "rows": 1,
+      "commitment": "0xd1ae021a544e44ebcf23ad487f01be6cd511b0d4bbb80cf1827c59d906bef800"
+    },
+    {
+      "key": "scan-folder-64-4",
+      "totalGas": "4608827",
+      "complete": true,
+      "refused": false,
+      "pages": 1,
+      "scanned": "3",
+      "rows": 1,
+      "commitment": "0xd63c4c0d1cd9b4686185955f4449f5261a66090d91cb9757f82c20a50cbca954"
+    },
+    {
+      "key": "scan-stance-64-4",
+      "totalGas": "2689981",
+      "complete": true,
+      "refused": false,
+      "pages": 1,
+      "scanned": "1",
+      "rows": 1,
+      "commitment": "0x070190598f7ce2d6c700b8dd03d50c696f080d1ef52d49be2639725c440a228b"
+    },
+    {
+      "key": "scan-folder-1-1-mutate",
+      "totalGas": "898237",
+      "complete": false,
+      "refused": true,
+      "pages": 2,
+      "scanned": "1",
+      "rows": 1,
+      "commitment": "0x8690e284ca8dac4f7171cc5517b2dad9a126dca412eed238cd74f57dc8cc3459"
+    }
+  ],
+  "attribution": [
+    {
+      "label": "Files/create-inline-41",
+      "receiptGas": "2169867",
+      "knownSlots": 136,
+      "categories": {
+        "current": {
+          "new": 5,
+          "changed": 1,
+          "cleared": 0,
+          "unchanged": 0
+        },
+        "authority-history": {
+          "new": 32,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 17
+        },
+        "guard": {
+          "new": 1,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 0
+        },
+        "Record/body": {
+          "new": 9,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 0
+        },
+        "index-buckets": {
+          "new": 12,
+          "changed": 6,
+          "cleared": 0,
+          "unchanged": 47
+        },
+        "index-current": {
+          "new": 0,
+          "changed": 1,
+          "cleared": 0,
+          "unchanged": 5
+        }
+      },
+      "status": "AVAILABLE",
+      "inclusiveFrames": {
+        "support": "838431",
+        "acceptor": "5376",
+        "indexPrefix": "557484",
+        "indexFinal": "79235"
+      },
+      "disjointSelectedFrames": {
+        "support": "838431",
+        "acceptor": "5376",
+        "indexPrefix": "0",
+        "indexFinal": "0"
+      },
+      "selected": [
+        {
+          "path": [
+            0
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "171074"
+        },
+        {
+          "path": [
+            3
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "18012"
+        },
+        {
+          "path": [
+            4
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "11856"
+        },
+        {
+          "path": [
+            8
+          ],
+          "category": "acceptor",
+          "to": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+          "inclusiveGas": "2691"
+        },
+        {
+          "path": [
+            9
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "125899"
+        },
+        {
+          "path": [
+            13
+          ],
+          "category": "acceptor",
+          "to": "0x0165878a594ca255338adfa4d48449f69242eb8f",
+          "inclusiveGas": "2685"
+        },
+        {
+          "path": [
+            14
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "92347"
+        },
+        {
+          "path": [
+            18
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "155482"
+        },
+        {
+          "path": [
+            22
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "181930"
+        },
+        {
+          "path": [
+            25
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "81831"
+        }
+      ],
+      "nestedValidatorFramesNonadditive": [
+        {
+          "path": [
+            18,
+            0,
+            1
+          ],
+          "to": "0x851356ae760d987e095750cceb3bc6014560891c",
+          "inclusiveGas": "67590",
+          "overlapsSelectedAncestor": true
+        },
+        {
+          "path": [
+            22,
+            0,
+            1
+          ],
+          "to": "0x851356ae760d987e095750cceb3bc6014560891c",
+          "inclusiveGas": "9590",
+          "overlapsSelectedAncestor": true
+        },
+        {
+          "path": [
+            25,
+            0,
+            1
+          ],
+          "to": "0x1613beb3b2c4f22ee086b2b38c1476a3ce7f78e8",
+          "inclusiveGas": "63056",
+          "overlapsSelectedAncestor": true
+        }
+      ],
+      "unallocatedResidual": "1326060",
+      "nodes": 105,
+      "storageGasEstimate": null,
+      "overlap": "Index prefix/final callbacks are nested inside support fallback frames. Inclusive columns overlap; only disjointSelectedFrames may be summed."
+    },
+    {
+      "label": "Files/edit-inline-41",
+      "receiptGas": "1327787",
+      "knownSlots": 86,
+      "categories": {
+        "current": {
+          "new": 0,
+          "changed": 4,
+          "cleared": 0,
+          "unchanged": 0
+        },
+        "authority-history": {
+          "new": 18,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 16
+        },
+        "guard": {
+          "new": 1,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 0
+        },
+        "Record/body": {
+          "new": 6,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 0
+        },
+        "index-buckets": {
+          "new": 5,
+          "changed": 5,
+          "cleared": 0,
+          "unchanged": 25
+        },
+        "index-current": {
+          "new": 0,
+          "changed": 1,
+          "cleared": 0,
+          "unchanged": 5
+        }
+      },
+      "status": "AVAILABLE",
+      "inclusiveFrames": {
+        "support": "516840",
+        "acceptor": "12165",
+        "indexPrefix": "290827",
+        "indexFinal": "50048"
+      },
+      "disjointSelectedFrames": {
+        "support": "516840",
+        "acceptor": "12165",
+        "indexPrefix": "0",
+        "indexFinal": "0"
+      },
+      "selected": [
+        {
+          "path": [
+            0
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "159679"
+        },
+        {
+          "path": [
+            3
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "10009"
+        },
+        {
+          "path": [
+            6
+          ],
+          "category": "acceptor",
+          "to": "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
+          "inclusiveGas": "12165"
+        },
+        {
+          "path": [
+            7
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "143760"
+        },
+        {
+          "path": [
+            11
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "151079"
+        },
+        {
+          "path": [
+            14
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "52313"
+        }
+      ],
+      "nestedValidatorFramesNonadditive": [
+        {
+          "path": [
+            11,
+            0,
+            1
+          ],
+          "to": "0x851356ae760d987e095750cceb3bc6014560891c",
+          "inclusiveGas": "75590",
+          "overlapsSelectedAncestor": true
+        },
+        {
+          "path": [
+            14,
+            0,
+            1
+          ],
+          "to": "0x1613beb3b2c4f22ee086b2b38c1476a3ce7f78e8",
+          "inclusiveGas": "39292",
+          "overlapsSelectedAncestor": true
+        }
+      ],
+      "unallocatedResidual": "798782",
+      "nodes": 70,
+      "storageGasEstimate": null,
+      "overlap": "Index prefix/final callbacks are nested inside support fallback frames. Inclusive columns overlap; only disjointSelectedFrames may be summed."
+    },
+    {
+      "label": "Files/tag-file-fresh-Concept",
+      "receiptGas": "1294225",
+      "knownSlots": 84,
+      "categories": {
+        "current": {
+          "new": 2,
+          "changed": 2,
+          "cleared": 0,
+          "unchanged": 0
+        },
+        "authority-history": {
+          "new": 22,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 12
+        },
+        "guard": {
+          "new": 1,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 0
+        },
+        "Record/body": {
+          "new": 4,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 0
+        },
+        "index-buckets": {
+          "new": 4,
+          "changed": 7,
+          "cleared": 0,
+          "unchanged": 24
+        },
+        "index-current": {
+          "new": 0,
+          "changed": 1,
+          "cleared": 0,
+          "unchanged": 5
+        }
+      },
+      "status": "AVAILABLE",
+      "inclusiveFrames": {
+        "support": "449434",
+        "acceptor": "4132",
+        "indexPrefix": "239598",
+        "indexFinal": "50048"
+      },
+      "disjointSelectedFrames": {
+        "support": "449434",
+        "acceptor": "4132",
+        "indexPrefix": "0",
+        "indexFinal": "0"
+      },
+      "selected": [
+        {
+          "path": [
+            0
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "143502"
+        },
+        {
+          "path": [
+            3
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "10009"
+        },
+        {
+          "path": [
+            5
+          ],
+          "category": "acceptor",
+          "to": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+          "inclusiveGas": "4132"
+        },
+        {
+          "path": [
+            6
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "83014"
+        },
+        {
+          "path": [
+            10
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "160596"
+        },
+        {
+          "path": [
+            13
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "52313"
+        }
+      ],
+      "nestedValidatorFramesNonadditive": [
+        {
+          "path": [
+            10,
+            0,
+            1
+          ],
+          "to": "0x851356ae760d987e095750cceb3bc6014560891c",
+          "inclusiveGas": "67590",
+          "overlapsSelectedAncestor": true
+        },
+        {
+          "path": [
+            13,
+            0,
+            1
+          ],
+          "to": "0x1613beb3b2c4f22ee086b2b38c1476a3ce7f78e8",
+          "inclusiveGas": "39292",
+          "overlapsSelectedAncestor": true
+        }
+      ],
+      "unallocatedResidual": "840659",
+      "nodes": 60,
+      "storageGasEstimate": null,
+      "overlap": "Index prefix/final callbacks are nested inside support fallback frames. Inclusive columns overlap; only disjointSelectedFrames may be summed."
+    },
+    {
+      "label": "Files/tag-revision-fresh-Concept",
+      "receiptGas": "1327142",
+      "knownSlots": 84,
+      "categories": {
+        "current": {
+          "new": 2,
+          "changed": 2,
+          "cleared": 0,
+          "unchanged": 0
+        },
+        "authority-history": {
+          "new": 22,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 12
+        },
+        "guard": {
+          "new": 1,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 0
+        },
+        "Record/body": {
+          "new": 4,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 0
+        },
+        "index-buckets": {
+          "new": 3,
+          "changed": 8,
+          "cleared": 0,
+          "unchanged": 24
+        },
+        "index-current": {
+          "new": 0,
+          "changed": 1,
+          "cleared": 0,
+          "unchanged": 5
+        }
+      },
+      "status": "AVAILABLE",
+      "inclusiveFrames": {
+        "support": "448678",
+        "acceptor": "2656",
+        "indexPrefix": "222665",
+        "indexFinal": "50048"
+      },
+      "disjointSelectedFrames": {
+        "support": "448678",
+        "acceptor": "2656",
+        "indexPrefix": "0",
+        "indexFinal": "0"
+      },
+      "selected": [
+        {
+          "path": [
+            0
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "159679"
+        },
+        {
+          "path": [
+            3
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "10009"
+        },
+        {
+          "path": [
+            5
+          ],
+          "category": "acceptor",
+          "to": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+          "inclusiveGas": "2656"
+        },
+        {
+          "path": [
+            6
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "83014"
+        },
+        {
+          "path": [
+            10
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "143663"
+        },
+        {
+          "path": [
+            13
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "52313"
+        }
+      ],
+      "nestedValidatorFramesNonadditive": [
+        {
+          "path": [
+            10,
+            0,
+            1
+          ],
+          "to": "0x851356ae760d987e095750cceb3bc6014560891c",
+          "inclusiveGas": "67590",
+          "overlapsSelectedAncestor": true
+        },
+        {
+          "path": [
+            13,
+            0,
+            1
+          ],
+          "to": "0x1613beb3b2c4f22ee086b2b38c1476a3ce7f78e8",
+          "inclusiveGas": "39292",
+          "overlapsSelectedAncestor": true
+        }
+      ],
+      "unallocatedResidual": "875808",
+      "nodes": 62,
+      "storageGasEstimate": null,
+      "overlap": "Index prefix/final callbacks are nested inside support fallback frames. Inclusive columns overlap; only disjointSelectedFrames may be summed."
+    },
+    {
+      "label": "Files/tag-file-existing-Concept",
+      "receiptGas": "899975",
+      "knownSlots": 61,
+      "categories": {
+        "current": {
+          "new": 2,
+          "changed": 2,
+          "cleared": 0,
+          "unchanged": 0
+        },
+        "authority-history": {
+          "new": 19,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 11
+        },
+        "guard": {
+          "new": 0,
+          "changed": 0,
+          "cleared": 0,
+          "unchanged": 1
+        },
+        "index-buckets": {
+          "new": 2,
+          "changed": 3,
+          "cleared": 0,
+          "unchanged": 15
+        },
+        "index-current": {
+          "new": 0,
+          "changed": 1,
+          "cleared": 0,
+          "unchanged": 5
+        }
+      },
+      "status": "AVAILABLE",
+      "inclusiveFrames": {
+        "support": "336716",
+        "acceptor": "0",
+        "indexPrefix": "149571",
+        "indexFinal": "47801"
+      },
+      "disjointSelectedFrames": {
+        "support": "336716",
+        "acceptor": "0",
+        "indexPrefix": "0",
+        "indexFinal": "0"
+      },
+      "selected": [
+        {
+          "path": [
+            0
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "132747"
+        },
+        {
+          "path": [
+            2
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "2435"
+        },
+        {
+          "path": [
+            4
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "151577"
+        },
+        {
+          "path": [
+            7
+          ],
+          "category": "support",
+          "to": "0xcafac3dd18ac6c6e92c921884f9e4176737c052c",
+          "inclusiveGas": "49957"
+        }
+      ],
+      "nestedValidatorFramesNonadditive": [
+        {
+          "path": [
+            4,
+            0,
+            1
+          ],
+          "to": "0x851356ae760d987e095750cceb3bc6014560891c",
+          "inclusiveGas": "67590",
+          "overlapsSelectedAncestor": true
+        },
+        {
+          "path": [
+            7,
+            0,
+            1
+          ],
+          "to": "0x1613beb3b2c4f22ee086b2b38c1476a3ce7f78e8",
+          "inclusiveGas": "38849",
+          "overlapsSelectedAncestor": true
+        }
+      ],
+      "unallocatedResidual": "563259",
+      "nodes": 44,
+      "storageGasEstimate": null,
+      "overlap": "Index prefix/final callbacks are nested inside support fallback frames. Inclusive columns overlap; only disjointSelectedFrames may be summed."
+    }
+  ],
+  "historical": [
+    {
+      "path": "core-closeout-tags-20260915/query-paid-final2.json.gz",
+      "sha256": "78b7dde2ec8930d7b70bcaf74b7d6bf261a184e742b6de4b4b6a997e7c45fcaf",
+      "sourceComparisons": [
+        {
+          "source": "src/ContractSignatureEvidenceStore.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/DescribedTypeProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/ExecutionSlots.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/IndexFieldProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/IndexModule.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/IndexReplaySource.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/IndexSource.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/IndexWork.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/Interfaces.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/Keys.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/Ledger.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/LensReader.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/PublicationPreparation.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/PublicationSupport.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/ReadSetStorage.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/TypeRegistry.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesCarrierProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesDirectoryProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesFinalValidator.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesJoinedProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesLiveIndex.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesNamesProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesScopeState.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/LiveFilesProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/ProfiledFilesIndex.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/TagStanceProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/TagStanceReader.sol",
+          "sourceEqual": false
+        },
+        {
+          "source": "test/TagStanceQueryAccumulator.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "browser/tag-stance-profile.mjs",
+          "sourceEqual": true
+        }
+      ],
+      "artifactComparisons": [
+        {
+          "name": "TagStanceLens",
+          "creationEqual": false,
+          "runtimeTemplateEqual": false
+        },
+        {
+          "name": "TagStanceReader",
+          "creationEqual": false,
+          "runtimeTemplateEqual": false
+        },
+        {
+          "name": "TagStanceQueryAccumulator",
+          "creationEqual": false,
+          "runtimeTemplateEqual": false
+        },
+        {
+          "name": "TagStanceIndex",
+          "creationEqual": false,
+          "runtimeTemplateEqual": false
+        },
+        {
+          "name": "TagStanceValidator",
+          "creationEqual": false,
+          "runtimeTemplateEqual": false
+        },
+        {
+          "name": "FilesFinalValidator",
+          "creationEqual": false,
+          "runtimeTemplateEqual": false
+        }
+      ],
+      "scope": "Historical exact receipts; logical old-mapping/additive-carrier guarantees and calldata density, not final-build transaction identity."
+    },
+    {
+      "path": "core-closeout-tags-20260915/query-fix1-diagnostic.json.gz",
+      "sha256": "b1e85f6df9618c842f34964a8bec775611ddacfc12900a236196a941c0d76fe6",
+      "sourceComparisons": [
+        {
+          "source": "src/ContractSignatureEvidenceStore.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/DescribedTypeProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/ExecutionSlots.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/IndexFieldProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/IndexModule.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/IndexReplaySource.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/IndexSource.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/IndexWork.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/Interfaces.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/Keys.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/Ledger.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/LensReader.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/PublicationPreparation.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/PublicationSupport.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/ReadSetStorage.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/TypeRegistry.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesCarrierProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesDirectoryProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesFinalValidator.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesJoinedProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesLiveIndex.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesNamesProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/FilesScopeState.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/LiveFilesProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/ProfiledFilesIndex.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/TagStanceProfile.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/TagStanceReader.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "test/TagStanceQueryAccumulator.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "browser/tag-stance-profile.mjs",
+          "sourceEqual": true
+        }
+      ],
+      "artifactComparisons": [
+        {
+          "name": "TagStanceLens",
+          "creationEqual": false,
+          "runtimeTemplateEqual": false
+        },
+        {
+          "name": "TagStanceReader",
+          "creationEqual": false,
+          "runtimeTemplateEqual": false
+        },
+        {
+          "name": "TagStanceQueryAccumulator",
+          "creationEqual": false,
+          "runtimeTemplateEqual": false
+        },
+        {
+          "name": "TagStanceIndex",
+          "creationEqual": false,
+          "runtimeTemplateEqual": false
+        },
+        {
+          "name": "TagStanceValidator",
+          "creationEqual": false,
+          "runtimeTemplateEqual": false
+        },
+        {
+          "name": "FilesFinalValidator",
+          "creationEqual": false,
+          "runtimeTemplateEqual": false
+        }
+      ],
+      "scope": "Historical exact receipts; logical old-mapping/additive-carrier guarantees and calldata density, not final-build transaction identity."
+    },
+    {
+      "path": "core-closeout-sdk-20260915/readset-carrier-paid.json.gz",
+      "sha256": "55700293db1e7af1a7b27a3f47609b4babdfaed3468df40ed37a7c8a0973d567",
+      "sourceComparisons": [
+        {
+          "source": "src/Ledger.sol",
+          "sourceEqual": false
+        },
+        {
+          "source": "src/ReadSetStorage.sol",
+          "sourceEqual": true
+        },
+        {
+          "source": "src/PublicationSupport.sol",
+          "sourceEqual": false
+        },
+        {
+          "source": "browser/compact-sdk-v2.mjs",
+          "sourceEqual": false
+        },
+        {
+          "source": "script/compact-environment.mjs",
+          "sourceEqual": false
+        }
+      ],
+      "artifactComparisons": [],
+      "controls": [
+        {
+          "arm": "old",
+          "rows": [
+            {
+              "shape": "0x0",
+              "first": "943752",
+              "repeat": "573789",
+              "read": "94555",
+              "exactRepeat": "162937",
+              "calldataBytes": 1156,
+              "nonzeroBytes": 331,
+              "carrierRuntimeBytes": 0,
+              "carrierInitcodeBytes": null
+            },
+            {
+              "shape": "1x1",
+              "first": "826908",
+              "repeat": "584279",
+              "changed": "826908",
+              "read": "67023",
+              "exactRepeat": "173407",
+              "calldataBytes": 1252,
+              "nonzeroBytes": 420,
+              "carrierRuntimeBytes": 0,
+              "carrierInitcodeBytes": null
+            },
+            {
+              "shape": "8x4",
+              "first": "2015063",
+              "repeat": "862205",
+              "changed": "2015063",
+              "read": "158174",
+              "exactRepeat": "451216",
+              "calldataBytes": 2564,
+              "nonzeroBytes": 1517,
+              "carrierRuntimeBytes": 0,
+              "carrierInitcodeBytes": null
+            },
+            {
+              "shape": "64x4",
+              "first": "10620239",
+              "repeat": "3251089",
+              "changed": "10620202",
+              "read": "782251",
+              "exactRepeat": "2839400",
+              "calldataBytes": 11524,
+              "nonzeroBytes": 8740,
+              "carrierRuntimeBytes": 0,
+              "carrierInitcodeBytes": null
+            }
+          ]
+        },
+        {
+          "arm": "new",
+          "rows": [
+            {
+              "shape": "0x0",
+              "first": "928447",
+              "repeat": "576284",
+              "read": "86177",
+              "exactRepeat": "163047",
+              "calldataBytes": 1156,
+              "nonzeroBytes": 331,
+              "carrierRuntimeBytes": 225,
+              "carrierInitcodeBytes": 532
+            },
+            {
+              "shape": "1x1",
+              "first": "704593",
+              "repeat": "586808",
+              "changed": "704593",
+              "read": "52178",
+              "exactRepeat": "173539",
+              "calldataBytes": 1252,
+              "nonzeroBytes": 420,
+              "carrierRuntimeBytes": 321,
+              "carrierInitcodeBytes": 628
+            },
+            {
+              "shape": "8x4",
+              "first": "1246580",
+              "repeat": "865379",
+              "changed": "1246568",
+              "read": "54997",
+              "exactRepeat": "452030",
+              "calldataBytes": 2564,
+              "nonzeroBytes": 1517,
+              "carrierRuntimeBytes": 1633,
+              "carrierInitcodeBytes": 1940
+            },
+            {
+              "shape": "64x4",
+              "first": "5441882",
+              "repeat": "3259203",
+              "changed": "5441845",
+              "read": "77941",
+              "exactRepeat": "2845142",
+              "calldataBytes": 11524,
+              "nonzeroBytes": 8740,
+              "carrierRuntimeBytes": 10593,
+              "carrierInitcodeBytes": 10900
+            }
+          ]
+        }
+      ],
+      "upgrade": {
+        "oldExecution": "0x7a95b131814c338d038a214ec630e216c38cd5f7a870f73a2e38ee07e842dee7",
+        "newExecution": "0x5fb66d976e6ce0bde2782ff19382517ecd67b2c4335405c5d037b3a0e88b1ede",
+        "oldRoot15Headers": [
+          "0x00000000000000000000000000000000000000000000000000000000000001c1",
+          "0x0000000000000000000000000000000000000000000000000000000000000281",
+          "0x0000000000000000000000000000000000000000000000000000000000000cc1",
+          "0x00000000000000000000000000000000000000000000000000000000000052c1"
+        ],
+        "oldABIHashes": [
+          "0x1fbc131f4eafcddc650de1519b37f71f6b9a864523c83f16392f4798cc2eb919",
+          "0x12320ce44a8cc5a26d9010c194a61fb14e625d2d11130d128fc3e7c7bb72bdfc",
+          "0x9f043ba0e184f9ffa8891b88a61acbd845085c30a344c9ee9800b490e669a1ab",
+          "0x70712d698e0b9c612dfcab4473df0be9d3a0259e76e5829260bebb900305f19d"
+        ],
+        "legacyDedupCreated": 0,
+        "newCarrier": {
+          "label": "upgrade/new-carrier",
+          "gas": "1246555",
+          "data": "0x45c9f18bd2c0689ece09797951177e2e3edb01a8e7a5f57d5a22904b28c16d802e7321355f57247c6eeb5cefd11a0dca9567d9449266ad9fab1228eb2eaf4ef1b92c6a965fb66d976e6ce0bde2782ff19382517ecd67b2c4335405c5d037b3a0e88b1ede00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8000000000000000000000000000000000000000000000000000000000000000f0000000000000000000000000000000000000000000000000000000077359400a203aa925a402e702bc50aa644257aaad009058b23782edce0f50a072645ea9322705c6b85c7cec7f0d628999afc05193a21b847277f94432e792213b49034e232817066163ddf7df07e81e4892ff1f2bd7a21a98d112228258414bd10f5a16e00000000000000000000000000000000000000000000000000000000000001a000000000000000000000000000000000000000000000000000000000000002e00000000000000000000000000000000000000000000000000000000000000340000000000000000000000000000000000000000000000000000000000000098000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000014b1add416bd17fc312353724ee8cd828e79fb9710dbe426720da45b730accdc000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001800000000000000000000000000000000000000000000000000000000000000220000000000000000000000000000000000000000000000000000000000000000800000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c800000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000004898ceeb99b5e163a84bb5b4ac7fa6dec1af8dac61d5714b7cd4287d1b6d6bfc6d9a9325cb5bd09d668a07d068d928158cc7ae8ff3b3c5d4ef7cbfdaf3eb6a8fde38fdca2fe3a2d105df38ca6b8ae4ed5d006490b32f9cd9c9a5f3ef0e990a9d115e93489766af2c36a15bd05198d90a467ed6d1ee86912a939cd58541bae5a28000000000000000000000000000000000000000000000000000000000000002007a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d0000000000000000000000000000000000000000000000000000000000000041543e806c70fdcf5733af551f3b642e711f4283bd5418431c4ae3afa5bab438ac23f07cdc38345b646a33aaac77437a55a26d98417c5e7cb3ec1f8812cbbc794e1b00000000000000000000000000000000000000000000000000000000000000",
+          "readSetHash": "0x32817066163ddf7df07e81e4892ff1f2bd7a21a98d112228258414bd10f5a16e",
+          "readBytes": 1632,
+          "legacy": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "pointer": "0x000000000000000000000000d8058efe0198ae9dd7d563e1b4938dcbc86a1f81",
+          "carrier": "0xd8058efe0198ae9dD7D563e1b4938Dcbc86A1F81",
+          "carrierRuntimeBytes": 1633,
+          "carrierCodeHash": "0x6c93965e107abdf816ff8a799e12033529b1fb9417d8fa2d0494901b549a7ab9",
+          "created": 1,
+          "expectedCarrier": "0xd8058efe0198ae9dD7D563e1b4938Dcbc86A1F81",
+          "publication": "16",
+          "carrierInitcodeBytes": 1940,
+          "carrierInitcodeHash": "0x0dcf011449fefda3ae49b85d3c5e4c94b72ff0efcc067b54b9110f8dde79fec9",
+          "transactionHash": "0xc528de3d9bd4ca68a99f6b67ebcf8721220e94cd8a3a1470f47301d47fe4929a",
+          "executionSet": "0x5fb66d976e6ce0bde2782ff19382517ecd67b2c4335405c5d037b3a0e88b1ede"
+        },
+        "failed": {
+          "label": "upgrade/rejected",
+          "gas": "1353245",
+          "data": "0x45c9f18bd2c0689ece09797951177e2e3edb01a8e7a5f57d5a22904b28c16d802e7321355f57247c6eeb5cefd11a0dca9567d9449266ad9fab1228eb2eaf4ef1b92c6a969bdb79045fc955a3194443e23d2cbc0eab83018dd75e39275bc53007774e497a00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c800000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000077359400dc8f07ee96dca030da7557cae555a1811cd183123fcecfd98cbe2c0f5942257622705c6b85c7cec7f0d628999afc05193a21b847277f94432e792213b49034e2b44b573ece1805df12c1737d43b77e2909035c2f7e10f3734a8bac36643372b300000000000000000000000000000000000000000000000000000000000001a000000000000000000000000000000000000000000000000000000000000002e00000000000000000000000000000000000000000000000000000000000000340000000000000000000000000000000000000000000000000000000000000098000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001d8bb29b1a96907acb71f09f1d621a4f6687d4c78b9953cf20d2247e26d6af45ec5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001800000000000000000000000000000000000000000000000000000000000000220000000000000000000000000000000000000000000000000000000000000000800000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c800000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000004a22aba39d13feaf35f6f251a81e8df6bf61242887df1c28e3aaed8c24fda9141a71867de6709620953db21e453c2c60f711c4d8e2f53c9f985e8bcaac3e536f7b15a61fa39cb5d75d8be00c515d12b951e69158e6a588ec955da1913fff2c64bbd85c9a9e2b165db860ff7b936e9fb3a802c50303caeeed4682f9819895737da000000000000000000000000000000000000000000000000000000000000002007a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d07a19befbf589b34c3b655c5c6397ae8474e46ed47f5bb4d5f536f8630d4b57d00000000000000000000000000000000000000000000000000000000000000416282f572be076c0168d56bf9d44272d53355ac63e8897956e875f167532a70104af97f44ecb1b228c91071c7215682fe1b14577e8f71bb8fe5cfe5082a51dcd31b00000000000000000000000000000000000000000000000000000000000000",
+          "readSetHash": "0xb44b573ece1805df12c1737d43b77e2909035c2f7e10f3734a8bac36643372b3",
+          "readBytes": 0,
+          "legacy": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "pointer": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "carrier": "0x0000000000000000000000000000000000000000",
+          "carrierRuntimeBytes": 0,
+          "carrierCodeHash": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "created": 0,
+          "expectedCarrier": "0x6D544390Eb535d61e196c87d6B9c80dCD8628Acd",
+          "publication": null,
+          "carrierInitcodeBytes": null,
+          "carrierInitcodeHash": null,
+          "transactionHash": "0xe8afa65fb08e4361025aa168132e23e65c8d46f68a179d5b09301cdfca0d5e7c",
+          "executionSet": "0x9bdb79045fc955a3194443e23d2cbc0eab83018dd75e39275bc53007774e497a"
+        },
+        "downgrade": {
+          "downgradeExecution": "0x662117c7d4f98dffb059f731f2e306aa5a8f48041557da2e2094825dcd9cf4de",
+          "restoredExecution": "0x9bdb79045fc955a3194443e23d2cbc0eab83018dd75e39275bc53007774e497a",
+          "legacyBytes": 224,
+          "newReadSetBytes": "0x",
+          "sdkArchiveExport": "ARCHIVE_READSET_MISSING",
+          "meaning": "UNKNOWN_NOT_ABSENT",
+          "restoredExactBytes": true
+        },
+        "sameOldProxy": true,
+        "oldAdapterPrepare": true,
+        "newAdapterPrepare": true,
+        "oldReadbacksPreserved": true,
+        "rollbackCountsNonceAndCode": true
+      },
+      "offline": [
+        {
+          "claimId": "0x24412da1ed6cf70fa552554735ae268af45c61caa26843ff013c9eccea61238c",
+          "publicationId": "0x153dae6fe80092b739eb8cac5225d7990b32b87666b2cb6cdafee0df095227b9",
+          "principalId": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "author": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "proof": "AUTHOR_SIGNATURE_VERIFIED",
+          "bodyCoverage": "COMPLETE",
+          "closureCoverage": "COMPLETE",
+          "content": [],
+          "missingMeaning": [],
+          "authority": "NONE",
+          "sourceAdmission": "NOT_PROVEN",
+          "guardTruth": "NOT_PROVEN",
+          "historicalExecution": "SIGNER_COMMITTED_NOT_AUTHENTICATED",
+          "currentness": "NOT_PROVEN"
+        },
+        {
+          "claimId": "0x71634cc2d84ae934d8ae6f1cbf2485c8acf9d0c74d0e28c571ed260e0fba0079",
+          "publicationId": "0x233f4ce851e45d7f1678b3cec69b8a159a588ea1e3291b9992ed617b599c2ce7",
+          "principalId": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "author": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "proof": "AUTHOR_SIGNATURE_VERIFIED",
+          "bodyCoverage": "COMPLETE",
+          "closureCoverage": "COMPLETE",
+          "content": [],
+          "missingMeaning": [],
+          "authority": "NONE",
+          "sourceAdmission": "NOT_PROVEN",
+          "guardTruth": "NOT_PROVEN",
+          "historicalExecution": "SIGNER_COMMITTED_NOT_AUTHENTICATED",
+          "currentness": "NOT_PROVEN"
+        },
+        {
+          "claimId": "0xaa97f91021a290db17d6681fa7b6c5a8459e875e98d5b996148da1068ef23453",
+          "publicationId": "0xb0e324a982d13e144320e1af7a302fa707f8f4b7e440bada8ab9358dac371c18",
+          "principalId": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "author": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "proof": "AUTHOR_SIGNATURE_VERIFIED",
+          "bodyCoverage": "COMPLETE",
+          "closureCoverage": "COMPLETE",
+          "content": [],
+          "missingMeaning": [],
+          "authority": "NONE",
+          "sourceAdmission": "NOT_PROVEN",
+          "guardTruth": "NOT_PROVEN",
+          "historicalExecution": "SIGNER_COMMITTED_NOT_AUTHENTICATED",
+          "currentness": "NOT_PROVEN"
+        },
+        {
+          "claimId": "0x24412da1ed6cf70fa552554735ae268af45c61caa26843ff013c9eccea61238c",
+          "publicationId": "0x153dae6fe80092b739eb8cac5225d7990b32b87666b2cb6cdafee0df095227b9",
+          "principalId": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "author": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "proof": "AUTHOR_SIGNATURE_VERIFIED",
+          "bodyCoverage": "COMPLETE",
+          "closureCoverage": "COMPLETE",
+          "content": [],
+          "missingMeaning": [],
+          "authority": "NONE",
+          "sourceAdmission": "NOT_PROVEN",
+          "guardTruth": "NOT_PROVEN",
+          "historicalExecution": "SIGNER_COMMITTED_NOT_AUTHENTICATED",
+          "currentness": "NOT_PROVEN"
+        },
+        {
+          "claimId": "0x71634cc2d84ae934d8ae6f1cbf2485c8acf9d0c74d0e28c571ed260e0fba0079",
+          "publicationId": "0x233f4ce851e45d7f1678b3cec69b8a159a588ea1e3291b9992ed617b599c2ce7",
+          "principalId": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "author": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "proof": "AUTHOR_SIGNATURE_VERIFIED",
+          "bodyCoverage": "COMPLETE",
+          "closureCoverage": "COMPLETE",
+          "content": [],
+          "missingMeaning": [],
+          "authority": "NONE",
+          "sourceAdmission": "NOT_PROVEN",
+          "guardTruth": "NOT_PROVEN",
+          "historicalExecution": "SIGNER_COMMITTED_NOT_AUTHENTICATED",
+          "currentness": "NOT_PROVEN"
+        },
+        {
+          "claimId": "0xaa97f91021a290db17d6681fa7b6c5a8459e875e98d5b996148da1068ef23453",
+          "publicationId": "0xb0e324a982d13e144320e1af7a302fa707f8f4b7e440bada8ab9358dac371c18",
+          "principalId": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "author": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "proof": "AUTHOR_SIGNATURE_VERIFIED",
+          "bodyCoverage": "COMPLETE",
+          "closureCoverage": "COMPLETE",
+          "content": [],
+          "missingMeaning": [],
+          "authority": "NONE",
+          "sourceAdmission": "NOT_PROVEN",
+          "guardTruth": "NOT_PROVEN",
+          "historicalExecution": "SIGNER_COMMITTED_NOT_AUTHENTICATED",
+          "currentness": "NOT_PROVEN"
+        }
+      ],
+      "scope": "Historical exact receipts; logical old-mapping/additive-carrier guarantees and calldata density, not final-build transaction identity."
+    }
+  ],
+  "setup": {
+    "deployment": {
+      "transactions": 51,
+      "gas": "118184929"
+    },
+    "type-registration": {
+      "transactions": 19,
+      "gas": "3314767"
+    },
+    "other-setup-and-interleaving": {
+      "transactions": 37,
+      "gas": "21375368"
+    },
+    "operation": {
+      "transactions": 35,
+      "gas": "82103600"
+    },
+    "query": {
+      "transactions": 14,
+      "gas": "21364832"
+    },
+    "replay": {
+      "transactions": 58,
+      "gas": "22233464"
+    }
+  },
+  "artifacts": {
+    "registry": {
+      "artifact": "TypeRegistry",
+      "codeHash": "0xe1e7236075aafb9e5fbf298471f5cda0707dd4759e449f80d02d5d8c7d186b11",
+      "runtime": 14914,
+      "initcode": 19512,
+      "transaction": "0x8b94032fca8f06f8da8bf850aaf1aac882dd93dcfa478f41f324335c456e86fe"
+    },
+    "ledger": {
+      "artifact": "Ledger",
+      "codeHash": "0xa04a446d8d8625cd95b3537438fceaa8b1a8de956bb98e329f6af08840a9c380",
+      "runtime": 24538,
+      "initcode": 39310,
+      "transaction": "0x18dec7e4953263bd7a18b6c1ec94c3c75707b336534d8eb218e1a20873fc9929"
+    },
+    "rootRule": {
+      "artifact": "FilesRootRule",
+      "codeHash": "0x940605fbdd956475b2d85bc35a113f35610014c1bdeec2aa76f7735ec288a4c0",
+      "runtime": 513,
+      "initcode": 539,
+      "transaction": "0x987b82b757c01022fd5503d68dfe1a9e61c0f79797aa6bc578d966ac595af0ea"
+    },
+    "childRule": {
+      "artifact": "FilesChildRule",
+      "codeHash": "0xef65caca7746daf1d1ca44b9174fcf7485a8c52f3c0d33af3bc51e56fc4ec6fc",
+      "runtime": 1284,
+      "initcode": 1434,
+      "transaction": "0xef49a147d52716d7d1938843ebe21930c0726597275a7a872bd160469a16ec93"
+    },
+    "nameRule": {
+      "artifact": "FilesNameRule",
+      "codeHash": "0x890450891171404468465b91910fbad7c1d950a2d2a31f52d6edea5da8ac7f6b",
+      "runtime": 646,
+      "initcode": 672,
+      "transaction": "0x4780502194cc3b0b3d45303e54fcfef232e70052ef179eed52cbdd1d7014abd9"
+    },
+    "index": {
+      "artifact": "TagStanceIndex",
+      "codeHash": "0xe6484ea50b0203f412843c221e37e5fbe11c2fdf3ee8c07e7c3656d3e68a691b",
+      "runtime": 21723,
+      "initcode": 45843,
+      "transaction": "0xe56510f792144e304c4e853acfed011b48ab86d7b511f49ec42065f97132f4db"
+    },
+    "lens": {
+      "artifact": "FilesLiveLens",
+      "codeHash": "0xdfb545a0306b5aee6f7611f79b5500401065311e3a5355f4cdb46088c238b0cc",
+      "runtime": 16415,
+      "initcode": 16861,
+      "transaction": "0x72d4a2358c90f3e0e1c0dd5860203b955b1997e43d20175ecc4c29d66e4af49b"
+    },
+    "files": {
+      "artifact": "FilesJoinedConsumer",
+      "codeHash": "0x25f6ebf82008de43396fc071201ff01899bb3ef7823390f0dc1522acb5190fca",
+      "runtime": 15356,
+      "initcode": 19585,
+      "transaction": "0x6401d67f908edcea6a98c46a15126d474a14f883df350284ffeb54ae33486a51"
+    },
+    "names": {
+      "artifact": "FilesNameReader",
+      "codeHash": "0x3dbbb1d6b3f7c70de6882b62ecb77d248e6fe9574b1e84906ef183a1c38b31be",
+      "runtime": 5120,
+      "initcode": 6455,
+      "transaction": "0x9b29ed4321166cc20655fb3e1158519cbd296ec1ab97cce82908c2361790301f"
+    },
+    "application": {
+      "artifact": "FilesApplication",
+      "codeHash": "0x50d8108efb75e8b9134daa88b6b3524f2545c12e5ff63de690cb81cbc29a8682",
+      "runtime": 4869,
+      "initcode": 5955,
+      "transaction": "0xf833f89a3352a82acbb1a9f7ccce1a39829f8ae6dc0869184adc76a912824d9c"
+    },
+    "directoryRule": {
+      "artifact": "FilesDirectoryRule",
+      "codeHash": "0x95ed4dab44051d28133aea4add45ae55c204977c3ac3e8f76fcf82b34a4f60c0",
+      "runtime": 514,
+      "initcode": 540,
+      "transaction": "0x062c824ab568289c8c8d2febda487a94db99fc3a2423ed0c391fa9b803637b7b"
+    },
+    "bytesRule": {
+      "artifact": "FilesBytesRule",
+      "codeHash": "0xc02d46b15c245cad962703e1bf1d17e6c44c122b3c14535bd1dab4bcdcaa5448",
+      "runtime": 383,
+      "initcode": 409,
+      "transaction": "0x0f7e201a594d290ad24cc70eec5d5f1faa71ff8701d1c36a337c7536057798bd"
+    },
+    "contentRule": {
+      "artifact": "FilesContentRule",
+      "codeHash": "0xae77d29439464af54ee4ae5bf8ba3497ff4731f3404b58e23bd04138ebf704de",
+      "runtime": 1539,
+      "initcode": 1689,
+      "transaction": "0xcf819dea6ecba318632b5ec71fc8b48d8eda7a1cd9d51c8b15d9096fe4594ceb"
+    },
+    "carrierRootRule": {
+      "artifact": "FilesCarrierRootRule",
+      "codeHash": "0x65cc5366dd8b3a3bbfc92084859cb1a924a2a0e08cdd67a98dbd4ea79eda02a0",
+      "runtime": 576,
+      "initcode": 602,
+      "transaction": "0xfb695219272fb11f76ff271d37967a76c899bcd3409c1059631810ffd7a01c02"
+    },
+    "carrierChildRule": {
+      "artifact": "FilesCarrierChildRule",
+      "codeHash": "0xd923fa0ab81164ad0a92aa215298bbddc10d33fe9a2c79f8cf9b66b91c49c700",
+      "runtime": 1895,
+      "initcode": 2162,
+      "transaction": "0xe18aa277f88f692e65f942dcafc0cee82c00e851068463fdd436a0f5d2ea5d17"
+    },
+    "conceptRule": {
+      "artifact": "FilesConceptRule",
+      "codeHash": "0xf9876b5494d459f8f60a1aa5011dd2c85152d86243ad87bc0ee0cd5a084d6d9e",
+      "runtime": 463,
+      "initcode": 489,
+      "transaction": "0x0bd584ed6b01ab8df1dc14a94a2f27c45cb0c1cb812a6db6a07a1494a033187d"
+    },
+    "quoteRule": {
+      "artifact": "LiveQuoteRule",
+      "codeHash": "0xcc724913c6b15143cc60d5305f0971eb796e0fee5d2e99e34f4e542118ccdb7a",
+      "runtime": 334,
+      "initcode": 360,
+      "transaction": "0x50997cdffe3617532e13ab067c6ff86e7989109d8de0751cf74a3112c4275c47"
+    },
+    "liveAdapter": {
+      "artifact": "LiveFilesAdapter",
+      "codeHash": "0x47a7dda22724e02f275c65ac68f43dbd1f1405e11160b36b5f297867cdcc90b8",
+      "runtime": 2618,
+      "initcode": 4726,
+      "transaction": "0x0a71b64ac2bd3751c86833aff0534c9847e2d1484809129ae3427bfefc5e9dbd"
+    },
+    "liveRootRule": {
+      "artifact": "LiveFilesRootRule",
+      "codeHash": "0x6f818c38b99d22db489931198f5ffb64cd4651313d22e8439814b891f7136ac4",
+      "runtime": 576,
+      "initcode": 602,
+      "transaction": "0xefcb487d2372dfd8a10064c93b0ef89c01facde0f1d43bd380c2a09daeb8bd40"
+    },
+    "liveChildRule": {
+      "artifact": "LiveFilesChildRule",
+      "codeHash": "0x5637722cd4a85a069fb5c2b83922900ba41a93f1969bfef3ff53f842164fe2c5",
+      "runtime": 1919,
+      "initcode": 2379,
+      "transaction": "0x059f611a24a568333ba623513d550bc369d7da32293e95cb7f04f713016084a4"
+    },
+    "finalValidator": {
+      "artifact": "FilesFinalValidator",
+      "codeHash": "0x834e2f056ecf59be8abebc18ce3ef86a48f223ec207541951ae000eeb53d93eb",
+      "runtime": 5417,
+      "initcode": 7297,
+      "transaction": "0x640ff36435662765952a95cf9b602794dc2bdb228d5a08de73603d149732e6b1"
+    },
+    "stanceValidator": {
+      "artifact": "TagStanceValidator",
+      "codeHash": "0x60b8a87e84d779a1eec7ba630c65236705cf82e45206f43e46f8b752d50a7321",
+      "runtime": 4873,
+      "initcode": 11752,
+      "transaction": "0x4e692be9a8c6ac3ba62ee630f9c17959987436918a076fd6cbdbdbb4803cbcc8"
+    },
+    "tagIndex": {
+      "artifact": "TagStanceIndex",
+      "codeHash": "0xe6484ea50b0203f412843c221e37e5fbe11c2fdf3ee8c07e7c3656d3e68a691b",
+      "runtime": 21723,
+      "initcode": 45843,
+      "transaction": "0xe56510f792144e304c4e853acfed011b48ab86d7b511f49ec42065f97132f4db"
+    },
+    "joined": {
+      "artifact": "LiveFilesPageReader",
+      "codeHash": "0x273111e786a489630adda04dee02365c3759ed7e940f90b1499125d743821720",
+      "runtime": 19012,
+      "initcode": 19731,
+      "transaction": "0x49f686f20d586a882c951995a268e2fe945ee4dfd4cd00abdc365e7272a25e00"
+    },
+    "mounted": {
+      "artifact": "LiveFilesMountedReader",
+      "codeHash": "0xabc434ae214bdc99b97f9bc0b17d48c9a5bd9273d34052aa9e9cadb4325318ce",
+      "runtime": 5986,
+      "initcode": 6889,
+      "transaction": "0x3c734230cb83531ec2c24a9861cb065daa0413cac944b02b4cf7f303f0168181"
+    },
+    "livePaid": {
+      "artifact": "LiveFilesPaid",
+      "codeHash": "0x97cc9208983d200e8b11dbcf662e9400df8aa2816c3361beb5ecbed11b9f5de5",
+      "runtime": 2965,
+      "initcode": 2991,
+      "transaction": "0xf811d0ecfa6082016c52128f1c512bbbe5ff6c66f704d8ad3e9c2b29746a645a"
+    },
+    "finalApplication": {
+      "artifact": "FilesApplication",
+      "codeHash": "0xc401b7600e502b6c29310a5af140845e7bf3df54dbb279745c7f17181b0d9842",
+      "runtime": 4869,
+      "initcode": 5955,
+      "transaction": "0xa21b675bdf583a8f364c88b8a4fc92eaa452df09af7e648261a8744435fb8af8"
+    },
+    "NoteV1Rule": {
+      "artifact": "NoteV1Rule",
+      "codeHash": "0xfffe5300b6747d7d91fa49e4d4412a84823de4fee270ae02c4dfd0f702ea68ee",
+      "runtime": 965,
+      "initcode": 991,
+      "transaction": "0x52e5291b6ce7b23989213d6c78faa46ed0f9660eafc5791a35f832d3dd42a08d"
+    },
+    "NoteV11Rule": {
+      "artifact": "NoteV11Rule",
+      "codeHash": "0xd31e4ae0a2968c50559f0b5f5482f42f84613aa2d8001da464309000f0eb487b",
+      "runtime": 1315,
+      "initcode": 1341,
+      "transaction": "0x8b725eea210f53f9a74ed82e108760eb00b9d13d7b0306fe292f296124c2e2ad"
+    },
+    "NoteV2Rule": {
+      "artifact": "NoteV2Rule",
+      "codeHash": "0x2efa713b07640e610181a8ed854a89217024259b2576bfaea9cee1e9cf70c467",
+      "runtime": 939,
+      "initcode": 965,
+      "transaction": "0x1c169fcc471b4c39ec04d7fe193ccd3282873eda797758e7225fd452a7dd4f07"
+    },
+    "note": {
+      "artifact": "NotePointReader",
+      "codeHash": "0x044b48618f8586a4c5ca11b6f382364d6e26c255278ac1af9bc39238c046a199",
+      "runtime": 5867,
+      "initcode": 7791,
+      "transaction": "0x734aab7d9b255fe89939367db3679cb9c554deb384621c042d13c144ccf5ea25"
+    },
+    "eligibility": {
+      "artifact": "EquipmentEligibility",
+      "codeHash": "0x326636d86d17f5534633dcbd7166af967f8607e8f6f85a3aecf97b3abe751528",
+      "runtime": 174,
+      "initcode": 209,
+      "transaction": "0x94ca75a5fb2a39bc4dd5a2b064ec7823dcf045dfe0c92accaed444c1fc3494ef"
+    },
+    "equipmentRule": {
+      "artifact": "EquipmentRule",
+      "codeHash": "0x4761c1bd7474fd551330cdad5d0042bb6688954d707be139ec4c39bb248331e3",
+      "runtime": 1807,
+      "initcode": 1972,
+      "transaction": "0x4820b6bfdbb742c2501967f62874475f564f547cc018ec82a30b0b5d6d2fdc61"
+    },
+    "equipmentApp": {
+      "artifact": "EquipmentApplication",
+      "codeHash": "0xb5ff2299830490d2d0d804c66a5b3eb36ee7ac4d769403724e9fa12570aca642",
+      "runtime": 1585,
+      "initcode": 1611,
+      "transaction": "0x148b12a8d3ebfa114fc6d3c11f9e090da31e338f8ef00f6558b9b464c3669fed"
+    },
+    "stressCore": {
+      "artifact": "Ledger",
+      "codeHash": "0xee53e6787ec813bf3b7181764d21b1abb88ce32551edc1d08e3c4b8c233eb556",
+      "runtime": 24538,
+      "initcode": 39310,
+      "transaction": "0x3ed96fceaae5d90cd101b6937d0d5e8ef86b7af20a2bc9fe549e5415bedb0df1"
+    },
+    "stressIndex": {
+      "artifact": "ProfiledIndexModule",
+      "codeHash": "0x7eeb09fd066475f06631d9cbb43ed1138b6a83d3d926a75cab101abefabf62b0",
+      "runtime": 16639,
+      "initcode": 29849,
+      "transaction": "0x4083767a4189372c6f8d0577c20df7182fe8ee2d029c7500b1932125afce9f0c"
+    },
+    "tagLens": {
+      "artifact": "TagStanceLens",
+      "codeHash": "0xf787099161664ed5544e251f5038d915346a568204f8269ab06829d518821ade",
+      "runtime": 18971,
+      "initcode": 19674,
+      "transaction": "0x22f955149944fa98d73e82662996415a29d0daf9c184439cc048b3122e6a0399"
+    },
+    "tagReader": {
+      "artifact": "TagStanceReader",
+      "codeHash": "0x2be1210dc896b36d024cd031fe0f80d62cf2b92642ce7ad44365cf66955cd7fc",
+      "runtime": 15160,
+      "initcode": 19052,
+      "transaction": "0x3a76f2bef33ddb295557a7bbff5d10804749a89a59be6c4c8303651470eff835"
+    },
+    "scan-folder-1-1": {
+      "artifact": "FilesQueryAccumulator",
+      "codeHash": "0x0d0300dc5655b69499a75a8cc5227d2e1d7b9228e810ac305f7df3f2129a801d",
+      "runtime": 6165,
+      "initcode": 8487,
+      "transaction": "0x38fab637a548a0ae0783ead1efeea25e4d388909736ef9dd4c85bdb727bfa826"
+    },
+    "scan-stance-1-1": {
+      "artifact": "TagStanceQueryAccumulator",
+      "codeHash": "0xd37e671bba2f1a93afe47cb97280077874b396dd26dcc1d775932193b011e857",
+      "runtime": 5418,
+      "initcode": 7322,
+      "transaction": "0x696112f5f993c4c1e29e5ccc5ee7e5c33c3cbafbab79c17c042664c1b7394dd2"
+    },
+    "scan-folder-1-4": {
+      "artifact": "FilesQueryAccumulator",
+      "codeHash": "0x81b6e1f10c2e6f359aaa55c6bb401926d69baa835cadb3ad96f064a6ea1f6222",
+      "runtime": 6165,
+      "initcode": 8487,
+      "transaction": "0x3a5ac3763a83f627d72f3d8a8e0fea2102ceb278b9719f5226d8cd8e9324e208"
+    },
+    "scan-stance-1-4": {
+      "artifact": "TagStanceQueryAccumulator",
+      "codeHash": "0xae9636c02f3330414552ad05cfc530f54c9860fb61b38fd23a02625e4f2031c6",
+      "runtime": 5418,
+      "initcode": 7322,
+      "transaction": "0xe6b89ee68087ca6ad0a2ef8a825c110cbb648bc211b177e9eda95541098c644f"
+    },
+    "scan-folder-64-1": {
+      "artifact": "FilesQueryAccumulator",
+      "codeHash": "0x591b0bacdac943b5d1d7f1e0519ef0b8d611d803dac4bec2e6d17bf8eb6dca32",
+      "runtime": 6165,
+      "initcode": 10503,
+      "transaction": "0xec4bc4eae4a1f708b5a046437cd9eb22b263afab56ad9abc32ff91f632062392"
+    },
+    "scan-stance-64-1": {
+      "artifact": "TagStanceQueryAccumulator",
+      "codeHash": "0xdc38e2b8d7256f6a6eab2af9a196c4d58e3521e77866f2d04714996d3da506fb",
+      "runtime": 5418,
+      "initcode": 9338,
+      "transaction": "0x7099f2caccabd4188ae0f1a6229b6de51e948fe803967b5476d0e3884143626a"
+    },
+    "scan-folder-64-4": {
+      "artifact": "FilesQueryAccumulator",
+      "codeHash": "0xc6ba2308397f4830a973def73cd5f303f86a92f50149685ce6c10a4c2cedac96",
+      "runtime": 6165,
+      "initcode": 10503,
+      "transaction": "0xd27c4c86792a8f380b0ea8e01a0f73ad827edbb5bea91c9ab00d15f9e7ee829c"
+    },
+    "scan-stance-64-4": {
+      "artifact": "TagStanceQueryAccumulator",
+      "codeHash": "0xbfda1aae71f338bac4735bc18c4e1a01728beebda486a71972fb07eea6fd8758",
+      "runtime": 5418,
+      "initcode": 9338,
+      "transaction": "0xf0bb41aed877a5dfc48d4602c49b491377a14f48ada24ecd247832b112edb30b"
+    },
+    "scan-folder-1-1-mutate": {
+      "artifact": "FilesQueryAccumulator",
+      "codeHash": "0xa87165ab09d26873fe42b798423e479dc6d479e042ab34ab517a7ee9aa3f7646",
+      "runtime": 6165,
+      "initcode": 8487,
+      "transaction": "0x1f0491c65d48bf7d298e79d1139e516ff7ab9d899d729713691f216e6088a381"
+    },
+    "stressReplay": {
+      "artifact": "ProfiledIndexModule",
+      "codeHash": "0x5114837dac1398f2630f07fa7d774731017db1fe997c074cd8854bdc272842ee",
+      "runtime": 16639,
+      "initcode": 29849,
+      "transaction": "0x5a1f396b7e98615ba4d7f0450e9fffda65c42de6a0566aafb68e4a3ff308373a"
+    },
+    "finalReplay": {
+      "artifact": "TagStanceIndex",
+      "codeHash": "0xdfeffdb11151209263d410a633b89f62c6b87f71f76e372974a0f9784a49b21c",
+      "runtime": 21723,
+      "initcode": 45843,
+      "transaction": "0xc2103a992a00c94ea75e4105595af077a13e7abc7e762cc643fd5ea49ba3cbde"
+    }
+  },
+  "scope": "offline raw-input/receipt/source joins and finite fixture semantics, not consensus proofs",
+  "traceConvention": {
+    "rootIncludesIntrinsic": true,
+    "receipt": "30822",
+    "intrinsic": 22008,
+    "nonIntrinsic": "8814",
+    "rule": "Child frames inclusive; selected subtrees disjoint; residual includes intrinsic, Ledger own work and unselected calls."
+  },
+  "bootstrap": {
+    "transactions": 60,
+    "gas": "72051322",
+    "qualification": "Contains detached bootstrap readers/profile and seeded sample records; not minimal deployment quote."
+  }
+}
