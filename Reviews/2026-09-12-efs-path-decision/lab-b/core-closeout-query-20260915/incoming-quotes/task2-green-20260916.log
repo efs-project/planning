@@ -1,0 +1,76 @@
+Compiling 3 files with Solc 0.8.30
+Solc 0.8.30 finished in 9.28s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:92:21:
+   |
+92 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:97:29:
+   |
+97 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:22:
+    |
+117 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:121:25:
+    |
+121 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 187200 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/IncomingQuotes.t.sol:19:1:
+   |
+19 | contract IncomingQuotesTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 18 tests for test/IncomingQuotes.t.sol:IncomingQuotesTest
+[PASS] test_64_returned_ids_fit_Page_4096_bound() (gas: 42497809)
+[PASS] test_B_only_auxiliary_zero_occurrence_record_still_returned() (gas: 4116061)
+[PASS] test_binding_backlink_rebind_unbind_preserved_and_retained_membership_unchanged() (gas: 5163447)
+[PASS] test_detached_selective_genesis_replay_checked_cutover_retains_complete_set() (gas: 13994886)
+[PASS] test_diagnostic_index_gap_refuses_ingress_and_stays_partial_after_generation_bump() (gas: 3928335)
+[PASS] test_each_cursor_commitment_mutation_and_same_graph_cross_mode_replay_rejected() (gas: 11719909)
+[PASS] test_exact_type_coverage_not_posting_or_pair_scope_both_readers() (gas: 2948817)
+[PASS] test_exactly_one_pair_reference_and_reciprocal_ledger_required() (gas: 11519967)
+[PASS] test_full_signed_schedule_old_and_current_against_current_tail() (gas: 11819019)
+[PASS] test_generation_invalidation_and_changed_attachment_rejected() (gas: 14707471)
+[PASS] test_invalid_budget_basis_absent_or_wrong_target_rejected() (gas: 2458461)
+[PASS] test_late_attachment_exhausted_partial_never_complete() (gas: 10942794)
+[PASS] test_max64_action_distinct_quote_targets_existing_callback_allowance() (gas: 60565802)
+[PASS] test_required_family_downgrades_refuse_and_queries_remain_complete() (gas: 2923780)
+[PASS] test_retained_revisions_and_cross_page_reuse_both_readers() (gas: 6090972)
+[PASS] test_runtime_pins_rechecked_for_ledger_index_and_rule() (gas: 2182283)
+[PASS] test_scan_works_with_original_nonselective_index() (gas: 17250208)
+[PASS] test_wrong_source_ordinal_rule_shape_and_code_constructor_rejected() (gas: 8578299)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 29.22ms (124.13ms CPU time)
+
+Ran 1 test suite in 30.11ms (29.22ms CPU time): 18 tests passed, 0 failed, 0 skipped (18 total tests)

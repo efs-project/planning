@@ -1,0 +1,36 @@
+{
+  "base": "5bc5f171c0dfe900d5121b19383382d24b7a14db",
+  "solc": "0.8.30",
+  "optimizerRuns": 200,
+  "viaIR": true,
+  "evm": "cancun",
+  "runtimeLimit": 24576,
+  "initcodeLimit": 49152,
+  "sources": {
+    "src/IncomingQuotesReader.sol": "36a63bbfb7549f7d15616c97ac7bde7ad5e6ca2e75b54ef2d0f315da09a852c7",
+    "src/SelectiveReferenceIndexModule.sol": "7e22c69809875da7b043e40717c422ee70aa8faf9b6c0b4a864eb775c56ddd3a",
+    "test/IncomingQuotes.t.sol": "aefef6dfac49983ef29814b43ada032a2827744b1a231c62c6b1dfa770ca96d0",
+    "src/Ledger.sol": "074b7eb414a940e439b9adfd8a2746ffef0a013fd36a10201c4408d9967d346e",
+    "src/IndexModule.sol": "9e4051f424e695fb0e928383040434e2d0894fe45f84fdbf97407bf22f6dae06"
+  },
+  "readers": [
+    {
+      "contract": "BScanIncomingQuotesReader",
+      "runtimeBytes": 8986,
+      "creationBytecodeBytes": 11646,
+      "initcodeWithSevenConstructorWordsBytes": 11870,
+      "artifactSha256": "826494f9434ba4b424d10f17eca5ca6f89b37c43211ec147dd0b1bd93314268f",
+      "runtimeTemplateSha256": "1c1589537003d2839ab231e0a5fa9b77248714d80e01f14e3f6ca7fa3f344805",
+      "runtimeIsTemplateNotDeployedCode": true
+    },
+    {
+      "contract": "BIndexedIncomingQuotesReader",
+      "runtimeBytes": 8986,
+      "creationBytecodeBytes": 11647,
+      "initcodeWithSevenConstructorWordsBytes": 11871,
+      "artifactSha256": "ddd298fd4a6098affddc1d3fc90a72371021cf588fa42a08712e1adcaa1e0e04",
+      "runtimeTemplateSha256": "c56e32148bc858e8042d135aa10a0726a9e6bab19f3bbdadd32f19a494fbf24a",
+      "runtimeIsTemplateNotDeployedCode": true
+    }
+  ]
+}

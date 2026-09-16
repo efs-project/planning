@@ -1,0 +1,39 @@
+No files changed, compilation skipped
+
+Ran 13 tests for test/CoreIndexMaterialization.t.sol:CoreIndexMaterializationTest
+[PASS] test_bounded_manifest_is_exposed_and_required_by_signed_obligations() (gas: 71250)
+[PASS] test_declared_scalar_and_digest_are_retained_unique_records() (gas: 7394512)
+[PASS] test_generic_references_same_target_two_roles_dedup_and_withdraw() (gas: 2739902)
+[PASS] test_global_digest_two_declared_types_and_algorithm_separation() (gas: 8801083)
+[PASS] test_manifest_header_exposes_limits_and_callback_abi() (gas: 8747)
+[PASS] test_manifest_immutable_data_not_progress_and_unknown_fields() (gas: 12478640)
+[PASS] test_occurrences_distinct_from_retained_records_and_withdrawals() (gas: 3160848)
+[PASS] test_profile_bounds_and_wrong_algorithm_roll_back_every_family() (gas: 7419657)
+[PASS] test_scalar_type_codec_and_digest_algorithm_separation() (gas: 7117599)
+[PASS] test_singleton_saving_and_word_equivalence_boundaries() (gas: 4299746)
+[PASS] test_undeclared_field_spec_kind_and_algorithm_remain_unknown() (gas: 5325899)
+[PASS] test_unregistered_exact_type_is_unknown_not_future_complete() (gas: 20024)
+[PASS] test_withdrawn_singleton_keeps_word_when_second_occurrence_arrives() (gas: 1676295)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 4.66ms (12.10ms CPU time)
+
+Ran 9 tests for test/CoreIndexReplay.t.sol:CoreIndexReplayTest
+[PASS] test_active_lock_and_incomplete_final_publication_cannot_advance_replay() (gas: 5539161)
+[PASS] test_checked_cutover_stale_basis_suffix_retry_and_exactly_once_live() (gas: 10840502)
+[PASS] test_cutover_rejects_wide_fixed_request_and_old_guarded_signature() (gas: 5208744)
+[PASS] test_decoder_pin_and_unsupported_retained_execution_fail_closed() (gas: 4934222)
+[PASS] test_detached_complete_replay_ignores_mutable_policy_and_live_instance_cannot_backfill() (gas: 5678465)
+[PASS] test_detached_genesis_replays_historical_heads_and_withdrawal() (gas: 8781758)
+[PASS] test_guard_codec_preserves_hash_error_before_exact_stale_coordinates() (gas: 253300)
+[PASS] test_imported_create_replays_retained_source_creator() (gas: 12936606)
+[PASS] test_readiness_rejects_wrong_basis_manifest_identity_and_malformed_getters() (gas: 10685427)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 5.02ms (13.91ms CPU time)
+
+Ran 5 tests for test/IndexConfigExpectation.t.sol:IndexConfigExpectationTest
+[PASS] test_actual_module_replacement_rejects_old_signature() (gas: 5101650)
+[PASS] test_default_unset_index_keeps_zero_obligation_and_unknown_listing() (gas: 10938843)
+[PASS] test_internal_required_declarations_are_constructor_only() (gas: 4216364)
+[PASS] test_required_downgrade_refuses_without_invalidating_signed_publication() (gas: 1843144)
+[PASS] test_signed_write_survives_other_author_optional_and_generation_progress() (gas: 3817142)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 5.05ms (3.96ms CPU time)
+
+Ran 3 test suites in 5.56ms (14.73ms CPU time): 27 tests passed, 0 failed, 0 skipped (27 total tests)

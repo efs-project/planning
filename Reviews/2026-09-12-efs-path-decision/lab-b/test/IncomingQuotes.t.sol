@@ -7,6 +7,7 @@ import {IndexModule} from "../src/IndexModule.sol";
 import {QuoteAcceptor} from "../src/LabAcceptors.sol";
 import {Actor} from "../src/LabHarness.sol";
 import {Keys} from "../src/Keys.sol";
+import {IIndexReadiness} from "../src/Interfaces.sol";
 import {BIncomingQuotesReader, BScanIncomingQuotesReader, BIndexedIncomingQuotesReader} from "../src/IncomingQuotesReader.sol";
 import {SelectiveReferenceIndexModule} from "../src/SelectiveReferenceIndexModule.sol";
 
@@ -51,6 +52,29 @@ contract IncomingQuotesTest is LabBase {
         bytes32 itemA = publish(alice, ITEM, abi.encode(uint256(1)));
         bytes32 itemB = publish(alice, ITEM, abi.encode(uint256(2)));
         return publish(alice, PAIR, abi.encode(itemA, itemB, uint256(1)));
+    }
+
+    // Catches confusing semantic exact-Type coverage with a physical posting key or Record ID.
+    function test_exact_type_coverage_not_posting_or_pair_scope_both_readers() public {
+        bytes32 pair = pairFixture();
+        bytes32 recordId = publish(alice, joinedType, quote(pair, 1));
+        bytes32[2] memory families = [index.FAMILY_BY_TYPE(), index.FAMILY_REFERENCE_POSITION()];
+        bytes32[3] memory nonTypes = [Keys.byTypeList(joinedType), Keys.referenceList(joinedType, 0, pair), pair];
+        for (uint256 i; i < families.length; ++i) {
+            (uint8 status, uint64 from, uint64 through) = index.coverage(families[i], joinedType);
+            require(status == index.COMPLETE() && from == 1 && through == 4, "exact Type has complete coverage");
+            for (uint256 j; j < nonTypes.length; ++j) {
+                (status, from, through) = index.coverage(families[i], nonTypes[j]);
+                require(status == index.UNKNOWN() && from == 0 && through == 0, "posting and Record identities are not Types");
+            }
+        }
+        BIncomingQuotesReader.Cursor memory zero;
+        BIncomingQuotesReader[2] memory readers = [BIncomingQuotesReader(scan), BIncomingQuotesReader(indexedReader)];
+        for (uint256 i; i < readers.length; ++i) {
+            BIncomingQuotesReader.Page memory page = readers[i].incomingQuotes(pair, 4, 64, zero);
+            require(page.status == readers[i].COMPLETE() && page.records.length == 1 && page.records[0] == recordId,
+                "exact admitted Quote returned under semantic coverage");
+        }
     }
 
     // Catches HEAD-only enumeration and reuse duplication across a page boundary.
@@ -295,6 +319,11 @@ contract IncomingQuotesTest is LabBase {
         BIncomingQuotesReader.Page memory b = indexedReader.incomingQuotes(pair, admissions(), 64, zero);
         require(a.status == scan.PARTIAL() && b.status == indexedReader.PARTIAL(), "incomplete family never complete");
         require(a.next.position == a.rawTotal && b.next.position == b.rawTotal, "exhausted partial stays at tail");
+        a = scan.incomingQuotes(pair, admissions(), 64, a.next);
+        b = indexedReader.incomingQuotes(pair, admissions(), 64, b.next);
+        require(a.status == scan.PARTIAL() && b.status == indexedReader.PARTIAL(), "terminal continuation cannot heal missing history");
+        require(a.scanned == 0 && b.scanned == 0 && a.records.length == 0 && b.records.length == 0,
+            "terminal partial continuation does not restart");
     }
 
     function test_late_attachment_exhausted_partial_never_complete() public {
@@ -305,17 +334,30 @@ contract IncomingQuotesTest is LabBase {
         assertPartial(pair);
     }
 
-    function test_gapped_and_optional_family_never_complete() public {
+    function test_diagnostic_index_gap_refuses_ingress_and_stays_partial_after_generation_bump() public {
         bytes32 pair = pairFixture();
-        ledger.setIndexModule(address(new IndexModule(address(ledger))));
+        // Diagnostic-only guarantee ablation: not a valid production ingest/recovery route.
+        ledger.setIndexModule(address(0));
         publish(alice, joinedType, quote(pair, 1));
         ledger.setIndexModule(address(index));
-        (bool ok,)=address(alice).call(abi.encodeCall(alice.publish,(joinedType,quote(pair,2))));
-        require(!ok, "required index must refuse missing contiguous history");
+        (uint64 beforeAdmissions, uint64 beforeRecords, uint64 beforeBindings, uint64 beforePublications) = ledger.counts();
+        uint64 beforeNonce = ledger.nonces(address(alice));
+        uint64 beforeFrontier = index.lastProcessed();
+        (bool ok, bytes memory err) = address(alice).call(abi.encodeCall(alice.publish, (joinedType, quote(pair, 2))));
+        require(!ok && keccak256(err) == keccak256(abi.encodeWithSelector(Ledger.E_INDEX.selector,
+            abi.encodeWithSelector(IndexModule.E_SEGMENT.selector))), "required index refuses missing contiguous history exactly");
+        (uint64 afterAdmissions, uint64 afterRecords, uint64 afterBindings, uint64 afterPublications) = ledger.counts();
+        require(afterAdmissions == beforeAdmissions && afterRecords == beforeRecords && afterBindings == beforeBindings
+            && afterPublications == beforePublications, "refused ingress rolls back all counters");
+        require(ledger.nonces(address(alice)) == beforeNonce && index.lastProcessed() == beforeFrontier,
+            "refused ingress preserves author nonce and index frontier");
+        require(beforeAdmissions == 4 && beforeFrontier == 3, "diagnostic gap remains real");
+        assertPartial(pair);
+        index.bumpGeneration();
         assertPartial(pair);
     }
 
-    // Catches optional setters replacing either base or specialized required declarations.
+    // Catches optional setters downgrading generic required families; the selective profile aliases references.
     function test_required_family_downgrades_refuse_and_queries_remain_complete() public {
         bytes32 pair = pairFixture();
         bytes32 recordId = publish(alice, joinedType, quote(pair, 1));
@@ -323,8 +365,8 @@ contract IncomingQuotesTest is LabBase {
         for (uint256 i; i < families.length; ++i) {
             (bool ok, bytes memory err) = address(index).call(abi.encodeCall(index.declareOptional, (families[i], uint64(1))));
             require(!ok && keccak256(err) == keccak256(abi.encodeWithSelector(IndexModule.E_MANDATORY_FAMILY.selector)),
-                "base and specialized required downgrade refuse exactly");
-            (uint8 status, uint64 from, uint64 through) = index.coverage(families[i], pair);
+                "generic required family downgrades refuse exactly");
+            (uint8 status, uint64 from, uint64 through) = index.coverage(families[i], joinedType);
             require(status == index.COMPLETE() && from == 1 && through == 4, "constructor requirement and maintained coverage preserved");
         }
         BIncomingQuotesReader.Cursor memory zero;
@@ -333,6 +375,32 @@ contract IncomingQuotesTest is LabBase {
         require(a.status == scan.COMPLETE() && b.status == indexedReader.COMPLETE(), "both real queries remain complete");
         require(a.records.length == 1 && b.records.length == 1 && a.records[0] == recordId && b.records[0] == recordId,
             "both queries return the actual admitted quote");
+    }
+
+    // Catches deployment-time frontier fabrication or loss/duplication of retained history during replay/cutover.
+    function test_detached_selective_genesis_replay_checked_cutover_retains_complete_set() public {
+        bytes32 pair = pairFixture();
+        bytes32 a1 = publish(alice, joinedType, quote(pair, 1));
+        bytes32 a2 = publish(alice, joinedType, quote(pair, 2));
+        bob.execute(one(aReuse(joinedType, a1)), new bytes[](1));
+        bytes32 b1 = publish(bob, joinedType, quote(pair, 3));
+        checkSmall(scan, pair, a1, a2, b1);
+        checkSmall(indexedReader, pair, a1, a2, b1);
+        IndexModule old = index;
+        IndexModule replacement = new SelectiveReferenceIndexModule(address(ledger), joinedType, 0, PAIR, JOINED_SHAPE, address(joinedRule).codehash);
+        require(replacement.lastProcessed() == 0 && replacement.attachedFrom() == 8, "late detached instance has no proven history");
+        (uint8 status,,) = replacement.coverage(replacement.FAMILY_REFERENCE_POSITION(), joinedType);
+        require(status == replacement.PARTIAL(), "unreplayed late state is partial");
+        for (uint256 i; i < 7; ++i) replacement.replayNextPublication();
+        require(ledger.indexModule() == address(old) && replacement.lastProcessed() == 7 && replacement.provenFrom() == 1,
+            "canonical replay proves genesis prefix without changing attachment");
+        ledger.replaceIndexWhenReady(IIndexReadiness.ReplacementRequest(address(replacement), address(old), 7, 7,
+            replacement.manifestHash(), address(replacement).codehash, replacement.generation()));
+        require(ledger.indexModule() == address(replacement), "checked current-basis cutover attached replayed index");
+        index = replacement;
+        installReaders();
+        checkSmall(scan, pair, a1, a2, b1);
+        checkSmall(indexedReader, pair, a1, a2, b1);
     }
 
     function test_scan_works_with_original_nonselective_index() public {

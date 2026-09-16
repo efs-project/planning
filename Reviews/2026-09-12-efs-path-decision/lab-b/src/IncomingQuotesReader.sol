@@ -80,7 +80,7 @@ abstract contract BIncomingQuotesReader {
         if (t != pairType || first == 0 || first > basis) revert E_PAIR();
         bytes32 key = selective ? Keys.referenceList(quoteType, 0, pair) : Keys.byTypeList(quoteType);
         bytes32 family = selective ? keccak256("efs2/family/reference-position/1") : index.FAMILY_BY_TYPE();
-        (uint8 coverage, uint64 from, uint64 through) = index.coverage(family, key);
+        (uint8 coverage, uint64 from, uint64 through) = index.coverage(family, quoteType);
         if (coverage == UNKNOWN || coverage > COMPLETE || from == 0 || through > highWater) revert E_COVERAGE();
         (uint64 total, uint64 live, uint64 last,) = index.postingHead(key);
         if (total > highWater || live > total || last > highWater || (total == 0) != (last == 0)) revert E_BOUNDS();

@@ -28,8 +28,9 @@ library BQuoteProfile {
 
 /// DISPOSABLE LAB. Only the exact one-Pair-reference Quote profile is supported.
 /// Expected rule hash must be independently pinned to the reviewed QuoteAcceptor runtime.
-/// Register that Type before construction. Attach before admission 1 for COMPLETE coverage;
-/// late construction is permitted but remains honestly PARTIAL. Retained membership is NOT
+/// Register that Type before construction. Unreplayed late state remains honestly PARTIAL;
+/// canonical genesis replay followed by checked cutover can establish COMPLETE coverage.
+/// Construction time alone proves no coverage. Retained membership is NOT
 /// current validity: withdrawals never release this new family's audit entries.
 contract SelectiveReferenceIndexModule is IndexModule {
     bytes32 public immutable sourceType;
