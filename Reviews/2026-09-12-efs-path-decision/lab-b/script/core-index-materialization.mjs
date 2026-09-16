@@ -5,11 +5,12 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {gzipSync} from 'node:zlib';
 import {createHash} from 'node:crypto';
 import {join} from 'node:path';
-import {createEnvironment} from './compact-environment.mjs';
-
-const stage=process.argv[2]??'old350k';
-assert(['old350k','finite'].includes(stage));
-const env=await createEnvironment(stage==='finite'?{protocol:'compact-guarded-v2',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v2',indexFields:true}:{});
+// Historical350k evidence requires its original source/artifacts, not a fixture
+// switch against current FOUNDRY_OUT. Reject it before loading any resources.
+const stage=process.argv[2]??'finite';
+if(stage!=='finite')throw new Error('Only finite mode is supported; historical old350k evidence is retained, not reproducible with current artifacts.');
+const {createEnvironment}=await import('./compact-environment.mjs');
+const env=await createEnvironment({protocol:'compact-guarded-v2',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v2',indexFields:true});
 const {ethers:e,contracts:c}=env,abi=e.AbiCoder.defaultAbiCoder();
 const h=(types,values)=>e.keccak256(abi.encode(types,values));
 const pk=(t,k,o,v)=>h(['bytes32','bytes32','uint256','uint256','bytes32'],[e.id('efs2/pk/1'),t,k,o,v]);
@@ -25,8 +26,8 @@ try{
   const sourceType=await register('index-paid/eight',Array(8).fill(targetType));
   await env.deploy('testCore','Ledger.sol','Ledger',[c.registry.address,e.id('index-paid')]);
   const scalar=(kind,word)=>({kind,word});
-  const specs=[{typeId:sourceType,scalars:stage==='finite'?[scalar(2,8),scalar(1,11),scalar(2,12),scalar(1,13)]:[scalar(2,8)],digest:{enabled:true,word:10,algorithmWord:9,algorithm:e.toBeHex(1,32)}}];
-  if(stage==='finite')await env.deploy('standaloneProfile','IndexFieldProfile.sol','IndexFieldProfile',[specs]);
+  const specs=[{typeId:sourceType,scalars:[scalar(2,8),scalar(1,11),scalar(2,12),scalar(1,13)],digest:{enabled:true,word:10,algorithmWord:9,algorithm:e.toBeHex(1,32)}}];
+  await env.deploy('standaloneProfile','IndexFieldProfile.sol','IndexFieldProfile',[specs]);
   await env.deploy('testIndex','ProfiledIndexModule.sol','ProfiledIndexModule',[c.testCore.address,specs]);
   await env.transact('testCore','setIndexModule',[c.testIndex.address],'attach-profile');
   const targets=[];
@@ -42,12 +43,10 @@ try{
     if(receipt.status==='REVERTED')assert.deepEqual(Array.from(after),Array.from(before),'whole publication rollback');
     return receipt;
   };
-  const body=(refs,n)=>stage==='finite'
-    ?abi.encode(['bytes32[8]','uint256','uint256','bytes32','bytes32','uint256','bytes32'],[refs,n,1,e.toBeHex(99,32),e.toBeHex(51,32),52,e.toBeHex(53,32)])
-    :abi.encode(['bytes32[8]','uint256','uint256','bytes32'],[refs,n,1,e.toBeHex(99,32)]);
+  const body=(refs,n)=>abi.encode(['bytes32[8]','uint256','uint256','bytes32','bytes32','uint256','bytes32'],[refs,n,1,e.toBeHex(99,32),e.toBeHex(51,32),52,e.toBeHex(53,32)]);
   const firstBody=body(targets,17),firstId=rid(sourceType,firstBody);
-  const cold=await publishObserved(stage==='finite'?'cold-eight-plus-four-scalars-digest':'cold-eight-plus-scalar-digest',firstBody);
-  if(stage==='finite')assert.equal(cold.status,'SUCCESS');
+  const cold=await publishObserved('cold-eight-plus-four-scalars-digest',firstBody);
+  assert.equal(cold.status,'SUCCESS');
   if(cold.status==='SUCCESS'){
     for(let i=0;i<8;i++)assert.equal((await env.call('testIndex','postingAt',[pk(sourceType,11,i,targets[i]),0]))[0],9n);
     assert.equal((await env.call('testIndex','digestCoverage',[e.ZeroHash,e.toBeHex(1,32)]))[0],2n,'global finite profile coverage');
@@ -81,8 +80,8 @@ try{
   const plainType=await register('index-paid/eight-no-fields',Array(8).fill(targetType));
   const plainBody=abi.encode(['bytes32[8]'],[targets]);
   const plain=await publishObserved('cold-eight-without-fields',plainBody,'publish',[plainType,plainBody]);
-  if(stage==='finite')assert.equal(plain.status,'SUCCESS');
-  if(stage==='finite'){
+  assert.equal(plain.status,'SUCCESS');
+  {
     const t=env.manifest.types,salt=e.id('paid/ciphertext-file'),principal=(await env.call('ledger','principalOf',[env.wallets.deployer.address]))[0];
     const file=h(['bytes32','bytes32','bytes32'],[e.id('efs2/subject/1'),principal,salt]);
     await env.transact('ledger','create',[salt],'files/create');
@@ -115,6 +114,6 @@ try{
   const sources=Object.fromEntries(await Promise.all(paths.map(async p=>[p,createHash('sha256').update(await readFile(new URL('../'+p,import.meta.url))).digest('hex')])));
   const report={stage,observations,sources,profile:{address:profileAddress,runtimeBytes:e.getBytes(profileCode).length,codehash:e.keccak256(profileCode)},contracts:c,historyPolicy:env.historyPolicy,transactions:env.transactions,evidence:'LOCAL_RPC_OBSERVED_NOT_STATE_PROOF'};
   await mkdir(output,{recursive:true});
-  await writeFile(join(output,`${stage}-paid.json.gz`),gzipSync(JSON.stringify(report,(_,v)=>typeof v==='bigint'?String(v):v,2)));
+  await writeFile(join(output,'finite-paid.json.gz'),gzipSync(JSON.stringify(report,(_,v)=>typeof v==='bigint'?String(v):v,2)));
   console.log(JSON.stringify({stage,observations,contracts:Object.fromEntries(Object.entries(c).map(([k,v])=>[k,{runtime:v.runtimeBytes,initcode:v.initcodeBytes}]))},(_,v)=>typeof v==='bigint'?String(v):v,2));
 }finally{await env.close();}
