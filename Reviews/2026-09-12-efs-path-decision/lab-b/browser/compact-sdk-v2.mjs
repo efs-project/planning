@@ -36,7 +36,6 @@ export function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fai
     'function publicationSupportIdentity() view returns(address,bytes32)']);
   for(const implementation of family.implementations){
     const p=implementation.readSetStorage;
-    check(p || !interfaces.ledger.getFunction('readSetStorageProfile'),'MANIFEST_READSET_PROFILE');
     if(p)check(eq(p.profile,legacyReads)&&eq(p.namespace,Z)
       ||eq(p.profile,carrierReads)&&eq(p.namespace,carrierRoot)&&implementation.publicationSupport?.address
         &&/^0x[0-9a-f]{64}$/i.test(implementation.publicationSupport.codeHash),'MANIFEST_READSET_PROFILE');
@@ -127,13 +126,27 @@ export function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fai
         indexAddress:addresses.index,indexCodeHash:config.contracts.index.codeHash,indexGeneration:context.generation};
       reviewExecution(execution);check(eq(executionHash(execution),values.executionSet),'EXECUTION_HASH');
       const supported=family.implementations.find(i=>eq(i.address,execution.implementation)&&eq(i.codeHash,execution.implementationCodeHash));
-      if(eq(supported.readSetStorage?.profile,carrierReads)){
-        // No exception-to-legacy fallback: unavailable new-profile evidence
-        // invalidates this fresh pin just like unavailable code or execution.
-        const probe=async fn=>profileAbi.decodeFunctionResult(fn,await rpc('eth_call',[
-          {to:addresses.ledger,data:profileAbi.encodeFunctionData(fn)}, {blockHash:context.blockHash,requireCanonical:true}]));
-        const [physical,support]=await Promise.all([probe('readSetStorageProfile'),probe('publicationSupportIdentity')]);
-        check(eq(physical[0],carrierReads)&&eq(physical[1],carrierRoot),'READSET_PROFILE_UNSUPPORTED');
+      const expected=supported.readSetStorage??{profile:legacyReads,namespace:Z};
+      // Probe the actual codehash-qualified implementation, even when its
+      // manifest says legacy. A shared proxy ABI is not per-implementation proof.
+      const rawProbe=fn=>rpc('eth_call',[{to:execution.implementation,data:profileAbi.encodeFunctionData(fn)},
+        {blockHash:context.blockHash,requireCanonical:true}]);
+      let declared,legacyRefusal=false;
+      try{declared=await rawProbe('readSetStorageProfile');}
+      catch(error){
+        // The old binary has no selector and explicitly EVM-reverts with empty
+        // bytes. Only that typed RPC result may establish legacy compatibility;
+        // timeout/untyped/provider errors and declared-new refusals remain errors.
+        if(!eq(expected.profile,legacyReads)||!isRpcUnavailable(error)
+          ||error.rpcError?.code!==3||error.rpcError?.data!=='0x')throw error;
+        legacyRefusal=true;
+      }
+      if(!legacyRefusal){
+        const physical=profileAbi.decodeFunctionResult('readSetStorageProfile',declared);
+        check(eq(physical[0],expected.profile)&&eq(physical[1],expected.namespace),'READSET_PROFILE_UNSUPPORTED');
+      }
+      if(eq(expected.profile,carrierReads)){
+        const support=profileAbi.decodeFunctionResult('publicationSupportIdentity',await rawProbe('publicationSupportIdentity'));
         check(eq(support[0],supported.publicationSupport.address)&&eq(support[1],supported.publicationSupport.codeHash)
           &&eq(e.keccak256(await code(support[0],context)),supported.publicationSupport.codeHash),'READSET_SUPPORT_UNSUPPORTED');
       }

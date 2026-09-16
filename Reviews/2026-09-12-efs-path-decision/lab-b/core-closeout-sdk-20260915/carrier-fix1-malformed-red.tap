@@ -1,0 +1,33 @@
+▶ recognized legacy relabel cannot bypass an actual carrier implementation declaration
+  ✔ declaration (37.774083ms)
+  ✔ unavailable (31.856209ms)
+  ✔ malformed-success (30.463708ms)
+  ✖ undefined-success (30.729209ms)
+✖ recognized legacy relabel cannot bypass an actual carrier implementation declaration (459.812ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 3
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3548.689667
+
+✖ failing tests:
+
+test at browser/readset-profile.test.mjs:35:99
+✖ undefined-success (30.729209ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/readset-profile.test.mjs:48:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/readset-profile.test.mjs:35:91)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }

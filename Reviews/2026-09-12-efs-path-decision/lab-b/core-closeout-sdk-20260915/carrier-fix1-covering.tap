@@ -1,0 +1,29 @@
+✔ offline guarded verifier derives exact signature evidence without RPC and rejects independent tamper classes (63.8805ms)
+✔ final six argument guarded ABI admits exactly bounded maximal padding and refuses one byte over (28.231458ms)
+✔ guarded source and archive cold readers are distinct from journal recovery (0.068583ms)
+✔ a signed never-admitted claim cannot omit a zero-valued declared Record reference (8.93525ms)
+Report: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-DmEXiZ/guarded-upgrades.json
+✔ populated proxy upgrades preserve native application identity and fresh historical reconstruction across same-block schedules (1419.613333ms)
+✔ browser transport preserves typed EVM errors without manufacturing metadata for HTTP failures (4.583916ms)
+▶ recognized legacy relabel cannot bypass an actual carrier implementation declaration
+  ✔ declaration (38.307208ms)
+  ✔ unavailable (30.644792ms)
+  ✔ malformed-success (31.373042ms)
+  ✔ undefined-success (30.486167ms)
+✔ recognized legacy relabel cannot bypass an actual carrier implementation declaration (446.149458ms)
+✔ new read-set profile must be explicit and a failed exact probe cannot downgrade to legacy (323.13275ms)
+▶ actual old browser transport and mixed family qualify old new downgrade restore per implementation
+  ✔ bare-message (27.768292ms)
+  ✔ timeout (24.342625ms)
+  ✔ wrong-code (26.630667ms)
+  ✔ nonempty-revert (28.933375ms)
+  ✔ missing-revert-data (24.040209ms)
+✔ actual old browser transport and mixed family qualify old new downgrade restore per implementation (863.141ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9494.528792

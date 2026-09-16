@@ -1,0 +1,15 @@
+✔ browser transport preserves typed EVM errors without manufacturing metadata for HTTP failures (4.839083ms)
+▶ recognized legacy relabel cannot bypass an actual carrier implementation declaration
+  ✔ declaration (36.745083ms)
+  ✔ unavailable (30.386583ms)
+  ✔ malformed-success (29.245041ms)
+✔ recognized legacy relabel cannot bypass an actual carrier implementation declaration (427.071125ms)
+✔ new read-set profile must be explicit and a failed exact probe cannot downgrade to legacy (330.666375ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3855.064292

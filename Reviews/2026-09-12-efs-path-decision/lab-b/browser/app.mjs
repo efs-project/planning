@@ -82,7 +82,7 @@ async function rpc(method,params=[]) {
     if(!response.ok) throw new Error(`RPC HTTP ${response.status}`);
     const payload=JSON.parse(raw);
     if(payload.id!==id) throw new Error('RPC response ID mismatch');
-    if(payload.error) throw new Error(payload.error.message ?? `RPC ${payload.error.code}`);
+    if(payload.error) throw Object.assign(new Error(payload.error.message ?? `RPC ${payload.error.code}`),{rpcError:payload.error});
     if(!Object.hasOwn(payload,'result')) throw new Error('RPC response has no result');
     return payload.result;
   } catch(error) { state.rpc.errors++; throw error; }

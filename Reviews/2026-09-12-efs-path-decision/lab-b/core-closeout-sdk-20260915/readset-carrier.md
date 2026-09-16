@@ -8,6 +8,11 @@ Selected implementation/runner commit is
 was independently compared with that commit after committing. The packet's
 `candidateParent` records the pre-commit parent, not a false clean-source claim.
 
+**Review fix 1:** [per-implementation qualification correction](carrier-fix1.md)
+supersedes this note's shared-ABI qualification wording below. Recognized legacy
+labels cannot skip actual runtime evidence. The original paid packet retains its
+original SDK provenance; the fix has separate focused compatibility evidence.
+
 ## Selected policy and physical profile
 
 Keep sequential root15 **exactly** `mapping(bytes32 => bytes) _readSets`.
