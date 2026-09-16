@@ -4,6 +4,7 @@ pragma solidity 0.8.30;
 import {Keys} from "./Keys.sol";
 import {ExecutionSlots} from "./ExecutionSlots.sol";
 import {PublicationSupport} from "./PublicationSupport.sol";
+import {PublicationPreparation as P} from "./PublicationPreparation.sol";
 import {IAcceptor, IIndexModule, ITypeRegistry,IIndexReadiness,IndexReadinessProfile} from "./Interfaces.sol";
 
 /// @title Ledger — Road B single-pass ingestion kernel
@@ -178,7 +179,6 @@ contract Ledger {
     uint256 public constant INDEX_GAS_BASE = 200_000; // bounded CALL to the index module ...
     uint256 public constant INDEX_GAS_PER_ACTION = 150_000; // ... plus this per action
     uint64 private constant GUARD = (uint64(1) << 48) - 1;
-    uint256 private constant SECP256K1_N_HALF = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0;
     bytes32 public constant INTENT_TYPEHASH = keccak256(
         "PublicationIntent(bytes32 realmId,bytes32 coreCodeCommitment,address author,uint64 nonce,uint64 deadline,bytes32 acceptanceProfile,bytes32 indexObligations,bytes32 actionsHash)"
     );
@@ -279,14 +279,10 @@ contract Ledger {
     function executeGuardedSigned(IntentV2 memory intent, Action[] memory actions, bytes[] memory bodies,
         ReadSetV2 memory readSet, bytes memory sig) external returns (uint64, uint64)
     {
-        if (block.timestamp > intent.deadline) revert E_EXPIRED(intent.deadline);
-        Pub memory p = _guarded(intent, actions, readSet);
-        p.proofKind = PROOF_SIGNED;
-        p.author32 = Keys.principal(intent.author);
-        p.creator = p.author32;
-        (p.r, p.s, p.v) = _split(sig);
-        address signer = ecrecover(p.intentHash, p.v, p.r, p.s);
-        if (signer == address(0) || signer != p.author) revert E_SIGNATURE();
+        bytes memory readBytes = abi.encode(readSet);
+        Pub memory p = _prepare(abi.encodeWithSelector(PublicationSupport.prepareGuardedSigned.selector,
+            intent, abi.encode(actions), readBytes, sig));
+        p.readBytes = readBytes;
         return _run(p, actions, bodies);
     }
 
@@ -294,31 +290,11 @@ contract Ledger {
     function executeGuarded(Action[] memory actions, bytes[] memory bodies, uint64 nonce,
         bytes32 expectedExecution, ReadSetV2 memory readSet) external returns (uint64, uint64)
     {
-        IntentV2 memory i = IntentV2(realmId, realmOrigin(), expectedExecution, msg.sender, nonce, 0,
-            acceptanceProfileOf(actions), indexObligations(), readSetHash(readSet));
-        Pub memory p = _guarded(i, actions, readSet);
-        p.proofKind = PROOF_NATIVE;
-        p.author32 = principalOf(msg.sender);
-        p.creator = p.author32;
+        bytes memory readBytes = abi.encode(readSet);
+        Pub memory p = _prepare(abi.encodeCall(PublicationSupport.prepareGuardedNative,
+            (nonce, expectedExecution, abi.encode(actions), readBytes)));
+        p.readBytes = readBytes;
         return _run(p, actions, bodies);
-    }
-
-    function _guarded(IntentV2 memory i, Action[] memory actions, ReadSetV2 memory rs) private view returns (Pub memory p) {
-        if (i.realmId != realmId || i.realmOrigin != realmOrigin()) revert E_INTENT(1);
-        p.execution = executionSet();
-        if (i.executionSet != p.execution) revert E_INTENT(2);
-        p.acceptanceProfile = acceptanceProfileOf(actions);
-        if (i.acceptanceProfile != p.acceptanceProfile) revert E_INTENT(3);
-        p.indexObligations = indexObligations();
-        if (i.indexObligations != p.indexObligations) revert E_INTENT(4);
-        p.readBytes = abi.encode(rs);
-        p.readsHash = _supportRead(abi.encodeCall(PublicationSupport.checkReadSet,(p.readBytes,i.readSetHash)));
-        p.author = i.author;
-        p.nonce = i.nonce;
-        p.deadline = i.deadline;
-        p.actionsHash = keccak256(abi.encode(actions));
-        p.intentHash = guardedIntentDigest(i, p.actionsHash);
-        p.format = 2;
     }
 
     /// Canonical empty means all three arrays empty. Principal order is significant;
@@ -350,15 +326,7 @@ contract Ledger {
         external
         returns (uint64 publication, uint64 firstAdmission)
     {
-        Pub memory p;
-        p.author = msg.sender;
-        p.author32 = principalOf(msg.sender);
-        p.creator = p.author32;
-        p.proofKind = PROOF_NATIVE;
-        p.nonce = nonce;
-        p.acceptanceProfile = acceptanceProfileOf(actions);
-        p.indexObligations = indexObligations();
-        p.actionsHash = keccak256(abi.encode(actions));
+        Pub memory p = _prepare(abi.encodeCall(PublicationSupport.prepareNative, (nonce, abi.encode(actions))));
         return _run(p, actions, bodies);
     }
 
@@ -369,28 +337,7 @@ contract Ledger {
         external
         returns (uint64 publication, uint64 firstAdmission)
     {
-        if (address(this) != implementationSelf) revert E_LEGACY_UNSUPPORTED();
-        if (intent.realmId != realmId) revert E_INTENT(1);
-        if (intent.coreCodeCommitment != address(this).codehash) revert E_INTENT(2);
-        if (block.timestamp > intent.deadline) revert E_EXPIRED(intent.deadline);
-        Pub memory p;
-        p.author = intent.author;
-        p.author32 = Keys.principal(intent.author); // an EOA key is the same principal everywhere
-        p.creator = p.author32;
-        p.proofKind = PROOF_SIGNED;
-        p.nonce = intent.nonce;
-        p.deadline = intent.deadline;
-        p.acceptanceProfile = acceptanceProfileOf(actions);
-        if (intent.acceptanceProfile != p.acceptanceProfile) revert E_INTENT(3);
-        p.indexObligations = indexObligations();
-        if (intent.indexObligations != p.indexObligations) revert E_INTENT(4);
-        p.actionsHash = keccak256(abi.encode(actions));
-        (bytes32 r, bytes32 s, uint8 v) = _split(sig);
-        address recovered = ecrecover(intentDigest(intent, p.actionsHash), v, r, s);
-        if (recovered == address(0) || recovered != intent.author) revert E_SIGNATURE();
-        p.r = r;
-        p.s = s;
-        p.v = v;
+        Pub memory p = _prepare(abi.encodeWithSelector(PublicationSupport.prepareSigned.selector, intent, abi.encode(actions), sig));
         return _run(p, actions, bodies);
     }
 
@@ -416,64 +363,10 @@ contract Ledger {
         Intent memory dst,
         bytes memory dstSig
     ) external returns (uint64 publication, uint64 firstAdmission) {
-        if (address(this) != implementationSelf) revert E_LEGACY_UNSUPPORTED();
-        bytes32 hash = keccak256(abi.encode(actions));
-        if (src.v != 0) {
-            if (uint256(src.s) > SECP256K1_N_HALF || (src.v != 27 && src.v != 28)) revert E_SOURCE_SIGNATURE();
-            Intent memory si = Intent(
-                src.realmId, src.coreCodeCommitment, src.author, src.nonce, src.deadline, src.acceptanceProfile, src.indexObligations
-            );
-            address signer = ecrecover(intentDigest(si, hash), src.v, src.r, src.s);
-            if (signer == address(0) || signer != src.author) revert E_SOURCE_SIGNATURE();
-            if (src.sourcePrincipal != Keys.principal(src.author)) revert E_SOURCE_SIGNATURE();
-            src.grade = 1;
-        } else {
-            // Contract-author source: a chain-state witness this Realm cannot verify (REVIEW
-            // MAJOR-1). Fail closed before any write: nothing retained, minted or bound under a
-            // bare claim. See the NatSpec above for why this is a limit, not a waiver.
-            revert E_SOURCE_UNSUPPORTED();
-        }
-        Pub memory p;
-        p.author = src.author;
-        p.imported = true;
-        p.creator = src.sourcePrincipal;
-        p.acceptanceProfile = acceptanceProfileOf(actions);
-        p.indexObligations = indexObligations();
-        p.actionsHash = hash;
-        if (dstSig.length == 0) {
-            if (msg.sender != src.author) revert E_DESTINATION_AUTH();
-            p.author32 = principalOf(msg.sender);
-            p.proofKind = PROOF_NATIVE;
-            p.nonce = nonces[msg.sender];
-        } else {
-            if (dst.author != src.author || dst.realmId != realmId || dst.coreCodeCommitment != address(this).codehash) {
-                revert E_DESTINATION_AUTH();
-            }
-            if (block.timestamp > dst.deadline) revert E_EXPIRED(dst.deadline);
-            if (dst.acceptanceProfile != p.acceptanceProfile || dst.indexObligations != p.indexObligations) revert E_DESTINATION_AUTH();
-            (bytes32 r, bytes32 s, uint8 v) = _split(dstSig);
-            address signer = ecrecover(intentDigest(dst, hash), v, r, s);
-            if (signer == address(0) || signer != dst.author) revert E_SIGNATURE();
-            p.author32 = Keys.principal(dst.author);
-            p.proofKind = PROOF_SIGNED;
-            p.nonce = dst.nonce;
-            p.deadline = dst.deadline;
-            p.r = r;
-            p.s = s;
-            p.v = v;
-        }
+        Pub memory p = _prepare(abi.encodeWithSelector(PublicationSupport.prepareImport.selector, src, abi.encode(actions), dst, dstSig));
         (publication, firstAdmission) = _run(p, actions, bodies);
+        src.grade = 1; // preparation verified the source; only Ledger retains it after successful admission
         _source[publication] = src;
-    }
-
-    function _split(bytes memory sig) private pure returns (bytes32 r, bytes32 s, uint8 v) {
-        if (sig.length != 65) revert E_SIGNATURE();
-        assembly ("memory-safe") {
-            r := mload(add(sig, 32))
-            s := mload(add(sig, 64))
-            v := byte(0, mload(add(sig, 96)))
-        }
-        if (uint256(s) > SECP256K1_N_HALF || (v != 27 && v != 28)) revert E_SIGNATURE();
     }
 
     // Convenience single-action entrypoints (native). They consume nonces[msg.sender].
@@ -526,15 +419,7 @@ contract Ledger {
         actions[0] = x;
         bytes[] memory bodies = new bytes[](1);
         bodies[0] = data;
-        Pub memory p;
-        p.author = msg.sender;
-        p.author32 = principalOf(msg.sender);
-        p.creator = p.author32;
-        p.proofKind = PROOF_NATIVE;
-        p.nonce = nonces[msg.sender];
-        p.acceptanceProfile = acceptanceProfileOf(actions);
-        p.indexObligations = indexObligations();
-        p.actionsHash = keccak256(abi.encode(actions));
+        Pub memory p = _prepare(abi.encodeCall(PublicationSupport.prepareNative, (nonces[msg.sender], abi.encode(actions))));
         (, admissionOrdinal) = _run(p, actions, bodies);
     }
 
@@ -730,7 +615,9 @@ contract Ledger {
             cell.meta = uint256(p.ord) | (bodyBytes.length << 48) | (uint256(1) << 80);
             _storeBody(id, bodyBytes);
         } else {
-            cell.meta = meta + (uint256(1) << 80); // one more occurrence; Record row unchanged otherwise
+            if (meta >> 80 >= type(uint32).max) revert E_BOUNDS(7);
+            // Full shifted-word guard proves the result is below 2^112; no uint256 overflow.
+            unchecked { cell.meta = meta + (uint256(1) << 80); } // low metadata and body unchanged
         }
         AdmissionRow storage ar = _admission[p.ord];
         ar.meta = uint256(x.kind) | (leaf << 4) | (uint256(p.publication) << 20) | (uint256(activation) << 152);
@@ -935,6 +822,33 @@ contract Ledger {
 
     function _requireSupport() private view {
         if (publicationSupport.codehash != publicationSupportCodehash) revert E_INDEX("");
+    }
+
+    /// One fixed typed preparation call. Copy only its seventeen static fields;
+    /// mutable ordinals/counters, exact read bytes and every canonical write stay here.
+    function _prepare(bytes memory input) private returns (Pub memory p) {
+        _requireSupport();
+        address support = publicationSupport;
+        bytes memory output = new bytes(544);
+        assembly ("memory-safe") {
+            let ptr := add(output, 32)
+            // A ceiling, not a demanded reserve. EIP-150 applies to actual gas.
+            let ok := delegatecall(12000000, support, add(input,32), mload(input), ptr, 544)
+            if or(iszero(ok), iszero(eq(returndatasize(),544))) {
+                if or(ok, gt(returndatasize(),4164)) {
+                    mstore(ptr,shl(224,0x2bd4fb9c)) mstore(add(ptr,4),32) mstore(add(ptr,36),0)
+                    revert(ptr,68)
+                }
+                returndatacopy(ptr,0,returndatasize()) revert(ptr,returndatasize())
+            }
+        }
+        P.Result memory r = abi.decode(output, (P.Result));
+        p.author = r.author; p.author32 = r.author32; p.creator = r.creator;
+        p.imported = r.imported; p.proofKind = r.proofKind; p.v = r.v;
+        p.nonce = r.nonce; p.deadline = r.deadline; p.r = r.r; p.s = r.s;
+        p.acceptanceProfile = r.acceptanceProfile; p.indexObligations = r.indexObligations;
+        p.actionsHash = r.actionsHash; p.execution = r.execution; p.intentHash = r.intentHash;
+        p.readsHash = r.readsHash; p.format = r.format;
     }
 
     /// Fixed output and bounded error copies, including for malformed helper code.
