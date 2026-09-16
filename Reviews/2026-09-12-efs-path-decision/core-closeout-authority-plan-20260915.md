@@ -37,6 +37,19 @@ chains; parent owns main documents and publication. Partial verifier controls
 are not the paid source-off journey or independent task approval. Final results
 will be recorded in [[core-closeout-results-20260915]].
 
+**Measured resource finding, September16 (worker evidence, pending review):**
+the first corrected five-packet source-off journey succeeds, but onchain
+retention costs12,643,943–14,994,650gas for20,824–26,360proof bytes. One matched
+verify-only call costs12,445,456 versus12,643,943for retention: verification,
+not archive storage, dominates. Preserve these baselines. The controller permits
+one scratch-memory reuse experiment around the30scalar-returning storage-proof
+calls; no upstream library, proof check, storage guarantee or cap may be removed.
+Persistent inputs/results must stay outside reclaimed memory, dirty-memory
+initialization must be safe, and independent decoded outputs plus adversarial
+controls must match. This is a reversible implementation experiment, not a
+measured saving or expanded proof envelope. The large safety ceiling is not an
+affordability guarantee.
+
 **Files:** separate `RecentStateRootCheckpoint`, `NativePublicationProof`, `NativeClaimArchive`, bounded proof libraries/NOTICE, independent `browser/native-proof.mjs`, focused tests and an actual Anvil export/offline runner. No Ledger growth required.
 
 **Journey sequencing clarification, September16:** actual same-chain checkpoint,
