@@ -3,9 +3,10 @@
 import assert from 'node:assert/strict';
 import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
+import {gunzipSync} from 'node:zlib';
 import {loadEthers} from '../script/compact-environment.mjs';
 const e=await loadEthers(),root=new URL('../',import.meta.url);
-const report=JSON.parse(await readFile(new URL('paid-run2/paid.json',import.meta.url)));
+const report=JSON.parse(gunzipSync(await readFile(new URL('paid-run2/paid.json.gz',import.meta.url))));
 const vectors=JSON.parse(await readFile(new URL('vectors.json',import.meta.url)));
 const json=x=>JSON.stringify(x,(_,v)=>typeof v==='bigint'?String(v):v,2)+'\n';
 for(const [path,pin] of Object.entries(report.sourcePins)){

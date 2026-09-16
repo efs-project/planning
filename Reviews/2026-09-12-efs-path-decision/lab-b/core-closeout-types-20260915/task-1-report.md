@@ -3,9 +3,10 @@
 Status: DONE, candidate ready for independent controller review. September16,
 2026; contracts-dev / codex / Astra Extra High; session described-types-20260916.
 Exact reviewed BASE: `f7ce1875044e9c63f762cc57bde3b9dba523f86a`.
-The source/evidence commit is the commit containing this report; the controller
-handoff at `.superpowers/sdd/core-closeout-types-plan-20260915/task-1-report.md`
-records its exact SHA after commit. No push by this worker.
+The implementation/source-evidence commit is
+`a533311118a5e6881c839cc5102098dffbcae281`; subsequent report/archive-only commits
+are recorded in `.superpowers/sdd/core-closeout-types-plan-20260915/task-1-report.md`.
+No push by this worker.
 
 ## Outcome and scope
 
@@ -167,11 +168,38 @@ EFS_TYPES_OUTPUT=core-closeout-types-20260915/paid-run2 \
 Output directory must be new; existing-output overwrite refuses.55 transactions,
 47 successes and8 intended refusals; all raw signed transactions, receipts,
 chain-transaction/block joins and source/compiler/deployment metadata retained
-in `paid-run2/paid.json`. Local Node26.0.0, solc0.8.30+73712a01, optimizer200,
+in `paid-run2/paid.json.gz` (lossless archival packaging below). Local Node26.0.0,
+solc0.8.30+73712a01, optimizer200,
 viaIR/Cancun. Every tx gasLimit15,000,000; chain block cap16,777,216. Anvil
 PID88291, loopback62899, prune-history256, transaction-block-keeper512, fresh
 run-specific cache; closed in finally, exit0, `ps -p 88291` verified absent.
 No owner RPC60599/UI60608 use or server restart.
+
+After the measured run and initial commit, the exact raw `paid.json` packet was
+mechanically archived with `gzip -n -9 -k`; the duplicate plain file was removed
+from the current tree only and remains recoverable in `a533311`. The unchanged
+`paid.mjs` still produces a new raw `paid.json`, not a gzip archive. Archival
+packaging is a separate post-run step, not part of the measured runner or its
+source pins. No new paid run, build, chain or contract test was performed for
+this packaging change. The gzip-backed audit was rerun and its result remained
+byte-identical to the retained `audit.json`.
+
+```text
+Original/raw round-trip bytes: 1389712
+Original/raw round-trip SHA256: d6edc5c1660b3ca4a2f0202ac7bf9accc8e0ffc4811f7efb53ca31ace94a4090
+Packed bytes: 247274
+Packed SHA256: 0cddc685f0ccd5153ac444fd03c219437303116faff45f7ac5c00f0aa4410202
+```
+
+Exact packaging/round-trip checks (lab directory; before removing the plain copy):
+
+```sh
+gzip -n -9 -k core-closeout-types-20260915/paid-run2/paid.json
+gzip -t core-closeout-types-20260915/paid-run2/paid.json.gz
+cmp core-closeout-types-20260915/paid-run2/paid.json <(gzip -dc core-closeout-types-20260915/paid-run2/paid.json.gz)
+shasum -a 256 core-closeout-types-20260915/paid-run2/paid.json.gz
+gzip -dc core-closeout-types-20260915/paid-run2/paid.json.gz | shasum -a 256
+```
 
 Four explicit `debug_traceTransaction` **callTracer** requests, not opcode traces;
 runner refuses traversal beyond512 calls. Actual call counts34/33/42/19. Only
