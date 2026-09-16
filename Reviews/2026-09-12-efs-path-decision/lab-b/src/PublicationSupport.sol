@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
-import {IIndexModule, ITypeRegistry} from "./Interfaces.sol";
+import {IIndexModule, ITypeRegistry,IIndexReadiness,IndexReadinessProfile} from "./Interfaces.sol";
+import {ExecutionSlots} from "./ExecutionSlots.sol";
+import {IndexReplaySource} from "./IndexReplaySource.sol";
 import {IndexWork} from "./IndexWork.sol";
 import {IndexFieldProfile} from "./IndexFieldProfile.sol";
 
@@ -13,8 +15,53 @@ contract PublicationSupport {
     error E_INDEX_RETURNDATA(uint256 size);
     error E_READSET_SHAPE();
     error E_BOUNDS(uint256 code);
+    error E_REPLACEMENT();
+    error E_INTENT(uint256 code);
+    error E_READSET_STALE(uint256 positionIndex,uint256 principalIndex);
 
     struct ReadSet {bytes32[] principalIds;bytes32[] positions;bytes32[] expectedHeads;}
+
+    /// Fixed static-word EIP712 codecs, with no nested dynamic byte wrapper.
+    /// Domain/type/intent/actions are supplied by the typed Ledger serializer.
+    /// No signature check, authorization, nonce, or canonical mutation moves here.
+    function legacyDigest(bytes32,bytes32,bytes32[7] calldata,bytes32) external pure returns(bytes32){return _intentDigest(288);}
+    function guardedDigest(bytes32,bytes32,bytes32[9] calldata,bytes32) external pure returns(bytes32){return _intentDigest(352);}
+    function _intentDigest(uint256 length) private pure returns(bytes32){
+        bytes32 domain;bytes32 structHash;
+        assembly("memory-safe"){
+            domain:=calldataload(4)
+            let ptr:=mload(0x40)
+            calldatacopy(ptr,36,length)
+            structHash:=keccak256(ptr,length)
+        }
+        return keccak256(abi.encodePacked(hex"1901",domain,structHash));
+    }
+
+    function checkReplacement(IIndexReadiness.ReplacementRequest calldata r) external view returns(bytes32){
+        if(r.replacement==address(0)||r.replacement==r.expectedOld||r.replacement.code.length==0
+            ||r.replacement.codehash!=r.expectedReplacementCodehash||r.requiredManifest==0)revert E_REPLACEMENT();
+        if(_fixedRead(msg.sender,abi.encodeWithSignature("layoutId()"),30_000)!=IndexReplaySource.LAYOUT)revert E_REPLACEMENT();
+        if(uint256(_fixedRead(msg.sender,abi.encodeWithSignature("indexModule()"),30_000))!=uint160(r.expectedOld)
+            ||_fixedRead(msg.sender,abi.encodeWithSignature("extsload(bytes32)",ExecutionSlots.PUBLICATION_ACTIVE),30_000)!=0)revert E_REPLACEMENT();
+        (uint64 a,,,uint64 p)=abi.decode(_fixedBytes(msg.sender,abi.encodeWithSignature("counts()"),30_000,128),(uint64,uint64,uint64,uint64));
+        if(a!=r.expectedAdmission||p!=r.expectedPublication)revert E_REPLACEMENT();
+        IIndexReadiness.Ready memory ready=abi.decode(_fixedBytes(r.replacement,abi.encodeCall(IIndexReadiness.replayReadiness,()),100_000,320),(IIndexReadiness.Ready));
+        if(ready.sourceLedger!=msg.sender||ready.physicalProfile!=IndexReadinessProfile.PHYSICAL
+            ||ready.callbackProfile!=IndexReadinessProfile.CALLBACK||ready.obligationManifest!=r.requiredManifest
+            ||ready.coveredManifest!=r.requiredManifest||ready.provenFrom!=1||ready.completedAdmission!=a
+            ||ready.completedPublication!=p||ready.generation!=r.expectedGeneration||ready.phase!=1)revert E_REPLACEMENT();
+        if(_fixedRead(r.replacement,abi.encodeCall(IIndexModule.manifestHash,()),100_000)!=r.requiredManifest)revert E_REPLACEMENT();
+        return IndexReadinessProfile.ACK;
+    }
+
+    function _fixedBytes(address target,bytes memory input,uint256 gasLimit,uint256 length) private view returns(bytes memory output){
+        output=new bytes(length);bool ok;uint256 size;
+        assembly("memory-safe"){
+            ok:=staticcall(gasLimit,target,add(input,32),mload(input),add(output,32),length)
+            size:=returndatasize()
+        }
+        if(!ok||size!=length)revert E_REPLACEMENT();
+    }
 
     /// Fixed-output quote from bounded action bytes and canonical Type refs.
     /// Body work conservatively charges all256 possible words for each authored
@@ -68,11 +115,29 @@ contract PublicationSupport {
         return keccak256(abi.encode(module,module.codehash,manifest));
     }
 
-    /// Static publication codecs. No canonical storage, authority, head comparison
-    /// or Type-rule invocation is delegated to this helper.
+    /// Static publication codecs. Canonical mutation, authority, and Type-rule
+    /// invocation remain Ledger-owned. Head comparison uses its caller-independent
+    /// canonical getter, never a supplied source or a forwarded author.
     function readSetHash(bytes calldata encoded) external pure returns(bytes32) {
+        return _readSetHash(_readSet(encoded));
+    }
+
+    function checkReadSet(bytes calldata encoded,bytes32 expectedHash) external view returns(bytes32 actualHash){
+        ReadSet memory rs=_readSet(encoded);actualHash=_readSetHash(rs);
+        if(actualHash!=expectedHash)revert E_INTENT(5);
+        for(uint256 x;x<rs.positions.length;x++)for(uint256 y;y<rs.principalIds.length;y++){
+            if(_fixedRead(msg.sender,abi.encodeWithSignature("headSnapshot(bytes32,bytes32)",rs.principalIds[y],rs.positions[x]),30_000)
+                !=rs.expectedHeads[x*rs.principalIds.length+y])revert E_READSET_STALE(x,y);
+        }
+    }
+
+    function _readSetHash(ReadSet memory rs) private pure returns(bytes32){
+        return keccak256(abi.encode(keccak256("efs.lab.read-set/2:ordered-first-binding"),rs));
+    }
+
+    function _readSet(bytes calldata encoded) private pure returns(ReadSet memory rs){
         if(encoded.length>10_592)revert E_READSET_SHAPE();
-        ReadSet memory rs=abi.decode(encoded,(ReadSet));
+        rs=abi.decode(encoded,(ReadSet));
         uint256 n=rs.principalIds.length;uint256 m=rs.positions.length;
         if(n>64 || m>4 || rs.expectedHeads.length!=n*m || (n==0)!=(m==0))revert E_READSET_SHAPE();
         for(uint256 i;i<n;i++){
@@ -83,7 +148,6 @@ contract PublicationSupport {
             if(rs.positions[i]==0)revert E_READSET_SHAPE();
             for(uint256 j;j<i;j++)if(rs.positions[i]==rs.positions[j])revert E_READSET_SHAPE();
         }
-        return keccak256(abi.encode(keccak256("efs.lab.read-set/2:ordered-first-binding"),rs));
     }
 
     function acceptanceProfile(address registry,bytes calldata encoded) external view returns(bytes32 profile) {

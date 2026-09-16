@@ -46,6 +46,9 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   const bindingOf = (author,position) => hash(['bytes32','bytes32','bytes32'],[e.id('efs2/binding/1'),e.zeroPadValue(author,32),position]);
   const contexts = new WeakSet(), continuations = new WeakMap(), plans = new WeakSet(), signedPlans = new WeakSet(), submissions = new Map();
   const interfaces = Object.fromEntries(Object.entries(config.contracts).map(([k,c]) => [k,new e.Interface(c.abi)]));
+  // Select by the pinned deployment ABI, never by a failed live getter. Older
+  // demos retain their original genesis-attachment qualification and code pins.
+  const indexOriginGetter=interfaces.index.hasFunction('provenFrom()')?'provenFrom':'attachedFrom';
   const blockArg = context => ({blockHash:context.blockHash,requireCanonical:true});
   const call = async (key,fn,args,context) => {
     const data = interfaces[key].encodeFunctionData(fn,args);
@@ -508,7 +511,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     const family = await scalar('index',config.listing==='live-positive'?'FAMILY_LIVE_SCOPE':'FAMILY_SCOPE',[],context);
     const coverage = await call('index','coverage',[family,scope],context);
     if (Number(coverage[0]) !== 2 || coverage[1] !== 1n || String(coverage[2]) !== context.admission
-      || await scalar('index','attachedFrom',[],context) !== 1n) {
+      || await scalar('index',indexOriginGetter,[],context) !== 1n) {
       return result(basis,'UNKNOWN','UNKNOWN',walk.rows,{nameCoverage:'PARTIAL',reason:'INDEX_COVERAGE'});
     }
     const page = await protocol.list(authors,purpose.folder,folder,walk.cursor,budget,context);

@@ -55,7 +55,7 @@ contract FilesPageReader {
         LensReader.PrincipalCursor memory cursor;
         if(continuation.length!=0){bytes32 previous;(previous,cursor)=abi.decode(continuation,(bytes32,LensReader.PrincipalCursor));if(previous!=queryHash)revert E_CONTINUATION();}
         (uint8 coverage,uint64 from,uint64 through)=index.coverage(index.FAMILY_LIVE_SCOPE(),keccak256(abi.encode(FOLDER,folder)));
-        if(coverage!=2||from!=1||through!=current||index.attachedFrom()!=1)return page;
+        if(coverage!=2||from!=1||through!=current||index.provenFrom()!=1)return page;
         FilesNameLayout.pin(ledger,index.nameType(),index.expectedNameRuleHash());
         LensReader.PrincipalPage memory source=lens.listPrincipals(principals,FOLDER,folder,cursor,budget);
         if(source.mutated)revert E_BASIS();

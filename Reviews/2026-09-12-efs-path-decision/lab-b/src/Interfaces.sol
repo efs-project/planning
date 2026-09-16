@@ -44,6 +44,40 @@ interface IIndexModule {
     function manifestHash() external view returns(bytes32);
 }
 
+/// Fixed-width, reviewed-module readiness. This is not a proof that an arbitrary
+/// contract honestly maintains its advertised data: exact runtime approval is
+/// still the administrator's trust boundary.
+interface IIndexReadiness {
+    struct ReplacementRequest {
+        address replacement;
+        address expectedOld;
+        uint64 expectedAdmission;
+        uint64 expectedPublication;
+        bytes32 requiredManifest;
+        bytes32 expectedReplacementCodehash;
+        uint64 expectedGeneration;
+    }
+    struct Ready {
+        address sourceLedger;
+        bytes32 physicalProfile;
+        bytes32 callbackProfile;
+        bytes32 obligationManifest;
+        bytes32 coveredManifest;
+        uint64 provenFrom;
+        uint64 completedAdmission;
+        uint64 completedPublication;
+        uint64 generation;
+        uint8 phase; // 1 READY, 0 unfinished, 2 source publication active
+    }
+    function replayReadiness() external view returns(Ready memory);
+}
+
+library IndexReadinessProfile {
+    bytes32 internal constant PHYSICAL=keccak256("efs.lab.index-layout/3:inline-singleton:five-u48:header-u64-u64-u48-u16:genesis-shadow-replay");
+    bytes32 internal constant CALLBACK=keccak256("efs.lab.index-callback/1:ordered-prefix:static-final:canonical-replay-final");
+    bytes32 internal constant ACK=keccak256("REPLACEMENT_READY_V1");
+}
+
 /// @notice What the Ledger needs from the Type registry. Three layers (authority repair
 ///         2026-09-13, F5): the Type's IDENTITY (descriptor: shape, refTypes, declared rule) is
 ///         immutable and the id is derived from it; its MANDATORY RULE (the registration-time

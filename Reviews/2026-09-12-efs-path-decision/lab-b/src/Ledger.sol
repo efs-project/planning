@@ -4,7 +4,7 @@ pragma solidity 0.8.30;
 import {Keys} from "./Keys.sol";
 import {ExecutionSlots} from "./ExecutionSlots.sol";
 import {PublicationSupport} from "./PublicationSupport.sol";
-import {IAcceptor, IIndexModule, ITypeRegistry} from "./Interfaces.sol";
+import {IAcceptor, IIndexModule, ITypeRegistry,IIndexReadiness,IndexReadinessProfile} from "./Interfaces.sol";
 
 /// @title Ledger — Road B single-pass ingestion kernel
 /// @notice DISPOSABLE LAB, NO PROTOCOL CLAIM. Implements road-b.md §2/§3/§5 plus the
@@ -311,15 +311,8 @@ contract Ledger {
         if (i.acceptanceProfile != p.acceptanceProfile) revert E_INTENT(3);
         p.indexObligations = indexObligations();
         if (i.indexObligations != p.indexObligations) revert E_INTENT(4);
-        p.readsHash = readSetHash(rs);
-        if (i.readSetHash != p.readsHash) revert E_INTENT(5);
-        for (uint256 x; x < rs.positions.length; ++x) {
-            for (uint256 y; y < rs.principalIds.length; ++y) {
-                if (headSnapshot(rs.principalIds[y], rs.positions[x]) != rs.expectedHeads[x * rs.principalIds.length + y])
-                    revert E_READSET_STALE(x, y);
-            }
-        }
         p.readBytes = abi.encode(rs);
+        p.readsHash = _supportRead(abi.encodeCall(PublicationSupport.checkReadSet,(p.readBytes,i.readSetHash)));
         p.author = i.author;
         p.nonce = i.nonce;
         p.deadline = i.deadline;
@@ -341,7 +334,7 @@ contract Ledger {
     }
 
     function guardedIntentDigest(IntentV2 memory intent, bytes32 actionsHash) public view returns (bytes32) {
-        return keccak256(abi.encodePacked(hex"1901", guardedDomainSeparator, keccak256(abi.encode(GUARDED_INTENT_TYPEHASH, intent, actionsHash))));
+        return _supportRead(abi.encodeWithSelector(PublicationSupport.guardedDigest.selector,guardedDomainSeparator,GUARDED_INTENT_TYPEHASH,intent,actionsHash));
     }
 
     function guardedPublicationId(bytes32 principalId, bytes32 digest) public pure returns (bytes32) {
@@ -1014,20 +1007,7 @@ contract Ledger {
     }
 
     function intentDigest(Intent memory intent, bytes32 actionsHash) public view returns (bytes32) {
-        bytes32 structHash = keccak256(
-            abi.encode(
-                INTENT_TYPEHASH,
-                intent.realmId,
-                intent.coreCodeCommitment,
-                intent.author,
-                intent.nonce,
-                intent.deadline,
-                intent.acceptanceProfile,
-                intent.indexObligations,
-                actionsHash
-            )
-        );
-        return keccak256(abi.encodePacked(hex"1901", domainSeparator, structHash));
+        return _supportRead(abi.encodeWithSelector(PublicationSupport.legacyDigest.selector,domainSeparator,INTENT_TYPEHASH,intent,actionsHash));
     }
 
     function coreCodeCommitment() external view returns (bytes32) {
@@ -1191,8 +1171,22 @@ contract Ledger {
     /// Admin ablation path. Rows produced with module == 0 are NOT EQUIVALENT (a named
     /// guarantee is omitted); they are diagnostic only and must be labelled so everywhere.
     function setIndexModule(address module) external {
+        _indexAdmin();
+        _setIndex(module);
+    }
+
+    function replaceIndexWhenReady(IIndexReadiness.ReplacementRequest calldata request) external {
+        _indexAdmin();
+        if(_supportRead(abi.encodeCall(PublicationSupport.checkReplacement,(request)))!=IndexReadinessProfile.ACK)revert E_INDEX("");
+        _setIndex(request.replacement);
+    }
+
+    function _indexAdmin() private view {
         ExecutionSlots.requireIdle();
-        if (msg.sender != admin) revert E_ADMIN();
+        if(msg.sender!=admin)revert E_ADMIN();
+    }
+
+    function _setIndex(address module) private {
         indexModule = module;
         ExecutionSlots.advance();
         emit IndexModuleSet(module);

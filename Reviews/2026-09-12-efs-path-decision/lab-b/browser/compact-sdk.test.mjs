@@ -27,7 +27,7 @@ const abis = {};
 for (const [key, artifact] of Object.entries({ledger:'ledger',index:'index',lens:'lens',registry:'registry',files:'consumer'})) {
   abis[key] = JSON.parse(gunzipSync(await readFile(new URL(`../files-paid-20260914/artifact-${artifact}.json.gz`, import.meta.url)))).abi;
 }
-abis.index = [...abis.index, 'function nameType() view returns(bytes32)', 'function expectedNameRuleHash() view returns(bytes32)'];
+abis.index = [...abis.index, 'function nameType() view returns(bytes32)', 'function expectedNameRuleHash() view returns(bytes32)', 'function provenFrom() view returns(uint64)'];
 abis.names = [
   'function ledger() view returns(address)', 'function source() view returns(address)',
   'function coreCodehash() view returns(bytes32)', 'function nameType() view returns(bytes32)',
@@ -116,7 +116,8 @@ function fixture(overrides = {}) {
       else if (fn === 'counts') out = [state.admission,3,3,1];
       else if (fn === 'generation') out = [state.generation];
       else if (fn === 'epoch') out = [state.epoch];
-      else if (fn === 'attachedFrom') out = [1];
+      else if (fn === 'attachedFrom') out = [state.attachedFrom??1];
+      else if (fn === 'provenFrom') out = [state.provenFrom??1];
       else if (fn === 'FAMILY_SCOPE') out = [H('efs2/family/scope/1')];
       else if (fn === 'coverage') out = [2,1,state.admission];
       else if (fn === 'rootType') out = [types.root];
@@ -155,12 +156,37 @@ function fixture(overrides = {}) {
     }
     return iface.encodeFunctionResult(fn,out);
   };
-  const sdk = createCompactSdk({ethers,rpc,manifest,journal:{
+  const sdkManifest=state.legacyIndexAbi?{...manifest,contracts:{...contracts,index:{...contracts.index,abi:abis.index.filter(fragment=>!(typeof fragment==='string'&&fragment.includes('provenFrom(')))}}}:manifest;
+  const sdk = createCompactSdk({ethers,rpc,manifest:sdkManifest,journal:{
     async put(entry) { journal.set(entry.id,JSON.parse(JSON.stringify(entry))); },
     async get(id) { return journal.get(id); },
   }});
   return {sdk,state,journal,calls,ownHeads,rpc};
 }
+
+test('late deployment with proven genesis materialization can list, but missing provenance cannot',async()=>{
+  const {sdk}=fixture({attachedFrom:21n,provenFrom:1n});
+  const context=await sdk.pin();
+  const first=await sdk.listFolder({folder,budget:64,context});
+  assert.equal(first.coverage,'PARTIAL');assert(first.value.length>0);
+  const result=await sdk.listFolder({folder,budget:64,context,continuation:first.continuation});
+  assert.equal(result.coverage,'COMPLETE');assert(result.value.length>0);
+  const partial=fixture({attachedFrom:1n,provenFrom:0n});
+  const refused=await partial.sdk.listFolder({folder,budget:64,context:await partial.sdk.pin()});
+  assert.equal(refused.reason,'INDEX_COVERAGE');
+});
+test('pinned legacy index ABI preserves genesis attachment qualification without probing a new getter',async()=>{
+  const {sdk,calls}=fixture({legacyIndexAbi:true,respond:({fn})=>{if(fn==='provenFrom')throw Error('old index has no getter');}});
+  const context=await sdk.pin();const first=await sdk.listFolder({folder,budget:64,context});
+  assert.equal(first.coverage,'PARTIAL');assert.equal(first.value.length,1);
+  const done=await sdk.listFolder({folder,budget:64,context,continuation:first.continuation});assert.equal(done.coverage,'COMPLETE');
+  const late=fixture({legacyIndexAbi:true,attachedFrom:21n});
+  assert.equal((await late.sdk.listFolder({folder,budget:64,context:await late.sdk.pin()})).reason,'INDEX_COVERAGE');
+});
+test('new provenance RPC refusal never falls back to genesis deployment time',async()=>{
+  const {sdk}=fixture({respond:({fn})=>{if(fn==='provenFrom')throw Error('provenance unavailable');}});
+  await assert.rejects(sdk.listFolder({folder,budget:64,context:await sdk.pin()}),/provenance unavailable/);
+});
 
 test('a missing Name preserves the positive member and resumable PARTIAL coverage', async () => {
   const {sdk} = fixture({nameStatus:2}), context = await sdk.pin();

@@ -120,7 +120,7 @@ contract FilesJoinedConsumer {
     // Exact point/parent-by-ID reads do not consume reverse-parent enumeration.
     function _completeFamily(bytes32 family, bytes32 scope, uint64 admission) private view {
         (uint8 status, uint64 from, uint64 through) = filesIndex.coverage(family, scope);
-        if (status != 2 || from != 1 || through != admission || filesIndex.attachedFrom() != 1)
+        if (status != 2 || from != 1 || through != admission || filesIndex.provenFrom() != 1)
             revert E_INCOMPLETE();
     }
 

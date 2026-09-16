@@ -93,8 +93,8 @@ contract FilesNamesIndex is FilesParentIndex {
         expectedNameRuleHash = nh;
     }
 
-    function afterPublication(uint64 publication, Effect[] calldata effects) public view virtual override returns(bytes4 acknowledgement) {
-        acknowledgement = super.afterPublication(publication, effects);
+    function _validatePublication(Effect[] memory effects) internal view virtual override {
+        super._validatePublication(effects);
         Ledger core = Ledger(ledger);
         FilesNameLayout.pin(core, nameType, expectedNameRuleHash);
         // Final-only: a Name after BIND is already retained, but never indexed twice.

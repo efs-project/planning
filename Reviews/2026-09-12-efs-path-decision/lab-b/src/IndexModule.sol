@@ -2,11 +2,12 @@
 pragma solidity 0.8.30;
 
 import {Keys} from "./Keys.sol";
-import {IIndexModule} from "./Interfaces.sol";
+import {IIndexModule,IIndexReadiness,IndexReadinessProfile} from "./Interfaces.sol";
 import {ExecutionSlots} from "./ExecutionSlots.sol";
 import {IndexSource, IIndexSource} from "./IndexSource.sol";
 import {IndexFieldProfile} from "./IndexFieldProfile.sol";
 import {IndexWork} from "./IndexWork.sol";
+import {IndexReplaySource,IndexReplayDecoder,IReplayLedger} from "./IndexReplaySource.sol";
 
 interface ILedgerCounts {
     function counts() external view returns (uint64 admissions, uint64 records, uint64 bindings, uint64 publications);
@@ -49,8 +50,7 @@ contract IndexModule is IIndexModule {
     bytes32 public constant FAMILY_REFERENCE_POSITION = keccak256("efs2/family/reference-position/1");
     bytes32 public constant FAMILY_SCALAR = keccak256("efs2/family/scalar-equality/1");
     bytes32 public constant FAMILY_DIGEST = keccak256("efs2/family/content-digest/1");
-    bytes32 public constant PHYSICAL_PROFILE =
-        keccak256("efs.lab.index-layout/2:inline-singleton:five-u48:header-u64-u64-u48-u16");
+    bytes32 public constant PHYSICAL_PROFILE = IndexReadinessProfile.PHYSICAL;
     uint64 private constant GUARD = (uint64(1) << 48) - 1;
 
     struct Family {
@@ -61,11 +61,17 @@ contract IndexModule is IIndexModule {
 
     address public immutable ledger;
     address public immutable admin;
+    IndexReplayDecoder public immutable replayDecoder;
+    bytes32 private immutable replayDecoderCodehash;
     uint64 public immutable attachedFrom; // first admission this module could have seen
     uint64 public lastProcessed; // last admission ordinal indexed
     uint64 public lastPublication; // staged maintenance marker, NOT a final-completion receipt
     uint64 public generation; // bumped by the admin after a backfill/re-index; part of a cursor's basis
     bool public gapped; // retained legacy diagnostic; current ingress rejects gaps without advancing the frontier
+    bool private _liveStarted;
+    struct ShadowHead { bytes32 target; uint64 ordinal; uint32 revision; bool live; }
+    mapping(bytes32=>ShadowHead) private _shadow;
+    mapping(uint64=>bool) private _withdrawn;
 
     mapping(bytes32 => Family) private _family;
     mapping(bytes32 => uint256) private _postingHead;
@@ -86,9 +92,10 @@ contract IndexModule is IIndexModule {
     constructor(address ledger_) {
         ledger = ledger_;
         admin = msg.sender;
+        replayDecoder=new IndexReplayDecoder(ledger_);
+        replayDecoderCodehash=address(replayDecoder).codehash;
         (uint64 admissions,,,) = ILedgerCounts(ledger_).counts();
         attachedFrom = admissions + 1;
-        lastProcessed = admissions;
         _declare(FAMILY_SCOPE, true, admissions + 1);
         _declare(FAMILY_HISTORY, true, admissions + 1);
         _declare(FAMILY_BACKLINK, true, admissions + 1);
@@ -137,6 +144,7 @@ contract IndexModule is IIndexModule {
     // ---------------------------------------------------------------- maintenance
     function onAdmission(uint64 publication, Effect[] calldata effects) public virtual {
         if (msg.sender != ledger) revert E_LEDGER();
+        _liveStarted = true;
         uint256 n = effects.length;
         (uint64 through,,, uint64 stagedPublication) = ILedgerCounts(ledger).counts();
         if (
@@ -150,6 +158,64 @@ contract IndexModule is IIndexModule {
         }
         lastProcessed = effects[n - 1].admission;
         lastPublication = publication;
+    }
+
+    /// A fresh detached index always starts at zero. After live ingress this
+    /// instance cannot backfill later detachments: deploy a new genesis replay.
+    function replayNextPublication() external {
+        _requireIdle();
+        if(_liveStarted||IReplayLedger(ledger).indexModule()==address(this))revert E_SEGMENT();
+        uint64 publication=lastPublication+1;
+        IndexReplaySource.Fact[] memory facts=_replayFacts(publication);
+        Effect[] memory effects=new Effect[](facts.length);
+        for(uint256 i;i<facts.length;i++){
+            IndexReplaySource.Fact memory f=facts[i];Effect memory e;
+            e.kind=f.kind;e.admission=f.admission;e.author=f.author;e.recordId=f.recordId;e.typeId=f.typeId;
+            if(f.kind==3||f.kind==4){
+                e.bindingKey=f.bindingKey;e.scopeKey=f.scopeKey;
+                e.bindingOrdinal=f.bindingOrdinal;ShadowHead storage h=_shadow[e.bindingKey];
+                if(h.revision!=f.expectedRevision||h.revision>=type(uint32).max-1)revert E_SEGMENT();
+                e.freshBinding=h.ordinal==0;e.oldLive=h.live;e.oldTarget=h.target;
+                if((!e.freshBinding&&h.ordinal!=f.bindingOrdinal)||(f.kind==4&&!h.live))revert E_SEGMENT();
+                e.target=f.kind==3?f.recordId:bytes32(0);
+                h.target=e.target;h.ordinal=f.bindingOrdinal;h.revision++;h.live=f.kind==3;
+            }else if(f.kind==6){
+                if(_withdrawn[f.withdrawalTarget])revert E_SEGMENT();
+                _withdrawn[f.withdrawalTarget]=true;
+            }
+            effects[i]=e;_foldEffect(e);
+        }
+        _validatePublication(effects);
+        lastProcessed=effects[effects.length-1].admission;
+        lastPublication=publication;
+    }
+
+    function _replayFacts(uint64 publication) private view returns(IndexReplaySource.Fact[] memory){
+        address decoder=address(replayDecoder);
+        if(decoder.codehash!=replayDecoderCodehash)revert E_SEGMENT();
+        bytes memory input=abi.encodeCall(IndexReplayDecoder.publication,(publication,lastProcessed+1));
+        bytes memory output=new bytes(20_544);bool ok;uint256 size;
+        assembly("memory-safe"){
+            ok:=staticcall(gas(),decoder,add(input,32),mload(input),add(output,32),20544)
+            size:=returndatasize()
+        }
+        if(!ok||size<384||size>20_544)revert E_SEGMENT();
+        uint256 offset;uint256 n;
+        assembly("memory-safe"){offset:=mload(add(output,32)) n:=mload(add(output,64)) mstore(output,size)}
+        // Exact size384..20544 and checked size==64+n*320 imply1<=n<=64.
+        if(offset!=32||size!=64+n*320)revert E_SEGMENT();
+        return abi.decode(output,(IndexReplaySource.Fact[]));
+    }
+
+    function provenFrom() public view returns(uint64){return gapped?0:1;}
+
+    function replayReadiness() external view returns(IIndexReadiness.Ready memory r){
+        (uint64 a,,,uint64 p)=ILedgerCounts(ledger).counts();
+        bool active=ILedgerCounts(ledger).extsload(ExecutionSlots.PUBLICATION_ACTIVE)!=0;
+        bytes32 manifest=manifestHash();
+        r=IIndexReadiness.Ready(ledger,PHYSICAL_PROFILE,IndexReadinessProfile.CALLBACK,manifest,
+            gapped?bytes32(0):manifest,provenFrom(),lastProcessed,lastPublication,generation,
+            active?2:(!gapped&&lastProcessed==a&&lastPublication==p?1:0));
     }
 
     /// The same ordered memory-effect fold is the only family implementation for
@@ -325,8 +391,13 @@ contract IndexModule is IIndexModule {
         for (uint256 i = 1; i < n; ++i) {
             if (effects[i].admission != effects[i - 1].admission + 1) revert E_SEGMENT();
         }
+        _validatePublication(effects);
         return IIndexModule.afterPublication.selector;
     }
+
+    /// Shared final checks use the complete publication's terminal admission,
+    /// whether entered through live callbacks or canonical historical replay.
+    function _validatePublication(Effect[] memory) internal view virtual {}
 
     // ---------------------------------------------------------------- coverage
     /// COMPLETE only if the family is mandatory, maintained from admission 1, and no
@@ -364,7 +435,7 @@ contract IndexModule is IIndexModule {
             }
         }
         (uint64 admissions,,,) = ILedgerCounts(ledger).counts();
-        fromAdmission = f.fromAdmission;
+        fromAdmission = f.mandatory ? provenFrom() : f.fromAdmission;
         throughAdmission = lastProcessed;
         bool upToDate = lastProcessed == admissions && !gapped;
         status = (f.mandatory && fromAdmission == 1 && upToDate) ? COMPLETE : PARTIAL;
