@@ -2,7 +2,62 @@
 
 September 14, 2026 · v2 PM recommendation · no repository/deployment authority implied.
 
-**Current checkpoint, September16:** implementation has advanced through independently reviewed prototype`86c3649`; use [[core-closeout-results-20260915|the closeout results]] before reading the dated history below. Ordered acceptance, full required indexing/replay, qualified progressing reads, described Types, wallet signatures, finite live contract-backed Files, stance tags/queries/diagnostics and bounded native retained-state proofs have passed their scoped gates. Final whole-operation/resource measurements are active from a coherent clean build; final integration review still precedes the real-code handoff. Native proofs cost11.6–13.4Mgas even for small records and fail the tested joint maximum, so this is not general cheap proof portability. The repo boundaries and one-path recommendation below remain the intended build plan, not authorization to create/deploy repos or a claim that every large workload is affordable.
+**Current checkpoint, September16:** all scoped closeout tasks and the single
+[[core-closeout-final-review-20260916|combined review]] are complete through
+prototype `c9cc15b`: no Critical/Important defect identified in the inspected scope,
+six nonblocking evidence/test findings retained. Start with
+[[core-closeout-results-20260915|the current measurements]], not the dated history
+below. Ordinary File writes, contract consumption, ordered validation/indexing,
+query progress, Type interpretation, wallet authority, live values and bounded
+portable evidence have concrete implementations and failure controls. This is
+not a permanent freeze or authorization to create/deploy product repositories.
+
+### The next real-code work, in plain language
+
+The recommended path is still **compact Ledger + separate required index + explicit
+application profiles + qualified SDK + static SPA**. Do not maintain another
+competing product architecture just to avoid choosing this reversible starting point.
+
+1. **Package the contract boundaries.** Port the tested admission/index/rollback
+   semantics, with populated testnet upgrades from day one. The current Ledger has
+   only 38 runtime bytes spare. Design clean module boundaries and wider counters
+   before freezing storage/ABI; do not keep appending functions to this prototype.
+2. **Set the public application profiles.** Finalize normalized Names, the intended
+   Commons Concept identity and explicitly distinct File/revision/location tags.
+   Isolate exact-Type validator sources from evolving reader code. These are
+   production profile tasks, not evidence that the prototype already did them.
+   Version archive adapters with those exact builds: the current described-Type
+   archive pins the historical wrapper and does not accept the final clean-built
+   wrapper. Preserve the generic decoder, add a reviewed explicit support profile,
+   and run the source-off journey against the selected production artifacts.
+3. **Build the SDK and Files vertical.** Preserve qualified results and transaction
+   preconditions; wire measured cache/batching into the chosen browser transport,
+   then measure cold access with ordinary public providers and a real wallet.
+   The final resource run used caching but not HTTP batching; do not promise its
+   hundreds of requests are already an optimized guest experience.
+4. **Demonstrate the same API from a contract.** A small Arcade/native application
+   should read a known typed Record or narrow path, validate an action and publish
+   atomically. Use live-backed Files for frequently changing values already held
+   by another contract, rather than duplicating every update into retained Records.
+
+Measured examples: inline File create **2.17M gas**, descriptor-backed create
+**2.88M**, existing-Concept tag about **0.90M**, known typed Record read **124k**,
+mounted selected read about **703–723k**. These include different guarantees;
+setup is separate. A 64-author scan of only three candidates cost **4.61M** in
+one call. This supports a bounded L2-first implementation experiment, not cheap
+arbitrary onchain search or actual public-chain execution evidence.
+
+**Portability remains first-class and unfinished in breadth.** Independent retained
+interpretation and original attribution work in tested profiles. Native state-proof
+retention costs **11.6–13.4M** even for small records; its tested joint maximum
+fails under 15M. Foreign finality and general proxy history remain unsolved here.
+Keep the verifier/periphery seam and explicit unsupported grades; James must approve
+any launch limitation. Do not silently downgrade the long-term requirement.
+
+The [[core-closeout-engineering-choices-20260916|engineering-choice appendix]]
+preserves the reversible choices made during this pass. The detailed repository
+boundaries and build order are in sections 2–3 below. Older checkpoints are history,
+not instructions to repeat completed experiments.
 
 **September 15 whole-core audit update:** [[core-design-audit-20260915]] is now
 the current prototype closeout queue. It reproduces four composition/resource

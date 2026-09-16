@@ -1,0 +1,123 @@
+> Publication routing, v2 PM: the reviewed source and `L/` references below live on the preserved prototype branch `codex/efs-warroom-b-run`, not planning/main. This main-vault copy retains the independent review wording below, with trailing whitespace normalized, so its findings are visible with the shared designs. The original report remains in that prototype workspace's `.superpowers/sdd/core-closeout-resource-plan-20260915/final-review-report.md`.
+
+# Final assembled-core review
+
+September 16, 2026. Independent, read-only broad review after the scoped task gates.
+
+**Base:** `23a331e468102512d01acbf422dbf8a9349ee7b3`
+**Head:** `c9cc15b35a04af2c59fcc772e2678b69799a6173` (verified in the worktree)
+**Verdict:** Defensible prototype-to-real-code handoff, with the finite scope and remaining gates below. **0 Critical, 0 Important, 6 carried nonblocking Minor findings.** This is not a production-security approval, permission to deploy, or a claim that the owner’s complete product scope is implemented.
+
+For compact references below, `L/` means `Reviews/2026-09-12-efs-path-decision/lab-b/` relative to this worktree. References identify current source unless explicitly labelled historical.
+
+## Scope, method, and evidence limits
+
+I followed the installed requesting-code-review `code-reviewer.md` structure and read the final brief/preflight, relevant canonical audit/results/build-handoff requirements, task reviews, and controller ledgers. I reviewed the cumulative 42-commit package in source/evidence-oriented passes, using current source and targeted cumulative diffs. The package is 3,788,697 bytes across 538 changed files; much is retained evidence, generated artifacts, and literal data. I did **not** line-review every retained byte string, all historical log output, or every test in that package.
+
+Direct code coverage included the important admission/preparation/dispatch sections of Ledger; PublicationSupport and typed preparation; IndexModule/replay/field profiles and changed posting keys; read-set storage; ERC-1271 store/archive/browser verification; bounded native proof/checkpoint/archive and browser verifier; described registry/profile/frozen reader/archive extensions; Files final validation, scope tracking, page reader, retained lens and accumulator; Live Files profile/reader/adapter; stance profile/reader/accumulator/planner/source-off query verifier; changed SDK read-set and Files paths; the bounded RPC transport; and the complete final resource runner. I inspected selected adversarial test bodies as well as test inventories, rather than representing all suites as independently rerun.
+
+I made focused, read-only Node checks against the retained final packet and existing compiler artifact to resolve specific doubts: packet digest/receipt total, alias/runtime identities, replay/trace availability, clean wrapper identity versus the frozen archive adapter, and decoded mounted-read events. No suite, build, chain action, install, Git mutation, owner-demo action, or subagent was run. Only this report was written.
+
+The controller reports fresh 97 focused Forge passes, the current offline auditor PASS, and broader 47-source/869-metadata/45-artifact/214-receipt consistency checks. I inspected the offline auditor implementation and relevant retained evidence but did not duplicate those entire checks. Historical test counts, process continuity, and full source/compiler/receipt joins remain attributed to their named task/controller evidence. Internal consistency of retained RPC data is not independent proof of chain membership or consensus.
+
+## Strengths
+
+- The assembled publication path has an intelligible authority boundary: read-only preparation with the actual Ledger/proxy caller, fixed bounded support, ordered per-leaf rules and required postings, terminal Files obligations, and EVM-atomic rollback of Ledger, companions, nonce, and evidence. The dispatch split did not visibly turn mandatory acceptance into optional application policy.
+- Query completion, retained origin, current authority, and live observations remain different things in source. Owned accumulators do not infer origin absence from a suffix page; selected UNKNOWN stops resolution; mounted provider failure does not silently substitute old stored content.
+- Described Types retain a useful separation between interpretation, creator declaration, local installation, mandatory validation, custom state, and consumer-approved projection. Portable meaning does not automatically install an admissible Type or authorize an old writer.
+- The final economics packet measures real atomic recipes with backing data and explicit setup, an actual required TagStanceIndex, and a clean coherent artifact set. Failed stress/proof cases and expensive query paths are retained, not converted to success by raising caps or weakening validation.
+- Historical and new identities are treated as evidence, not interchangeable labels. In particular, the old native-proof mixed-cache packet is not falsely upgraded into proof of the final clean deployment.
+
+## Named integration-seam checks
+
+| Seam | Inspection and result |
+|---|---|
+| Preparation, proxy caller, and 1271 | `L/src/Ledger.sol:285`, `:850`; `L/src/PublicationSupport.sol:104`, `:388`; `PublicationPreparation.sol`. The 17-field/544-byte preparation boundary and first-13-field context copy agree; mutable counters/pointers remain initialized separately. Delegate preparation preserves the actual execution caller. Wallet validation is the selected deployed-code profile with bounded opaque signature/static call, not an EOA reinterpretation. |
+| Ordered admission and complete failure | `Ledger.sol:449`, `:484`, `:558`, `:803`; `FilesFinalValidator.sol`; selected `CoreOrderedAcceptance.t.sol` and `Guarded1271.t.sol` bodies. Per-leaf effects/checkpoint/index prefix precede terminal static validation; lock, execution and epoch checks survive the split. Name/Directory terminal checks intentionally permit later-in-publication Name materialization while each ordinary mandatory rule checks its valid prefix. Nonce, new read-set/store evidence and companion writes are in the reverting transaction. |
+| Live/replay index equivalence and cutover | `IndexModule.sol:145`, `:165`, `:225`, `:404`; `IndexReplaySource.sol`; `PublicationSupport.sol:237`. Live and replay share the fold, retained inventory is not accidentally live-count-only, replay reconstructs historical heads, and checked replacement compares manifest/generation/frontier/scope identity. Final resource evidence replays 58 admitted publications, not cutover itself; earlier scoped evidence owns cutover. Arbitrary mixed historical implementation replay is not claimed. |
+| Origin prefix, selected-scope mutation, and current guards | `FilesPageReader.sol`, `FilesRetainedLens.sol`, `FilesQueryAccumulator.sol`, `FilesLiveIndex.sol`, changed `compact-sdk.mjs`. Pinned origin/epoch/execution/generation and retained-history bounds agree. Accumulator-owned cursor/totals/unknown accounting protect absence; every selected scope, including empty/exhausted scopes, participates in mutation rejection. Current signing/send/read-back basis checks are separate from origin completion. |
+| Physical read sets and historical evidence | `ReadSetStorage.sol`; `Ledger.sol:530`; changed `compact-sdk-v2.mjs`; `ContractSignatureEvidenceStore.sol`, `ContractSignatureEvidenceArchive.sol`, `browser/contract-signature-evidence.mjs`. Legacy root15 bytes remain distinct from the new namespaced STOP-code carrier. Fallback is positively classified legacy-profile behavior, not arbitrary transport failure. Carrier preimage and original per-publication store pointer are checked; after an upgrade, the current support store is not substituted for historical evidence. Empty 1271 signature bytes still have distinguishable retained existence. |
+| Type interpretation versus acceptance | `TypeRegistry.sol:1`, `DescribedTypeProfile.sol`, `browser/described-type-reader.mjs`, `described-type-archive.mjs`, changed `guarded-archive.mjs`; selected `DescribedTypeProfile.t.sol`. Exact descriptor/ref/declaration/local-binding joins are present. Retaining a declaration does not install it; opaque legacy registration remains opaque; unknown later-leaf Type registration is rejected in initial preparation. Optional custom validation is inside the mandatory wrapper allowance. Supplied absent-Type sidecars still consume bounds. Projections remain explicit, lossy when declared, and read-only. |
+| Live typed Files and snapshots | `LiveFilesProfile.sol:85`, `:99`, `LiveFilesReader.sol`, `LiveFilesAdapter.sol`. Finite directed parent compatibility and helper configuration pins remain checked. A live observation validates the selected output shape, not the stricter stored admission rule; observation block is separate from selection origin. Snapshot saving performs a new independent admission. The reviewed selected direct-provider runtime is not a generic proxy/dependency-history assurance. |
+| Stance attribution, revision, and diagnostics | `TagStanceProfile.sol`, `TagStanceReader.sol`, `TagStanceQueryAccumulator.sol`, `browser/tag-stance-profile.mjs`, `core-closeout-tags-20260915/query-archive.mjs`. Statement author comes from binding authority, not token publisher. Dependencies precede the binding’s own cutoff. ASSERT/DENY, SILENT/tombstone, and UNKNOWN do not collapse. Selected revision is independently joined to the File; priority selection, full ordered diagnostic observations, and legacy ambiguous diagnosticHead remain different APIs. The source-off query verifier proves finite-profile consistency, not admission or destination authority. |
+| Native attribution/trust/deployment boundary | `NativePublicationProof.sol`, `BoundedStateProof.sol`, `RecentStateRootCheckpoint.sol`, `NativeClaimArchive.sol`, `browser/native-proof.mjs`. Positive bounded proof paths, canonical RLP, exact reserved widths/semantic joins, scratch reuse clearing, and retained original acceptance versus later observations were inspected. This is a selected direct-deployment/local-root profile. Checkpoint BLOCKHASH provenance is not foreign finality; archive retention is not edit/import authority. I did not perform a formal trie/security audit. |
+| Transport and actual SDK profile | `script/compact-read-transport.mjs`; changed SDK context/cache paths; final runner. Request graph ownership before queueing, request/response/pending/concurrency bounds, strict batch response IDs and explicit batch-refusal fallback were inspected. Final resource aliases use the final TagStanceIndex. Its transport is `batch:false`; 142/142 cold logical/HTTP calls and 297/297 create calls are actual unbatched measurements, not proof of final-profile batching savings. |
+| Final identities, operation accounting, and attribution | `script/core-final-resource.mjs`, `core-closeout-resource-20260915/task-2-report.md`, original and fix1 reviews, retained attempt4. Actual registry destination/method classification fixes the three Note registration mislabels without changing raw receipts or the grand total. Required helpers, constructor/initcode and setup are retained. Inclusive callback traces are not double-counted as disjoint support costs; known-key probes remain partial net-state attribution, not a universal minimum storage/gas decomposition. |
+
+## Final resource/evidence checks
+
+My focused read-only checks confirmed the retained `attempt-4.json.gz` SHA-256 is `d7b25e8dd961e31f194d572314d8dfbb6959b2c8c3e9f66b01098dac476f051c`, its 214 receipts sum to **268,576,960 gas**, all five attribution traces are AVAILABLE, and all 58 replay transactions succeeded for **22,233,464 gas**. The packet has 211 successful transactions and three intended reverts. `index` and `tagIndex` resolve to the same final deployment/codehash, not a cheaper stale base index.
+
+The report’s 22 registrations/3,710,146 gas and 34 other-setup transactions/20,979,989 gas match the corrected classification logic; setup/deployment is not rolled into a misleading per-user marginal figure. The final packet is tied to paid source `86c3649` and retained coherent artifacts; later evidence/audit commits, including `c9cc15b`, are not different paid runs.
+
+Representative whole-operation results are bounded evidence, not universal caps:
+
+| Recipe | Final reported gas / qualification |
+|---|---|
+| Inline 41-byte File creation | 2,169,867; one atomic five-leaf publication. |
+| Descriptor-backed 41-byte File creation | 2,881,507; one atomic seven-leaf publication including backing Bytes, Content and revision. |
+| Edit / rename | 1,327,787 / 1,535,870; actual distinct recipes, not one generic write price. |
+| Fresh File/revision stance | 1,294,225 / 1,327,142; existing-concept variants separately measured. |
+| Native Files application / Equipment adoption | 1,395,895 / 3,218,570; Equipment is a nine-leaf operation, not one free lookup. |
+| Fresh 64-by-4 guarded write | 5,539,847; dedup case 3,357,303. Distinct custom stress profile joint case 11,502,072 is not the final Files profile or dense occupancy. |
+| Folder paid scans | P1/B4 934,517; P64/B4 4,608,827; B1 complete scan totals 1,689,934 / 6,931,663. P64 means one occupied principal after 63 untouched principals, not 64 dense histories. |
+| Mounted inline / descriptor paid read | 702,756 / 722,779; unlike the 123,525 known-Note control, they perform selection and mounted-content guarantees. I independently decoded status=2, liveStatus=0, and the expected 41-byte `y`/`0x7b` bodies from both retained Observed logs. |
+
+The normal caps remain 15,000,000 requested gas, 16,777,216 hard gas, 24,576 runtime and 49,152 initcode. Ledger’s **24,538-byte runtime leaves only 38 bytes**; TagStanceIndex is 21,723 runtime/45,843 initcode. This proves current packaging fits, not comfortable production growth capacity.
+
+Earlier native proof verification-plus-retention costs 11.617–13.383M for its small cases. The admitted joint 8,192-byte body/10,592-byte read-set case still fails proof verification/retention under 15M. That is a real finite portability boundary, not a recurring surcharge on every File write. Final clean resource evidence does not rerun or migrate those exact historical proofs.
+
+## Issues
+
+### Critical — must fix
+
+None identified in the inspected scope.
+
+### Important — should fix before this prototype handoff
+
+None identified in the inspected scope. This does not waive the real-code/product requirements listed below.
+
+### Minor — carried, nonblocking
+
+1. **Offline trace fallback is not fully graceful.** `L/script/core-final-resource.mjs:146` unconditionally dereferences `tiny.trace.tree.gasUsed`, although acquisition can represent unavailable tracing. A future valid receipt packet without the convention trace can crash instead of reporting unavailable attribution. Branch on availability before interpreting the tree and retain receipt totals independently. Current packet has the convention and all five operation traces; current reported attribution is not invalidated.
+
+2. **Mounted paid-result assertions belong in the runner.** `L/script/core-final-resource.mjs:266` and `:267` retain successful transactions but do not assert the emitted selected result/status/body. A later semantic regression could be reported as a successful resource row. Decode and compare Observed status, revision and expected body in future runs. I independently checked the current retained events, so this is future harness debt, not evidence of a wrong current result.
+
+3. **Post-rollback callback state is not proof of temporal non-entry.** `L/test/DescribedTypeProfile.t.sol:168`–`:174` checks `!callback.called()` after the outer call reverted. Callback state would revert even if entered. Keep the rollback assertion, but establish pre-callback rejection with distinguishable errors/trace or a direct preparation check. Actual initial `PublicationSupport` acceptance-profile rejection was inspected and prevents the unknown future Type from reaching the execution loop; no acceptance bypass was found.
+
+4. **Four helper configuration rejection axes lack direct tests.** `L/test/LiveFiles.t.sol:175` tests wrong helper hash/ledger and runtime drift; `L/test/LiveFilesProfile.sol:99`–`:101` also checks Name Type/hash and Directory Type/hash without one negative test for each. Add those cases to protect later refactoring. The four actual comparisons are present and were reviewed, so this is narrow coverage debt rather than missing production checks.
+
+5. **Historical Types audit wording must retain checker attribution.** `L/core-closeout-types-20260915/audit.mjs:22`–`:37` validates a narrower set of signed-transaction/receipt/deployment joins than the aggregate assurance wording at `task-1-report.md:278`–`:291` can suggest. The parent’s separate checker supplied the additional joins; do not attribute them to this script alone. Preserve that distinction in any condensed handoff or amend future report wording without rewriting historical evidence. The source does not establish a missing core acceptance check.
+
+6. **Old Tags1 packet lacks late replay-index raw runtime.** `L/core-closeout-tags-20260915/measure.mjs:12`–`:15` captures runtimes before deployment at `:43`; `audit.mjs:16`–`:24` explicitly excludes the missing bytes. This narrows offline re-verification of that historical deployment. Keep the limitation on the old packet; capture late runtimes in new evidence. The final runner’s finalization captures all current deployments and its packet is separately coherent, but it cannot retroactively repair the old packet.
+
+## Other carried findings and CannotVerify dispositions
+
+- **Resolved, not indefinitely deferred:** old IndexModule coverage comment now correctly describes genesis live/replay and detached PARTIAL behavior (`L/src/IndexModule.sol:404`); IncomingQuotesReader checks the quote Type’s coverage rather than the posting key (`L/src/IncomingQuotesReader.sol:80`). Tags2 diagnostic attribution and query/native evidence joins were repaired in its scoped fix; Resource2 setup category misclassification is repaired in `c9cc15b`. I inspected the corresponding current implementation, not only the approval labels.
+- **Warning/readability debt remains, without a new correctness finding:** inherited Keys shadowing, unused LedgerImport parameters/packed-width lint, the local NativeSemantic shadow (`L/test/NativeSemantic.t.sol:34`), dense validation/runner formatting, and oversized test-harness warnings. A 100,365-byte composite harness is not the deployed helper/carrier. Preserve the actual warning-bearing logs; do not call the build pristine or reformat a frozen historical reader while claiming its original source identity.
+- **Historical verification gaps stay attributed:** task/controller checks cover the historical source/compiler/receipt/runtime joins they actually ran. This seat did not rerun all historical RED/GREEN campaigns, prove earlier owner-process continuity, or reproduce every old artifact set from one current default build. Missing old replay bytes remain missing; mixed-cache native artifacts remain their exact historical set. Whole-core review is now performed at the bounded coverage stated above, not transformed into universal test completeness.
+- **Native trust limitations remain unsupported breadth:** foreign consensus/finality, arbitrary historical proxy implementations, destination transaction inclusion, complete custom/wallet dependency-state history, and broad deployed-runtime equivalence are not established by the source-off bundles. The number-pinned eth_getProof fallback was not exercised by the retained campaign. These are explicit supported-profile boundaries, not claims fulfilled by raw ECDSA/receipt consistency.
+- **Public execution costs remain unverified as deployments:** only two Base model recipes completed before rate limiting (modeled totals 0.000013061525555385 and 0.000017344849763412 ETH); no real Base execution receipt follows. Era ergs/fees remain unmeasured. Local Anvil gas is neither a universal network fee quote nor real-wallet-popup evidence.
+- **Unexercised scale stays unexercised:** final few-candidate folders and sparse P64 cases do not prove arbitrary dense histories. Isolated body/ref/field/read-set maxima do not establish their universal joint envelope. The finite live provider matrix and proof body sizes do not imply arbitrary providers or one-call portable recovery for every admitted publication.
+
+### Newly clarified adapter/profile support boundary
+
+`L/browser/described-type-archive.mjs:4`–`:5` pins historical wrapper runtime `0x685da87926b52f471eca3b7994db46cccf1f3e8166c2af378fb45d7768806ec8` and initcode `0xe9eef707a978ff6519b427f0ffb6de5a01a73b076b3aa1591b18c3879991e725`; its checks at `:18`, `:21`, `:22`, `:35` and `:78` intentionally accept that exact profile.
+
+The existing clean final compiler artifact hashes to runtime `0xa76d5adae06243b8eb63a7112deb78ea3dbad7a49e2b0c000031710f4e200bfd` / initcode `0x9528709ba3a5ea46bca61db72900d97d22aebc04cd478f15a240cc554a02917a`. I joined the final packet’s stanceValidator constructor to that new runtime and token Type `0xd3d28154883684b04a02241741bf8385f221c80187d9a5b6ab556a079a88ed8b`.
+
+Therefore that **old archive extension does not support the final clean wrapper/Types**. The frozen generic described reader accepts an explicit runtime profile and is not thereby broken; the current final resource packet does not claim an old-adapter source-off roundtrip for its newly built token. This is not a discovered consensus/acceptance defect or a reason to relabel the old evidence. Carry an explicit adapter/build/Type support matrix into real code, and review a new adapter profile before claiming portability of those final clean identities. I notified the parent and read back the explicit boundary in canonical `core-closeout-results-20260915.md:36`; the parent also reports the corresponding build-plan update. No source change was requested or made.
+
+## Recommendations and requirements handoff
+
+1. Proceed from this prototype into a bounded real-code design/build plan, preserving exact artifact/provenance and the mandatory rule/index/final-validation semantics. Give Ledger packaging and Type-defining source isolation early attention: 38 runtime bytes of margin and metadata-coupled identity are material engineering constraints, not permission to strip identity or weaken indexes silently.
+2. Start real-code acceptance with one complete vertical slice: explicit supported profile, real wallet, public RPC, static-SPA browser-only caching, native consumer, canonical committed-basis read-back, and rejection/rollback fixtures. The local prototype and selected-contract-wallet tests do not replace that environment evidence.
+3. Keep the owner’s remaining product requirements live: global canonical-string Commons concepts are not the prototype’s namespaced ASCII concepts; ASCII Names are not the proposed NFC/UTF-8 product profile; stable-File/revision/Directory stances do not implement persistent path-slot tags applying automatically to a replacement File. Their absence is acceptable for this finite feasibility experiment, not a ruling to omit them from launch. Full wallet/provider/proof portability and supported dense workload envelopes likewise need explicit product choices.
+4. Address the six small evidence/test debts opportunistically in the next authorized implementation work; do not reopen completed historical campaigns solely to make their old logs look cleaner. Preserve old packets and publish new profile evidence as new evidence.
+5. Owner approval is still required for launch scope, permanent authority/admin/upgradability posture, production repositories/public deployment, and any launch limitations. This review makes no new protocol ruling and grants none of those authorities.
+
+## Assessment
+
+**Ready to merge? Yes for the scoped prototype closeout and prototype-to-real-code handoff; no production/deployment approval is implied.**
+
+The inspected assembled source provides a defensible finite basis for real reads/writes, mandatory composable Types, useful native consumers, qualified portable attribution and atomic rollback within unchanged normal caps. No load-bearing correctness gap was identified in this review; the six carried Minor items do not invalidate current paid evidence. Remaining product breadth, exact adapter/build compatibility, packaging headroom, public environment validation and security/permanence work must remain explicit gates rather than being silently promoted to guarantees.

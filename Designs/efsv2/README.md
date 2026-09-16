@@ -10,14 +10,18 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
-**September16 — current prototype checkpoint:**
-[[../../Reviews/2026-09-12-efs-path-decision/core-closeout-results-20260915|Closeout results through reviewed 86c3649]]
-now include ordered acceptance, full required indexing/replay, origin-qualified
-reads, described Types, bounded smart-wallet authorization, live contract-backed
-Files and required stance tags with both query directions, guarded planners and
-attributed diagnostics, plus bounded native retained-state proofs. Those proofs
-remain expensive and fail the tested joint maximum. Final integrated costs are
-active from a coherent clean build; whole-branch review remains.
+**September16 — bounded core prototype closeout complete:**
+[[../../Reviews/2026-09-12-efs-path-decision/core-closeout-results-20260915|Final results through reviewed c9cc15b]]
+include ordered acceptance, required indexing/replay, qualified reads, described
+Types, wallet authority, live Files, stance tags and bounded retained-state proofs.
+The [[../../Reviews/2026-09-12-efs-path-decision/core-closeout-final-review-20260916|combined review]]
+found no Critical/Important defect in the inspected scope, with six nonblocking
+evidence/test findings. Small inline File creation costs 2.17M gas; broad reads
+and native proof recovery remain expensive, and the proof joint maximum fails.
+Exact archive/build compatibility and real-wallet/public-provider validation
+remain explicit. Next is the
+[[../../Reviews/2026-09-12-efs-path-decision/compact-mvp-build-plan-20260914|sequenced real-code handoff]],
+including module packaging, production profiles and the SDK/Files/native vertical.
 Earlier dated status below is historical. The owner demo is unchanged; this is
 not permanent protocol adoption or public-deployment authority.
 

@@ -8,6 +8,8 @@
 
 **Spec:** [[core-closeout-results-20260915]], packets3/6; [[core-design-audit-20260915]]. Run final measurements after index replay, query, Type/authority, live Files, the [[core-closeout-tags-plan-20260915|bounded stance-tag experiment]] and SDK changes are reviewed. Pin the final source before reporting.
 
+**Final status September16:** both tasks and the single [[core-closeout-final-review-20260916|combined core review]] are complete through `c9cc15b`. The unchecked lists below preserve the executed task brief, not open work to rerun. Results and remaining production/environment boundaries are in [[core-closeout-results-20260915]] and [[compact-mvp-build-plan-20260914]]. No active worker or source/build/chain lease remains.
+
 ## Global Constraints
 
 - Existing prototype and one source/build/chain owner; parent owns canonical main documents/publication. No owner-demo mutation, production repo, public transaction/deployment, package install, Fable, unbounded tracing/history or architecture tournament.
@@ -45,14 +47,18 @@ This is a reversible implementation boundary needed to complete the authorized c
 
 ## Task 2: Cold integrated receipts, limited attribution and feasible combinations
 
-**Execution status September16:** active from reviewed/published prototype
-`86c3649`, after the native-proof gate. One Astra Extra High worker owns the
-source/build/bounded-chain lease; parent owns canonical main docs/publication.
-Start with a coherent clean build: the native final-1 packet intentionally retains
-mixed-cache artifact identities, not the output of a clean default build at its
-source commit. Record actual new hashes/Types and preserve earlier receipts under
-their own identities. Its expensive recovery-proof operations are not recurring
-File-write charges and need no repeated proof campaign in this resource task.
+**Execution status September16:** complete through independently reviewed
+`c9cc15b`, including one offline accounting correction; whole-core review is
+separate. The finite run retained 214 transactions, coherent clean-build identities,
+complete Files/native recipes, paid scan/replay totals, bounded attribution and
+partial public fee observations. Parent fresh 97 focused tests and source/receipt
+joins pass. No source/build/chain lease remains active. See
+[[core-closeout-results-20260915#Final integrated resource packet — September16|the measured outcomes and limits]].
+The original native proof packet retains its distinct mixed-cache artifacts;
+the final resource run does not relabel them. Recovery-proof cost is not a
+recurring File-write charge. The requirements below are the executed task brief,
+not a request to repeat the campaign; final batching savings, complete public fee
+coverage and Era execution remain explicitly unmeasured.
 
 **Final-profile clarification, September16:** ordinary Files/native measurements
 must use the reviewed `TagStanceIndex` composition, including inherited generic,

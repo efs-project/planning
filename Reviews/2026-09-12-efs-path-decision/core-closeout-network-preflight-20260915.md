@@ -4,6 +4,22 @@ Observed September15,2026 Chicago / September16 00:25–00:26 UTC. Read-only pre
 
 ## Bounded live observations
 
+**Final integrated recipe refresh, September16 14:07:28UTC:** retained Resource2
+packet `d7b25e8dd961e31f194d572314d8dfbb6959b2c8c3e9f66b01098dac476f051c`
+observes Base block `0x31022de`, hash
+`0x87370c81d4a4fd5119883b24fd8e2a8f77f84ba85c4ae688ff9deb47dd8d0dd5`,
+execution price 6,012,195wei/gas. Full unsigned serialized inputs plus exact-hash
+oracle results give local-gas cross-venue models of **0.000013061525555385ETH**
+for the complete 41-byte inline File create and **0.000017344849763412ETH** for
+the atomic descriptor-backed create. Both include returned L1 estimates and an
+observed zero operator component; neither is a Base execution receipt. Later
+operator/L1 requests returned `-32016` rate limits, so those whole totals remain
+unavailable. Final Base hash controls were only partial. Era's hash controls
+succeeded and nonexistent-hash calls errored, but its state root was still zero;
+execution/ergs/pubdata/deployment remain unmeasured. No public writes or retry
+campaign. See [[core-closeout-results-20260915#Final integrated resource packet — September16|final resource qualifications]];
+the earlier preflights below are historical observations, not guaranteed provider capacity.
+
 Three HTTP requests per endpoint, each containing three independent JSON-RPC reads: initial chain/header/gas-price lookup; exact-hash code/storage/call; nonexistent-hash negative controls. All six HTTP requests returned200 and each batch returned its three request IDs. The successful `eth_call` used the identity precompile with input/output `0x1234`; code/storage reads used the zero address, not an EFS deployment.
 
 | Observation | Base | ZKsync Era |
