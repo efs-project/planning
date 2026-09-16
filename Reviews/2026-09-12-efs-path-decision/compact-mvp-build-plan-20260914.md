@@ -2,6 +2,12 @@
 
 September 14, 2026 · v2 PM recommendation · no repository/deployment authority implied.
 
+**September 16 follow-through:** James chose one more quick, usable prototype
+before the clean-slate engineering handoff, not production repositories yet.
+[[files-workbench-20260916|The integrated Files workbench]] connects the final v2
+core to actual browser writes/reads, uploads, paths, Lens fallback and tag filters.
+Its walkthrough and explicit remaining parity gaps are the current UI checkpoint.
+
 **Current checkpoint, September16:** all scoped closeout tasks and the single
 [[core-closeout-final-review-20260916|combined review]] are complete through
 prototype `c9cc15b`: no Critical/Important defect identified in the inspected scope,
