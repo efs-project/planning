@@ -40,10 +40,12 @@ test('local faucet tops up to one ETH, verifies it, and never reduces a larger b
   calls.length=0;balance='0x0';
   assert.equal(await fundLocalWallet({config,pageUrl,address,rpc}),10n**18n);
   assert.deepEqual(calls.find(([m])=>m==='anvil_setBalance'),['anvil_setBalance',[address,'0xde0b6b3a7640000']]);
+  assert.deepEqual(calls.slice(-3).map(([m])=>m),['anvil_setBalance','evm_mine','eth_getBalance']);
   assert.equal(calls.at(-1)[0],'eth_getBalance');
   calls.length=0;
   await fundLocalWallet({config,pageUrl,address,rpc});
   assert.equal(calls.filter(([m])=>m==='anvil_setBalance').length,0);
+  assert.equal(calls.filter(([m])=>m==='evm_mine').length,0);
 });
 test('local faucet does not claim success when the balance was not updated',async()=>{
   await assert.rejects(fundLocalWallet({config,pageUrl,address,rpc:async m=>expected[m]}),/balance/);

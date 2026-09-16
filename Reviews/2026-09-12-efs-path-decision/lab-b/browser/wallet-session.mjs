@@ -48,6 +48,9 @@ export async function fundLocalWallet({config,pageUrl,address,rpc}){
   const balance=BigInt(await rpc('eth_getBalance',[address,'latest'])),target=10n**18n;
   if(balance>=target)return balance;
   await rpc('anvil_setBalance',[address,'0x'+target.toString(16)]);
+  // Setting Anvil state alone does not advance the head. MetaMask can keep
+  // displaying its old balance until its block tracker observes a new block.
+  await rpc('evm_mine');
   const funded=BigInt(await rpc('eth_getBalance',[address,'latest']));
   if(funded<target)throw Error('Local test balance was not funded. Reconnect to try again.');
   return funded;
