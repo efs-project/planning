@@ -21,17 +21,21 @@ test('unavailable selected header makes positive and negative keyed revision tag
   for(const rawPresent of [false,true])await t.test(`raw keyed presence ${rawPresent}`,async()=>{
     if(rawPresent)await env.transact('ledger','bind',[e.id('efs2/purpose/tag/1'),other.file,concept,file.file,0],'positive-keyed-revision-tag','alice');
     const context=await sdk.pin(),basis=[context.admission,context.generation,context.epoch,context.executionSet];
-    const [raw]=await env.call('joined','readPage',[manifest.folder,authors.map(a=>e.zeroPadValue(a,32)),[concept,3,false,''],basis,'0x',32],{blockHash:context.blockHash,requireCanonical:true});
-    const observed=raw.rows.find(row=>row.placement.target===file.file);
-    assert.equal(Number(observed.head.status),1);assert.equal(Number(observed.header.qualification),0);
-    assert.equal(Number(observed.revisionTag.qualification),1);assert.equal(observed.revisionTag.present,rawPresent);
-    const page=await sdk.listFolderPage({authors,context,concept,tagScope:'either'}),joined=page.pageRows.find(row=>row.file===file.file).point.value;
     const point=await sdk.readFile({file:file.file,authors,context,concept});
-    assert.equal(joined.revisionTag.assessment,'UNKNOWN');assert.equal(joined.revisionTag.present,null);
-    assert.equal(joined.revisionTag.subject,other.file);assert.equal(joined.revisionTag.selection.status,rawPresent?1:0);
-    for(const key of ['assessment','present','subject','concept'])assert.equal(joined.revisionTag[key],point.value.revisionTag[key],key);
-    assert.equal(joined.fileTag.assessment,'PRESENT','independent stable tag remains known');
-    assert.equal(page.tagCoverage,'PARTIAL');assert.equal(page.tagCoverageScope,'PAGE');
+    for(const tagScope of ['revision','either']){
+      const [raw]=await env.call('joined','readPage',[manifest.folder,authors.map(a=>e.zeroPadValue(a,32)),[concept,tagScope==='revision'?2:3,false,''],basis,'0x',32],{blockHash:context.blockHash,requireCanonical:true});
+      const observed=raw.rows.find(row=>row.placement.target===file.file);
+      assert.equal(Number(observed.head.status),1);assert.equal(Number(observed.header.qualification),0);
+      assert.equal(Number(observed.revisionTag.qualification),1);assert.equal(observed.revisionTag.present,rawPresent);
+      assert.equal(Number(observed.matchStatus),0,'unavailable header conservatively qualifies the raw match');
+      const page=await sdk.listFolderPage({authors,context,concept,tagScope}),row=page.pageRows.find(row=>row.file===file.file),joined=row.point.value;
+      assert.equal(joined.revisionTag.assessment,'UNKNOWN');assert.equal(joined.revisionTag.present,null);
+      assert.equal(joined.revisionTag.subject,other.file);assert.equal(joined.revisionTag.selection.status,rawPresent?1:0);
+      for(const key of ['assessment','present','subject','concept'])assert.equal(joined.revisionTag[key],point.value.revisionTag[key],key);
+      assert.equal(joined.fileTag.assessment,'PRESENT','independent stable tag remains known');
+      assert.equal(row.match,'UNKNOWN');assert.equal(page.queryKnowledge,'UNKNOWN');assert.equal(page.queryAbsent,false);
+      assert.equal(page.tagCoverage,'PARTIAL');assert.equal(page.tagCoverageScope,'PAGE');
+    }
   });
 });
 test('requested tag joins stay partial independently of either and none matches',{timeout:120000},async t=>{
