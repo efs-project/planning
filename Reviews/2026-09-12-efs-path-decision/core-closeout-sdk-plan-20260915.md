@@ -16,7 +16,20 @@
 - Cache/transport optimizations do not change transaction semantics or calldata. Report HTTP requests, logical calls, bytes, latency and cache work separately. No claimed savings without matched instrumentation.
 - Preserve runtime24,576/initcode49,152, normal15M/hard16,777,216 transaction limits and all reviewed acceptance/index/Type/authority checks. Storage changes need populated-upgrade and archive evidence, not only a cheaper fresh write.
 
-## Task 1: Exact-basis reuse and bounded read batching
+## Task 1: Make tag assessments explicit and repair join coverage
+
+**Files:** narrow shared tag normalization in`browser/compact-sdk.mjs`, its existing`files-view.mjs`/`app.mjs` consumers, focused SDK/view/joined tests. This is API correctness/safety, not UI redesign.
+
+- [ ] Reproduce joined`tagCoverage` claiming COMPLETE from a known query match while a requested tag join is UNKNOWN. Derive tag coverage from actual requested joins; keep query match separate. A known-positive OR match stays a match even if the other tag join is unknown. With concept0, any vacuous coverage describes the empty requested join set, not evaluated placeholder tags.
+- [ ] Use one normalized tag shape with mandatory`assessment: PRESENT | NOT_PRESENT | UNKNOWN | NOT_APPLICABLE`;`present` is true/false only for the first two, null otherwise. Preserve exact subject, concept, selected revision, provenance, label qualification and outer basis. Existing`evaluated` may remain as a consistently derived compatibility field. Missing/malformed discriminants never become known negatives.
+- [ ] Missing/conflicting/unavailable File revision means UNKNOWN, not Directory-N/A. A missing Concept label does not erase otherwise proven keyed presence. Preserve outer successful-negative`knowledge:PRESENT` as assessment availability for compatibility; document it rather than silently changing its meaning.
+- [ ] Update existing consumers to branch on assessment, never infer absence by negating a nullable boolean. Keep unknown/masked/N/A distinct. Preserve the existing valid AND inference in fallback mixed name/tag filtering; document its diagnostic-retention difference from the more conservative joined matcher instead of calling it a correctness repair.
+- [ ] Add focused controls for direct selection RPC failure, label-only failure, true absence/mask/wrong-target negative, missing/conflicting revision, Directory-N/A, missing discriminator, point/joined parity, and either/none filter modes with a requested unknown join. Tag coverage is page-local unless explicitly accumulated in the owned continuation; never let the final page falsely certify earlier unknown joins.
+- [ ] Self-review, exact task commit/report and independent review. No broad Result/SDK redesign or visual polish.
+
+Source preflight atdcb9b2f found no false-absence propagation in current main consumers: they already check evaluation/outer qualification. The boolean shape is a developer hazard; the aggregate tagCoverage derivation is the concrete bug. Fix both narrowly without overstating the finding.
+
+## Task 2: Exact-basis reuse and bounded read batching
 
 **Files:** `browser/compact-sdk.mjs`, narrow independent-read grouping in `browser/compact-sdk-v2.mjs`, injected transport in `script/compact-environment.mjs`, measurement script and focused SDK tests. Evidence in `core-closeout-sdk-20260915/`.
 
@@ -30,7 +43,7 @@
 - [ ] Measure matched uncached, cache-only, batch-only and combined controls: first cold operation, repeated same-block read, new block after a write, richer Directory/carrier profile and bounded1/8/64-principal read sets. A too-large joint workload is a reported limit, not an implicit promise that every maximum combines.
 - [ ] Self-review, commit exact task paths, report source/commands/outcomes and release ownership for independent review. No push.
 
-## Task 2: Additive immutable read-set carrier experiment
+## Task 3: Additive immutable read-set carrier experiment
 
 **Files:** Ledger read-set retention/getter and a fixed helper only if size demands it; guarded archive/SDK profile qualification and focused upgrade/cost fixtures. This is separate from transport caching.
 

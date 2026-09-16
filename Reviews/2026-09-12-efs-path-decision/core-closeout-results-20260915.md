@@ -27,6 +27,8 @@ The real cold native Name255 bind initially reverted `E_INDEX(empty)` at871,092 
 - Ledger runtime24,375bytes (201bytes headroom); initcode with arguments27,882bytes. Constructor-created support deployment is included in the5,958,151gas implementation deployment. `readSetHash` source mutability changes pure→view; selector/hash output stays unchanged. Later features need coherent module boundaries, not an assumption of spare kernel room.
 - Evidence: `lab-b/core-closeout-acceptance-20260915/` on the prototype branch. Full generic families, replay, busy-Realm query progress and the remaining packets are not closed by these checks.
 
+**Full-index in-progress evidence, not reviewed completion:** actual cold8-reference publication under the original350k allowance succeeds at1,017,982whole gas after inline-singleton storage. Adding one scalar and digest index refuses at1,133,618 with counts unchanged. The worker is calibrating a fixed declared-work allowance under the existing9.8M shared maximum/15M transaction ceiling. Full fields, Files paths and matched ordinary overhead still need the final source/receipt packet.
+
 ## Six-packet finish line
 
 | Packet | Current state | Evidence still needed |
@@ -36,7 +38,7 @@ The real cold native Name255 bind initially reverted `E_INDEX(empty)` at871,092 
 | 3. Resource envelope and avoidable overhead | Name/search waste repaired and reviewed. | Cold paid joint body/ref/name/Lens bounds, full required-profile callback costs and same-guarantee storage/evidence decomposition. |
 | 4. Contract query progress and live-backed Files | [[core-closeout-query-plan-20260915|Query plan]] and [[core-closeout-live-files-plan-20260915|typed live Files plan]] ready. | Owned paid continuation, retained-origin HEAD/tag joins, scope-mutation limits, typed live provider and immutable snapshot cost comparison. |
 | 5. Type interpretation, participation and authority | [[core-closeout-types-plan-20260915|Finite Type/participation plan]] and [[core-closeout-authority-plan-20260915|wallet/native-proof plan]] ready; not yet implemented. | Recoverable third-party descriptors/compatibility, non-griefable public registration, smart-wallet evidence, authenticated native provenance and honest private/external boundaries. |
-| 6. Integrated access and complete economics | [[core-closeout-sdk-plan-20260915|Bounded transport and read-set experiment plan]] ready. [[core-closeout-network-preflight-20260915|Small public-RPC preflight]] passed hash/batch controls on Base/Era; Era root-proof limitation confirmed. | Final cold Files/native-app journey, measured SDK transport, integrated public-provider access and all-in network fees. |
+| 6. Integrated access and complete economics | [[core-closeout-sdk-plan-20260915|Qualified-tag, bounded transport and read-set plan]] ready. [[core-closeout-network-preflight-20260915|Small public-RPC preflight]] passed hash/batch controls on Base/Era; Era root-proof limitation confirmed. | Correct tag-join coverage independently of query match, final cold Files/native-app journey, measured SDK transport, integrated public-provider access and all-in network fees. |
 
 ## Engineering direction from this pass
 
@@ -47,3 +49,9 @@ The real cold native Name255 bind initially reverted `E_INDEX(empty)` at871,092 
 **Public Types:** removing the admin check alone is unsafe. New registration currently bumps the global epoch, and identical rule code can have different storage in different instances. Investigate portable recoverable declarations and a finite structural interpreter without allowing a stranger to choose somebody else's local stateful rule binding. Do not require a vanished creator to freshly sign every destination merely to retain or interpret a portable Type.
 
 No owner choice is being waived. No UI polish, production repository, public deployment, Claude/Fable usage, owner-demo change or new recurring run. One Astra High/Extra High source/build worker at a time; independent read-only specialists and scoped review run alongside it.
+
+## Final joint-resource check, after integration
+
+Do not substitute isolated maxima for a supported workload. The final packet must retain cold whole receipts for: a maximum-body/eight-reference profiled Record; a real Name255 Files operation with its ordinary guarded dependency set; a64-principal/four-coordinate guard with a small mutation; paid low-selectivity folder/tag scans with short and255-byte names; and replay of a largest actually admitted source publication. Record all setup separately. If a combination exceeds its callback/transaction allowance, preserve the failed receipt and identify the finite supported combination or architectural follow-up. No arbitrary all-maxima guarantee, silent batch splitting, shorter-name waiver or claim that future EVM changes will solve it.
+
+Compare the same recipe before/after representation work. Distinguish logical data and authority/history commitments from redundant copies, index materialization, new-key versus reused-key storage, validation/dispatch, calldata and venue fees. A marginal append cost is never presented as the whole guarded tag price.
