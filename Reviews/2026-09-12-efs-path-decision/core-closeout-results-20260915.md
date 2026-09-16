@@ -4,6 +4,8 @@ September15,2026 · v2 PM · core-closeout-20260915
 
 **Status:** implementation in progress. James authorized finishing the six-packet [[core-design-audit-20260915|Core audit closeout]]. This page separates reviewed fixes from work still being implemented; no whole-prototype completion or permanent protocol claim.
 
+**Latest reviewed checkpoint: `2e8838d`.** Queries now finish despite unrelated writes and preserve one historical placement/HEAD/tag snapshot. A separate bounded retained-inventory query also survives changes to the selected folder. This closes a correctness/liveness gap, not the performance budget: a64-author joined scan is still about3.1M gas per candidate, and a seven-candidate call refused under15M. SDK qualification/transport, recoverable Types, wallet/native evidence, live Files, the bounded stance-tag experiment and final integrated economics remain in flight or queued below.
+
 ## Reviewed now
 
 **Byte-work repair, source `deb2d966223bcc54ecb1776c604213ebb1c10994`:**
@@ -65,6 +67,31 @@ The minimal repair exceeded runtime by 19 bytes. Moving the coherent publication
 
 Evidence: `lab-b/core-closeout-resource-20260915/record-occurrence.md` in the prototype worktree. Future wallet/carrier fit and final counter capacities remain separate tasks and decisions.
 
+## Origin-stable contract queries reviewed
+
+**Reviewed source `2e8838d1d5bb1df97d8400b1a34f313e74c58955`:** the fast folder profile checks exact last-mutation admissions for every selected author/scope, including empty, consumed and terminal scopes. Unrelated writes no longer restart it. HEAD and stable/revision tags resolve at the original admission A, while the page separately reports current C. Missing history remains UNKNOWN. An owning contract controls its cursor, raw total, result commitment and complete prefix; historical absence cannot authorize a current write.
+
+A separate retained-inventory reader pins append-only origin lengths, reads placement/masks at A and completed eight rows through seven selected-folder renames. This trades progress during relevant churn for lifetime-candidate work. The measured query pinned eight entries; after further churn the same folder had31 lifetime entries but only eight live entries. Wide/deep prefix discovery is still unmeasured and can consume the allowance before a row is read. The fast and retained profiles are not interchangeable promises.
+
+| Paid query profile | Whole step gas | Meaning |
+| --- | ---: | --- |
+| Two authors, one candidate/page, unrelated writes | first682,637; later481,391–498,075 | Completed all eight origin rows despite intervening writes. |
+| One author, seven remaining candidates | 1,478,365 | One bounded page, not an arbitrary large-directory claim. |
+| Eight authors, four candidates | 1,830,234 | Separate finite workload. |
+|64authors, one candidate | 3,097,152–3,199,148 continuation | Completes, but expensive; eight successful pages total24,968,297gas before session deployment. |
+|64authors, seven candidates | **14,768,931 reverted** under15M | Owned progress unchanged; smaller calls then completed. No absence inferred. |
+| Retained one-author snapshot through folder churn | first734,809; later517,264–535,268 | Eight pages total4,422,595gas; separate session/reader deployment. |
+
+These include actual transaction costs, not just inner calls. Session deployment adds1,598,276/1,755,685/3,015,023gas for the1/8/64-author deep profiles. Only one later candidate per run receives64post-origin changes to each of its three joins; the packet does not claim all candidates/authors have maximal history. A browser's `eth_call` does not charge transaction gas, but this work still matters to RPC limits/latency.
+
+- Worker198/198 focused covering checks pass; parent fresh origin/churn11/11 and existing real SDK joined integration14/14 pass. Independent Astra Extra High review approved spec and quality with no Critical/Important findings. Parent matched24source hashes,157raw Ethereum transaction hashes/receipt gas/status/limits and six current artifact metadata/size sets; reviewer separately checked receipt summaries and actual constructor lengths.155receipts succeeded; two expected refusals remain retained. This is observed local evidence, not state proofs or independently repeated historical RED runs.
+- One fixed index-only companion now holds dense scope arrays and mutation stamps. Shared live/replay folds, final Name/Directory checks, code/ledger/writer pins and atomic rollback remain. ProfiledFiles runtime24,491 (85spare), actual initcode44,737. Ledger runtime23,434, actual initcode35,535 after its embedded support changed. Constructor arguments and nested deployment are included; no gas/size caps were raised.
+- Precise warning logs include inherited warning classes at some new oversized Foundry-fixture locations; real deployable contracts fit. Test output is not called pristine. Owner demo stayed unchanged and a read-only HTTP check returned200; only its original Anvil process remains after the temporary worlds closed.
+
+**Performance follow-up:** the owner-last64-author case can perform64placement/mask head reads plus3×64HEAD/tag reads per candidate. Repeated basis checks, external calls/selector copies and cold slots are source-derived causes, not a trace-based cost allocation. A bounded same-origin batch reader can share qualification and reduce calls; it must retain every authority/history/UNKNOWN rule. Remaining selector work and historical-prefix initialization are not free. Route this as explicit tuning/feasibility evidence before practical wide-Lens promises, not an endless expansion of the completed origin-correctness task.
+
+Evidence: `lab-b/core-closeout-query-20260915/` on the published prototype branch. The next source owner is SDK Task1; the existing known `tagCoverage` aggregation bug is not fixed by this query checkpoint.
+
 ## Six-packet finish line
 
 | Packet | Current state | Evidence still needed |
@@ -72,9 +99,9 @@ Evidence: `lab-b/core-closeout-resource-20260915/record-occurrence.md` in the pr
 | 1. Ordered acceptance and application atomicity | Reviewed atdcb9b2f; focused parent28/28 and actual paid cases pass. | Repeat relevant integrated cases after the full index bundle lands. |
 | 2. Full required index bundle and evolution | [[core-closeout-index-plan-20260915|Both tasks]] reviewed through7af2695: canonical populated replay/catchup/cutover and independent family comparisons pass. | Final integrated largest-body replay and joint-envelope refresh; historical source decoders remain explicit supported profiles. |
 | 3. Resource envelope and avoidable overhead | Name/search waste repaired; [[core-closeout-resource-plan-20260915|packed-count repair and preparation extraction]] reviewed at 4c1098f; normal sizes fit and 65 selected checks pass. | Cold paid joint body/ref/name/Lens bounds and same-guarantee storage/evidence decomposition. |
-| 4. Contract query progress and live-backed Files | [[core-closeout-query-plan-20260915|Query implementation]] active after reviewed 4c1098f; [[core-closeout-live-files-plan-20260915|typed live Files plan]] remains queued. | Owned paid continuation, retained-origin HEAD/tag joins, scope-mutation limits, typed live provider and immutable snapshot cost comparison. |
+| 4. Contract query progress and live-backed Files | [[core-closeout-query-plan-20260915|Bounded origin-query task]] reviewed at2e8838d, including paid owned continuation and retained churn; [[core-closeout-live-files-plan-20260915|typed live Files plan]] queued. | Practical wide/deep query costs, bounded retained initialization, typed live provider and immutable snapshot comparison. |
 | 5. Type interpretation, participation and authority | [[core-closeout-types-plan-20260915|Finite Type/participation plan]] and [[core-closeout-authority-plan-20260915|wallet/native-proof plan]] ready; not yet implemented. | Recoverable third-party descriptors/compatibility, non-griefable public registration, smart-wallet evidence, authenticated native provenance and honest private/external boundaries. |
-| 6. Integrated access and complete economics | [[core-closeout-sdk-plan-20260915|Qualified-tag, bounded transport and read-set plan]] ready. [[core-closeout-network-preflight-20260915|Small public-RPC preflight]] passed hash/batch controls on Base/Era; Era root-proof limitation confirmed. | Correct tag-join coverage independently of query match, final cold Files/native-app journey, measured SDK transport, integrated public-provider access and all-in network fees. |
+| 6. Integrated access and complete economics | [[core-closeout-sdk-plan-20260915|Qualified-tag Task1]] now implementing; bounded transport/read-set tasks queued. [[core-closeout-network-preflight-20260915|Small public-RPC preflight]] passed hash/batch controls on Base/Era; Era root-proof limitation confirmed. | Correct tag-join coverage independently of query match, final cold Files/native-app journey, measured SDK transport, integrated public-provider access and all-in network fees. |
 
 ## Engineering direction from this pass
 

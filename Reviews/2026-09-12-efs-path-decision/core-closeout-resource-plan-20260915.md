@@ -6,7 +6,7 @@
 
 **Architecture:** One bounded final runner reuses the reviewed compact SDK, receipt recorder, full required index, application and query fixtures. Receipts establish total gas; bounded call trees and known-slot readbacks qualify attribution without pretending to establish an irreducible minimum.
 
-**Spec:** [[core-closeout-results-20260915]], packets3/6; [[core-design-audit-20260915]]. Run final measurements after index replay, query, Type/authority, live Files and SDK changes are reviewed. Pin the final source before reporting.
+**Spec:** [[core-closeout-results-20260915]], packets3/6; [[core-design-audit-20260915]]. Run final measurements after index replay, query, Type/authority, live Files, the [[core-closeout-tags-plan-20260915|bounded stance-tag experiment]] and SDK changes are reviewed. Pin the final source before reporting.
 
 ## Global Constraints
 
@@ -49,6 +49,7 @@ This is a reversible implementation boundary needed to complete the authorized c
 
 - [ ] Record exact source/artifact/runtime/execution/manifest/profile hashes, pre/post block hashes/counters, raw signed inputs and receipts, body/ref/field counts, full read-set preimage/dimensions, fresh/hot/dedup conditions, transaction/signature counts and canonical effect readback. Separate deployment, Directory/Type/target registration and all setup totals. All failed receipts remain retained.
 - [ ] Actual named41-byte Files create/edit, fresh stable-File and selected-revision tags, existing-Concept controls, fresh rename, remove/restore and tag removal. Measure the SDK's actual atomic publication recipe. Also exercise its small descriptor-backed content recipe when distinct: count every backing-byte transaction and state its visibility/atomicity boundary. Do not label an INLINE document a descriptor upload or a descriptor index entry fetched-byte verification.
+- [ ] Carry the separately reviewed new-purpose stance-tag whole-action/query measurements into the final table, with exact source/profile equivalence checked; refresh only affected representative rows if later code changed them. Keep legacy mask removal distinct from new SILENT/retraction, and closed-Lens Concept lookup distinct from all-author discovery. No automatic UI-default or permanent-profile adoption.
 - [ ] Real native application: final-index nine-leaf Character+7Items+Equipment acceptance and small update, plus later-rule/app rollback. Reuse the existing Files consumer where compatible, accurately distinguishing native`execute` after app-side read checks from Ledger`executeGuarded`. No new app architecture solely for this benchmark.
 - [ ] Joint body case: fresh8,192-byte Record with8checked refs,4scalar fields and one digest; nonzero-byte density disclosed. Price first/second/later shared-key inserts and a normal small guarded version. These are whole Records, not whole Files. Registered Type/eight target Records are explicit setup.
 - [ ] Actual atomic File create or rename with Name255 and its normal complete guard set. Earlier separate Name retention and binding receipts do not satisfy this row.
