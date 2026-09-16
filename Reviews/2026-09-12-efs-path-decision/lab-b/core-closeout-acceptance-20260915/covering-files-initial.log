@@ -1,0 +1,128 @@
+Compiling 7 files with Solc 0.8.30
+Solc 0.8.30 finished in 17.90s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:88:21:
+   |
+88 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:93:29:
+   |
+93 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:113:22:
+    |
+113 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:25:
+    |
+117 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> test/FilesNames.t.sol:297:14:
+    |
+297 |             (bool ok, bytes memory err) = address(reader).staticcall(abi.encodeCall(reader.readName, (position, MOUNT, role, bad)));
+    |              ^^^^^^^
+Note: The shadowed declaration is here:
+   --> test/FilesNames.t.sol:301:10:
+    |
+301 |         (bool ok, bytes memory err) = address(reader).staticcall(abi.encodeCall(reader.readName,
+    |          ^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> test/FilesNames.t.sol:297:23:
+    |
+297 |             (bool ok, bytes memory err) = address(reader).staticcall(abi.encodeCall(reader.readName, (position, MOUNT, role, bad)));
+    |                       ^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> test/FilesNames.t.sol:301:19:
+    |
+301 |         (bool ok, bytes memory err) = address(reader).staticcall(abi.encodeCall(reader.readName,
+    |                   ^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/FilesDirectoryProfile.t.sol:60:5:
+   |
+60 |     function test_directory_pin_rejects_wrong_rule_hash() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 99247 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesDirectoryProfile.t.sol:11:1:
+   |
+11 | contract FilesDirectoryProfileTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 133828 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesNames.t.sol:30:1:
+   |
+30 | contract FilesNamesTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 103800 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/MatchedRollback.t.sol:35:1:
+   |
+35 | contract MatchedRollbackTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 4 tests for test/MatchedRollback.t.sol:MatchedRollbackTest
+[PASS] test_direct_late_index_call_remains_ledger_only() (gas: 1300775)
+[PASS] test_scale_seven_complete_a1_reverts_with_full_mandatory_error_and_s0() (gas: 3475519)
+[PASS] test_scale_six_complete_a1_late_tag_refusal_rolls_back_full_prefix() (gas: 4642224)
+[PASS] test_scale_six_complete_a1_zero_poison_calibrates_full_state() (gas: 4621096)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 14.49ms (11.96ms CPU time)
+
+Ran 8 tests for test/FilesNames.t.sol:FilesNamesTest
+[PASS] test_guarded_name_basis_tracks_execution_without_admission_change() (gas: 1965303)
+[PASS] test_names_ascii_grammar_refuses_unsupported_bytes_without_normalizing() (gas: 7064788)
+[PASS] test_names_forged_earlier_metadata_refuses_without_membership_change() (gas: 3673576)
+[PASS] test_names_last_occurrence_withdrawal_preserves_name_membership_and_contents() (gas: 3108807)
+[PASS] test_names_missing_signed_and_generic_ingress_roll_back() (gas: 3270308)
+[PASS] test_names_multiple_positions_and_reused_name_without_republication() (gas: 3939980)
+[PASS] test_names_response_faults_preserve_membership_and_reject_mixed_basis() (gas: 13904554)
+[PASS] test_names_signed_name_after_bind_and_parent_maintenance() (gas: 2817626)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 15.51ms (23.21ms CPU time)
+
+Ran 12 tests for test/FilesDirectoryProfile.t.sol:FilesDirectoryProfileTest
+[PASS] test_directory_exact_body_length_required() (gas: 934742)
+[PASS] test_directory_pin_rejects_wrong_rule_hash() (gas: 25885)
+[PASS] test_file_subject_parent_raw_ingress_rejected() (gas: 2226340)
+[PASS] test_lookalike_type_with_wrong_rule_is_not_a_directory() (gas: 3255066)
+[PASS] test_missing_zero_and_wrong_length_directory_seeds_rejected() (gas: 1591558)
+[PASS] test_nonexistent_parent_raw_ingress_rejected() (gas: 1881954)
+[PASS] test_required_index_failure_rolls_back_whole_signed_batch() (gas: 1489340)
+[PASS] test_self_link_raw_ingress_rejected() (gas: 2364367)
+[PASS] test_unrelated_record_parent_raw_ingress_rejected() (gas: 2352330)
+[PASS] test_unrelated_record_target_raw_ingress_rejected() (gas: 2834075)
+[PASS] test_valid_directory_bootstrap_and_nested_file_without_head() (gas: 4581810)
+[PASS] test_withdrawn_descriptor_remains_valid_and_bind_before_name_parent_publish_is_atomic() (gas: 2862772)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 15.52ms (11.56ms CPU time)
+
+Ran 3 test suites in 23.74ms (45.53ms CPU time): 24 tests passed, 0 failed, 0 skipped (24 total tests)

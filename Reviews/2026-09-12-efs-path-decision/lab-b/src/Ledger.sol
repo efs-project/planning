@@ -3,6 +3,7 @@ pragma solidity 0.8.30;
 
 import {Keys} from "./Keys.sol";
 import {ExecutionSlots} from "./ExecutionSlots.sol";
+import {PublicationSupport} from "./PublicationSupport.sol";
 import {IAcceptor, IIndexModule, ITypeRegistry} from "./Interfaces.sol";
 
 /// @title Ledger — Road B single-pass ingestion kernel
@@ -191,6 +192,10 @@ contract Ledger {
     bytes32 public immutable domainSeparator;
     bytes32 public immutable guardedDomainSeparator;
     address public immutable implementationSelf;
+    // Address and expected codehash are embedded in implementationCodeHash, hence
+    // recoverable/pinned by every historical ExecutionInfo. No linker configuration.
+    address private immutable publicationSupport;
+    bytes32 private immutable publicationSupportCodehash;
     bytes32 public constant LAYOUT_ID = keccak256("efs.lab.ledger-layout/2:roots-0-12-preserved:context-13:execution-14:readsets-15");
     bytes32 public constant GUARDED_INTENT_TYPEHASH = keccak256("IntentV2(bytes32 realmId,bytes32 realmOrigin,bytes32 executionSet,address author,uint64 nonce,uint64 deadline,bytes32 acceptanceProfile,bytes32 indexObligations,bytes32 readSetHash,bytes32 actionsHash)");
     bytes32 public constant HEAD_SNAPSHOT_V2 = keccak256("efs.lab.head-snapshot/2");
@@ -259,6 +264,8 @@ contract Ledger {
     constructor(ITypeRegistry registry_, bytes32 realmId_) {
         ExecutionSlots.initialize();
         implementationSelf = address(this);
+        publicationSupport = address(new PublicationSupport());
+        publicationSupportCodehash = publicationSupport.codehash;
         registry = registry_;
         realmId = realmId_;
         admin = msg.sender;
@@ -323,19 +330,8 @@ contract Ledger {
 
     /// Canonical empty means all three arrays empty. Principal order is significant;
     /// duplicate principals or coordinates and non-Cartesian vectors are ambiguous.
-    function readSetHash(ReadSetV2 memory rs) public pure returns (bytes32) {
-        uint256 n = rs.principalIds.length;
-        uint256 m = rs.positions.length;
-        if (n > 64 || m > 4 || rs.expectedHeads.length != n * m || (n == 0) != (m == 0)) revert E_READSET_SHAPE();
-        for (uint256 i; i < n; ++i) {
-            if (rs.principalIds[i] == 0) revert E_READSET_SHAPE();
-            for (uint256 j; j < i; ++j) if (rs.principalIds[i] == rs.principalIds[j]) revert E_READSET_SHAPE();
-        }
-        for (uint256 i; i < m; ++i) {
-            if (rs.positions[i] == 0) revert E_READSET_SHAPE();
-            for (uint256 j; j < i; ++j) if (rs.positions[i] == rs.positions[j]) revert E_READSET_SHAPE();
-        }
-        return keccak256(abi.encode(READ_SET_V2, rs));
+    function readSetHash(ReadSetV2 memory rs) public view returns (bytes32) {
+        return _supportRead(abi.encodeCall(PublicationSupport.readSetHash,(abi.encode(rs))));
     }
 
     function headSnapshot(bytes32 principalId, bytes32 position) public view returns (bytes32) {
@@ -556,17 +552,34 @@ contract Ledger {
         private
         returns (uint64, uint64)
     {
+        ExecutionSlots.requireIdle();
+        ExecutionSlots.write(ExecutionSlots.PUBLICATION_ACTIVE, 1);
         if (block.chainid != ExecutionSlots.read(ExecutionSlots.GENESIS)) revert E_CHAIN();
         if (p.proofKind == PROOF_NATIVE && msg.sender.code.length == 0 && msg.sender != tx.origin) revert E_NATIVE_AMBIGUOUS();
         uint256 n = actions.length;
         if (n == 0 || n > MAX_ACTIONS || bodies.length != n) revert E_BOUNDS(0);
+        uint64 registryEpoch = registry.epoch();
         IIndexModule.Effect[] memory effects = _beginPublication(p, n);
+        IIndexModule.Effect[] memory segment = new IIndexModule.Effect[](1);
+        uint256 budget = INDEX_GAS_BASE + INDEX_GAS_PER_ACTION * n;
         for (uint256 i; i < n; ++i) {
             ++p.ord;
             effects[i] = _applyOne(p, actions[i], bodies[i], i);
+            _checkpoint(p);
+            segment[0] = effects[i];
+            budget = _notifyIndex(p.publication, segment, budget, false);
+            _requirePublicationBasis(p.execution, registryEpoch);
         }
-        _endPublication(p, effects);
+        _notifyIndex(p.publication, effects, budget, true);
+        _requirePublicationBasis(p.execution, registryEpoch);
+        ExecutionSlots.write(ExecutionSlots.PUBLICATION_ACTIVE, 0);
+        emit Published(p.publication, p.publicationId, p.author, p.proofKind, p.first, uint16(n));
         return (p.publication, p.first);
+    }
+
+    function _requirePublicationBasis(bytes32 execution, uint64 registryEpoch) private view {
+        if (registry.epoch() != registryEpoch) revert E_INTENT(3);
+        if (executionSet() != execution) revert E_INTENT(2);
     }
 
     /// Retry/nonce/counter checks, then the first writes (nonce, retry key, evidence cell).
@@ -595,11 +608,9 @@ contract Ledger {
         effects = new IIndexModule.Effect[](n);
     }
 
-    function _endPublication(Pub memory p, IIndexModule.Effect[] memory effects) private {
+    function _checkpoint(Pub memory p) private {
         _counters = uint256(p.ord) | (uint256(p.records) << 64) | (uint256(p.bindings) << 128)
             | (uint256(p.publication) << 192);
-        _notifyIndex(p.publication, effects);
-        emit Published(p.publication, p.publicationId, p.author, p.proofKind, p.first, uint16(effects.length));
     }
 
     /// One action of the ordered prefix. Kept out of the loop body so its callees' locals never
@@ -884,16 +895,71 @@ contract Ledger {
         emit Admitted(p.author32, cell.typeId, rid, p.ord);
     }
 
-    /// One bounded CALL per publication. The module must revert to refuse; refusal reverts
-    /// the whole publication (mandatory-index rollback). address(0) = run "without".
-    function _notifyIndex(uint64 publication, IIndexModule.Effect[] memory effects) private {
+    /// One joint allowance including ABI dispatch and return-copy overhead. The final
+    /// callback is read-only and mandatory. address(0) remains the labelled ablation.
+    function _notifyIndex(uint64 publication, IIndexModule.Effect[] memory effects, uint256 budget, bool finalPhase)
+        private returns (uint256 remaining)
+    {
+        uint256 beforeGas = gasleft();
         address m = indexModule;
-        if (m == address(0)) return;
-        uint256 budget = INDEX_GAS_BASE + INDEX_GAS_PER_ACTION * effects.length;
-        if (gasleft() < budget + budget / 63 + 20_000) revert E_GAS();
-        (bool ok, bytes memory ret) =
-            m.call{gas: budget}(abi.encodeWithSelector(IIndexModule.onAdmission.selector, publication, effects));
-        if (!ok) revert E_INDEX(ret);
+        if (m == address(0)) return budget;
+        _requireSupport();
+        // Effect has exactly 12 fixed ABI words. Flatten its memory pointers once;
+        // the stateless dispatcher adds the public callback selector/array offset.
+        // This private format avoids two dynamic ABI encoders in the near-cap Core.
+        // _run bounds both the one-effect segment and full array to 1..64.
+        // Consequently this aligned allocation is <=24,736 bytes; multiplication,
+        // pointer arithmetic and bounded gas subtraction cannot overflow.
+        address dispatcher = publicationSupport;
+        assembly ("memory-safe") {
+            let data := mload(0x40)
+            let size := add(160,mul(mload(effects),384))
+            mstore(0x40,add(data,size))
+            mstore(data,m) mstore(add(data,32),budget) mstore(add(data,64),finalPhase)
+            mstore(add(data,96),publication) mstore(add(data,128),mload(effects))
+            for { let i := 0 } lt(i,mload(effects)) { i := add(i,1) } {
+                mcopy(add(add(data,160),mul(i,384)),mload(add(add(effects,32),mul(i,32))),384)
+            }
+            if iszero(delegatecall(gas(),dispatcher,data,size,0,0)) {
+                let ptr := mload(0x40)
+                // Helper limits a raw callback response to 4096 bytes. Its largest
+                // error is E_INDEX(bytes), 68 + 4096 bytes. Never copy past that.
+                if gt(returndatasize(),4164) {
+                    mstore(ptr,shl(224,0x2bd4fb9c)) mstore(add(ptr,4),32) mstore(add(ptr,36),0)
+                    revert(ptr,68)
+                }
+                returndatacopy(ptr,0,returndatasize())
+                revert(ptr,returndatasize())
+            }
+            let spent := add(sub(beforeGas,gas()),256)
+            if gt(spent,budget) {
+                mstore(data,shl(224,0x2bd4fb9c)) mstore(add(data,4),32) mstore(add(data,36),0)
+                revert(data,68)
+            }
+            remaining := sub(budget,spent)
+        }
+    }
+
+    function _requireSupport() private view {
+        if (publicationSupport.codehash != publicationSupportCodehash) revert E_INDEX("");
+    }
+
+    /// Fixed output and bounded error copies, including for malformed helper code.
+    function _supportRead(bytes memory input) private view returns(bytes32 result) {
+        _requireSupport();
+        address support=publicationSupport;
+        assembly ("memory-safe") {
+            let ptr:=mload(0x40)
+            let ok:=staticcall(gas(),support,add(input,32),mload(input),ptr,32)
+            if or(iszero(ok),iszero(eq(returndatasize(),32))) {
+                if or(ok,gt(returndatasize(),4164)) {
+                    mstore(ptr,shl(224,0x2bd4fb9c)) mstore(add(ptr,4),32) mstore(add(ptr,36),0)
+                    revert(ptr,68)
+                }
+                returndatacopy(ptr,0,returndatasize()) revert(ptr,returndatasize())
+            }
+            result:=mload(ptr)
+        }
     }
 
     // ------------------------------------------------------------------------ commitments a signer computes
@@ -903,14 +969,7 @@ contract Ledger {
     /// Realm's current additional acceptor (0 = none): a policy activation changes the profile
     /// (and moves the epoch) without changing the Type id.
     function acceptanceProfileOf(Action[] memory actions) public view returns (bytes32 profile) {
-        uint64 epoch = registry.epoch();
-        profile = keccak256(abi.encode(keccak256("efs.lab.acceptance-profile/2"), address(registry), epoch));
-        for (uint256 i; i < actions.length; ++i) {
-            uint8 k = actions[i].kind;
-            if (k != PUBLISH && k != REUSE) continue;
-            (, address mandatory, bytes32 ruleId, address policy, bytes32 policyCodehash,, uint16 activation) = registry.typeInfo(actions[i].typeId);
-            profile = keccak256(abi.encode(profile, actions[i].typeId, mandatory, ruleId, policy, policyCodehash, activation));
-        }
+        return _supportRead(abi.encodeCall(PublicationSupport.acceptanceProfile,(address(registry),abi.encode(actions))));
     }
 
     /// The acceptance basis that admitted a publish/reuse admission: its Type, the Type's mandatory
@@ -980,6 +1039,7 @@ contract Ledger {
     function executionRevision() public view returns (uint256) { return ExecutionSlots.read(ExecutionSlots.REVISION); }
     function genesisChainId() external view returns (uint256) { return ExecutionSlots.read(ExecutionSlots.GENESIS); }
     function implementationCodeHash() external view returns (bytes32) { return implementationSelf.codehash; }
+    function publicationSupportIdentity() external view returns (address, bytes32) { return (publicationSupport,publicationSupportCodehash); }
     function _indexGeneration() private view returns (uint64) {
         (bool ok, bytes memory data) = indexModule.staticcall{gas: 30_000}(abi.encodeWithSignature("generation()"));
         return ok && data.length == 32 ? uint64(uint256(bytes32(data))) : 0;
@@ -1132,6 +1192,7 @@ contract Ledger {
     /// Admin ablation path. Rows produced with module == 0 are NOT EQUIVALENT (a named
     /// guarantee is omitted); they are diagnostic only and must be labelled so everywhere.
     function setIndexModule(address module) external {
+        ExecutionSlots.requireIdle();
         if (msg.sender != admin) revert E_ADMIN();
         indexModule = module;
         ExecutionSlots.advance();

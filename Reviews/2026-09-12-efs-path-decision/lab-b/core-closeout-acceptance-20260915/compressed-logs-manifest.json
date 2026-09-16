@@ -1,0 +1,22 @@
+[
+  {
+    "file": "node-paid-cold-name-calltree-red.log",
+    "bytes": 6139,
+    "sha256": "a07143d59834596a4bfc836e20e420a380521d408affe3221848cfc72beabb72"
+  },
+  {
+    "file": "node-paid-cold-name-diagnostic.log",
+    "bytes": 1826,
+    "sha256": "b05710740675329ea83da1c913da8f35734f6dcfad431351756e60353842d81b"
+  },
+  {
+    "file": "node-paid-cold-name-refusal.log",
+    "bytes": 1179,
+    "sha256": "be611d80016c18e5dd32bf19dc5a91cc06fc02020eb35f623a97c7d5c673f944"
+  },
+  {
+    "file": "node-paid-initial-harness.log",
+    "bytes": 1472,
+    "sha256": "c7978cdcb21eef516813335f082b79ebbf7e545e3291e28ba29de4e8aac80e05"
+  }
+]

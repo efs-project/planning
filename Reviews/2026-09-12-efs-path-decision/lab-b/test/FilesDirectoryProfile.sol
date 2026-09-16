@@ -48,10 +48,9 @@ contract FilesDirectoryIndex is FilesLiveNamesIndex {
         FilesLiveNamesIndex(c,rt,ct,rh,ch,nt,nh) {
         FilesDirectoryLayout.pin(Ledger(c),dt,dh);directoryType=dt;expectedDirectoryRuleHash=dh;
     }
-    function onAdmission(uint64 publication,Effect[] calldata effects) public virtual override {
-        super.onAdmission(publication,effects);
+    function afterPublication(uint64 publication,Effect[] calldata effects) public view virtual override returns(bytes4 acknowledgement) {
+        acknowledgement=super.afterPublication(publication,effects);
         Ledger core=Ledger(ledger);FilesDirectoryLayout.pin(core,directoryType,expectedDirectoryRuleHash);
-        if(effects.length==0)return;
         uint64 through=effects[effects.length-1].admission;
         for(uint256 i;i<effects.length;i++) {
             Effect calldata e=effects[i];if(e.kind!=3)continue;

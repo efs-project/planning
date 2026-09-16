@@ -3,14 +3,16 @@ pragma solidity 0.8.30;
 
 import {Keys} from "./Keys.sol";
 import {IIndexModule} from "./Interfaces.sol";
+import {ExecutionSlots} from "./ExecutionSlots.sol";
 
 interface ILedgerCounts {
     function counts() external view returns (uint64 admissions, uint64 records, uint64 bindings, uint64 publications);
+    function extsload(bytes32 slot) external view returns (bytes32);
 }
 
 /// @title IndexModule — the separate index responsibility (coordinator delta 3)
 /// @notice DISPOSABLE LAB, NO PROTOCOL CLAIM. Owns EVERY query structure; the Ledger keeps
-///         none. Called once per publication in the same transaction; a revert here reverts
+///         none. Called for contiguous ordered-prefix segments; a revert here reverts
 ///         the accepted logical action (mandatory-index rollback).
 ///
 /// Mandatory families (maintained here, coverage reported):
@@ -47,9 +49,9 @@ contract IndexModule is IIndexModule {
     address public immutable admin;
     uint64 public immutable attachedFrom; // first admission this module could have seen
     uint64 public lastProcessed; // last admission ordinal indexed
-    uint64 public lastPublication;
+    uint64 public lastPublication; // staged maintenance marker, NOT a final-completion receipt
     uint64 public generation; // bumped by the admin after a backfill/re-index; part of a cursor's basis
-    bool public gapped; // an admission range was skipped while detached: coverage can never be COMPLETE again
+    bool public gapped; // retained legacy diagnostic; current ingress rejects gaps without advancing the frontier
 
     mapping(bytes32 => Family) private _family;
     mapping(bytes32 => uint256) private _postingHead;
@@ -62,6 +64,7 @@ contract IndexModule is IIndexModule {
     error E_MANDATORY_FAMILY();
     error E_ORDER(bytes32 key, uint64 last, uint64 proposed);
     error E_GUARD();
+    error E_SEGMENT();
 
     constructor(address ledger_) {
         ledger = ledger_;
@@ -77,14 +80,21 @@ contract IndexModule is IIndexModule {
     }
 
     function declareOptional(bytes32 family, uint64 fromAdmission) external {
+        _requireIdle();
         if (msg.sender != admin) revert E_ADMIN();
         _declare(family, false, fromAdmission);
     }
 
     /// A new index generation invalidates every outstanding listing cursor.
     function bumpGeneration() external {
+        _requireIdle();
         if (msg.sender != admin) revert E_ADMIN();
         ++generation;
+    }
+
+    function _requireIdle() private view {
+        if (ILedgerCounts(ledger).extsload(ExecutionSlots.PUBLICATION_ACTIVE) != 0)
+            revert ExecutionSlots.E_PUBLICATION_ACTIVE();
     }
 
     function _declare(bytes32 family, bool mandatory, uint64 fromAdmission) internal {
@@ -101,10 +111,12 @@ contract IndexModule is IIndexModule {
     function onAdmission(uint64 publication, Effect[] calldata effects) public virtual {
         if (msg.sender != ledger) revert E_LEDGER();
         uint256 n = effects.length;
-        if (n == 0) return;
-        if (effects[0].admission != lastProcessed + 1) gapped = true;
+        (uint64 through,,, uint64 stagedPublication) = ILedgerCounts(ledger).counts();
+        if (n == 0 || publication != stagedPublication || publication < lastPublication
+            || effects[n - 1].admission != through) revert E_SEGMENT();
         for (uint256 i; i < n; ++i) {
             Effect calldata e = effects[i];
+            if (e.admission != lastProcessed + i + 1 || e.kind == 0 || e.kind > 6) revert E_SEGMENT();
             if (e.kind == 1 || e.kind == 2) {
                 _append(Keys.byTypeList(e.typeId), e.admission, false);
                 _append(Keys.byAuthorList(e.author), e.admission, false);
@@ -124,6 +136,21 @@ contract IndexModule is IIndexModule {
         }
         lastProcessed = effects[n - 1].admission;
         lastPublication = publication;
+    }
+
+    /// No state writes: final obligations may inspect the complete proposed publication.
+    /// Outside this transaction success is committed; within it, consult the Core lock
+    /// before interpreting evidence/lastPublication as completion. Coverage is prefix-only.
+    function afterPublication(uint64 publication, Effect[] calldata effects) public view virtual returns(bytes4) {
+        if (msg.sender != ledger) revert E_LEDGER();
+        (uint64 through,,, uint64 stagedPublication) = ILedgerCounts(ledger).counts();
+        uint256 n = effects.length;
+        if (n == 0 || publication != stagedPublication || publication != lastPublication
+            || through != lastProcessed || effects[n - 1].admission != through) revert E_SEGMENT();
+        for (uint256 i = 1; i < n; ++i) {
+            if (effects[i].admission != effects[i - 1].admission + 1) revert E_SEGMENT();
+        }
+        return IIndexModule.afterPublication.selector;
     }
 
     // ---------------------------------------------------------------- coverage

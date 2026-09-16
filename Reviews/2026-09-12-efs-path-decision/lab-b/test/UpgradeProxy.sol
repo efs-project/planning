@@ -37,6 +37,7 @@ contract UpgradeProxy {
     }
 
     function upgradeTo(Ledger next) external {
+        ExecutionSlots.requireIdle();
         if (msg.sender != address(uint160(ExecutionSlots.read(ExecutionSlots.ADMIN)))) revert E_UPGRADE_ADMIN();
         if (address(next).code.length == 0 || next.implementationSelf() != address(next)
             || address(next.registry()) != expectedRegistry || expectedRegistry.codehash != expectedRegistryHash

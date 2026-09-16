@@ -497,21 +497,22 @@ contract FilesJoinedTest is LabBase {
         require(filesIndex.lastProcessed() == basis.admission, "detached actual admission was not indexed");
         ledger.setIndexModule(address(filesIndex));
         bodies[0] = hex"d2";
-        _assertEvidence(_signedActions(one(aPublish(BINARY, bodies[0])), bodies), eoaA, ledger.PROOF_SIGNED());
-        _assertRecord(rid(BINARY, bodies[0]), BINARY, bodies[0]);
-        require(filesIndex.gapped() && admissions() == basis.admission + 2 && filesIndex.lastProcessed() == admissions(),
-            "reattached real callback detects missing admission despite current frontier");
+        (Ledger.Intent memory intent, bytes memory sig) = signed(PK_A, ledger, ledger.nonces(eoaA), one(aPublish(BINARY, bodies[0])));
+        (bool accepted,) = address(ledger).call(abi.encodeCall(ledger.executeSigned,
+            (intent, one(aPublish(BINARY, bodies[0])), bodies, sig)));
+        require(!accepted && admissions() == basis.admission + 1 && filesIndex.lastProcessed() == basis.admission,
+            "required callback must reject a gap without advancing coverage");
         require(ledger.indexObligations() == obligation && _postingDigest(Keys.referenceList(childType, 0, r0)) == parentPostings,
             "same configuration and retained parent postings do not claim complete coverage");
         basis = _basis();
         (uint8 scopeStatus, uint64 scopeFrom, uint64 scopeThrough) = filesIndex.coverage(filesIndex.FAMILY_SCOPE(), 0);
-        require(scopeStatus == 1 && scopeFrom == 1 && scopeThrough == basis.admission, "scope is honestly partial at fresh basis");
+        require(scopeStatus == 1 && scopeFrom == 1 && scopeThrough + 1 == basis.admission, "scope is honestly partial at fresh basis");
         _rejectRead(reader, abi.encodeCall(reader.readFolderTaggedOnce,
             (DRAFTS, lensOf(eoaA, address(bob)), PROJECT_EFS, FilesJoinedConsumer.TagScope.File, 8, basis)),
             FilesJoinedConsumer.E_INCOMPLETE.selector);
         (uint8 status, uint64 from, uint64 through) =
             filesIndex.coverage(filesIndex.FAMILY_FILES_PARENT(), Keys.referenceList(childType, 0, r0));
-        require(status == 1 && from == 1 && through == admissions(), "parent enumeration coverage is honestly PARTIAL");
+        require(status == 1 && from == 1 && through + 1 == admissions(), "parent enumeration coverage is honestly PARTIAL");
         FilesJoinedConsumer.FilePoint memory afterGap = reader.readFilePoint(file, lensOf(eoaA), APPROVED, basis);
         require(afterGap.status == 1 && afterGap.file == file, "fresh exact point does not consume enumeration");
         _assertRevision(afterGap.revision, ra, childType, r0, "Meeting at 11:00.\n");

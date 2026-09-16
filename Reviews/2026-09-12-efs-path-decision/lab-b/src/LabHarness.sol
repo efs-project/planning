@@ -41,6 +41,7 @@ contract MockAcceptor is IAcceptor {
 
 /// A mandatory index that refuses everything: every publication routed through it must roll back.
 contract FailingIndexModule is IIndexModule {
+    function afterPublication(uint64, Effect[] calldata) external pure returns(bytes4) { revert("final index refused"); }
     function onAdmission(uint64, Effect[] calldata) external pure {
         revert("index refused");
     }

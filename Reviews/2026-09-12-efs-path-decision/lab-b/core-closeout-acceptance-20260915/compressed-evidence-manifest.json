@@ -1,0 +1,17 @@
+[
+  {
+    "file": "paid-report.json",
+    "bytes": 593093,
+    "sha256": "f0fd68d0b3536c38870ff7dfefa2305df2154f0877b359531c94ed7686602427"
+  },
+  {
+    "file": "paid-receipts.json",
+    "bytes": 809169,
+    "sha256": "b450bd3bc2d90eb94529c7f133af09a7d45860b5a7251535aeec171630531b03"
+  },
+  {
+    "file": "cold-name-red-manifest.json",
+    "bytes": 205290,
+    "sha256": "16e5898a2abeaf018cf2c385a79fd1762cbb8d9de0407f6e6a5a2885c778a6b7"
+  }
+]

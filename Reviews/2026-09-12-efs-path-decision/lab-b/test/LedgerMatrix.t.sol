@@ -330,9 +330,10 @@ contract LedgerMatrixTest is LabBase {
         ledger.setIndexModule(address(0));
         alice.publish(QUOTE, q(1)); // admitted while detached: a gap the module can never close
         ledger.setIndexModule(address(index));
-        alice.publish(QUOTE, q(2));
+        (bool gapOk,) = address(alice).call(abi.encodeCall(alice.publish,(QUOTE,q(2))));
+        require(!gapOk,"gapped required index accepted publication");
         (cov,,) = index.coverage(index.FAMILY_SCOPE(), bytes32(0));
-        require(cov == 1 && index.gapped(), "gap => PARTIAL");
+        require(cov == 1, "gap => PARTIAL");
         bytes32 optional = keccak256("efs2/family/by-digest/1");
         (cov,,) = index.coverage(optional, bytes32(0));
         require(cov == 0, "undeclared => UNKNOWN");

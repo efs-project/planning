@@ -28,6 +28,25 @@ contract FilesNameResponseFacade is IFilesNameSource {
 
 /// Seven standalone cases; no inherited FilesJoined tests or paid/browser claims.
 contract FilesNamesTest is LabBase {
+    function test_name_grammar_exhaustive_bytes_and_255_boundaries() public pure {
+        for(uint256 c;c<256;c++){
+            bool allowed=(c>=97&&c<=122)||(c>=48&&c<=57)||c==46||c==95||c==45;
+            bytes memory oneByte=new bytes(1);oneByte[0]=bytes1(uint8(c));
+            require(FilesNameLayout.valid(oneByte)==(allowed&&c!=46),"single-byte grammar changed");
+            bytes memory twoBytes=new bytes(2);twoBytes[0]=bytes1(uint8(c));twoBytes[1]="a";
+            require(FilesNameLayout.valid(twoBytes)==allowed,"dot/byte grammar changed");
+        }
+        require(!FilesNameLayout.valid(bytes("."))&&!FilesNameLayout.valid(bytes("..")),"dot names allowed");
+        require(FilesNameLayout.valid(bytes("..."))&&FilesNameLayout.valid(bytes("a-0_z.txt")),"literal names refused");
+        bytes memory edge=new bytes(255);
+        for(uint256 i;i<255;i++)edge[i]="a";
+        require(FilesNameLayout.valid(edge),"Name255 refused");
+        edge[0]=hex"00";require(!FilesNameLayout.valid(edge),"first byte ignored");edge[0]="a";
+        edge[127]=hex"ff";require(!FilesNameLayout.valid(edge),"middle byte ignored");edge[127]="a";
+        edge[254]=hex"7b";require(!FilesNameLayout.valid(edge),"last byte ignored");edge[254]="z";
+        require(FilesNameLayout.valid(edge),"valid last byte refused");
+        require(!FilesNameLayout.valid(new bytes(0))&&!FilesNameLayout.valid(new bytes(256)),"length domain changed");
+    }
     function test_guarded_name_basis_tracks_execution_without_admission_change() public {
         bytes memory filename = bytes("basis.txt");
         _create(987,filename,true,0);

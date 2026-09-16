@@ -19,7 +19,9 @@ library FilesNameLayout {
         if (value[0] == bytes1(".") && (n == 1 || (n == 2 && value[1] == bytes1(".")))) return false;
         for (uint256 i; i < n; ++i) {
             uint8 c = uint8(value[i]);
-            if (!((c >= 97 && c <= 122) || (c >= 48 && c <= 57) || c == 46 || c == 95 || c == 45)) return false;
+            // Exact byte alphabet [a-z0-9._-], not normalization. One membership
+            // test avoids five comparisons per byte in publication-final checks.
+            if ((uint256(1) << c) & 0x0000000000000000000000000000000007fffffe8000000003ff600000000000 == 0) return false;
         }
         return true;
     }
@@ -88,12 +90,11 @@ contract FilesNamesIndex is FilesParentIndex {
         expectedNameRuleHash = nh;
     }
 
-    function onAdmission(uint64 publication, Effect[] calldata effects) public virtual override {
-        super.onAdmission(publication, effects);
+    function afterPublication(uint64 publication, Effect[] calldata effects) public view virtual override returns(bytes4 acknowledgement) {
+        acknowledgement = super.afterPublication(publication, effects);
         Ledger core = Ledger(ledger);
         FilesNameLayout.pin(core, nameType, expectedNameRuleHash);
-        if (effects.length == 0) return;
-        // Ledger invokes us once after all actions. A Name after BIND is already retained.
+        // Final-only: a Name after BIND is already retained, but never indexed twice.
         uint64 through = effects[effects.length - 1].admission;
         for (uint256 i; i < effects.length; ++i) {
             if (effects[i].kind != 3) continue;

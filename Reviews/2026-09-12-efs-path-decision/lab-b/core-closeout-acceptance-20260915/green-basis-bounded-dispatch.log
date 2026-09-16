@@ -1,0 +1,105 @@
+Compiling 14 files with Solc 0.8.30
+Solc 0.8.30 finished in 52.95s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:88:21:
+   |
+88 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:93:29:
+   |
+93 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:113:22:
+    |
+113 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:25:
+    |
+117 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:84:5:
+   |
+84 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (5574): Contract code size is 25018 bytes and exceeds 24576 bytes (a limit introduced in Spurious Dragon). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> src/Ledger.sol:33:1:
+   |
+33 | contract Ledger {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 75387 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/CoreAcceptanceAudit.t.sol:24:1:
+   |
+24 | contract CoreAcceptanceAuditTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 162152 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+   --> test/CoreOrderedAcceptance.t.sol:193:1:
+    |
+193 | contract CoreOrderedAcceptanceTest is LabBase {
+    | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 3 tests for test/CoreAcceptanceAudit.t.sol:CoreAcceptanceAuditTest
+[PASS] test_audit_singleton_separate_publication_negative_control() (gas: 1451402)
+[PASS] test_indexed_rule_observes_ordered_prefix_and_rolls_back() (gas: 1258018)
+[PASS] test_ordered_singleton_rejection_across_native_signed_and_guarded_ingress() (gas: 4901493)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 19.41ms (14.62ms CPU time)
+
+Ran 15 tests for test/CoreOrderedAcceptance.t.sol:CoreOrderedAcceptanceTest
+[PASS] test_callback_cannot_reenter_mutation_configuration_or_proxy_upgrade() (gas: 14581966)
+[PASS] test_callback_returndata_is_bounded_before_copy() (gas: 756850)
+[PASS] test_duplicate_reuse_withdraw_and_binding_prefix_agreement() (gas: 3074061)
+[PASS] test_earlier_same_batch_reference_succeeds_future_reference_rolls_back() (gas: 1649177)
+[PASS] test_eight_reference_quota_mutable_dependency_and_application_atomicity() (gas: 9270825)
+Logs:
+  8-ref guarded app warm call gas: 956289
+
+[PASS] test_final_phase_is_static_and_rolls_back_prefix_writes() (gas: 1093061)
+[PASS] test_fixed_dispatch_identity_mismatch_fails_closed() (gas: 1236586)
+[PASS] test_legacy_fallback_index_cannot_skip_mandatory_final_phase() (gas: 2060489)
+[PASS] test_low_work_55_leaf_publication_uses_actual_gas_not_unused_allowance() (gas: 5481908)
+Logs:
+  55 CREATE warm call gas: 5444897
+
+[PASS] test_noncontiguous_required_index_refuses_without_laundering_coverage() (gas: 1688485)
+[PASS] test_prefix_and_final_failure_restore_all_state() (gas: 4866304)
+[PASS] test_prefix_and_final_spend_one_joint_allowance() (gas: 5626867)
+[PASS] test_registry_and_execution_drift_roll_back_before_next_rule() (gas: 45821703)
+[FAIL: Ledger EIP-170 overflow] test_runtime_and_initcode_fit_ordinary_deployment_limits() (gas: 5100)
+[PASS] test_static_type_rule_cannot_mutate_dependency() (gas: 1139525)
+Suite result: FAILED. 14 passed; 1 failed; 0 skipped; finished in 21.32ms (74.68ms CPU time)
+
+Ran 2 test suites in 26.07ms (40.72ms CPU time): 17 tests passed, 1 failed, 0 skipped (18 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/CoreOrderedAcceptance.t.sol:CoreOrderedAcceptanceTest
+[FAIL: Ledger EIP-170 overflow] test_runtime_and_initcode_fit_ordinary_deployment_limits() (gas: 5100)
+
+Encountered a total of 1 failing tests, 17 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test

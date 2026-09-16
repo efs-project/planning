@@ -19,8 +19,8 @@ contract LateRefusingIndexModule is IndexModule {
         poisonBindingKey = poisonBindingKey_;
     }
 
-    function onAdmission(uint64 publication, IIndexModule.Effect[] calldata effects) public override {
-        super.onAdmission(publication, effects);
+    function afterPublication(uint64 publication, IIndexModule.Effect[] calldata effects) public view override returns(bytes4 acknowledgement) {
+        acknowledgement = super.afterPublication(publication, effects);
         uint256 n = effects.length;
         if (
             n != 0 && poisonBindingKey != bytes32(0) && effects[n - 1].kind == 3

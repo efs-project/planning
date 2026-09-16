@@ -15,10 +15,12 @@ interface IAcceptor {
 }
 
 /// @notice The separate index responsibility (coordinator delta 3). The Ledger
-///         calls `onAdmission` once per publication, in the same transaction,
-///         after its own writes, with a plain CALL and bounded gas. Any failure
-///         reverts the whole publication (mandatory-index rollback). The module
-///         owns every posting list; the Ledger keeps no list at all.
+///         calls `onAdmission` after each staged leaf, before the next Type rule.
+///         Segments of one publication are contiguous and applied exactly once.
+///         `afterPublication` is a mandatory STATICCALL over all effects, for
+///         final-state obligations (not maintenance or repeated Type acceptance).
+///         Both phases jointly spend one bounded allowance; either failure rolls
+///         back the whole publication. Staged counters/coverage are not receipts.
 interface IIndexModule {
     struct Effect {
         uint8 kind; // Ledger action kind (PUBLISH/REUSE/BIND/UNBIND/CREATE/WITHDRAW)
@@ -36,6 +38,8 @@ interface IIndexModule {
     }
 
     function onAdmission(uint64 publication, Effect[] calldata effects) external;
+    // Exact selector acknowledgement prevents a permissive old fallback qualifying.
+    function afterPublication(uint64 publication, Effect[] calldata effects) external view returns (bytes4);
 }
 
 /// @notice What the Ledger needs from the Type registry. Three layers (authority repair

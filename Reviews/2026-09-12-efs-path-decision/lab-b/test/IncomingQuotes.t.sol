@@ -310,8 +310,8 @@ contract IncomingQuotesTest is LabBase {
         ledger.setIndexModule(address(new IndexModule(address(ledger))));
         publish(alice, joinedType, quote(pair, 1));
         ledger.setIndexModule(address(index));
-        publish(alice, joinedType, quote(pair, 2));
-        require(index.gapped(), "real detached publication creates coverage gap");
+        (bool ok,)=address(alice).call(abi.encodeCall(alice.publish,(joinedType,quote(pair,2))));
+        require(!ok, "required index must refuse missing contiguous history");
         assertPartial(pair);
     }
 

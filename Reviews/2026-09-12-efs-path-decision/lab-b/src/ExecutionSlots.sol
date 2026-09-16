@@ -9,6 +9,12 @@ library ExecutionSlots {
     bytes32 internal constant REVISION = bytes32(uint256(keccak256("efs.lab.execution-revision.v2")) - 1);
     bytes32 internal constant IMPLEMENTATION = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
     bytes32 internal constant ADMIN = bytes32(uint256(keccak256("eip1967.proxy.admin")) - 1);
+    bytes32 internal constant PUBLICATION_ACTIVE = bytes32(uint256(keccak256("efs.lab.publication-active.v1")) - 1);
+    error E_PUBLICATION_ACTIVE();
+
+    function requireIdle() internal view {
+        if (read(PUBLICATION_ACTIVE) != 0) revert E_PUBLICATION_ACTIVE();
+    }
 
     function read(bytes32 slot) internal view returns (uint256 value) {
         assembly ("memory-safe") { value := sload(slot) }

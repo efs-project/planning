@@ -1,0 +1,149 @@
+{
+  "compiler": "solc 0.8.30",
+  "optimizerRuns": 200,
+  "viaIR": true,
+  "evmVersion": "cancun",
+  "classification": "BUILD_TEMPLATES_NOT_IMMUTABLE_PATCHED_DEPLOYED_HASHES",
+  "contracts": [
+    {
+      "file": "Ledger.sol",
+      "name": "Ledger",
+      "runtimeBytes": 24375,
+      "creationArtifactBytes": 27818,
+      "runtimeTemplateHash": "0x1df1e588b4cd9aa7896b349eb0341960415b39c0b82b681c819402079cdcefb8",
+      "creationArtifactHash": "0xa65b852b7e64abec048e523d251cadbb580e35188edbb192ba10659d75dd2dd0",
+      "immutableFields": 8,
+      "unlinked": false
+    },
+    {
+      "file": "PublicationSupport.sol",
+      "name": "PublicationSupport",
+      "runtimeBytes": 2563,
+      "creationArtifactBytes": 2589,
+      "runtimeTemplateHash": "0x73a85a96b3b0bbb8af958e05e6cf2c4dac537894edc9958f464a1acf1468446f",
+      "creationArtifactHash": "0x8c8fd5ea26c79afae38bb145662aa6e01fd6e622dcde9458fb67b6ec11ac61f8",
+      "immutableFields": 0,
+      "unlinked": false
+    },
+    {
+      "file": "IndexModule.sol",
+      "name": "IndexModule",
+      "runtimeBytes": 5067,
+      "creationArtifactBytes": 6923,
+      "runtimeTemplateHash": "0x5b80b04e072273ed0d6b919dd8126952ec15044efdd87de5be2252bfaaaab1cb",
+      "creationArtifactHash": "0x3a60ee6411dc9bfc71f7358d5943fbf7772b962061d105299849e36d3967f09f",
+      "immutableFields": 3,
+      "unlinked": false
+    },
+    {
+      "file": "SelectiveReferenceIndexModule.sol",
+      "name": "SelectiveReferenceIndexModule",
+      "runtimeBytes": 6085,
+      "creationArtifactBytes": 9367,
+      "runtimeTemplateHash": "0xe8704102b73b31162e807a4cd27e65f7fb016f3a876980164f5d096a5362a086",
+      "creationArtifactHash": "0x3187bab684e5b1405145a51bcb37b11f6e8b812527258887110546b9ca411f92",
+      "immutableFields": 8,
+      "unlinked": false
+    },
+    {
+      "file": "FilesJoinedProfile.sol",
+      "name": "FilesParentIndex",
+      "runtimeBytes": 6181,
+      "creationArtifactBytes": 10174,
+      "runtimeTemplateHash": "0xede49debe1d7e6b4b0025184dd8a5c21d11f71df893b236bbd7f52b3f05572f6",
+      "creationArtifactHash": "0x6d1eefaea775361a5b27ed71afb385a02516ac43a15de7161c6f2e86580c0795",
+      "immutableFields": 7,
+      "unlinked": false
+    },
+    {
+      "file": "FilesNamesProfile.sol",
+      "name": "FilesNamesIndex",
+      "runtimeBytes": 8983,
+      "creationArtifactBytes": 13211,
+      "runtimeTemplateHash": "0xe5ffab5d678fd65c865983af8e120ac8e430544637aef8b30fda24177835a2c0",
+      "creationArtifactHash": "0x0bbb6969deb8501d4b45ca7fc58ec26905c2336cb6772f591126cef2ddd5ef9a",
+      "immutableFields": 9,
+      "unlinked": false
+    },
+    {
+      "file": "FilesNamesProfile.sol",
+      "name": "FilesNameRule",
+      "runtimeBytes": 646,
+      "creationArtifactBytes": 672,
+      "runtimeTemplateHash": "0x8fc7fbffd5c8b004849b10495e145545839593669c57c09bbd0f848cfc0a9eab",
+      "creationArtifactHash": "0xab6cb4b33dee2fbfd93704a0066311009d67578d6df265b0bfdb710469cab853",
+      "immutableFields": 0,
+      "unlinked": false
+    },
+    {
+      "file": "FilesNamesProfile.sol",
+      "name": "FilesNameReader",
+      "runtimeBytes": 5120,
+      "creationArtifactBytes": 6327,
+      "runtimeTemplateHash": "0xcd32a0da42a2cb5c97a0cf64f61d69ea8b6997d07684517db6d170357f58c44d",
+      "creationArtifactHash": "0x1c606ab70ca269b490d2e77dc02533a80cd05469ca442f379912bf610c3a50fc",
+      "immutableFields": 5,
+      "unlinked": false
+    },
+    {
+      "file": "FilesLiveIndex.sol",
+      "name": "FilesLiveNamesIndex",
+      "runtimeBytes": 9982,
+      "creationArtifactBytes": 14438,
+      "runtimeTemplateHash": "0x4f9d24c617edb57598a12f7c966e365e229902f93a4c844a98aafe4e21cb56cf",
+      "creationArtifactHash": "0x328e599dc25a8c5c477b80ceb02615ee9e487be24aeba95ae86597a9ee8e2df7",
+      "immutableFields": 9,
+      "unlinked": false
+    },
+    {
+      "file": "FilesDirectoryProfile.sol",
+      "name": "FilesDirectoryIndex",
+      "runtimeBytes": 11768,
+      "creationArtifactBytes": 16754,
+      "runtimeTemplateHash": "0xec0e5b804edc34a8ca6cb86051b40d2bfbe014014b14db3904a23349b5f287ac",
+      "creationArtifactHash": "0x58fd95d740c7d8b960ce8867e1d528c2fc483cc35a40b7efd73c05a03fe69b32",
+      "immutableFields": 11,
+      "unlinked": false
+    },
+    {
+      "file": "FilesCarrierProfile.sol",
+      "name": "FilesCarrierIndex",
+      "runtimeBytes": 12207,
+      "creationArtifactBytes": 19189,
+      "runtimeTemplateHash": "0x2ecdd273c842eae2dfbeaff2e331ab04b82d74c8642f92b04cc735d6a04c8e5d",
+      "creationArtifactHash": "0x9e286b608dc952b947668036db76d9a295740ba9e52dd4bfaa936be923389c47",
+      "immutableFields": 11,
+      "unlinked": false
+    },
+    {
+      "file": "UpgradeProxy.sol",
+      "name": "UpgradeProxy",
+      "runtimeBytes": 1848,
+      "creationArtifactBytes": 3142,
+      "runtimeTemplateHash": "0x228a86c10bbed1b8723ac1095a02c162919b7ad41eec03718ec089c1e53bba06",
+      "creationArtifactHash": "0xbc134c677a905fae9ca8d817fbfa3cecd3006084229427dd6ab89063f15d44b1",
+      "immutableFields": 7,
+      "unlinked": false
+    },
+    {
+      "file": "LabHarness.sol",
+      "name": "FailingIndexModule",
+      "runtimeBytes": 356,
+      "creationArtifactBytes": 382,
+      "runtimeTemplateHash": "0x47de5539db46b70e35f05eafe09d52841d94170d6505ee879307e904aa8586cf",
+      "creationArtifactHash": "0xe635b1cacdc1bea8de0c0bfabff3555fbf6519fac663a42ac5c4a91e0089cec2",
+      "immutableFields": 0,
+      "unlinked": false
+    },
+    {
+      "file": "MatchedRollback.t.sol",
+      "name": "LateRefusingIndexModule",
+      "runtimeBytes": 5371,
+      "creationArtifactBytes": 7267,
+      "runtimeTemplateHash": "0x934a1f78a8ff286a430c19ecd87099f6fabeb88a65dec0e836f1b83758eb7b1c",
+      "creationArtifactHash": "0x6f10f61d8da2748e6144958b289be3a0dbfddf7ca2cdc91305c5657fb75020c2",
+      "immutableFields": 4,
+      "unlinked": false
+    }
+  ]
+}
