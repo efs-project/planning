@@ -75,6 +75,8 @@ DENY is a qualified negative statement, distinct from no qualifying statement. A
 
 ## Task 2: Origin-qualified queries, explicit planners and paid/source-off evidence
 
+**Measured fit ruling September16:** the first inherited reader measured27,496runtime bytes (2,920over24,576) with5/5 focused behavior controls. Allow one new-only composition into separately predeployed fixed `TagStanceLens` (existing history/origin inventory) and `TagStanceReader` (profile/mode/stance joins/paging). Pin expected code/configuration, preserve UNKNOWN and caller-bound cursor semantics, and measure actual initcode including arguments, separate setup and whole consumer calls. No predecessor rule/index/Core edits, mutable helper, domain/cap reduction or further split without a measured escalation. Added deployment/call/pin complexity is the cost of this reversible experiment; the failed source/artifact/log stays retained. This is not yet a fit or end-to-end pass.
+
 **Files:** new `lab-b/test/TagStanceReader.sol`, `TagStanceQuery.t.sol`, a narrow owned consumer reusing the reviewed query mechanism, `browser/tag-stance-profile.mjs` with focused tests, `script/core-tag-stance.mjs`, and the same evidence directory. No visual changes or default-menu integration.
 
 **Interfaces:** consumes Task1's exact configuration/key/validation and reviewed origin-history/owned-prefix mechanism. Produces named `tagsOnSubject` and `subjectsForConcept` operations, separate stable/revision/selected-revision modes, and attributed `PRESENT | NOT_PRESENT | UNKNOWN | NOT_APPLICABLE` assessments compatible with SDK Task1. Pin the concrete reviewed query ABI at dispatch rather than an in-progress worker's ABI.
