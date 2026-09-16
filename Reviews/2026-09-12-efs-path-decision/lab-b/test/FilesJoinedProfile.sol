@@ -67,6 +67,14 @@ contract FilesParentIndex is IndexModule {
     error E_FILES_PROFILE();
     error E_FILES_RECORD();
 
+    function _extensionEntry(bytes32 f) internal view virtual override returns(ManifestEntry memory){
+        if(f==FAMILY_FILES_PARENT)return ManifestEntry(f,11,2,2,keccak256("childType,11,0,parent:alias-of-generic-ref"),true);
+        return super._extensionEntry(f);
+    }
+    function _manifestExtension() internal view virtual override returns(bytes32){
+        return keccak256(abi.encode("FilesParent/1",rootType,childType,expectedRootRuleHash,expectedChildRuleHash));
+    }
+
     constructor(address ledger_, bytes32 rootType_, bytes32 childType_, bytes32 rootHash_, bytes32 childHash_)
         IndexModule(ledger_)
     {
@@ -94,18 +102,12 @@ contract FilesParentIndex is IndexModule {
         return mandatory;
     }
 
-    function onAdmission(uint64 publication, Effect[] calldata effects) public virtual override {
-        super.onAdmission(publication, effects);
+    function _foldEffect(Effect memory e) internal virtual override {
+        super._foldEffect(e);
         Ledger core = Ledger(ledger);
-        for (uint256 i; i < effects.length; ++i) {
-            Effect calldata e = effects[i];
-            if ((e.kind != 1 && e.kind != 2) || e.typeId != childType) continue;
+            if ((e.kind != 1 && e.kind != 2) || e.typeId != childType) return;
             (bytes32 t, uint64 first, uint32 length) = FilesLayout.header(core, e.recordId);
             if (t != childType || length < 64 || first == 0 || first > e.admission) revert E_FILES_RECORD();
-            if (first != e.admission) continue;
-            bytes32 parent = FilesLayout.word(core, e.recordId, 0);
-            _append(Keys.referenceList(childType, 0, parent), first, true);
-        }
     }
 }
 

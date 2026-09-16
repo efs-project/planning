@@ -73,6 +73,9 @@ contract FilesCarrierIndex is FilesDirectoryIndex {
     bytes32[5] public carrierTypes;
     bytes32[5] public carrierRuleHashes;
     error E_CARRIER_PROFILE();
+    function _manifestExtension() internal view virtual override returns(bytes32){
+        return keccak256(abi.encode(super._manifestExtension(),"FilesCarrier/2:ciphertext-only",carrierTypes,carrierRuleHashes));
+    }
     constructor(address c,bytes32[8] memory legacy,bytes32[5] memory ts,bytes32[5] memory hs)
         FilesDirectoryIndex(c,legacy[0],legacy[1],legacy[2],legacy[3],legacy[4],legacy[5],legacy[6],legacy[7]) {
         string[5] memory shapes=["lab/type/files-bytes/1","lab/type/files-content/1","lab/type/files-carrier-root/1","lab/type/files-carrier-child/1","lab/type/files-concept/1"];
@@ -89,13 +92,10 @@ contract FilesCarrierIndex is FilesDirectoryIndex {
             ||FilesCarrierChildRule(rules[3]).inlineChild()!=legacy[1]||FilesCarrierChildRule(rules[3]).carrierRoot()!=ts[2])revert E_CARRIER_PROFILE();
         carrierTypes=ts;carrierRuleHashes=hs;
     }
-    function onAdmission(uint64 publication,Effect[] calldata effects) public override {
-        super.onAdmission(publication,effects);
-        for(uint256 i;i<effects.length;i++){
-            Effect calldata e=effects[i];if((e.kind!=1&&e.kind!=2)||e.typeId!=carrierTypes[3])continue;
+    function _foldEffect(Effect memory e) internal override {
+        super._foldEffect(e);
+            if((e.kind!=1&&e.kind!=2)||e.typeId!=carrierTypes[3])return;
             (bytes32 t,uint64 first,uint32 length)=FilesLayout.header(Ledger(ledger),e.recordId);
             if(t!=carrierTypes[3]||length!=96||first==0||first>e.admission)revert E_CARRIER_PROFILE();
-            if(first==e.admission)_append(Keys.referenceList(t,0,FilesLayout.word(Ledger(ledger),e.recordId,0)),first,true);
-        }
     }
 }

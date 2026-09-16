@@ -81,6 +81,9 @@ contract FilesNamesIndex is FilesParentIndex {
     bytes32 public immutable nameType;
     bytes32 public immutable expectedNameRuleHash;
     error E_NAME_REQUIRED(bytes32 position, bytes32 nameRecord);
+    function _manifestExtension() internal view virtual override returns(bytes32){
+        return keccak256(abi.encode(super._manifestExtension(),"FilesNames/1:final-name-before-terminal-admission:ascii255",nameType,expectedNameRuleHash));
+    }
 
     constructor(address core, bytes32 rt, bytes32 ct, bytes32 rh, bytes32 ch, bytes32 nt, bytes32 nh)
         FilesParentIndex(core, rt, ct, rh, ch)

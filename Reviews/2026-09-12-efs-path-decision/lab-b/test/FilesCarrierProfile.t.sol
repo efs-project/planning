@@ -70,7 +70,7 @@ contract FilesCarrierProfileTest is LabBase {
 }
 contract FilesCarrierIndexTest is FilesDirectoryProfileTest {
     bytes32[5] ts;bytes32[5] hs;
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();address rule=address(new FilesBytesRule());hs[0]=rule.codehash;ts[0]=registry.register(keccak256("lab/type/files-bytes/1"),rule,new bytes32[](0));
         bytes32[] memory refs=new bytes32[](1);refs[0]=ts[0];rule=address(new FilesContentRule(ts[0]));hs[1]=rule.codehash;
         ts[1]=registry.register(keccak256("lab/type/files-content/1"),rule,refs);

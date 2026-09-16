@@ -16,15 +16,18 @@ contract FilesLiveNamesIndex is FilesNamesIndex {
     bytes32 private constant FOLDER = keccak256("efs2/purpose/folder/1");
     mapping(bytes32 => uint64[]) private _live;
     mapping(uint64 => uint256) private _offsetPlusOne;
+    function _extensionEntry(bytes32 f) internal view override returns(ManifestEntry memory){
+        if(f==FAMILY_LIVE_SCOPE)return ManifestEntry(f,0,3,3,keccak256("live-positive-folder-binding-ordinals:dense-swap:scopeList"),true);
+        return super._extensionEntry(f);
+    }
     constructor(address c,bytes32 rt,bytes32 ct,bytes32 rh,bytes32 ch,bytes32 nt,bytes32 nh)
         FilesNamesIndex(c,rt,ct,rh,ch,nt,nh) {_declare(FAMILY_LIVE_SCOPE,true,attachedFrom);}
-    function onAdmission(uint64 publication,Effect[] calldata effects) public virtual override {
-        super.onAdmission(publication,effects);
+    function _foldEffect(Effect memory e) internal virtual override {
+        super._foldEffect(e);
         Ledger core=Ledger(ledger);
-        for(uint256 i;i<effects.length;i++){
-            Effect calldata e=effects[i];if(e.kind!=3 && e.kind!=4)continue;
+            if(e.kind!=3 && e.kind!=4)return;
             (bytes32 purpose,,)=core.positionCell(core.bindingPosition(e.bindingOrdinal));
-            if(purpose!=FOLDER)continue;
+            if(purpose!=FOLDER)return;
             uint64[] storage active=_live[Keys.scopeList(e.scopeKey)];
             uint256 oneBased=_offsetPlusOne[e.bindingOrdinal];
             if(e.kind==3){
@@ -34,7 +37,6 @@ contract FilesLiveNamesIndex is FilesNamesIndex {
                 if(removed!=last){uint64 moved=active[last];active[removed]=moved;_offsetPlusOne[moved]=oneBased;}
                 active.pop();delete _offsetPlusOne[e.bindingOrdinal];
             }
-        }
     }
     function liveCount(bytes32 key) external view returns(uint64) { return uint64(_live[key].length); }
     function liveAt(bytes32 key,uint64 i) external view returns(uint64) { return _live[key][i]; }

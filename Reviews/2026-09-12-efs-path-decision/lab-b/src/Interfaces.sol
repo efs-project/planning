@@ -40,6 +40,8 @@ interface IIndexModule {
     function onAdmission(uint64 publication, Effect[] calldata effects) external;
     // Exact selector acknowledgement prevents a permissive old fallback qualifying.
     function afterPublication(uint64 publication, Effect[] calldata effects) external view returns (bytes4);
+    // Immutable required semantics; excludes generation, attachment and progress.
+    function manifestHash() external view returns(bytes32);
 }
 
 /// @notice What the Ledger needs from the Type registry. Three layers (authority repair

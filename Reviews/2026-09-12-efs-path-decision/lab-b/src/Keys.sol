@@ -48,6 +48,10 @@ library Keys {
     uint8 internal constant KIND_HISTORY = 8;
     uint8 internal constant KIND_SCOPE = 10;
     uint8 internal constant KIND_REFERENCE_POSITION = 11;
+    uint8 internal constant KIND_BY_RECORD = 12;
+    uint8 internal constant KIND_UNIQUE_BY_TYPE = 13;
+    uint8 internal constant KIND_SCALAR = 14;
+    uint8 internal constant KIND_DIGEST = 15;
 
     /// EOA principal id: the left-padded address (c0 form). The same key names the same
     /// principal on every Realm.
@@ -120,6 +124,19 @@ library Keys {
 
     function referenceList(bytes32 sourceType, uint8 ordinal, bytes32 target) internal pure returns (bytes32) {
         return posting(sourceType, KIND_REFERENCE_POSITION, ordinal, target);
+    }
+
+    function byRecordList(bytes32 id) internal pure returns(bytes32) {
+        return posting(0,KIND_BY_RECORD,0,id);
+    }
+    function uniqueByTypeList(bytes32 t) internal pure returns(bytes32) {
+        return posting(t,KIND_UNIQUE_BY_TYPE,0,0);
+    }
+    function scalarList(bytes32 t,uint8 spec,uint8 kind,bytes32 value) internal pure returns(bytes32) {
+        return posting(t,KIND_SCALAR,spec,keccak256(abi.encode(kind,value)));
+    }
+    function digestList(bytes32 algorithm,bytes32 value) internal pure returns(bytes32) {
+        return posting(0,KIND_DIGEST,0,keccak256(abi.encode(algorithm,value)));
     }
 
     function byAuthorList(bytes32 principalId) internal pure returns (bytes32) {

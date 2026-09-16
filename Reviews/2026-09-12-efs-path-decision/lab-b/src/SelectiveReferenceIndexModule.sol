@@ -32,7 +32,6 @@ library BQuoteProfile {
 /// late construction is permitted but remains honestly PARTIAL. Retained membership is NOT
 /// current validity: withdrawals never release this new family's audit entries.
 contract SelectiveReferenceIndexModule is IndexModule {
-    bytes32 public constant FAMILY_REFERENCE_POSITION = keccak256("efs2/family/reference-position/1");
     bytes32 public immutable sourceType;
     uint8 public immutable referenceOrdinal;
     bytes32 public immutable pairType;
@@ -41,6 +40,9 @@ contract SelectiveReferenceIndexModule is IndexModule {
 
     error E_REFERENCE_PROFILE();
     error E_REFERENCE_RECORD();
+    function _manifestExtension() internal view override returns(bytes32){
+        return keccak256(abi.encode("SelectiveQuote/1:generic-ref-alias",sourceType,referenceOrdinal,pairType,expectedShape,expectedRuleCodehash));
+    }
 
     constructor(address ledger_, bytes32 sourceType_, uint8 referenceOrdinal_, bytes32 pairType_, bytes32 expectedShape_, bytes32 expectedRuleCodehash_)
         IndexModule(ledger_)
@@ -52,20 +54,12 @@ contract SelectiveReferenceIndexModule is IndexModule {
         pairType = pairType_;
         expectedShape = expectedShape_;
         expectedRuleCodehash = expectedRuleCodehash_;
-        _declare(FAMILY_REFERENCE_POSITION, true, attachedFrom);
     }
 
-    function onAdmission(uint64 publication, Effect[] calldata effects) public override {
-        super.onAdmission(publication, effects);
-        for (uint256 i; i < effects.length; ++i) {
-            Effect calldata e = effects[i];
-            if ((e.kind != 1 && e.kind != 2) || e.typeId != sourceType) continue;
+    function _foldEffect(Effect memory e) internal override {
+        super._foldEffect(e);
+            if ((e.kind != 1 && e.kind != 2) || e.typeId != sourceType) return;
             (bytes32 t, uint64 first,, bytes memory body_) = Ledger(ledger).record(e.recordId);
             if (t != sourceType || body_.length != 160 || first == 0 || first > e.admission) revert E_REFERENCE_RECORD();
-            if (first != e.admission) continue;
-            bytes32 target;
-            assembly ("memory-safe") { target := mload(add(body_, 32)) }
-            _append(Keys.referenceList(sourceType, 0, target), first, true);
-        }
     }
 }

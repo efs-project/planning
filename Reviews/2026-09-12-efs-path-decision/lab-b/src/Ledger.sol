@@ -561,7 +561,7 @@ contract Ledger {
         uint64 registryEpoch = registry.epoch();
         IIndexModule.Effect[] memory effects = _beginPublication(p, n);
         IIndexModule.Effect[] memory segment = new IIndexModule.Effect[](1);
-        uint256 budget = INDEX_GAS_BASE + INDEX_GAS_PER_ACTION * n;
+        uint256 budget = uint256(_supportRead(abi.encodeCall(PublicationSupport.indexAllowance,(indexModule,address(registry),abi.encode(actions)))));
         for (uint256 i; i < n; ++i) {
             ++p.ord;
             effects[i] = _applyOne(p, actions[i], bodies[i], i);
@@ -1010,8 +1010,7 @@ contract Ledger {
     }
 
     function indexObligations() public view returns (bytes32) {
-        address m = indexModule;
-        return m == address(0) ? bytes32(0) : keccak256(abi.encode(m, m.codehash));
+        return _supportRead(abi.encodeCall(PublicationSupport.indexObligations,(indexModule)));
     }
 
     function intentDigest(Intent memory intent, bytes32 actionsHash) public view returns (bytes32) {

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {IIndexModule, ITypeRegistry} from "./Interfaces.sol";
+import {IndexWork} from "./IndexWork.sol";
+import {IndexFieldProfile} from "./IndexFieldProfile.sol";
 
 /// Fixed, constructor-created stateless dispatch dependency. Ledger alone selects
 /// this immutable DELEGATECALL target; module is only a CALL/STATICCALL recipient.
@@ -13,6 +15,58 @@ contract PublicationSupport {
     error E_BOUNDS(uint256 code);
 
     struct ReadSet {bytes32[] principalIds;bytes32[] positions;bytes32[] expectedHeads;}
+
+    /// Fixed-output quote from bounded action bytes and canonical Type refs.
+    /// Body work conservatively charges all256 possible words for each authored
+    /// occurrence; actual index reads are sparse. Reuse/duplicate bodies may
+    /// overquote, but unused budget is never demanded as an outer-gas reserve.
+    function indexAllowance(address module,address registry,bytes calldata encoded) external view returns(uint256 budget){
+        uint256 n;uint256 offset;
+        assembly("memory-safe"){offset:=calldataload(encoded.offset) n:=calldataload(add(encoded.offset,32))}
+        if(n==0||n>64||offset!=32||encoded.length!=64+n*288)revert E_BOUNDS(0);
+        budget=IndexWork.BASE+IndexWork.ACTION*n;
+        if(module==address(0))return budget;
+        uint256 profileWord=uint256(_fixedRead(module,abi.encodeWithSignature("fieldProfile()"),30_000));
+        if(profileWord>type(uint160).max)revert E_INDEX("");
+        address profile=address(uint160(profileWord));
+        for(uint256 i;i<n;i++){
+            uint256 kind;bytes32 t;
+            assembly("memory-safe"){
+                let ptr:=add(add(encoded.offset,64),mul(i,288))
+                kind:=calldataload(ptr) t:=calldataload(add(ptr,32))
+            }
+            if(kind!=1&&kind!=2)continue;
+            (,,,,,uint8 refs,)=ITypeRegistry(registry).typeInfo(t);
+            if(refs>8)revert E_BOUNDS(4);
+            uint256 declarations=profile==address(0)?0:uint256(_fixedRead(profile,abi.encodeCall(IndexFieldProfile.workUnits,(t)),30_000));
+            if(declarations>5)revert E_BOUNDS(4);
+            budget+=IndexWork.REFERENCE*refs+IndexWork.DECLARATION*declarations+IndexWork.BODY_WORD*256;
+        }
+        if(budget>IndexWork.MAXIMUM)budget=IndexWork.MAXIMUM;
+    }
+
+    function _fixedRead(address target,bytes memory input,uint256 gasLimit) private view returns(bytes32 word){
+        bool ok;uint256 size;
+        assembly("memory-safe"){
+            let ptr:=mload(0x40)
+            ok:=staticcall(gasLimit,target,add(input,32),mload(input),ptr,32)
+            size:=returndatasize() word:=mload(ptr)
+        }
+        if(!ok||size!=32)revert E_INDEX("");
+    }
+
+    function indexObligations(address module) external view returns(bytes32){
+        if(module==address(0))return 0;
+        bytes memory input=abi.encodeWithSelector(IIndexModule.manifestHash.selector);
+        bytes32 manifest;bool ok;uint256 size;
+        assembly("memory-safe"){
+            let ptr:=mload(0x40)
+            ok:=staticcall(100000,module,add(input,32),mload(input),ptr,32)
+            size:=returndatasize() manifest:=mload(ptr)
+        }
+        if(!ok||size!=32||manifest==0)revert E_INDEX("");
+        return keccak256(abi.encode(module,module.codehash,manifest));
+    }
 
     /// Static publication codecs. No canonical storage, authority, head comparison
     /// or Type-rule invocation is delegated to this helper.

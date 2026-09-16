@@ -23,12 +23,13 @@ async function freePort() {
   const port = server.address().port; await new Promise(ok => server.close(ok)); return port;
 }
 export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_OUT ?? join(lab,'out'),useLive=process.env.EFS_LISTING_MODE!=='audit',
-  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile,evidenceMode='snapshot',benchmarkHistory=false,chainId=31337}={}) {
+  protocol='compact-legacy-v1',deployment='direct',hardfork='cancun',filesProfile,contentProfile,indexFields=false,evidenceMode='snapshot',benchmarkHistory=false,chainId=31337}={}) {
   assert([31337,31338].includes(chainId),'owned fixture chainId is 31337 or 31338');
   assert(['snapshot','append'].includes(evidenceMode),'supported evidence mode');
   assert(!benchmarkHistory||evidenceMode==='append','short history is explicit benchmark-only');
   const historyPolicy=benchmarkHistory?{states:16,transactionBlocks:32}:{states:256,transactionBlocks:512};
   assert(!contentProfile||(contentProfile==='raw-sha256-aesgcm-v2'&&filesProfile==='typed-directory-v1'),'supported content profile');
+  assert(!indexFields||contentProfile==='raw-sha256-aesgcm-v2','field index requires exact carrier profile');
   assert(filesProfile===undefined||filesProfile==='typed-directory-v1','supported Files profile');
   assert(!filesProfile||(protocol==='compact-guarded-v2'&&useLive),'typed directories require guarded live profile');
   assert(['compact-legacy-v1','compact-guarded-v2'].includes(protocol),'supported fixture protocol');
@@ -175,8 +176,8 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
       }
     }
     const legacyIndexArgs=[root,childType,ruleHashes.root,ruleHashes.child,name,ruleHashes.name,...(filesProfile?[directoryType,ruleHashes.directory]:[])];
-    const index=await deploy('index',contentProfile?'FilesCarrierProfile.sol':filesProfile?'FilesDirectoryProfile.sol':useLive?'FilesLiveIndex.sol':'FilesNamesProfile.sol',
-      contentProfile?'FilesCarrierIndex':filesProfile?'FilesDirectoryIndex':useLive?'FilesLiveNamesIndex':'FilesNamesIndex',
+    const index=await deploy('index',indexFields?'ProfiledFilesIndex.sol':contentProfile?'FilesCarrierProfile.sol':filesProfile?'FilesDirectoryProfile.sol':useLive?'FilesLiveIndex.sol':'FilesNamesProfile.sol',
+      indexFields?'ProfiledFilesIndex':contentProfile?'FilesCarrierIndex':filesProfile?'FilesDirectoryIndex':useLive?'FilesLiveNamesIndex':'FilesNamesIndex',
       contentProfile?[ledger,legacyIndexArgs,Object.values(contentTypes),Object.keys(contentTypes).map(k=>ruleHashes[k])]:[ledger,...legacyIndexArgs]);
     await transact('ledger','setIndexModule',[index]);
     const lens=await deploy('lens',useLive?'FilesLiveIndex.sol':'LensReader.sol',useLive?'FilesLiveLens':'LensReader',[ledger,index]);

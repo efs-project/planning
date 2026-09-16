@@ -82,12 +82,19 @@ contract PhaseRefusingIndex is IndexModule {
     }
 }
 
-/// A pre-two-phase module whose permissive fallback must NOT silently qualify.
-contract LegacyFallbackIndex {
+/// Negative callback fixtures deliberately pass the new metadata gate so these
+/// regressions still exercise CALL/STATICCALL response handling, not an earlier
+/// missing-manifest failure. Their fake manifest is NOT a readiness claim.
+abstract contract CallbackMetadataProbe {
+    function manifestHash() external pure returns(bytes32){return keccak256("test/negative-callback/1");}
+    function fieldProfile() external pure returns(address){return address(0);}
+}
+/// A pre-final-phase module whose permissive fallback must NOT silently qualify.
+contract LegacyFallbackIndex is CallbackMetadataProbe {
     function onAdmission(uint64,IIndexModule.Effect[] calldata) external {}
     fallback() external {}
 }
-contract MalformedFinalIndex {
+contract MalformedFinalIndex is CallbackMetadataProbe {
     bool immutable longResult;
     constructor(bool long_) {longResult=long_;}
     function onAdmission(uint64,IIndexModule.Effect[] calldata) external {}
@@ -101,7 +108,7 @@ contract MutatingRule {
     constructor(EquipmentEligibility d){dependency=d;}
     function accept(bytes32,bytes calldata,bytes32[] calldata) external returns(bool){dependency.set(false);return true;}
 }
-contract WritingFinalIndex {
+contract WritingFinalIndex is CallbackMetadataProbe {
     uint256 public prefixWrites;
     uint256 public finalWrites;
     function onAdmission(uint64,IIndexModule.Effect[] calldata) external {++prefixWrites;}
@@ -109,7 +116,7 @@ contract WritingFinalIndex {
         ++finalWrites;return IIndexModule.afterPublication.selector;
     }
 }
-contract OversizedCallbackIndex {
+contract OversizedCallbackIndex is CallbackMetadataProbe {
     uint256 public touched;
     function onAdmission(uint64,IIndexModule.Effect[] calldata) external {
         touched=1;bytes memory result=new bytes(4097);

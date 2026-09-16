@@ -44,6 +44,9 @@ contract FilesDirectoryIndex is FilesLiveNamesIndex {
     error E_DIRECTORY_PARENT(bytes32 parent);
     error E_DIRECTORY_TARGET(bytes32 target);
     error E_DIRECTORY_SELF_LINK();
+    function _manifestExtension() internal view virtual override returns(bytes32){
+        return keccak256(abi.encode(super._manifestExtension(),"FilesDirectory/1:final-retained-parent-target",directoryType,expectedDirectoryRuleHash));
+    }
     constructor(address c,bytes32 rt,bytes32 ct,bytes32 rh,bytes32 ch,bytes32 nt,bytes32 nh,bytes32 dt,bytes32 dh)
         FilesLiveNamesIndex(c,rt,ct,rh,ch,nt,nh) {
         FilesDirectoryLayout.pin(Ledger(c),dt,dh);directoryType=dt;expectedDirectoryRuleHash=dh;
