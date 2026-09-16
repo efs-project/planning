@@ -191,6 +191,8 @@ export function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fai
     async verifyRetained(plan,publication,retained,context) {
       const pub=await scalar('ledger','publicationContext',[publication],context);
       if(Number(pub.intentFormat)!==2)fail('FORMAT_UNSUPPORTED');
+      // Proof-kind3 r/s are a typed evidence hash/store union, never ECDSA.
+      if(Number(retained[1])!==2||Number(pub.principalKind)!==1||Number(pub.authorizationProfile)!==2)fail('FORMAT_UNSUPPORTED');
       const execution=namedExecution(await scalar('ledger','executionInfo',[pub.executionSet],context));
       reviewExecution(execution);check(eq(executionHash(execution),pub.executionSet),'HISTORY_EXECUTION');
       const bytes=await scalar('ledger','readSetBytes',[pub.readSetHash],context);

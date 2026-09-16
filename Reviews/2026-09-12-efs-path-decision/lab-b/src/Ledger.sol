@@ -6,6 +6,7 @@ import {ExecutionSlots} from "./ExecutionSlots.sol";
 import {PublicationSupport} from "./PublicationSupport.sol";
 import {PublicationPreparation as P} from "./PublicationPreparation.sol";
 import {ReadSetStorage} from "./ReadSetStorage.sol";
+import {ContractSignatureEvidenceStore} from "./ContractSignatureEvidenceStore.sol";
 import {IAcceptor, IIndexModule, ITypeRegistry,IIndexReadiness,IndexReadinessProfile} from "./Interfaces.sol";
 
 /// @title Ledger — Road B single-pass ingestion kernel
@@ -122,6 +123,7 @@ contract Ledger {
         bytes32 readsHash;
         bytes readBytes;
         uint8 format;
+        bytes contractSignature;
     }
 
     // What one admission reads from the registry (memory struct: one pointer on the stack; the
@@ -279,13 +281,28 @@ contract Ledger {
     }
 
     // ------------------------------------------------------------------------ ingress
+    /// Explicit ordinary deployed-wallet lane; opaque/empty bytes are not ECDSA.
+    function executeGuarded1271(IntentV2 memory intent,Action[] memory actions,bytes[] memory bodies,
+        ReadSetV2 memory readSet,bytes calldata signature) external returns(uint64,uint64)
+    {
+        if(signature.length>4096)revert E_SIGNATURE();
+        return _guardedSignature(intent,actions,bodies,readSet,signature,true);
+    }
+
     function executeGuardedSigned(IntentV2 memory intent, Action[] memory actions, bytes[] memory bodies,
         ReadSetV2 memory readSet, bytes memory sig) external returns (uint64, uint64)
     {
+        return _guardedSignature(intent,actions,bodies,readSet,sig,false);
+    }
+
+    function _guardedSignature(IntentV2 memory intent,Action[] memory actions,bytes[] memory bodies,
+        ReadSetV2 memory readSet,bytes memory sig,bool wallet) private returns(uint64,uint64)
+    {
         bytes memory readBytes = abi.encode(readSet);
-        Pub memory p = _prepare(abi.encodeWithSelector(PublicationSupport.prepareGuardedSigned.selector,
+        Pub memory p = _prepare(abi.encodeWithSelector(wallet?PublicationSupport.prepareGuarded1271.selector:PublicationSupport.prepareGuardedSigned.selector,
             intent, abi.encode(actions), readBytes, sig));
         p.readBytes = readBytes;
+        p.contractSignature=sig;
         return _run(p, actions, bodies);
     }
 
@@ -521,8 +538,9 @@ contract Ledger {
         EvidenceCell storage e = _evidence[p.publication];
         e.w0 = uint256(uint160(p.author)) | (uint256(p.proofKind) << 160) | (uint256(p.v) << 164)
             | (uint256(leafCount) << 172) | (uint256(first) << 188) | (p.imported ? (uint256(1) << 236) : 0);
-        if (p.proofKind == PROOF_SIGNED) {
-            e.r = p.r;
+        if (p.proofKind != PROOF_NATIVE) {
+            e.r = p.proofKind==3?ContractSignatureEvidenceStore(address(uint160(uint256(p.s)))).retain(
+                p.publication,p.intentHash,p.r,p.contractSignature):p.r;
             e.s = p.s;
         }
         e.w3 = uint256(p.nonce) | (uint256(p.deadline) << 64) | ((block.number & 0xFFFFFFFFFF) << 128);
@@ -846,11 +864,11 @@ contract Ledger {
             }
         }
         P.Result memory r = abi.decode(output, (P.Result));
-        p.author = r.author; p.author32 = r.author32; p.creator = r.creator;
-        p.imported = r.imported; p.proofKind = r.proofKind; p.v = r.v;
-        p.nonce = r.nonce; p.deadline = r.deadline; p.r = r.r; p.s = r.s;
-        p.acceptanceProfile = r.acceptanceProfile; p.indexObligations = r.indexObligations;
-        p.actionsHash = r.actionsHash; p.execution = r.execution; p.intentHash = r.intentHash;
+        // Both typed memory structs begin with the same thirteen static fields.
+        // Decode above still checks every address/bool/narrow integer. Copy only
+        // that shared prefix; mutable ordinals and dynamic pointers stay zero.
+        assembly("memory-safe"){mcopy(p,r,416)}
+        p.execution = r.execution; p.intentHash = r.intentHash;
         p.readsHash = r.readsHash; p.format = r.format;
     }
 

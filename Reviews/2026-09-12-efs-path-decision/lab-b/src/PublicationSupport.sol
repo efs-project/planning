@@ -7,11 +7,15 @@ import {IndexWork} from "./IndexWork.sol";
 import {IndexFieldProfile} from "./IndexFieldProfile.sol";
 import {Keys} from "./Keys.sol";
 import {PublicationPreparation as P} from "./PublicationPreparation.sol";
+import {ContractSignatureEvidenceStore} from "./ContractSignatureEvidenceStore.sol";
 
 /// Fixed, constructor-created stateless dispatch dependency. Ledger alone selects
 /// this immutable DELEGATECALL target; module is only a CALL/STATICCALL recipient.
 /// Owns no storage and cannot delegate to a caller-supplied address.
 contract PublicationSupport {
+    address private immutable signatureStore=address(new ContractSignatureEvidenceStore());
+    bytes32 private immutable signatureStoreCodehash=signatureStore.codehash;
+    function signatureStoreIdentity() external view returns(address,bytes32){return(signatureStore,signatureStoreCodehash);}
     error E_INDEX(bytes data);
     error E_GAS();
     error E_INDEX_RETURNDATA(uint256 size);
@@ -93,6 +97,33 @@ contract PublicationSupport {
     function prepareGuardedSigned(P.IntentV2 calldata intent, bytes calldata actions, bytes calldata encodedReads, bytes calldata sig)
         external view returns (P.Result memory p)
     {
+        p=_guarded(intent,actions,encodedReads);
+        _signature(p, sig, p.intentHash);
+    }
+
+    function prepareGuarded1271(P.IntentV2 calldata intent, bytes calldata actions, bytes calldata encodedReads, bytes calldata sig)
+        external view returns(P.Result memory p)
+    {
+        if(sig.length>4096)revert E_SIGNATURE();
+        p=_guarded(intent,actions,encodedReads);
+        bytes32 principal=Keys.principalFor(intent.author,intent.realmOrigin);
+        if(intent.author.code.length==0||principal==Keys.principal(intent.author))revert E_SIGNATURE();
+        if(signatureStore.codehash!=signatureStoreCodehash)revert E_SIGNATURE();
+        p.author32=principal;p.creator=principal;p.proofKind=3;
+        p.r=intent.author.codehash;p.s=bytes32(uint256(uint160(signatureStore)));
+        bytes memory input=abi.encodeWithSelector(bytes4(0x1626ba7e),p.intentHash,sig);
+        // Reserve includes EIP-150, cold target charge and dispatch/result work.
+        if(gasleft()<320_000)revert E_GAS();
+        address wallet=intent.author;bool ok;uint256 size;bytes32 magic;
+        assembly("memory-safe"){
+            let ptr:=mload(0x40)
+            ok:=staticcall(300000,wallet,add(input,32),mload(input),ptr,32)
+            size:=returndatasize() magic:=mload(ptr)
+        }
+        if(!ok||size!=32||magic!=bytes32(bytes4(0x1626ba7e)))revert E_SIGNATURE();
+    }
+
+    function _guarded(P.IntentV2 calldata intent,bytes calldata actions,bytes calldata encodedReads) private view returns(P.Result memory p) {
         if (block.timestamp > intent.deadline) revert E_EXPIRED(intent.deadline);
         if (intent.realmId != _sourceWord("realmId()") || intent.realmOrigin != _sourceWord("realmOrigin()")) revert E_INTENT(1);
         p.execution = _sourceWord("executionSet()");
@@ -110,7 +141,6 @@ contract PublicationSupport {
         p.deadline = intent.deadline;
         p.actionsHash = keccak256(actions);
         _finishGuarded(p, intent, _readSet(encodedReads));
-        _signature(p, sig, p.intentHash);
     }
 
     function _finishGuarded(P.Result memory p, P.IntentV2 memory intent, ReadSet memory rs) private view {

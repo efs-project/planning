@@ -209,6 +209,25 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
           const [address,codeHash]=await call(key,'publicationSupportIdentity');
           assert.equal(e.keccak256(await rpc('eth_getCode',[address,'latest'])),codeHash,'fixed support code');
           implementation.readSetStorage={profile,namespace};implementation.publicationSupport={address,codeHash};
+          // Additive wallet profile: old artifact deployments do not require it.
+          if(new e.Interface(contracts[key].abi).getFunction('executeGuarded1271')){
+            const supportArtifact=await artifact('PublicationSupport.sol','PublicationSupport');
+            const supportApi=new e.Interface(supportArtifact.abi);
+            const [store,storeHash]=supportApi.decodeFunctionResult('signatureStoreIdentity',await rpc('eth_call',[
+              {to:address,data:supportApi.encodeFunctionData('signatureStoreIdentity')},'latest']));
+            const storeArtifact=await artifact('ContractSignatureEvidenceStore.sol','ContractSignatureEvidenceStore');
+            for(const [dependency,expectedHash,a,target] of [[address,codeHash,supportArtifact,implementation.publicationSupport],
+              [store,storeHash,storeArtifact,implementation.signatureStore={address:store,codeHash:storeHash}]]){
+              const runtime=await rpc('eth_getCode',[dependency,'latest']),actual=e.getBytes(runtime),template=e.getBytes(a.deployedBytecode.object);
+              assert.equal(e.keccak256(runtime),expectedHash,'fixed wallet dependency code');
+              assert(actual.length<=24576&&e.getBytes(a.bytecode.object).length<=49152,'wallet dependency size');
+              assert.equal(Object.keys(a.bytecode.linkReferences??{}).length,0,'unlinked dependency initcode');
+              assert.equal(actual.length,template.length);const immutable=new Set();
+              for(const refs of Object.values(a.deployedBytecode.immutableReferences??{}))for(const r of refs)for(let j=r.start;j<r.start+r.length;j++)immutable.add(j);
+              for(let j=0;j<actual.length;j++)if(!immutable.has(j))assert.equal(actual[j],template[j],'dependency artifact byte');
+              Object.assign(target,{runtimeBytes:actual.length,initcodeBytes:e.getBytes(a.bytecode.object).length,creationPaidInLedgerReceipt:true});
+            }
+          }
         }else implementation.readSetStorage={profile:e.id('efs.lab.read-set-storage/1:root15-bytes'),namespace:e.ZeroHash};
       }
     }
