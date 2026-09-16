@@ -17,7 +17,7 @@
 
 ## Task 1: Deployed ERC1271 wallet ingress and retained historical authorization
 
-**Execution status September16:** active from reviewed prototype `ab55ca6`, sole Astra Extra High source/build/bounded-chain worker. The existing fixed caller-preserving preparation split supersedes the older preflight's standalone-module suggestion where coherent. Task2 waits for final source/layout anchors after live Files and stance tags; no wallet completion claim yet.
+**Execution status September16:** complete and independently reviewed `ab55ca6..7e2b5bf`; paid source `9941d3b`, later runner guards/evidence/test-only strengthening explicitly separate. Existing fixed caller-preserving preparation plus an immutable evidence Store implements the bounded profile; no new storage roots. [[core-closeout-results-20260915|Results and limits]]. Task2 waits for final source/layout anchors after live Files and stance tags; local wallet retention is not its state-proof result.
 
 **Files:** minimal Ledger ingress/integration, fixed signature module/evidence carrier if runtime requires it, qualified companion SDK/archive support, focused wallet and cost tests.
 
