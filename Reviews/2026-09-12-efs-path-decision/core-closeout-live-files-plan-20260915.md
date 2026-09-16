@@ -45,6 +45,8 @@ This helper does not move storage ownership or by itself change the physical sto
 
 ### September16 measured-fit continuation
 
+Finite-provider clarification: the descriptor rule pins one independently selected expected provider runtime hash in immutable code, checked at admission and explicit observation. The first fixture uses the reviewed direct provider; a different reviewed runtime needs a new explicit rule/profile binding. This is not a Core/global whitelist or support for arbitrary proxy/delegation implementation history. Reject a proxy/delegation-shaped control; keep shape-only observations, snapshot acceptance and setup pricing distinct. No proxy detector or additional generic lane is implied.
+
 The first inline live index compiled to25,050 runtime (474over); the fixed nested final-validator version reduced runtime to21,205 but actual initcode became50,584 (1,432over, including800 constructor bytes). These are compile/constructor measurements, not a completed normal-chain deployment. Preserve both controls.
 
 Controller authorizes one packaging correction: deploy the **same stateless immutable final validator separately**, then supply its address and independently selected expected runtime hash at index construction. Reject missing/wrong code and bound Ledger/Name/Directory configuration mismatch; pin address/hash immutably, with no setter/factory/new state owner. The reviewed deployment artifact, constructor/runtime and selected dependency closure authenticate the expected hash; matching getters or a caller-chosen hash alone do not prove honest validation. Actual index runtime/execution pins bind the helper identity. Logical replay manifest semantics must not accidentally require identical per-deployment helper addresses.
