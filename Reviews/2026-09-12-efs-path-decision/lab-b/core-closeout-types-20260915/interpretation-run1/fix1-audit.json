@@ -1,0 +1,55 @@
+{
+  "measuredSourceCommit": "a72c272a4f3d1d55aec1a0d77a2ee9cc2a351895",
+  "sourceJoins": 37,
+  "artifactJoins": 14,
+  "dependencyJoins": 193,
+  "transactions": 80,
+  "refusals": 8,
+  "deployments": 25,
+  "offlineBundles": 8,
+  "interpretation": [
+    "COMPLETE",
+    "COMPLETE",
+    "COMPLETE",
+    "COMPLETE",
+    "COMPLETE",
+    "COMPLETE",
+    "COMPLETE",
+    "OPAQUE_LEGACY"
+  ],
+  "postMeasurementChanges": [
+    {
+      "path": "browser/described-type-archive.mjs",
+      "measuredSha256": "b6f71f10d98fa14a971d22d98235f8004cfafb207d1f323a5f97f58b35b3f54e",
+      "currentSha256": "a850ad482216364aa4cd473cf9cfa387484a3f3c3995136e563ef7df32010377",
+      "scope": "offline qualification/projection hardening; no decoder or contract change"
+    },
+    {
+      "path": "browser/guarded-archive.mjs",
+      "measuredSha256": "c205ad638a4a1bb09fd363f85a02685ce2bbb1a6f7a441e90701b755df5917d9",
+      "currentSha256": "eb159b62afe8d0bef7941dab1803a6389792402f841e41b82935de3e58807e76",
+      "scope": "review fix1: bound and count every supplied ruleCode including absent Types; size guard before hex regex; no paid rerun"
+    }
+  ],
+  "packaging": {
+    "paid.json": {
+      "rawBytes": 3992774,
+      "gzipBytes": 719777,
+      "rawSha256": "513dc97767d2a76f9a031d25b39487e47cc829d6ece1ab8d8214685d12f9460b",
+      "gzipSha256": "ab5b941cf76eb3aca9a2e85d1388bc1dcc8fae91ef965f0c2650173aa8cecf33"
+    },
+    "source-sidecars.json": {
+      "rawBytes": 255002,
+      "gzipBytes": 18585,
+      "rawSha256": "ae6140014ac58f42748a1b47f94ff17a6e7380905993073f178818720f3e3eed",
+      "gzipSha256": "a8d4ff9a30740fe8f6b1bcec3cf8c81f98e2f254453df5157f24fae5f1323b2c"
+    },
+    "source-off-results.json": {
+      "rawBytes": 42655,
+      "gzipBytes": 3680,
+      "rawSha256": "c46bb849c2bd67d7268e87762f45afc3c232bc0803c1118bda2b589813a5d15c",
+      "gzipSha256": "ec1a8c1c20ce5d642d94d5783e2a5d3455c79b61c211a8045677f4104355a0cf"
+    }
+  },
+  "limits": "Retained local RPC joins, not authenticated chain-state or historical custom-state proof."
+}

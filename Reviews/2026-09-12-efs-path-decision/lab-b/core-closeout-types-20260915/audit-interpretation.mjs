@@ -20,9 +20,13 @@ for(const [name,[rawSha,gzipSha]] of Object.entries(expected)){
  documents[name]=JSON.parse(raw);packaging[name]={rawBytes:raw.length,gzipBytes:packed.length,rawSha256:rawSha,gzipSha256:gzipSha};
 }
 const packet=documents['paid.json'];assert(!packet.failure);let sourceJoins=0,artifactJoins=0,dependencyJoins=0,transactions=0,deployments=0,refusals=0;const postMeasurementChanges=[];
+const allowedPostMeasurement={
+ 'browser/described-type-archive.mjs':{sha256:'a850ad482216364aa4cd473cf9cfa387484a3f3c3995136e563ef7df32010377',scope:'offline qualification/projection hardening; no decoder or contract change'},
+ 'browser/guarded-archive.mjs':{sha256:'eb159b62afe8d0bef7941dab1803a6389792402f841e41b82935de3e58807e76',scope:'review fix1: bound and count every supplied ruleCode including absent Types; size guard before hex regex; no paid rerun'},
+};
 for(const [path,pin] of Object.entries(packet.sourcePins)){
  const retained=execFileSync('git',['show',measured+':'+lab+path],{maxBuffer:2*1024*1024});assert.equal(sha(retained),pin.sha256);assert.equal(e.keccak256(retained),pin.keccak256);sourceJoins++;
- const current=await readFile(new URL(path,root));if(sha(current)!==pin.sha256){assert.equal(path,'browser/described-type-archive.mjs','unexpected measured source drift');postMeasurementChanges.push({path,measuredSha256:pin.sha256,currentSha256:sha(current),scope:'offline qualification/projection hardening; no decoder or contract change'});}
+ const current=await readFile(new URL(path,root));if(sha(current)!==pin.sha256){const allowed=allowedPostMeasurement[path];assert(allowed,'unexpected measured source drift: '+path);assert.equal(sha(current),allowed.sha256,'unreviewed post-measurement source drift: '+path);postMeasurementChanges.push({path,measuredSha256:pin.sha256,currentSha256:sha(current),scope:allowed.scope});}
 }
 for(const [name,a] of Object.entries(packet.artifacts)){
  const raw=await readFile(`${process.env.FOUNDRY_OUT}/${a.file}/${name}.json`),artifact=JSON.parse(raw);assert.equal(sha(raw),a.artifactSha256);

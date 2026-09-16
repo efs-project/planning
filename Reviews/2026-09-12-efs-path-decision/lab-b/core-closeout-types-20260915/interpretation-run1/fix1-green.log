@@ -1,0 +1,11 @@
+✔ absent-Type rows cannot hide a single oversized supplied rule-code payload (0.4535ms)
+✔ absent-Type rows cannot hide an aggregate of individually permitted rule-code payloads (7.64175ms)
+✔ absent-Type partial claim verification enforces supplied code bounds without requiring missing preimages (44.912875ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 168.840917

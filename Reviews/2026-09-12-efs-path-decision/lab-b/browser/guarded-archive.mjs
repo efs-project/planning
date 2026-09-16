@@ -50,8 +50,9 @@ function checkBodies(e,x){
 export function checkTypeSidecarBudget(types){
   let descriptors=0,code=0,other=0;
   for(const t of types){
-    const take=(value,max,kind)=>{need(hex(value)&&(value.length-2)/2<=max,'TYPE_SIDECAR_BOUNDS');return (value.length-2)/2;};
-    if(t.present!==false)code+=take(t.ruleCode,24576);
+    const take=(value,max,kind)=>{need(typeof value==='string'&&(value.length-2)/2<=max&&hex(value),'TYPE_SIDECAR_BOUNDS');return (value.length-2)/2;};
+    // Absence is a knowledge qualification, never a payload-budget exemption.
+    if(t.present!==false||t.ruleCode!==undefined)code+=take(t.ruleCode,24576);
     const s=t.described;if(!s)continue;
     if(s.descriptor!==undefined)descriptors+=take(s.descriptor,4096);
     for(const k of ['wrapperInitcode','customCode'])if(s[k]!==undefined)code+=take(s[k],k==='wrapperInitcode'?49152:24576);

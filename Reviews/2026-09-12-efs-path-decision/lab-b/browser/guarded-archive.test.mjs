@@ -72,3 +72,14 @@ test('a signed never-admitted claim cannot omit a zero-valued declared Record re
   assert.equal(result.closureCoverage,'PARTIAL');
   assert.deepEqual(result.missingMeaning,[`record:${Z}`]);
 });
+test('absent-Type partial claim verification enforces supplied code bounds without requiring missing preimages',async()=>{
+  const x=fixture();x.closure.types[0].present=false;delete x.closure.types[0].ruleCode;x.closure.coverage='PARTIAL';
+  assert.equal((await archive.verifyGuardedClaim(e,x)).closureCoverage,'PARTIAL','an absent unsupplied rule preimage remains valid partial evidence');
+  const oversized=structuredClone(x);oversized.closure.types[0].ruleCode='0x'+'00'.repeat(4_194_305);
+  await assert.rejects(archive.verifyGuardedClaim(e,oversized),/TYPE_SIDECAR_BOUNDS/);
+  const aggregate=structuredClone(x);
+  aggregate.closure.types.push(...Array.from({length:171},(_,i)=>({typeId:e.toBeHex(i+1,32),present:false,ruleCode:'0x'+'00'.repeat(24576)})));
+  await assert.rejects(archive.verifyGuardedClaim(e,aggregate),/TYPE_SIDECAR_AGGREGATE_BOUNDS/);
+  const present=fixture();delete present.closure.types[0].ruleCode;
+  await assert.rejects(archive.verifyGuardedClaim(e,present),/TYPE_SIDECAR_BOUNDS/,'present Types must still supply their rule-code preimage');
+});

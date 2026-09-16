@@ -296,3 +296,90 @@ custom refusal are disclosed, not silently retrofitted into paid evidence.
 Unrelated `.codex-*message` files were preserved. No task-owned chain remains.
 **Source/build/bounded-chain ownership released** for controller review and the
 next explicitly assigned worker; no further source or chain work is pending here.
+
+
+## Review fix round1 — absent-Type rule-code bounds
+
+September 16, 2026; same contracts-dev/codex session. Fix BASE
+`2488c5bc3980f6f075e73ebcbcf478055bceb6d4`; read the full controller-provided
+Task2 review and addressed its sole Important finding. The review's dense-code
+and inherited compiler-warning minors remain explicitly deferred.
+
+The root cause was `present:false` skipping `ruleCode` validation/accounting
+even when bytes were supplied. The fix validates and counts **every supplied**
+rule-code preimage regardless of presence. Present Types still must supply
+their preimage; an absent Type without supplied code remains legal PARTIAL
+evidence. No descriptor/body meaning, signature, compatibility, static import,
+contract, code/gas cap, or frozen decoder changed.
+
+New behavior tests reject the actual4,194,305-byte absent-row reproduction and
+171 individually permitted24,576-byte absent-row payloads (4,202,496 aggregate),
+both directly and through complete signed partial-claim verification. They
+assert rejection, not merely returned counters. Positive missing-preimage
+PARTIAL and present-Type mandatory-preimage controls are retained.
+
+Exact scoped commands below ran from this lab with `set -o pipefail`.
+The environment variables were:
+
+```sh
+EFS_ETHERS_PATH=/Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers
+FOUNDRY_OUT=/tmp/efs-recovery-build-wPDyNv/out
+```
+
+Both variables were supplied to the audit command; only EFS_ETHERS_PATH was
+needed for these Node tests.
+
+```sh
+/opt/homebrew/opt/node/bin/node --test --test-name-pattern='absent-Type' \
+ browser/described-type.integration.test.mjs browser/guarded-archive.test.mjs
+/opt/homebrew/opt/node/bin/node --test \
+ browser/described-type.integration.test.mjs browser/guarded-archive.test.mjs
+/opt/homebrew/opt/node/bin/node core-closeout-types-20260915/audit-interpretation.mjs
+git diff --check
+```
+
+Output was retained via `2>&1 | tee` for tests and `| tee` for the audit:
+
+- `interpretation-run1/fix1-red.log`:0/3, all three controls report missing
+  expected exception/rejection on the original reviewed implementation.
+- `fix1-first-fix.log`:1/3. Counting supplied absent-row bytes fixed aggregate
+  rejection, but the single huge input exposed the existing hex regex running
+  **before** the size bound: `RangeError: Maximum call stack size exceeded`.
+  The log was renamed from the initial green-attempt filename; failure retained.
+  Stack traces identify the hex predicate called by the sidecar `take` helper.
+  Four whitespace-only diagnostic lines were normalized in the readable log;
+  exact original bytes remain in `fix1-first-fix.log.raw.gz` (gzip integrity
+  checked). Raw/gzip SHA256s are
+  `01d3d5a9a8b696742f193ae0b841f096d65f4bfbc452f61107093391c2b6013c` /
+  `9496d36d2ad5de747e21c888ddb98e35e30941ec6cdef76d5e498ece7ad46475`.
+- `fix1-green.log`:3/3 after moving the finite string/size guard before hex
+  validation. This is the same focused negative suite, not a new campaign.
+- `fix1-covering.log`:10/10,0 failures/skips, one complete run of the two
+  requested files. No all66/36 rerun, Solidity build, chain, or paid execution.
+- `fix1-audit.json`:37 measured source pins,14 artifacts,193 dependency joins,
+ 80 raw transactions,25 deployment joins and all eight offline bundles pass.
+  The successful current offline results exactly equal the retained originals.
+
+The audit preserves measured source commit
+`a72c272a4f3d1d55aec1a0d77a2ee9cc2a351895`, all raw/gzip packet hashes,
+artifact/compiler data and receipt joins. Its explicit post-measurement map
+now pins both the earlier described-archive hardening and this **bounds-only**
+guarded-archive correction. It rejects other drift or a changed current hash
+rather than treating these filenames as an unrestricted exception.
+New guarded-archive SHA256:
+`eb159b62afe8d0bef7941dab1803a6389792402f841e41b82935de3e58807e76`.
+The decoder remains
+`f592e731cab6e1e0a91b18ce4c89531e7a1f86e5cbb5dd004a3751c3fb02fed9`.
+The earlier `audit.json` and paid packets are historical evidence and were
+not overwritten; the fix audit is a separate dated checkpoint.
+
+Scoped changed files: guarded-archive.mjs; described-type.integration.test.mjs;
+guarded-archive.test.mjs; audit-interpretation.mjs; the two report copies; and
+the five fix1 log/audit outputs and exact raw first-fix log gzip. Runtime diff is two predicate changes plus a
+comment. The exact fix commit is the commit containing this appendix; the local
+SDD report records its full hash after commit. No push, owner-demo access,
+new static import, unrelated cleanup or architecture change.
+
+**Source/build/bounded-chain ownership released again** at this fix handoff.
+No task process was started, and the prior stopped chains remain untouched.
+Ready for the controller's scoped2488c5b..FIXHEAD review.

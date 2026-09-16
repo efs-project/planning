@@ -31,3 +31,10 @@ test('archive aggregate code budget refuses many individually valid-size Type si
   assert.throws(()=>checkTypeSidecarBudget(Array.from({length:171},()=>({ruleCode:'0x'+'00'.repeat(24576)}))),/AGGREGATE/);
   assert.throws(()=>checkTypeSidecarBudget([{ruleCode:'0x',described:{descriptor:'0x'+'00'.repeat(4097)}}]),/BOUNDS/);
 });
+test('absent-Type rows cannot hide a single oversized supplied rule-code payload',()=>{
+  assert.throws(()=>checkTypeSidecarBudget([{present:false,ruleCode:'0x'+'00'.repeat(4_194_305)}]),/TYPE_SIDECAR_BOUNDS/);
+});
+test('absent-Type rows cannot hide an aggregate of individually permitted rule-code payloads',()=>{
+  const rows=Array.from({length:171},()=>({present:false,ruleCode:'0x'+'00'.repeat(24576)}));
+  assert.throws(()=>checkTypeSidecarBudget(rows),/TYPE_SIDECAR_AGGREGATE_BOUNDS/);
+});

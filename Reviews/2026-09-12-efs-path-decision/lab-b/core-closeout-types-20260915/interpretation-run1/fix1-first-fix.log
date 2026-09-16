@@ -1,0 +1,71 @@
+✖ absent-Type rows cannot hide a single oversized supplied rule-code payload (23.11975ms)
+✔ absent-Type rows cannot hide an aggregate of individually permitted rule-code payloads (18.371875ms)
+✖ absent-Type partial claim verification enforces supplied code bounds without requiring missing preimages (62.742666ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 1
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 213.433458
+
+✖ failing tests:
+
+test at browser/described-type.integration.test.mjs:34:1
+✖ absent-Type rows cannot hide a single oversized supplied rule-code payload (23.11975ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /TYPE_SIDECAR_BOUNDS/. Input:
+
+  'RangeError: Maximum call stack size exceeded'
+
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/described-type.integration.test.mjs:35:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.start (node:internal/test_runner/test:1096:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17)
+      at run (node:internal/test_runner/harness:396:12)
+      at test (node:internal/test_runner/harness:405:12)
+      at file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/described-type.integration.test.mjs:34:1 {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: RangeError: Maximum call stack size exceeded
+        at RegExp.test (<anonymous>)
+        at hex (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/guarded-archive.mjs:21:65)
+        at take (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/guarded-archive.mjs:53:40)
+        at checkTypeSidecarBudget (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/guarded-archive.mjs:55:56)
+        at file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/described-type.integration.test.mjs:35:21
+        at getActual (node:assert:580:5)
+        at strict.throws (node:assert:728:24)
+        at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/described-type.integration.test.mjs:35:10)
+        at Test.runInAsyncScope (node:async_hooks:226:14)
+        at Test.run (node:internal/test_runner/test:1201:25),
+    expected: /TYPE_SIDECAR_BOUNDS/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at browser/guarded-archive.test.mjs:75:1
+✖ absent-Type partial claim verification enforces supplied code bounds without requiring missing preimages (62.742666ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /TYPE_SIDECAR_BOUNDS/. Input:
+
+  'RangeError: Maximum call stack size exceeded'
+
+      at async TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/guarded-archive.test.mjs:79:3)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: RangeError: Maximum call stack size exceeded
+        at RegExp.test (<anonymous>)
+        at hex (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/guarded-archive.mjs:21:65)
+        at take (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/guarded-archive.mjs:53:40)
+        at checkTypeSidecarBudget (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/guarded-archive.mjs:55:56)
+        at checkClosure (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/guarded-archive.mjs:70:3)
+        at Module.verifyGuardedClaim (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/guarded-archive.mjs:141:62)
+        at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/guarded-archive.test.mjs:79:32)
+        at async Test.run (node:internal/test_runner/test:1208:7)
+        at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3),
+    expected: /TYPE_SIDECAR_BOUNDS/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
