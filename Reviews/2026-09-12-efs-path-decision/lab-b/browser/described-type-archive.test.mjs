@@ -19,7 +19,21 @@ test('sidecar verifies meaning separately from opaque references and joins every
   }
   delete t.described;assert.equal(api.verifyDescribedSidecar(e,t).coverage,'PARTIAL');
   t.described={status:0};assert.equal(api.verifyDescribedSidecar(e,t).coverage,'OPAQUE_LEGACY');
-  const future=sidecar(vectors.invalidDescriptors[0]);assert.equal(api.verifyDescribedSidecar(e,future).coverage,'UNSUPPORTED');
+  const future=sidecar();future.described.descriptor=vectors.invalidDescriptors[0].descriptor;
+  future.shape=e.keccak256(e.AbiCoder.defaultAbiCoder().encode(['bytes32','bytes'],[e.id('efs.lab.described-shape/1'),future.described.descriptor]));
+  assert.equal(api.verifyDescribedSidecar(e,future).coverage,'UNSUPPORTED');
+});
+test('missing required sidecars are partial, and unsupported bytes still cannot spoof a known shape',()=>{
+  for(const field of ['wrapperAddress','registry','chainId','custom','allowedLedger','bindingId','bindingPreimage','bindingSignature','customCode']){
+    const t=sidecar();delete t.described[field];assert.equal(api.verifyDescribedSidecar(e,t).coverage,'PARTIAL',field);
+  }
+  const t=sidecar();t.described.descriptor=vectors.invalidDescriptors[0].descriptor;
+  assert.throws(()=>api.verifyDescribedSidecar(e,t),/SHAPE/);
+});
+test('standalone interpretation coverage cannot hide a missing referenced Record',()=>{
+  const v=vectors.vectors.at(-1),b=v.bodies[0];
+  const result=api.interpretationFor(e,{roots:[b.recordId],types:[sidecar(v)],records:[{recordId:b.recordId,typeId:v.typeId,present:true,body:b.body}]});
+  assert.equal(result.coverage,'PARTIAL');assert.equal(result.records[0].decoded.referenceMeaning,'NOT_ESTABLISHED');
 });
 test('consumer exact projection needs approval and explicit rich loss; reads never authorize old writes',()=>{
   assert.equal(typeof api.projectDescribedText,'function');
@@ -32,6 +46,7 @@ test('consumer exact projection needs approval and explicit rich loss; reads nev
   assert.equal(api.projectDescribedText(e,decoded(additive),{targetView:view,approved:[p1,p11]}).omitted.length,1);
   assert.throws(()=>api.projectDescribedText(e,decoded(additive),{targetView:view,approved:[p1]}),/UNAPPROVED/);
   const adapter={...p1,sourceType:rich.typeId,projectionId:e.id('consumer/rich-to-text'),adapter:'drop-emphasis',loss:'emphasis discarded'};
+  assert.throws(()=>api.projectDescribedText(e,decoded(rich),{targetView:view,approved:[{...p1,sourceType:rich.typeId}]}),/LOSS/);
   assert.throws(()=>api.projectDescribedText(e,decoded(rich),{targetView:view,approved:[adapter]}),/LOSS/);
   assert.equal(api.projectDescribedText(e,decoded(rich),{targetView:view,approved:[adapter],adapter:'drop-emphasis',acceptLoss:true}).loss,'emphasis discarded');
   assert.throws(()=>api.projectDescribedText(e,decoded(restricted),{targetView:view,approved:[p1],compatibleWith:v1.typeId}),/UNAPPROVED/);

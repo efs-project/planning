@@ -12,6 +12,8 @@ export function verifyDescribedSidecar(e,t){
   const s=t.described;if(s.status===0)return {coverage:'OPAQUE_LEGACY'};
   need(s.status===1||s.status===2,'STATUS');
   if(!s.descriptor||s.descriptor==='0x')return {coverage:'PARTIAL'};
+  need(bounded(s.descriptor,4096),'DESCRIPTOR_BOUND');
+  need(eq(e.keccak256(e.AbiCoder.defaultAbiCoder().encode(['bytes32','bytes'],[e.id('efs.lab.described-shape/1'),s.descriptor])),t.shape),'DESCRIPTOR_SHAPE');
   let d;try{d=decodeDescribedType(e,s.descriptor,t.ruleId);}catch(error){if(error.coverage==='UNSUPPORTED')return {coverage:'UNSUPPORTED'};throw error;}
   need(eq(t.ruleId,WRAPPER_RUNTIME),'WRAPPER_PROFILE');
   need(eq(d.typeId,t.typeId)&&eq(d.shape,t.shape)&&JSON.stringify(d.refTypes)===JSON.stringify(t.refTypes.map(v=>v.toLowerCase())),'TYPE_JOIN');
@@ -20,6 +22,7 @@ export function verifyDescribedSidecar(e,t){
   need(bounded(s.wrapperInitcode,49152)&&eq(e.keccak256(s.wrapperInitcode),WRAPPER_INIT),'WRAPPER_INIT');
   verifyPortableDeclaration(e,d,s.declaration);
   if(s.status===1)return {coverage:'COMPLETE',descriptor:d,installation:'NOT_INSTALLED',customState:'NOT_PROVEN'};
+  if(['wrapperAddress','registry','chainId','custom','allowedLedger','bindingId','bindingPreimage','bindingSignature','customCode'].some(k=>s[k]===undefined))return {coverage:'PARTIAL'};
   need(e.isAddress(s.wrapperAddress)&&!eq(s.wrapperAddress,e.ZeroAddress),'WRAPPER_ADDRESS');
   need(e.isAddress(s.registry)&&!eq(s.registry,e.ZeroAddress)&&/^[1-9][0-9]*$/.test(s.chainId),'SOURCE_CONTEXT');
   if(d.customAbi===0){
@@ -39,14 +42,21 @@ export function verifyDescribedSidecar(e,t){
 }
 export function interpretationFor(e,closure){
   const types=new Map(closure.types.map(t=>[t.typeId.toLowerCase(),verifyDescribedSidecar(e,t)]));
+  const retained=new Map(closure.records.map(r=>[r.recordId.toLowerCase(),r]));
   const records=closure.records.map(r=>{
     const type=types.get(r.typeId.toLowerCase());
     if(!r.present||!type)return {recordId:r.recordId,coverage:'PARTIAL'};
     if(type.coverage!=='COMPLETE')return {recordId:r.recordId,coverage:type.coverage};
     const decoded=decodeDescribedBody(e,type.descriptor,r.body);need(eq(decoded.recordId,r.recordId),'RECORD_JOIN');
-    return {recordId:r.recordId,coverage:'COMPLETE',decoded};
+    let coverage='COMPLETE';
+    for(const ref of decoded.references){
+      const target=retained.get(ref.recordId.toLowerCase());
+      if(!target?.present)coverage='PARTIAL';else need(eq(target.typeId,ref.typeId),'REFERENCE_TYPE');
+    }
+    return {recordId:r.recordId,coverage,decoded};
   });
   const states=[...Array.from(types.values(),t=>t.coverage),...records.map(r=>r.coverage)];
+  if(closure.roots?.some(id=>!retained.get(id.toLowerCase())?.present))states.push('PARTIAL');
   const coverage=states.includes('PARTIAL')?'PARTIAL':states.includes('UNSUPPORTED')?'UNSUPPORTED':states.includes('OPAQUE_LEGACY')?'OPAQUE_LEGACY':'COMPLETE';
   return {coverage,records,types:[...types].map(([typeId,t])=>({typeId,coverage:t.coverage})),semanticTruth:'NOT_PROVEN',referenceMeaning:'PER_TYPE_COVERAGE',authority:'NONE'};
 }
@@ -55,6 +65,7 @@ export function projectDescribedText(e,record,{targetView,approved=[],adapter,ac
   const rules=approved.filter(p=>eq(p.sourceType,record.typeId)&&eq(p.targetView,targetView));
   need(rules.length===1,'UNAPPROVED_PROJECTION');const p=rules[0];
   need(/^0x[0-9a-f]{64}$/i.test(p.projectionId),'PROJECTION_ID');
+  if(record.fields.some(f=>!eq(f.id,p.textField)&&!f.optional&&f.present))need(typeof p.adapter==='string'&&p.adapter.length>0,'LOSS_ADAPTER_REQUIRED');
   if(p.adapter)need(adapter===p.adapter&&acceptLoss===true&&typeof p.loss==='string'&&p.loss.length>0,'LOSS_CONSENT');
   const text=record.fields.find(f=>eq(f.id,p.textField));need(text?.present&&[7,8].includes(text.kind)&&typeof text.value==='string','TEXT_FIELD');
   return {value:{text:text.value},sourceType:record.typeId,targetView,projectionId:p.projectionId,

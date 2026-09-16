@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import * as e from '/Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
+import {loadEthers} from '../script/compact-environment.mjs';
+const e=await loadEthers();
 const vectors=JSON.parse(await readFile(new URL('../core-closeout-types-20260915/vectors.json',import.meta.url)));
 const api=await import('./described-type-reader.mjs').catch(error=>{if(error.code==='ERR_MODULE_NOT_FOUND')return {};throw error;});
 const descriptor=v=>api.decodeDescribedType(e,v.descriptor,vectors.wrapperRuntimeHash);

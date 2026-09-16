@@ -69,6 +69,19 @@ test('older registry descriptor accessor is explicitly unsupported and does not 
   assert.equal(value.knowledge,'UNSUPPORTED');assert.equal(value.coverage,'PARTIAL');assert.equal(value.value,null);
   assert.equal(value.reason,'DESCRIBED_GETTER_UNSUPPORTED');
 });
+test('raw descriptor accessor bounds bytes, distinguishes unavailable/invalid, and leaves unknown codecs uninterpreted',async()=>{
+  const registryAbi=[...abis.registry,'function describedStatus(bytes32) view returns(uint8)','function descriptorBytes(bytes32) view returns(bytes)','function declarationSignature(bytes32) view returns(bytes)'];
+  for(const [bytes,want] of [['0x0201','PRESENT'],['0x','INVALID'],['0x'+'00'.repeat(4097),'INVALID'],[null,'UNKNOWN']]){
+    const {sdk}=fixture({registryAbi,respond:({fn})=>{
+      if(fn==='describedStatus')return [1];
+      if(fn==='descriptorBytes'){if(bytes===null)throw Error('provider unavailable');return [bytes];}
+      if(fn==='declarationSignature')return ['0x'+'11'.repeat(65)];
+    }}),context=await sdk.pin(),answer=await sdk.readTypeDescriptor({typeId:H('uninterpreted'),context});
+    assert.equal(answer.knowledge,want);
+    if(want==='PRESENT'){assert.equal(answer.value.descriptor,bytes);assert.equal(answer.value.interpretationCoverage,'NOT_INTERPRETED');assert.equal(answer.value.local,null);}
+    else {assert.equal(answer.coverage,'PARTIAL');assert.equal(answer.value,null);}
+  }
+});
 test('guarded Files factory rejects the earlier public-plaintext-fingerprint carrier profile before RPC',()=>{
   let requests=0;
   assert.throws(()=>createFilesCompactSdk({ethers,manifest:{...manifest,protocol:'compact-guarded-v2',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v1'},rpc:()=>{requests++;}}),/CONTENT_PROFILE/);
@@ -83,7 +96,7 @@ test('legacy create retains its own-CAS overwrite semantics without adding a sel
 function fixture(overrides = {}) {
   const journal = new Map(), calls = [], ownHeads = new Map();
   const state = {generation:7n, admission:20n, epoch:3n, nonce:0n, publication:0n, ...overrides};
-  const ifaces = Object.fromEntries(Object.entries(abis).map(([k,abi]) => [k,new ethers.Interface(abi)]));
+  const ifaces = Object.fromEntries(Object.entries(abis).map(([k,abi]) => [k,new ethers.Interface(k==='registry'&&state.registryAbi?state.registryAbi:abi)]));
   const selected = (authors,purpose,subject) => {
     if (purpose === HEAD) return state.mask ? [2,Z,4,A,19] : [1,authors[0].toLowerCase() === A.toLowerCase() ? ra : rb,2,authors[0],12];
     if (purpose === TAG && subject === file && authors.some(a => a.toLowerCase() === A.toLowerCase())) return [1,file,3,A,13];
@@ -167,7 +180,9 @@ function fixture(overrides = {}) {
     }
     return iface.encodeFunctionResult(fn,out);
   };
-  const sdkManifest=state.legacyIndexAbi?{...manifest,contracts:{...contracts,index:{...contracts.index,abi:abis.index.filter(fragment=>!(typeof fragment==='string'&&fragment.includes('provenFrom(')))}}}:manifest;
+  const sdkManifest={...manifest,contracts:{...contracts,
+    ...(state.legacyIndexAbi?{index:{...contracts.index,abi:abis.index.filter(fragment=>!(typeof fragment==='string'&&fragment.includes('provenFrom(')))}}:{}),
+    ...(state.registryAbi?{registry:{...contracts.registry,abi:state.registryAbi}}:{})}};
   // Historical corruption fixtures deliberately mutate observations under one
   // constant hash. Keep that hostile-provider mode uncached; cache controls opt
   // in, and real-chain tests use the cache-enabled engine default.

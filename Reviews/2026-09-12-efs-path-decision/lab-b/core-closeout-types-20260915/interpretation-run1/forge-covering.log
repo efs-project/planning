@@ -1,0 +1,121 @@
+Compiling 6 files with Solc 0.8.30
+Solc 0.8.30 finished in 15.66s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:92:21:
+   |
+92 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:97:29:
+   |
+97 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:22:
+    |
+117 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:121:25:
+    |
+121 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 191870 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/SignedClaimArchive.t.sol:31:1:
+   |
+31 | contract SignedClaimArchiveTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 136330 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/GuardedArchive.t.sol:19:1:
+   |
+19 | contract GuardedArchiveTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 58947 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+ --> test/GuardedDelegate.t.sol:7:1:
+  |
+7 | contract GuardedDelegateTest {
+  | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 144820 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/GuardedRecovery.t.sol:12:1:
+   |
+12 | contract GuardedRecoveryTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 1 test for test/GuardedDelegate.t.sol:GuardedDelegateTest
+[PASS] testNonSelfCallerCannotPublishThroughDelegate() (gas: 11425536)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 7.08ms (1.56ms CPU time)
+
+Ran 12 tests for test/GuardedRecovery.t.sol:GuardedRecoveryTest
+[PASS] test_changed_source_realm_and_origin_rejected_mid_prefix() (gas: 3779301)
+[PASS] test_equal_revision_different_target_cannot_start_recovery() (gas: 2853485)
+[PASS] test_exact_front_run_reconciles_and_continues_prefix() (gas: 3878691)
+[PASS] test_independent_other_author_interleaving_preserves_prefix() (gas: 4214456)
+[PASS] test_legacy_signed_claim_rejected() (gas: 623075)
+[PASS] test_linked_duplicate_rejects_inconsistent_readset_preimage() (gas: 2422964)
+[PASS] test_original_author_recovery_preserves_subject_and_duplicate_has_no_effect() (gas: 2432482)
+[PASS] test_rejected_policy_rolls_back_helper_core_and_index_then_retry_succeeds() (gas: 3451468)
+[PASS] test_required_index_rejection_rolls_back_progress_publication_and_subject() (gas: 3429997)
+[PASS] test_sixty_four_source_actions_leave_no_room_for_statement() (gas: 5178347)
+[PASS] test_tampered_statement_and_post_front_run_interleaving_rejected() (gas: 2918659)
+[PASS] test_wrong_author_lineage_prefix_and_withdraw_rejected() (gas: 2288560)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 20.51ms (30.44ms CPU time)
+
+Ran 17 tests for test/SignedClaimArchive.t.sol:SignedClaimArchiveTest
+[PASS] test_any_account_can_complete_claim_without_changing_first_importer() (gas: 644445)
+[PASS] test_arbitrary_signed_tuples_and_unknown_type_are_claims_not_admissions() (gas: 693302)
+[PASS] test_claim_local_coverage_requires_explicit_attachment_after_global_cache_hit() (gas: 1088138)
+[PASS] test_codeblob_retry_preserves_event_location_codehash_and_creation_nonce() (gas: 2806141)
+[PASS] test_conflicting_same_nonce_signed_claims_remain_distinct() (gas: 970326)
+[PASS] test_joined_diverged_cas_current_rejection_and_missing_body() (gas: 4316528)
+[PASS] test_leaf_63_round_trips_and_wrong_leaf_reverts() (gas: 11918927)
+[PASS] test_maximum_vector_and_exact_calldata_ceilings() (gas: 16299268)
+[PASS] test_packed_and_codeblob_reconstruct_identical_1_2_64_vectors() (gas: 47784400)
+[PASS] test_paid_consumer_emits_exact_first_last_action_hash_without_storage() (gas: 28021354)
+[PASS] test_record_postings_are_per_leaf_even_for_repeated_record_id() (gas: 857281)
+[PASS] test_rejects_zero_actions_65_actions_65_bodies_duplicate_body_leaf_and_8193_bytes() (gas: 694277)
+[PASS] test_retry_keeps_first_importer_vector_and_posting_counts() (gas: 660072)
+[PASS] test_reuse_rejects_conflicting_type_or_body() (gas: 1689393)
+[PASS] test_signature_rejects_empty_bad_v_high_s_wrong_author_and_expired_is_archivable() (gas: 574473)
+[PASS] test_staged_attachments_only_set_requested_bits() (gas: 10409711)
+[PASS] test_valid_empty_body_is_present_and_attached() (gas: 544633)
+Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 21.28ms (39.46ms CPU time)
+
+Ran 6 tests for test/GuardedArchive.t.sol:GuardedArchiveTest
+[PASS] test_guarded_64_leaves_max_readset_shared_dedupe_retries_and_claim_local_completion() (gas: 22065105)
+[PASS] test_guarded_all_intent_execution_action_fields_order_domains_and_signature_tamper() (gas: 738998)
+[PASS] test_guarded_optional_bodies_bounds_duplicates_empty_and_unknown_actions() (gas: 1483794)
+[PASS] test_guarded_readset_shape_bounds_and_missing_preimages() (gas: 181614)
+[PASS] test_guarded_retains_exact_mandatory_preimages_and_refuses_legacy_getter() (gas: 869691)
+[PASS] test_paid_full_preimages_require_presence_and_return_exact_commitments() (gas: 4598597)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 21.66ms (29.94ms CPU time)
+
+Ran 4 test suites in 32.26ms (70.54ms CPU time): 36 tests passed, 0 failed, 0 skipped (36 total tests)
