@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#101614">
   <title>Files · EFS compact lab</title>
   <link rel="stylesheet" href="./files.css">
 </head>
@@ -11,12 +12,12 @@
   <header class="topbar">
     <a class="brand" href="./" aria-label="EFS Files home"><span class="brand-mark">e</span><strong>EFS</strong><span class="brand-divider">/</span>Files</a>
     <span class="lab-pill">COMPACT LAB · LOCAL</span>
-    <div class="signer-controls"><span id="signer-status">Guest · read only</span><select id="signer" aria-label="Disposable signer" disabled><option value="alice">Alice</option><option value="bob">Bob</option></select><button id="connect" data-action="connect">Try as Alice / Bob</button><button id="connect-wallet" data-action="connectWallet">Connect wallet</button><button id="disconnect" data-action="disconnect" hidden>Return to guest</button></div>
+    <div class="signer-controls"><span id="signer-status">Guest · read only</span><select id="signer" aria-label="Disposable signer" disabled><option value="alice">Alice</option><option value="bob">Bob</option></select><button id="connect" data-action="connect">Try as Alice / Bob</button><button id="add-network" data-action="addNetwork" hidden>Add EFS network to MetaMask</button><button id="connect-wallet" data-action="connectWallet">Connect wallet</button><button id="disconnect" data-action="disconnect" hidden>Return to guest</button></div>
   </header>
   <main>
     <section class="heading"><div><p class="eyebrow">YOUR FILES, OBSERVED ONCHAIN</p><h1>A place for your records.</h1><p class="subtitle">Read directly from the Ledger. Choose whose view you see.</p></div><button class="primary" id="create" data-action="create" disabled>＋ New file</button></section>
     <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
-    <details id="wallet-setup" class="wallet-setup" hidden><summary>Use your MetaMask wallet · local test network</summary><p>No real ETH is needed. Open this page in the browser where MetaMask is installed. Connect, approve the local network, then get free local test ETH below. Never import a demo key into your real wallet.</p><p id="wallet-network"></p><label>Wallet <select id="wallet-provider" aria-label="Wallet provider"></select></label> <button data-action="connectWallet">Connect &amp; set up network</button> <button id="test-funds" data-action="testFunds" disabled>Get local test ETH</button><p>This prototype asks for a data signature and a transaction for each write. These files belong only to this local experiment; stopping its chain loses its data.</p></details>
+    <details id="wallet-setup" class="wallet-setup" hidden><summary>Use your MetaMask wallet · local test network</summary><p>No real ETH is needed. Open this page in the browser where MetaMask is installed. Connect, approve the local network, then get free local test ETH below. Never import a demo key into your real wallet.</p><p id="wallet-network"></p><label>RPC URL <input id="wallet-rpc" readonly></label> <button data-action="copyRpc">Copy RPC URL</button><p>If MetaMask keeps the old Hardhat RPC, open that network's settings and replace its RPC URL with this one. Adding an already-known chain may not update its endpoint.</p><label>Wallet <select id="wallet-provider" aria-label="Wallet provider"></select></label> <button data-action="connectWallet">Connect &amp; set up network</button> <button id="test-funds" data-action="testFunds" disabled>Get local test ETH</button><p>This prototype asks for a data signature and a transaction for each write. These files belong only to this local experiment; stopping its chain loses its data.</p></details>
     <section class="workspace" aria-label="Files workspace">
       <div class="workspace-toolbar"><nav id="mounts" class="mounts" aria-label="Explicit mounted folders"></nav><div class="lens-control"><label for="lens">Lens</label><select id="lens" aria-describedby="lens-help"><option value="alice">Alice → Bob</option><option value="bob">Bob → Alice</option><option value="conflict">Advanced: conflict review (diagnostic)</option></select><button data-action="refresh" aria-label="Refresh pinned observation" title="Read a new pinned observation">↻ Refresh</button></div></div>
       <p id="lens-help" class="lens-help">Read authors left to right: the first authored entry wins. Deliberate masks stop fallback. Advanced conflict review compares HEADs only; placements remain Alice → Bob.</p>

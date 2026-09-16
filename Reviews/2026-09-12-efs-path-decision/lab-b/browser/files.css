@@ -1,14 +1,24 @@
 :root {
   font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  color:#1d3029;
-  background:#f5f6f2;
+  color-scheme:dark;
+  color:var(--text);
+  background:#101614;
   font-synthesis:none;
   font-size:14px;
-  --green:#235c42;
-  --line:#dfe5dd;
-  --muted:#65746b;
-  --pale:#eef3eb;
-  --amber:#91631a
+  --text:#dbe7e0;
+  --surface:#18211d;
+  --raised:#202c25;
+  --inset:#121b16;
+  --green:#8fd5ac;
+  --line:#35453b;
+  --muted:#a1b3a7;
+  --pale:#26382d;
+  --amber:#e7bd75;
+  --warning-bg:#30281b;
+  --warning-line:#665334;
+  --danger:#f1a398;
+  --preview-a:#26312b;
+  --preview-b:#1a231e
 }
 
 * {
@@ -26,7 +36,7 @@ button,select {
 button {
   border:1px solid var(--line);
   border-radius:7px;
-  background:white;
+  background:var(--raised);
   padding:9px 12px;
   color:inherit;
   transition:background .15s
@@ -39,18 +49,18 @@ button:disabled {
   cursor:not-allowed
 }
 .primary {
-  background:var(--green);
-  border-color:var(--green);
-  color:white
+  background:#285b40;
+  border-color:#568767;
+  color:#f0f8f2
 }
 .primary:hover:not(:disabled) {
-  background:#194b34
+  background:#326f4e
 }
 input,select,textarea {
   border:1px solid var(--line);
   border-radius:7px;
   padding:9px 10px;
-  background:white;
+  background:var(--inset);
   color:inherit;
   min-width:0
 }
@@ -71,7 +81,7 @@ a {
   gap:24px;
   padding:0 4%;
   border-bottom:1px solid var(--line);
-  background:#fcfdf9
+  background:var(--surface)
 }
 .brand {
   display:flex;
@@ -87,18 +97,18 @@ a {
   width:34px;
   height:34px;
   border-radius:10px;
-  background:var(--green);
-  color:#eff5bb;
+  background:#285b40;
+  color:#d5efbe;
   font:italic bold 30px Georgia,serif
 }
 .brand-divider {
-  color:#bac5ba
+  color:var(--muted)
 }
 .lab-pill {
   font-size:10px;
   letter-spacing:.12em;
-  background:#eaf0e5;
-  border:1px solid #d7e1d0;
+  background:var(--pale);
+  border:1px solid var(--line);
   padding:6px 9px;
   border-radius:5px;
   white-space:nowrap
@@ -145,10 +155,10 @@ h1 {
   padding:11px 18px
 }
 .workspace {
-  background:#fff;
+  background:var(--surface);
   border:1px solid var(--line);
   border-radius:12px;
-  box-shadow:0 4px 24px #283d2410;
+  box-shadow:0 4px 24px #0003;
   overflow:hidden
 }
 .workspace-toolbar {
@@ -169,8 +179,8 @@ h1 {
   min-width:94px
 }
 .mounts button.active {
-  background:#eaf0e5;
-  border-color:#d5e0ce;
+  background:var(--pale);
+  border-color:var(--line);
   color:var(--green)
 }
 .mounts .mount-icon {
@@ -239,16 +249,16 @@ h1 {
   display:flex;
   justify-content:space-between;
   font-size:10px;
-  color:#7c897f;
+  color:var(--muted);
   text-transform:uppercase;
   letter-spacing:.07em;
   padding:17px 23px;
-  border-bottom:1px solid #edf0eb
+  border-bottom:1px solid var(--line)
 }
 .file-row {
   width:100%;
   border:0;
-  border-bottom:1px solid #edf0eb;
+  border-bottom:1px solid var(--line);
   border-radius:0;
   padding:18px 22px;
   display:flex;
@@ -258,13 +268,13 @@ h1 {
   min-height:76px
 }
 .file-row.active {
-  background:#eff4e9;
+  background:var(--pale);
   box-shadow:inset 3px 0 var(--green)
 }
 .file-icon {
   font-size:24px;
   line-height:1;
-  color:#7c967c
+  color:var(--green)
 }
 .row-main {
   flex:1;
@@ -292,21 +302,21 @@ h1 {
   display:inline-block;
   font-size:9px;
   letter-spacing:.03em;
-  border:1px solid #d7e2d2;
+  border:1px solid var(--line);
   border-radius:4px;
   padding:3px 5px;
-  background:#f1f6ed;
+  background:var(--pale);
   color:var(--green)
 }
 .badge.warning {
-  background:#fbf4e6;
+  background:var(--warning-bg);
   color:var(--amber);
-  border-color:#eeddbb
+  border-color:var(--warning-line)
 }
 .detail {
   padding:25px;
   min-width:0;
-  background:#fdfefb
+  background:var(--inset)
 }
 .welcome {
   display:flex;
@@ -321,10 +331,10 @@ h1 {
 }
 .empty-icon {
   font-size:45px;
-  color:#9dae99
+  color:var(--muted)
 }
 .welcome h2 {
-  color:#465a4c;
+  color:var(--text);
   font-size:17px;
   margin:18px 0 0
 }
@@ -357,7 +367,7 @@ h1 {
   padding:7px 9px
 }
 .file-actions button.danger {
-  color:#9b493e
+  color:var(--danger)
 }
 .content-label {
   display:flex;
@@ -373,8 +383,8 @@ h1 {
   white-space:pre-wrap;
   overflow-wrap:anywhere;
   font:12px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;
-  background:#f2f5ef;
-  border:1px solid #e3e9df;
+  background:var(--surface);
+  border:1px solid var(--line);
   border-radius:8px;
   padding:16px;
   max-height:290px;
@@ -413,7 +423,7 @@ h1 {
 summary {
   cursor:pointer;
   font-size:12px;
-  color:#52664f
+  color:var(--text)
 }
 .revision-history p,.technical p {
   font-size:11px;
@@ -444,7 +454,7 @@ summary {
   overflow:auto;
   white-space:pre-wrap;
   overflow-wrap:anywhere;
-  background:#f1f3ee;
+  background:var(--surface);
   padding:12px
 }
 .workspace-footer {
@@ -493,20 +503,20 @@ summary {
 .notice {
   padding:12px 15px;
   border-radius:7px;
-  background:#eaf2e6;
-  color:#28583b;
+  background:var(--pale);
+  color:var(--green);
   font-size:12px;
   line-height:1.6;
   margin-bottom:18px;
   overflow-wrap:anywhere
 }
 .notice.error {
-  background:#fff0e9;
-  color:#91472d
+  background:#35221f;
+  color:var(--danger)
 }
 .notice.warning {
-  background:#fff6e2;
-  color:#815e1e
+  background:var(--warning-bg);
+  color:var(--amber)
 }
 .empty-list {
   padding:40px 25px;
@@ -518,14 +528,14 @@ summary {
   color:var(--muted)
 }
 .error {
-  color:#a34432
+  color:var(--danger)
 }
 .conflict-card {
   margin-top:12px;
   padding:12px;
-  border:1px solid #eeddbb;
+  border:1px solid var(--warning-line);
   border-radius:7px;
-  background:#fffaf0;
+  background:var(--warning-bg);
   font-size:12px
 }
 .conflict-card pre {
@@ -542,10 +552,10 @@ summary {
   z-index:5;
   width:480px;
   max-width:calc(100vw - 32px);
-  background:#fff;
-  border:1px solid #d0dccc;
+  background:var(--raised);
+  border:1px solid var(--line);
   border-radius:12px;
-  box-shadow:0 8px 35px #1c362b26;
+  box-shadow:0 8px 35px #0008;
   overflow:hidden
 }
 .cost-widget>summary {
@@ -585,7 +595,7 @@ summary {
   color:var(--green)
 }
 .chevron {
-  color:#7b8b77
+  color:var(--muted)
 }
 .cost-widget[open] .chevron {
   transform:rotate(180deg)
@@ -653,7 +663,7 @@ summary {
 }
 .base-estimate {
   color:var(--green);
-  background:#f5f8f3
+  background:var(--pale)
 }
 .lens-help {
   margin:0;
@@ -665,7 +675,7 @@ summary {
 .pathbar,.custom-lens { padding:10px 20px; }
 .pathbar { display:flex;gap:8px;align-items:center; }
 .pathbar input { flex:1;font-family:ui-monospace,monospace; }
-.wallet-setup { margin:0 0 18px;padding:14px 18px;border:1px solid #d7e0e8;border-radius:10px;background:#f8fafc; }
+.wallet-setup { margin:0 0 18px;padding:14px 18px;border:1px solid var(--line);border-radius:10px;background:var(--surface); }
 .wallet-setup summary { cursor:pointer;font-weight:600; }
 .wallet-setup p { max-width:900px;overflow-wrap:anywhere; }
 .custom-lens { font-size:11px;color:var(--muted); }
@@ -716,11 +726,12 @@ dialog {
   border:1px solid var(--line);
   border-radius:12px;
   padding:24px;
-  box-shadow:0 20px 80px #14251c40;
+  box-shadow:0 20px 80px #0009;
+  background:var(--surface);
   color:inherit
 }
 dialog::backdrop {
-  background:#1c2e2350;
+  background:#050907aa;
   backdrop-filter:blur(2px)
 }
 .dialog-heading {

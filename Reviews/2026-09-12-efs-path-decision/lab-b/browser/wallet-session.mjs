@@ -6,15 +6,22 @@ export function assertLocalConfig(config,pageUrl){
     ||rpc.username||rpc.password||!config.manifest.workbench||![31337,31338].includes(Number(config.manifest.chainId)))
     throw Error('This setup is restricted to the disposable local EFS network.');
 }
-export async function requestLocalNetwork({ethereum,config,pageUrl}){
+export async function requestLocalNetwork({ethereum,config,pageUrl,add=false}){
   assertLocalConfig(config,pageUrl);
   const chainId='0x'+BigInt(config.manifest.chainId).toString(16);
+  const offer=()=>ethereum.request({method:'wallet_addEthereumChain',params:[{chainId,chainName:'EFS local prototype',
+    nativeCurrency:{name:'Local test Ether',symbol:'ETH',decimals:18},rpcUrls:[config.rpcUrl]}]});
+  if(add){
+    // An existing Hardhat entry can have this chain ID but a different RPC.
+    // Offer the exact endpoint even then; the caller still verifies the chain.
+    await offer();
+    await ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId}]});return;
+  }
   if(BigInt(await ethereum.request({method:'eth_chainId'}))===BigInt(chainId))return;
   const select=()=>ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId}]});
   try{await select();}catch(error){
     if(Number(error.code??error.data?.originalError?.code)!==4902)throw error;
-    await ethereum.request({method:'wallet_addEthereumChain',params:[{chainId,chainName:'EFS local prototype',
-      nativeCurrency:{name:'Local test Ether',symbol:'ETH',decimals:18},rpcUrls:[config.rpcUrl]}]});
+    await offer();
     await select();
   }
 }

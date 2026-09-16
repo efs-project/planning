@@ -132,6 +132,7 @@ function controls() {
   $('connect').hidden=!!state.wallet; $('disconnect').hidden=!state.wallet;
   $('connect-wallet').hidden=!!state.wallet;
   if($('test-funds'))$('test-funds').disabled=!state.wallet?.external||state.busy;
+  if($('add-network'))$('add-network').disabled=state.busy;
   $('signer-status').textContent=state.wallet ? state.wallet.external?`${short(state.wallet.address)} · wallet`:`${$('signer').value} · disposable test signer` : 'Guest · read only';
   $('editor-submit').disabled=state.busy || state.routeLoading || !!state.operation?.pending;
   document.querySelectorAll('[data-write]').forEach(button=>{button.disabled=!writesAllowed() || button.dataset.blocked==='true';});
@@ -287,7 +288,7 @@ function renderDetail() {
       ${d.encryption?'<label>Supplied key (64 hexadecimal digits)<input id="content-key" type="password" autocomplete="off"></label><p>Key stays in this open operation; it is not saved to the journal. Encrypted files are read-only in this text editor; opening or downloading does not publish plaintext.</p>':''}
       ${d.carrier===1?`<label><input id="allow-carrier" type="checkbox"> Allow this open to fetch from ${escape(state.config.carrierOrigin??'no configured transport')}</label><p>Explicit raw SHA-256 transport; no credentials or redirects, 1 MiB / 5-second cap.</p>`:''}
       ${d.carrier>=2?`<p><strong>${d.carrier===2?'Arweave':'IPFS'}</strong> · ${pretty(d.length)} bytes</p><code style="overflow-wrap:anywhere">${escape(d.locator)}</code><p><label><input id="allow-carrier" type="checkbox"> Fetch from public ${d.carrier===2?'Arweave':'IPFS'} gateways</label></p><p>Downloads are checked against the EFS publisher’s saved fingerprint. This is not an independent proof of Arweave inclusion or the IPFS DAG. The gateways can see which content you request.</p>`:''}
-      ${state.previewUrl?`<figure style="margin:12px 0"><div style="min-height:160px;max-height:420px;width:100%;display:grid;place-items:center;background:repeating-conic-gradient(#e6e6e6 0% 25%,#fafafa 0% 50%) 50% / 20px 20px;border:1px solid #aaa;overflow:hidden"><img class="verified-image" src="${escape(state.previewUrl)}" alt="Verified static PNG preview" style="width:${Math.max(64,Math.min(640,state.previewSize.width))}px;max-width:100%;max-height:420px;object-fit:contain;image-rendering:pixelated"></div><figcaption>${state.previewSize.width} × ${state.previewSize.height} intrinsic pixels · bounded inert preview</figcaption></figure>`:''}
+      ${state.previewUrl?`<figure style="margin:12px 0"><div style="min-height:160px;max-height:420px;width:100%;display:grid;place-items:center;background:repeating-conic-gradient(var(--preview-a) 0% 25%,var(--preview-b) 0% 50%) 50% / 20px 20px;border:1px solid var(--line);overflow:hidden"><img class="verified-image" src="${escape(state.previewUrl)}" alt="Verified static PNG preview" style="width:${Math.max(64,Math.min(640,state.previewSize.width))}px;max-width:100%;max-height:420px;object-fit:contain;image-rendering:pixelated"></div><figcaption>${state.previewSize.width} × ${state.previewSize.height} intrinsic pixels · bounded inert preview</figcaption></figure>`:''}
       ${bytes?`<p>${pretty(bytes.length)} verified bytes. ${text.utf8?'UTF-8 interpretation below.':'Binary bytes; download preserves them exactly.'}</p>${text.utf8?`<pre class="document">${escape(text.text)}</pre>`:''}`:''}
       ${tagControls(point)}<p>Verified PNG/JPEG can be previewed. Other bytes can be downloaded; HTML and SVG are never executed.</p>
       <details><summary>Content, revision and verification details</summary><pre>${escape(json({revision,content:content?{...content,bytes:undefined}:null}))}</pre></details>
@@ -347,10 +348,14 @@ async function connect() {
   state.keys=keys; state.wallet=wallet;
   notice('Disposable local-test signer enabled. No real wallet was connected.');
 }
-async function connectWallet(){
-  if(!state.paths)throw Error('Wallet signing is supported in the guarded v2 workbench, not the old compact demo.');
+function walletProvider(){
   const ethereum=state.walletOptions?.find(w=>w.id===$('wallet-provider')?.value)?.provider??window.ethereum;
   if(!ethereum)throw Error('No wallet extension found. Open this exact URL in Chrome, Brave or Firefox with MetaMask installed. The Codex in-app browser does not supply MetaMask.');
+  return ethereum;
+}
+async function connectWallet(){
+  if(!state.paths)throw Error('Wallet signing is supported in the guarded v2 workbench, not the old compact demo.');
+  const ethereum=walletProvider();
   await ethereum.request({method:'eth_requestAccounts'});
   if(state.walletTools){
     await state.walletTools.requestLocalNetwork({ethereum,config:state.config,pageUrl:location.href});
@@ -545,6 +550,18 @@ document.addEventListener('click',event=>{
   run(async navigation=>{
     if(action==='connect') await connect();
     if(action==='connectWallet')await connectWallet();
+    if(action==='addNetwork'){
+      if(!state.walletTools)throw Error('Use the current workbench for network setup.');
+      $('wallet-setup').open=true;
+      const ethereum=walletProvider();
+      await state.walletTools.requestLocalNetwork({ethereum,config:state.config,pageUrl:location.href,add:true});
+      await state.walletTools.verifyWalletEnvironment({ethereum,config:state.config,rpc,keccak256:ethers.keccak256});
+      notice('EFS local network verified. Click Connect wallet, then Get local test ETH.');
+    }
+    if(action==='copyRpc'){
+      try{await navigator.clipboard.writeText(state.config.rpcUrl);notice('Local RPC URL copied.');}
+      catch{$('wallet-rpc').focus();$('wallet-rpc').select();notice('RPC URL selected — copy it with your keyboard.');}
+    }
     if(action==='testFunds'){
       if(!state.wallet?.external||!state.walletTools)throw Error('Connect a wallet on this local demo first.');
       const wallet=state.wallet;await checkWallet(wallet);
@@ -663,6 +680,8 @@ await run(async()=>{
   if(state.config.localWallet){
     state.walletTools=await import('./wallet-session.mjs');
     $('wallet-setup').hidden=false;
+    $('add-network').hidden=false;
+    $('wallet-rpc').value=state.config.rpcUrl;
     $('wallet-network').textContent=`RPC: ${state.config.rpcUrl} · chain ID ${state.config.manifest.chainId}. If you already have another Anvil network, update its RPC to this one.`;
     state.walletTools.discoverWallets(window,options=>{
       state.walletOptions=options;const select=$('wallet-provider'),previous=select.value;

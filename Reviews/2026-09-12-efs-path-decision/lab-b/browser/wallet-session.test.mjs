@@ -6,6 +6,13 @@ const config={rpcUrl:'http://127.0.0.1:57204',manifest:{workbench:true,chainId:3
 const address='0x'+'34'.repeat(20),pageUrl='http://127.0.0.1:57215/';
 const expected={eth_chainId:'0x7a69',eth_getBlockByNumber:{hash:'genesis'},eth_getCode:'code',web3_clientVersion:'anvil/v1',eth_getBalance:'0x0'};
 const keccak256=()=> 'runtime';
+test('explicit add button offers this RPC even when Hardhat has the same chain ID',async()=>{
+  const calls=[];
+  const ethereum={request:async({method,params})=>{calls.push({method,params});if(method==='eth_chainId')return '0x7a69';}};
+  await requestLocalNetwork({ethereum,config,pageUrl,add:true});
+  assert.equal(calls.find(c=>c.method==='wallet_addEthereumChain')?.params[0].rpcUrls[0],config.rpcUrl);
+  assert.equal(calls.at(-1).method,'wallet_switchEthereumChain');
+});
 test('unknown network is added with the exact local RPC then switched',async()=>{
   const calls=[];let chain='0x1',known=false;
   const ethereum={request:async({method,params})=>{calls.push({method,params});
