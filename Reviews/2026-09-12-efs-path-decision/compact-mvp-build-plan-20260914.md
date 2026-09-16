@@ -253,6 +253,31 @@ Do not relabel old records after a refactor or silently strip identity inputs.
 This is an implementation-layout recommendation, not a change to Type meaning or
 an identity-preserving migration claim.
 
+### Requirements the prototype does not silently waive
+
+- **Location tags are not File tags.** The current fixtures distinguish a stable
+  File, an exact revision and a Directory. They do not implement a persistent
+  path-slot tag that follows whatever File later occupies `/docs/efs.doc`.
+  Preserve that separately named application-profile requirement and its UX;
+  do not make File tags leak to a replacement occupant to imitate it.
+- **Names and Concepts need their intended public identity rules.** The
+  prototype's ASCII names and namespaced ASCII Concepts are finite test
+  profiles. They do not settle the proposed normalized UTF-8 name profile or
+  implement the owner's global canonical-string Commons Concept ruling.
+  Resolve these in the production profiles before publishing durable IDs.
+- **Capacity and cost are joint limits.** A supported Lens width, body size or
+  reference count is not a promise that every combination fits one transaction.
+  Carry measured complete-operation and refusal cases into SDK/onchain examples.
+  Known-record reads, path selection and multi-author discovery have different
+  costs and guarantees; do not force every contract to perform the broadest
+  query. Explicit pagination is useful, but does not make its total cost vanish.
+- **Prototype integer widths are not a century-long commitment.** The repaired
+  overflow checks fail closed; they do not establish that 32-bit occurrence
+  counts or binding revisions are the right production capacity. Review the
+  proposed wider packing together with ABI, guards, history and proof decoders
+  before the production storage layout is fixed. This is a coordinated layout
+  task, not permission to reinterpret old deployments.
+
 ## 3. Build one vertical, in this order
 
 1. **Port the tested kernel/index contracts and the two gate fixes.** Preserve
