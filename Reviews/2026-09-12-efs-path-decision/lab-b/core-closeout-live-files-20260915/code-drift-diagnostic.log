@@ -1,0 +1,596 @@
+No files changed, compilation skipped
+
+Ran 1 test for test/LiveFiles.t.sol:LiveFilesTest
+[FAIL: provider code drift accepted] test_live_provider_code_drift_chain_and_caller_context() (gas: 1333193)
+Traces:
+  [48598564] LiveFilesTest::setUp()
+    ├─ [0] VM::warp(1700000000 [1.7e9])
+    │   └─ ← [Return]
+    ├─ [3896002] → new TypeRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   ├─ [876917] → new DescribedTypeRule@0x104fBc016F4bb334D775a19E8A6510109AC63E00
+    │   │   └─ ← [Return] 4380 bytes of code
+    │   └─ ← [Return] 14914 bytes of code
+    ├─ [123178] → new MockAcceptor@0x2e234DAe75C793f67A35089C9d99245E1C58470b
+    │   └─ ← [Return] 615 bytes of code
+    ├─ [7769878] → new Ledger@0xF62849F9A0B5Bf2913b396098F7c7019b51A820a
+    │   ├─ [2776378] → new PublicationSupport@0x4f81992FCe2E1846dD528eC0102e6eE1f61ed3e2
+    │   │   ├─ [365206] → new ContractSignatureEvidenceStore@0xC5c6BcB38987D8D396A699F3A4139de024156af4
+    │   │   │   └─ ← [Return] 1824 bytes of code
+    │   │   └─ ← [Return] 11880 bytes of code
+    │   └─ ← [Return] 24538 bytes of code
+    ├─ [3987440] → new IndexModule@0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9
+    │   ├─ [874961] → new IndexReplayDecoder@0x5B0091f49210e7B2A57B03dfE1AB9D08289d9294
+    │   │   ├─ [1363] Ledger::layoutId() [staticcall]
+    │   │   │   └─ ← [Return] 0xf20ada07eabba123a843f9a671911f449c50bf068af1213118b5a13b43fd1b31
+    │   │   └─ ← [Return] 4359 bytes of code
+    │   ├─ [3240] Ledger::counts() [staticcall]
+    │   │   └─ ← [Return] 0, 0, 0, 0
+    │   ├─ emit FamilyDeclared(family: 0x1fd035d41e55e585706a270bca0fa36d150e1cc27de3a1b40654d1835f64287e, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xde538e29eab73663949ae6239c90dea8948cf7297cf44d0c79621ef8bf06e8ab, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xf564f360d1f5b65aacc3b70b5aa8bfd24bfcf28df404557ac647ae8d94954eb4, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xe4f7cc7ff76622e194a3ef2a8f23d6632b91cfda1f803fa443e9e04e43baa270, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xd674025fa1091f86834d22a642451cc45057f55537c4b4e65ee1139c390d1b8a, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x03b682942778e8b9a07a8448019ba6862fac962d963305b6b7b613a80d29f2c4, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x77b478e9ae9182fa4afb6af49a4b8b55c121d339d14f0df963ed8eb50225beca, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x29d3bea0a01e3e26f8a6ae33a62bc05c74281c8a392b910123320f4dfa13a897, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x3c7499618de14cb82dd05236b307f25a4b2da74ae9727c00b07f2f76a9476258, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xcc34c9c731a73d96bf89953e1479bc76faf75cadd9a9d2301c35fc5978b30aac, mandatory: true, fromAdmission: 1)
+    │   └─ ← [Return] 12897 bytes of code
+    ├─ [33302] Ledger::setIndexModule(IndexModule: [0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9])
+    │   ├─ emit IndexModuleSet(module: IndexModule: [0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9])
+    │   ├─ [2447] IndexModule::generation() [staticcall]
+    │   │   └─ ← [Return] 0
+    │   ├─ emit ExecutionChanged(executionSet: 0x224828fcfe51945eb066cf58fdf87c12fa51afd55a124e210609b41eb405c857, revision: 2)
+    │   └─ ← [Stop]
+    ├─ [2888240] → new LensReader@0xc7183455a4C133Ae270771860664b6B7ec320bB1
+    │   └─ ← [Return] 14422 bytes of code
+    ├─ [432580] → new Actor@0xa0Cb889707d426A7A386870A03bc70d1b0697598
+    │   └─ ← [Return] 2159 bytes of code
+    ├─ [432580] → new Actor@0x1d1499e622D69689cdf9004d05Ec547d650Ff211
+    │   └─ ← [Return] 2159 bytes of code
+    ├─ [660579] → new Consumer@0xA4AD4f68d0b91CFD19687c881e50f3A00242828c
+    │   └─ ← [Return] 3298 bytes of code
+    ├─ [802646] → new Reconstructor@0x03A6a84cD762D9707A21605b548aaaB891562aAb
+    │   └─ ← [Return] 4009 bytes of code
+    ├─ [0] VM::addr(<pk>) [staticcall]
+    │   └─ ← [Return] 0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7
+    ├─ [0] VM::addr(<pk>) [staticcall]
+    │   └─ ← [Return] 0x0376AAc07Ad725E01357B1725B5ceC61aE10473c
+    ├─ [71119] → new MinBodyAcceptor@0xD6BbDE9174b1CdAa358d2Cf4D57D1a9F7178FBfF
+    │   └─ ← [Return] 354 bytes of code
+    ├─ [71119] → new MinBodyAcceptor@0x15cF58144EF33af1e14b5208015d11F9143E27b9
+    │   └─ ← [Return] 354 bytes of code
+    ├─ [124181] TypeRegistry::register(0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068, MinBodyAcceptor: [0xD6BbDE9174b1CdAa358d2Cf4D57D1a9F7178FBfF], [])
+    │   ├─ emit TypeRegistered(typeId: 0x8dc6ca2f53167978c472b0237d9f93d21a729ec7ae9398542333790921eacccd, shape: 0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068, ruleId: 0x3290daa44199a5c045d55f2620e2fa1199733a6ea41b567abd73adf8b4863778, mandatoryAcceptor: MinBodyAcceptor: [0xD6BbDE9174b1CdAa358d2Cf4D57D1a9F7178FBfF], refCount: 0)
+    │   ├─ emit PolicyActivated(typeId: 0x8dc6ca2f53167978c472b0237d9f93d21a729ec7ae9398542333790921eacccd, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 1)
+    │   └─ ← [Return] 0x8dc6ca2f53167978c472b0237d9f93d21a729ec7ae9398542333790921eacccd
+    ├─ [82152] TypeRegistry::register(0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7, 0x0000000000000000000000000000000000000000, [])
+    │   ├─ emit TypeRegistered(typeId: 0xd8ca3e1560afcaeb12756b15399dad59f78e70e49ea9c4415501fe8bcd8f3bf2, shape: 0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7, ruleId: 0x0000000000000000000000000000000000000000000000000000000000000000, mandatoryAcceptor: 0x0000000000000000000000000000000000000000, refCount: 0)
+    │   ├─ emit PolicyActivated(typeId: 0xd8ca3e1560afcaeb12756b15399dad59f78e70e49ea9c4415501fe8bcd8f3bf2, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 2)
+    │   └─ ← [Return] 0xd8ca3e1560afcaeb12756b15399dad59f78e70e49ea9c4415501fe8bcd8f3bf2
+    ├─ [82152] TypeRegistry::register(0x089e89ac79be382b5051ee54411ad06893426d15b1eb67458c48d95d3c8dd7ef, 0x0000000000000000000000000000000000000000, [])
+    │   ├─ emit TypeRegistered(typeId: 0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019, shape: 0x089e89ac79be382b5051ee54411ad06893426d15b1eb67458c48d95d3c8dd7ef, ruleId: 0x0000000000000000000000000000000000000000000000000000000000000000, mandatoryAcceptor: 0x0000000000000000000000000000000000000000, refCount: 0)
+    │   ├─ emit PolicyActivated(typeId: 0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 3)
+    │   └─ ← [Return] 0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019
+    ├─ [166838] TypeRegistry::register(0x20bd50a4112086884183185adad5624590d31448d53976ac022d55bb46de0e98, MinBodyAcceptor: [0x15cF58144EF33af1e14b5208015d11F9143E27b9], [0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019, 0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019])
+    │   ├─ emit TypeRegistered(typeId: 0x788a9122fa52ecc91196206eb5f5837b27daa19565d99dc8b7f7d3e3f48a4dab, shape: 0x20bd50a4112086884183185adad5624590d31448d53976ac022d55bb46de0e98, ruleId: 0x242bff2d56cff1e45aaef4c1b15eba9b21438d8148135e2d2089b9a77bf30001, mandatoryAcceptor: MinBodyAcceptor: [0x15cF58144EF33af1e14b5208015d11F9143E27b9], refCount: 2)
+    │   ├─ emit PolicyActivated(typeId: 0x788a9122fa52ecc91196206eb5f5837b27daa19565d99dc8b7f7d3e3f48a4dab, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 4)
+    │   └─ ← [Return] 0x788a9122fa52ecc91196206eb5f5837b27daa19565d99dc8b7f7d3e3f48a4dab
+    ├─ [48851] TypeRegistry::activate(0x8dc6ca2f53167978c472b0237d9f93d21a729ec7ae9398542333790921eacccd, MockAcceptor: [0x2e234DAe75C793f67A35089C9d99245E1C58470b])
+    │   ├─ emit PolicyActivated(typeId: 0x8dc6ca2f53167978c472b0237d9f93d21a729ec7ae9398542333790921eacccd, activation: 2, acceptor: MockAcceptor: [0x2e234DAe75C793f67A35089C9d99245E1C58470b], acceptorCodehash: 0x0a99d12998ffd051bc6c39eeb59a1cb234d6cd418825ef00bc50e8bb623827cc, epoch: 5)
+    │   └─ ← [Return] 2
+    ├─ [48851] TypeRegistry::activate(0x788a9122fa52ecc91196206eb5f5837b27daa19565d99dc8b7f7d3e3f48a4dab, MockAcceptor: [0x2e234DAe75C793f67A35089C9d99245E1C58470b])
+    │   ├─ emit PolicyActivated(typeId: 0x788a9122fa52ecc91196206eb5f5837b27daa19565d99dc8b7f7d3e3f48a4dab, activation: 2, acceptor: MockAcceptor: [0x2e234DAe75C793f67A35089C9d99245E1C58470b], acceptorCodehash: 0x0a99d12998ffd051bc6c39eeb59a1cb234d6cd418825ef00bc50e8bb623827cc, epoch: 6)
+    │   └─ ← [Return] 2
+    ├─ [102759] → new FilesRootRule@0x212224D2F2d262cd093eE13240ca4873fcCBbA3C
+    │   └─ ← [Return] 513 bytes of code
+    ├─ [102281] TypeRegistry::register(0x57e874217c2dc4af9469f1feb6939d8c5136c664f28a6856d9a6981e468f308c, FilesRootRule: [0x212224D2F2d262cd093eE13240ca4873fcCBbA3C], [])
+    │   ├─ emit TypeRegistered(typeId: 0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34, shape: 0x57e874217c2dc4af9469f1feb6939d8c5136c664f28a6856d9a6981e468f308c, ruleId: 0x1a5b74eb3097326195b34429b4316148ca7a8ec4d3d93b563cc358d2f9533fd8, mandatoryAcceptor: FilesRootRule: [0x212224D2F2d262cd093eE13240ca4873fcCBbA3C], refCount: 0)
+    │   ├─ emit PolicyActivated(typeId: 0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 7)
+    │   └─ ← [Return] 0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34
+    ├─ [257297] → new FilesChildRule@0x2a07706473244BC757E10F2a9E86fB532828afe3
+    │   └─ ← [Return] 1284 bytes of code
+    ├─ [124609] TypeRegistry::register(0x443b1824c799f6b64165ddc4420154d5ab628dace224205f27f6a7b6ec244dd7, FilesChildRule: [0x2a07706473244BC757E10F2a9E86fB532828afe3], [0x0000000000000000000000000000000000000000000000000000000000000000])
+    │   ├─ emit TypeRegistered(typeId: 0xad55cbd219935e416ad4d551ea3cbd22f54c6d88d0cdbc767e102e718716c17f, shape: 0x443b1824c799f6b64165ddc4420154d5ab628dace224205f27f6a7b6ec244dd7, ruleId: 0x14a09b053e2d6a1a9960a561cf5e3c0adee142b23c63677c6fe2b467e448d88a, mandatoryAcceptor: FilesChildRule: [0x2a07706473244BC757E10F2a9E86fB532828afe3], refCount: 1)
+    │   ├─ emit PolicyActivated(typeId: 0xad55cbd219935e416ad4d551ea3cbd22f54c6d88d0cdbc767e102e718716c17f, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 8)
+    │   └─ ← [Return] 0xad55cbd219935e416ad4d551ea3cbd22f54c6d88d0cdbc767e102e718716c17f
+    ├─ [129384] → new FilesNameRule@0x3D7Ebc40AF7092E3F1C81F2e996cbA5Cae2090d7
+    │   └─ ← [Return] 646 bytes of code
+    ├─ [102281] TypeRegistry::register(0x1b2a89d3943033a5e1ba9bb85a8e5c087474e0d3a2f658aa553ee81fbc90ff77, FilesNameRule: [0x3D7Ebc40AF7092E3F1C81F2e996cbA5Cae2090d7], [])
+    │   ├─ emit TypeRegistered(typeId: 0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4, shape: 0x1b2a89d3943033a5e1ba9bb85a8e5c087474e0d3a2f658aa553ee81fbc90ff77, ruleId: 0x699e8e14108b4b520d0cf3dcec5f92c2875b232bfcf20ddffbfc3796b648da0d, mandatoryAcceptor: FilesNameRule: [0x3D7Ebc40AF7092E3F1C81F2e996cbA5Cae2090d7], refCount: 0)
+    │   ├─ emit PolicyActivated(typeId: 0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 9)
+    │   └─ ← [Return] 0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4
+    ├─ [102959] → new FilesDirectoryRule@0xD16d567549A2a2a2005aEACf7fB193851603dd70
+    │   └─ ← [Return] 514 bytes of code
+    ├─ [102281] TypeRegistry::register(0xad07c9f465272d2f09afdd24f73f727eedd24fbca2500ef72508da229c54f5e9, FilesDirectoryRule: [0xD16d567549A2a2a2005aEACf7fB193851603dd70], [])
+    │   ├─ emit TypeRegistered(typeId: 0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b, shape: 0xad07c9f465272d2f09afdd24f73f727eedd24fbca2500ef72508da229c54f5e9, ruleId: 0x27b5ce86bb37483fbf8a7d924d6260e6f77340d142bc064a8f9115951cb3f024, mandatoryAcceptor: FilesDirectoryRule: [0xD16d567549A2a2a2005aEACf7fB193851603dd70], refCount: 0)
+    │   ├─ emit PolicyActivated(typeId: 0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 10)
+    │   └─ ← [Return] 0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b
+    ├─ [5918466] → new FilesDirectoryIndex@0x96d3F6c20EEd2697647F543fE6C08bC2Fbf39758
+    │   ├─ [874961] → new IndexReplayDecoder@0xfA0e6015e8AD40Aa4535C477142a2eCdb824F2f7
+    │   │   ├─ [1363] Ledger::layoutId() [staticcall]
+    │   │   │   └─ ← [Return] 0xf20ada07eabba123a843f9a671911f449c50bf068af1213118b5a13b43fd1b31
+    │   │   └─ ← [Return] 4359 bytes of code
+    │   ├─ [1240] Ledger::counts() [staticcall]
+    │   │   └─ ← [Return] 0, 0, 0, 0
+    │   ├─ emit FamilyDeclared(family: 0x1fd035d41e55e585706a270bca0fa36d150e1cc27de3a1b40654d1835f64287e, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xde538e29eab73663949ae6239c90dea8948cf7297cf44d0c79621ef8bf06e8ab, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xf564f360d1f5b65aacc3b70b5aa8bfd24bfcf28df404557ac647ae8d94954eb4, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xe4f7cc7ff76622e194a3ef2a8f23d6632b91cfda1f803fa443e9e04e43baa270, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xd674025fa1091f86834d22a642451cc45057f55537c4b4e65ee1139c390d1b8a, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x03b682942778e8b9a07a8448019ba6862fac962d963305b6b7b613a80d29f2c4, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x77b478e9ae9182fa4afb6af49a4b8b55c121d339d14f0df963ed8eb50225beca, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x29d3bea0a01e3e26f8a6ae33a62bc05c74281c8a392b910123320f4dfa13a897, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x3c7499618de14cb82dd05236b307f25a4b2da74ae9727c00b07f2f76a9476258, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xcc34c9c731a73d96bf89953e1479bc76faf75cadd9a9d2301c35fc5978b30aac, mandatory: true, fromAdmission: 1)
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34) [staticcall]
+    │   │   └─ ← [Return] 0x57e874217c2dc4af9469f1feb6939d8c5136c664f28a6856d9a6981e468f308c, 0x1a5b74eb3097326195b34429b4316148ca7a8ec4d3d93b563cc358d2f9533fd8, FilesRootRule: [0x212224D2F2d262cd093eE13240ca4873fcCBbA3C], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [1082] TypeRegistry::descriptor(0xad55cbd219935e416ad4d551ea3cbd22f54c6d88d0cdbc767e102e718716c17f) [staticcall]
+    │   │   └─ ← [Return] 0x443b1824c799f6b64165ddc4420154d5ab628dace224205f27f6a7b6ec244dd7, 0x14a09b053e2d6a1a9960a561cf5e3c0adee142b23c63677c6fe2b467e448d88a, FilesChildRule: [0x2a07706473244BC757E10F2a9E86fB532828afe3], 1, 1, 1
+    │   ├─ [1148] TypeRegistry::refTypes(0xad55cbd219935e416ad4d551ea3cbd22f54c6d88d0cdbc767e102e718716c17f) [staticcall]
+    │   │   └─ ← [Return] [0x0000000000000000000000000000000000000000000000000000000000000000]
+    │   ├─ [148] FilesChildRule::rootType() [staticcall]
+    │   │   └─ ← [Return] 0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34
+    │   ├─ emit FamilyDeclared(family: 0x8053aa071bedd1503af182342576e61687106872dc9b7f072286540112646a01, mandatory: true, fromAdmission: 1)
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4) [staticcall]
+    │   │   └─ ← [Return] 0x1b2a89d3943033a5e1ba9bb85a8e5c087474e0d3a2f658aa553ee81fbc90ff77, 0x699e8e14108b4b520d0cf3dcec5f92c2875b232bfcf20ddffbfc3796b648da0d, FilesNameRule: [0x3D7Ebc40AF7092E3F1C81F2e996cbA5Cae2090d7], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [306030] → new FilesScopeState@0x1a7420135e3551169cf51251e77C21eCaB8fBff7
+    │   │   └─ ← [Return] 1527 bytes of code
+    │   ├─ emit FamilyDeclared(family: 0xf345775badad4a7c49f709e524319df020077e3571910d3ec364cc9e70d5c482, mandatory: true, fromAdmission: 1)
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b) [staticcall]
+    │   │   └─ ← [Return] 0xad07c9f465272d2f09afdd24f73f727eedd24fbca2500ef72508da229c54f5e9, 0x27b5ce86bb37483fbf8a7d924d6260e6f77340d142bc064a8f9115951cb3f024, FilesDirectoryRule: [0xD16d567549A2a2a2005aEACf7fB193851603dd70], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b) [staticcall]
+    │   │   └─ ← [Return] []
+    │   └─ ← [Return] 20263 bytes of code
+    ├─ [9424] Ledger::setIndexModule(FilesDirectoryIndex: [0x96d3F6c20EEd2697647F543fE6C08bC2Fbf39758])
+    │   ├─ emit IndexModuleSet(module: FilesDirectoryIndex: [0x96d3F6c20EEd2697647F543fE6C08bC2Fbf39758])
+    │   ├─ [2469] FilesDirectoryIndex::generation() [staticcall]
+    │   │   └─ ← [Return] 0
+    │   ├─ emit ExecutionChanged(executionSet: 0xffdf946115e40e1c55a87782386835ef26ab5ceba94d235a67ac2ddddb4fefaa, revision: 3)
+    │   └─ ← [Stop]
+    ├─ [76729] → new FilesBytesRule@0x13aa49bAc059d709dd0a18D6bb63290076a702D7
+    │   └─ ← [Return] 383 bytes of code
+    ├─ [102281] TypeRegistry::register(0x4c0bf2080105ad2a1fd5dd77cb6eecffa0e76dd4fa2e229f1503e2656b308942, FilesBytesRule: [0x13aa49bAc059d709dd0a18D6bb63290076a702D7], [])
+    │   ├─ emit TypeRegistered(typeId: 0x3ad903d4d8fe41f2dfb307d423089594bd75c8a21611ca581db1299eb5f8ab48, shape: 0x4c0bf2080105ad2a1fd5dd77cb6eecffa0e76dd4fa2e229f1503e2656b308942, ruleId: 0x57a774e8f150dd4f848d5775065ed1db09324ec2d26f52dbfc26aabf0079b8c1, mandatoryAcceptor: FilesBytesRule: [0x13aa49bAc059d709dd0a18D6bb63290076a702D7], refCount: 0)
+    │   ├─ emit PolicyActivated(typeId: 0x3ad903d4d8fe41f2dfb307d423089594bd75c8a21611ca581db1299eb5f8ab48, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 11)
+    │   └─ ← [Return] 0x3ad903d4d8fe41f2dfb307d423089594bd75c8a21611ca581db1299eb5f8ab48
+    ├─ [308346] → new FilesContentRule@0xDB25A7b768311dE128BBDa7B8426c3f9C74f3240
+    │   └─ ← [Return] 1539 bytes of code
+    ├─ [144509] TypeRegistry::register(0x3125436e3a0ba3f7b5025d69b242b9fa05a52b73c7dac7aa41ace028d04aa808, FilesContentRule: [0xDB25A7b768311dE128BBDa7B8426c3f9C74f3240], [0x3ad903d4d8fe41f2dfb307d423089594bd75c8a21611ca581db1299eb5f8ab48])
+    │   ├─ emit TypeRegistered(typeId: 0x867140924bd72d8b9e6c142f9ca9fc31af1473fa105d9190b495696ddfd52777, shape: 0x3125436e3a0ba3f7b5025d69b242b9fa05a52b73c7dac7aa41ace028d04aa808, ruleId: 0x5d50bc9ca15153965fd673f4e11379c433fb2095f066f317fd825db48ef24319, mandatoryAcceptor: FilesContentRule: [0xDB25A7b768311dE128BBDa7B8426c3f9C74f3240], refCount: 1)
+    │   ├─ emit PolicyActivated(typeId: 0x867140924bd72d8b9e6c142f9ca9fc31af1473fa105d9190b495696ddfd52777, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 12)
+    │   └─ ← [Return] 0x867140924bd72d8b9e6c142f9ca9fc31af1473fa105d9190b495696ddfd52777
+    ├─ [115365] → new FilesCarrierRootRule@0x3381cD18e2Fb4dB236BF0525938AB6E43Db0440f
+    │   └─ ← [Return] 576 bytes of code
+    ├─ [144509] TypeRegistry::register(0xbfb2824c79b139affb0529dc05bbdf1a07fcd0c3f02b177de4aa6a936bf74e4a, FilesCarrierRootRule: [0x3381cD18e2Fb4dB236BF0525938AB6E43Db0440f], [0x867140924bd72d8b9e6c142f9ca9fc31af1473fa105d9190b495696ddfd52777])
+    │   ├─ emit TypeRegistered(typeId: 0x6e582668b85311a9f87f3a4fa6eac3a9687a1dd71345a1163ace80afd0b6e48a, shape: 0xbfb2824c79b139affb0529dc05bbdf1a07fcd0c3f02b177de4aa6a936bf74e4a, ruleId: 0x7da757ee30d8d5b74c02e1115334f8f6191b04c8b4503918bf9d423f1c5e0bfc, mandatoryAcceptor: FilesCarrierRootRule: [0x3381cD18e2Fb4dB236BF0525938AB6E43Db0440f], refCount: 1)
+    │   ├─ emit PolicyActivated(typeId: 0x6e582668b85311a9f87f3a4fa6eac3a9687a1dd71345a1163ace80afd0b6e48a, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 13)
+    │   └─ ← [Return] 0x6e582668b85311a9f87f3a4fa6eac3a9687a1dd71345a1163ace80afd0b6e48a
+    ├─ [379745] → new FilesCarrierChildRule@0x756e0562323ADcDA4430d6cb456d9151f605290B
+    │   └─ ← [Return] 1895 bytes of code
+    ├─ [146938] TypeRegistry::register(0xc9fbdaec5b28bc159289f5bade4becae0f628336de4db6c77ad02a635b7f46d5, FilesCarrierChildRule: [0x756e0562323ADcDA4430d6cb456d9151f605290B], [0x0000000000000000000000000000000000000000000000000000000000000000, 0x867140924bd72d8b9e6c142f9ca9fc31af1473fa105d9190b495696ddfd52777])
+    │   ├─ emit TypeRegistered(typeId: 0x5e48c978f05c0a3f8204501cef26caa7017fa4a32faca96dfb0b2e25310ef078, shape: 0xc9fbdaec5b28bc159289f5bade4becae0f628336de4db6c77ad02a635b7f46d5, ruleId: 0x35bda015f0c951fa07fcd59ef47f681f475eb510d4ed3cf8584378488396c238, mandatoryAcceptor: FilesCarrierChildRule: [0x756e0562323ADcDA4430d6cb456d9151f605290B], refCount: 2)
+    │   ├─ emit PolicyActivated(typeId: 0x5e48c978f05c0a3f8204501cef26caa7017fa4a32faca96dfb0b2e25310ef078, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 14)
+    │   └─ ← [Return] 0x5e48c978f05c0a3f8204501cef26caa7017fa4a32faca96dfb0b2e25310ef078
+    ├─ [92747] → new FilesConceptRule@0x1aF7f588A501EA2B5bB3feeFA744892aA2CF00e6
+    │   └─ ← [Return] 463 bytes of code
+    ├─ [102281] TypeRegistry::register(0x4067cc03cf3fc892c3315f7414a806b894ca289e2b4ab0a2d074866b15c0c5fb, FilesConceptRule: [0x1aF7f588A501EA2B5bB3feeFA744892aA2CF00e6], [])
+    │   ├─ emit TypeRegistered(typeId: 0x74d3ab89675d25320dc904ad396d71202868b69c518c17bb383e6fbec829347d, shape: 0x4067cc03cf3fc892c3315f7414a806b894ca289e2b4ab0a2d074866b15c0c5fb, ruleId: 0x24ce97ee2ac6095bc32655b3cfb68d8f13cb220ad1f6302f9fd22dfdadb48011, mandatoryAcceptor: FilesConceptRule: [0x1aF7f588A501EA2B5bB3feeFA744892aA2CF00e6], refCount: 0)
+    │   ├─ emit PolicyActivated(typeId: 0x74d3ab89675d25320dc904ad396d71202868b69c518c17bb383e6fbec829347d, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 15)
+    │   └─ ← [Return] 0x74d3ab89675d25320dc904ad396d71202868b69c518c17bb383e6fbec829347d
+    ├─ [475] FilesDirectoryIndex::expectedRootRuleHash() [staticcall]
+    │   └─ ← [Return] 0x1a5b74eb3097326195b34429b4316148ca7a8ec4d3d93b563cc358d2f9533fd8
+    ├─ [365] FilesDirectoryIndex::expectedChildRuleHash() [staticcall]
+    │   └─ ← [Return] 0x14a09b053e2d6a1a9960a561cf5e3c0adee142b23c63677c6fe2b467e448d88a
+    ├─ [893] FilesDirectoryIndex::expectedNameRuleHash() [staticcall]
+    │   └─ ← [Return] 0x699e8e14108b4b520d0cf3dcec5f92c2875b232bfcf20ddffbfc3796b648da0d
+    ├─ [1047] FilesDirectoryIndex::expectedDirectoryRuleHash() [staticcall]
+    │   └─ ← [Return] 0x27b5ce86bb37483fbf8a7d924d6260e6f77340d142bc064a8f9115951cb3f024
+    ├─ [6284972] → new FilesCarrierIndex@0xe8dc788818033232EF9772CB2e6622F1Ec8bc840
+    │   ├─ [874961] → new IndexReplayDecoder@0xFb02F4fa07b34d7a3587051169EE9E18D237263C
+    │   │   ├─ [1363] Ledger::layoutId() [staticcall]
+    │   │   │   └─ ← [Return] 0xf20ada07eabba123a843f9a671911f449c50bf068af1213118b5a13b43fd1b31
+    │   │   └─ ← [Return] 4359 bytes of code
+    │   ├─ [1240] Ledger::counts() [staticcall]
+    │   │   └─ ← [Return] 0, 0, 0, 0
+    │   ├─ emit FamilyDeclared(family: 0x1fd035d41e55e585706a270bca0fa36d150e1cc27de3a1b40654d1835f64287e, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xde538e29eab73663949ae6239c90dea8948cf7297cf44d0c79621ef8bf06e8ab, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xf564f360d1f5b65aacc3b70b5aa8bfd24bfcf28df404557ac647ae8d94954eb4, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xe4f7cc7ff76622e194a3ef2a8f23d6632b91cfda1f803fa443e9e04e43baa270, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xd674025fa1091f86834d22a642451cc45057f55537c4b4e65ee1139c390d1b8a, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x03b682942778e8b9a07a8448019ba6862fac962d963305b6b7b613a80d29f2c4, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x77b478e9ae9182fa4afb6af49a4b8b55c121d339d14f0df963ed8eb50225beca, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x29d3bea0a01e3e26f8a6ae33a62bc05c74281c8a392b910123320f4dfa13a897, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x3c7499618de14cb82dd05236b307f25a4b2da74ae9727c00b07f2f76a9476258, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xcc34c9c731a73d96bf89953e1479bc76faf75cadd9a9d2301c35fc5978b30aac, mandatory: true, fromAdmission: 1)
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34) [staticcall]
+    │   │   └─ ← [Return] 0x57e874217c2dc4af9469f1feb6939d8c5136c664f28a6856d9a6981e468f308c, 0x1a5b74eb3097326195b34429b4316148ca7a8ec4d3d93b563cc358d2f9533fd8, FilesRootRule: [0x212224D2F2d262cd093eE13240ca4873fcCBbA3C], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [1082] TypeRegistry::descriptor(0xad55cbd219935e416ad4d551ea3cbd22f54c6d88d0cdbc767e102e718716c17f) [staticcall]
+    │   │   └─ ← [Return] 0x443b1824c799f6b64165ddc4420154d5ab628dace224205f27f6a7b6ec244dd7, 0x14a09b053e2d6a1a9960a561cf5e3c0adee142b23c63677c6fe2b467e448d88a, FilesChildRule: [0x2a07706473244BC757E10F2a9E86fB532828afe3], 1, 1, 1
+    │   ├─ [1148] TypeRegistry::refTypes(0xad55cbd219935e416ad4d551ea3cbd22f54c6d88d0cdbc767e102e718716c17f) [staticcall]
+    │   │   └─ ← [Return] [0x0000000000000000000000000000000000000000000000000000000000000000]
+    │   ├─ [148] FilesChildRule::rootType() [staticcall]
+    │   │   └─ ← [Return] 0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34
+    │   ├─ emit FamilyDeclared(family: 0x8053aa071bedd1503af182342576e61687106872dc9b7f072286540112646a01, mandatory: true, fromAdmission: 1)
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4) [staticcall]
+    │   │   └─ ← [Return] 0x1b2a89d3943033a5e1ba9bb85a8e5c087474e0d3a2f658aa553ee81fbc90ff77, 0x699e8e14108b4b520d0cf3dcec5f92c2875b232bfcf20ddffbfc3796b648da0d, FilesNameRule: [0x3D7Ebc40AF7092E3F1C81F2e996cbA5Cae2090d7], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [306030] → new FilesScopeState@0xf4a78db59e1cD9eF1fF98b56D1CD0119713e6009
+    │   │   └─ ← [Return] 1527 bytes of code
+    │   ├─ emit FamilyDeclared(family: 0xf345775badad4a7c49f709e524319df020077e3571910d3ec364cc9e70d5c482, mandatory: true, fromAdmission: 1)
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b) [staticcall]
+    │   │   └─ ← [Return] 0xad07c9f465272d2f09afdd24f73f727eedd24fbca2500ef72508da229c54f5e9, 0x27b5ce86bb37483fbf8a7d924d6260e6f77340d142bc064a8f9115951cb3f024, FilesDirectoryRule: [0xD16d567549A2a2a2005aEACf7fB193851603dd70], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0x3ad903d4d8fe41f2dfb307d423089594bd75c8a21611ca581db1299eb5f8ab48) [staticcall]
+    │   │   └─ ← [Return] 0x4c0bf2080105ad2a1fd5dd77cb6eecffa0e76dd4fa2e229f1503e2656b308942, 0x57a774e8f150dd4f848d5775065ed1db09324ec2d26f52dbfc26aabf0079b8c1, FilesBytesRule: [0x13aa49bAc059d709dd0a18D6bb63290076a702D7], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x3ad903d4d8fe41f2dfb307d423089594bd75c8a21611ca581db1299eb5f8ab48) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [1082] TypeRegistry::descriptor(0x867140924bd72d8b9e6c142f9ca9fc31af1473fa105d9190b495696ddfd52777) [staticcall]
+    │   │   └─ ← [Return] 0x3125436e3a0ba3f7b5025d69b242b9fa05a52b73c7dac7aa41ace028d04aa808, 0x5d50bc9ca15153965fd673f4e11379c433fb2095f066f317fd825db48ef24319, FilesContentRule: [0xDB25A7b768311dE128BBDa7B8426c3f9C74f3240], 1, 1, 1
+    │   ├─ [1148] TypeRegistry::refTypes(0x867140924bd72d8b9e6c142f9ca9fc31af1473fa105d9190b495696ddfd52777) [staticcall]
+    │   │   └─ ← [Return] [0x3ad903d4d8fe41f2dfb307d423089594bd75c8a21611ca581db1299eb5f8ab48]
+    │   ├─ [1082] TypeRegistry::descriptor(0x6e582668b85311a9f87f3a4fa6eac3a9687a1dd71345a1163ace80afd0b6e48a) [staticcall]
+    │   │   └─ ← [Return] 0xbfb2824c79b139affb0529dc05bbdf1a07fcd0c3f02b177de4aa6a936bf74e4a, 0x7da757ee30d8d5b74c02e1115334f8f6191b04c8b4503918bf9d423f1c5e0bfc, FilesCarrierRootRule: [0x3381cD18e2Fb4dB236BF0525938AB6E43Db0440f], 1, 1, 1
+    │   ├─ [1148] TypeRegistry::refTypes(0x6e582668b85311a9f87f3a4fa6eac3a9687a1dd71345a1163ace80afd0b6e48a) [staticcall]
+    │   │   └─ ← [Return] [0x867140924bd72d8b9e6c142f9ca9fc31af1473fa105d9190b495696ddfd52777]
+    │   ├─ [1082] TypeRegistry::descriptor(0x5e48c978f05c0a3f8204501cef26caa7017fa4a32faca96dfb0b2e25310ef078) [staticcall]
+    │   │   └─ ← [Return] 0xc9fbdaec5b28bc159289f5bade4becae0f628336de4db6c77ad02a635b7f46d5, 0x35bda015f0c951fa07fcd59ef47f681f475eb510d4ed3cf8584378488396c238, FilesCarrierChildRule: [0x756e0562323ADcDA4430d6cb456d9151f605290B], 2, 1, 1
+    │   ├─ [1411] TypeRegistry::refTypes(0x5e48c978f05c0a3f8204501cef26caa7017fa4a32faca96dfb0b2e25310ef078) [staticcall]
+    │   │   └─ ← [Return] [0x0000000000000000000000000000000000000000000000000000000000000000, 0x867140924bd72d8b9e6c142f9ca9fc31af1473fa105d9190b495696ddfd52777]
+    │   ├─ [1082] TypeRegistry::descriptor(0x74d3ab89675d25320dc904ad396d71202868b69c518c17bb383e6fbec829347d) [staticcall]
+    │   │   └─ ← [Return] 0x4067cc03cf3fc892c3315f7414a806b894ca289e2b4ab0a2d074866b15c0c5fb, 0x24ce97ee2ac6095bc32655b3cfb68d8f13cb220ad1f6302f9fd22dfdadb48011, FilesConceptRule: [0x1aF7f588A501EA2B5bB3feeFA744892aA2CF00e6], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x74d3ab89675d25320dc904ad396d71202868b69c518c17bb383e6fbec829347d) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [164] FilesContentRule::bytesType() [staticcall]
+    │   │   └─ ← [Return] 0x3ad903d4d8fe41f2dfb307d423089594bd75c8a21611ca581db1299eb5f8ab48
+    │   ├─ [216] FilesCarrierChildRule::inlineRoot() [staticcall]
+    │   │   └─ ← [Return] 0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34
+    │   ├─ [148] FilesCarrierChildRule::inlineChild() [staticcall]
+    │   │   └─ ← [Return] 0xad55cbd219935e416ad4d551ea3cbd22f54c6d88d0cdbc767e102e718716c17f
+    │   ├─ [197] FilesCarrierChildRule::carrierRoot() [staticcall]
+    │   │   └─ ← [Return] 0x6e582668b85311a9f87f3a4fa6eac3a9687a1dd71345a1163ace80afd0b6e48a
+    │   └─ ← [Return] 20796 bytes of code
+    ├─ [9424] Ledger::setIndexModule(FilesCarrierIndex: [0xe8dc788818033232EF9772CB2e6622F1Ec8bc840])
+    │   ├─ emit IndexModuleSet(module: FilesCarrierIndex: [0xe8dc788818033232EF9772CB2e6622F1Ec8bc840])
+    │   ├─ [2469] FilesCarrierIndex::generation() [staticcall]
+    │   │   └─ ← [Return] 0
+    │   ├─ emit ExecutionChanged(executionSet: 0x91a03500a3baf5b38ef374f3f1d460fb806cf9771b505d1a582e4a882a1c0029, revision: 4)
+    │   └─ ← [Stop]
+    ├─ [175137] → new LiveQuoteProvider@0x3Cff5E7eBecb676c3Cb602D0ef2d46710b88854E
+    │   └─ ← [Return] 764 bytes of code
+    ├─ [66923] → new LiveQuoteRule@0x27cc01A4676C73fe8b6d0933Ac991BfF1D77C4da
+    │   └─ ← [Return] 334 bytes of code
+    ├─ [102281] TypeRegistry::register(0xd6fa419f599f93616cdcf7fd3989405485b02674a0bbd7eb2068ccb9b6cc0cbf, LiveQuoteRule: [0x27cc01A4676C73fe8b6d0933Ac991BfF1D77C4da], [])
+    │   ├─ emit TypeRegistered(typeId: 0x5c64366d650ce3e9cafb6d3ef61c82be14476f38ae8a19b60400ccbc3b422fa8, shape: 0xd6fa419f599f93616cdcf7fd3989405485b02674a0bbd7eb2068ccb9b6cc0cbf, ruleId: 0x8f277c8f4c4e7785ba0d3cca651235fe0cff857fd93ac7139891de343ae49a5a, mandatoryAcceptor: LiveQuoteRule: [0x27cc01A4676C73fe8b6d0933Ac991BfF1D77C4da], refCount: 0)
+    │   ├─ emit PolicyActivated(typeId: 0x5c64366d650ce3e9cafb6d3ef61c82be14476f38ae8a19b60400ccbc3b422fa8, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 16)
+    │   └─ ← [Return] 0x5c64366d650ce3e9cafb6d3ef61c82be14476f38ae8a19b60400ccbc3b422fa8
+    ├─ [757888] → new LiveFilesAdapter@0x796f2974e3C1af763252512dd6d521E9E984726C
+    │   ├─ [224802] → new LiveFilesDescriptorRule@0x3cb0b7B82686A4cbc432f553004F13d0629Ae610
+    │   │   └─ ← [Return] 1121 bytes of code
+    │   └─ ← [Return] 2494 bytes of code
+    ├─ [166] LiveFilesAdapter::descriptorRule() [staticcall]
+    │   └─ ← [Return] LiveFilesDescriptorRule: [0x3cb0b7B82686A4cbc432f553004F13d0629Ae610]
+    ├─ [102281] TypeRegistry::register(0x518364ee605b8e627faf71cbfac1e3f0297025849428591a2c0290c70b121c02, LiveFilesDescriptorRule: [0x3cb0b7B82686A4cbc432f553004F13d0629Ae610], [])
+    │   ├─ emit TypeRegistered(typeId: 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa, shape: 0x518364ee605b8e627faf71cbfac1e3f0297025849428591a2c0290c70b121c02, ruleId: 0x77327c52f4b08ff1d4b9f67f72b59eec0caeb404d6999efaa5e29d66feb04c7a, mandatoryAcceptor: LiveFilesDescriptorRule: [0x3cb0b7B82686A4cbc432f553004F13d0629Ae610], refCount: 0)
+    │   ├─ emit PolicyActivated(typeId: 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 17)
+    │   └─ ← [Return] 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa
+    ├─ [115365] → new LiveFilesRootRule@0x92a6649Fdcc044DA968d94202465578a9371C7b1
+    │   └─ ← [Return] 576 bytes of code
+    ├─ [144509] TypeRegistry::register(0xcb1aaf985944ba2cbc17e6c86ae810e7e59f5e8cb22e3bd2bf1897243aa6793c, LiveFilesRootRule: [0x92a6649Fdcc044DA968d94202465578a9371C7b1], [0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa])
+    │   ├─ emit TypeRegistered(typeId: 0x69e7cc34ebc6efb74263c745335165691ba5a05026e3d2e7df169efcd01fa1cb, shape: 0xcb1aaf985944ba2cbc17e6c86ae810e7e59f5e8cb22e3bd2bf1897243aa6793c, ruleId: 0x3712a2d4e38dce4e9cf0db4b3c25ee8a7b9cea1dfbe109bd371db99cee01c71a, mandatoryAcceptor: LiveFilesRootRule: [0x92a6649Fdcc044DA968d94202465578a9371C7b1], refCount: 1)
+    │   ├─ emit PolicyActivated(typeId: 0x69e7cc34ebc6efb74263c745335165691ba5a05026e3d2e7df169efcd01fa1cb, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 18)
+    │   └─ ← [Return] 0x69e7cc34ebc6efb74263c745335165691ba5a05026e3d2e7df169efcd01fa1cb
+    ├─ [385178] → new LiveFilesChildRule@0xDA5A5ADC64C8013d334A0DA9e711B364Af7A4C2d
+    │   └─ ← [Return] 1919 bytes of code
+    ├─ [146938] TypeRegistry::register(0x8f52a13b546268d2b55fc2718dcef071604d540efba2b48ddd0b529f36099c88, LiveFilesChildRule: [0xDA5A5ADC64C8013d334A0DA9e711B364Af7A4C2d], [0x0000000000000000000000000000000000000000000000000000000000000000, 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa])
+    │   ├─ emit TypeRegistered(typeId: 0xe7062be87d77aeaa5b490dab4b91bc1b5fcf95367fd2f172e1d483c9dd69d807, shape: 0x8f52a13b546268d2b55fc2718dcef071604d540efba2b48ddd0b529f36099c88, ruleId: 0x00205f675e2adc51f2bdd5bf3810deeab4e90e66464129ae60d67258d0692049, mandatoryAcceptor: LiveFilesChildRule: [0xDA5A5ADC64C8013d334A0DA9e711B364Af7A4C2d], refCount: 2)
+    │   ├─ emit PolicyActivated(typeId: 0xe7062be87d77aeaa5b490dab4b91bc1b5fcf95367fd2f172e1d483c9dd69d807, activation: 1, acceptor: 0x0000000000000000000000000000000000000000, acceptorCodehash: 0x0000000000000000000000000000000000000000000000000000000000000000, epoch: 19)
+    │   └─ ← [Return] 0xe7062be87d77aeaa5b490dab4b91bc1b5fcf95367fd2f172e1d483c9dd69d807
+    ├─ [475] FilesCarrierIndex::expectedRootRuleHash() [staticcall]
+    │   └─ ← [Return] 0x1a5b74eb3097326195b34429b4316148ca7a8ec4d3d93b563cc358d2f9533fd8
+    ├─ [365] FilesCarrierIndex::expectedChildRuleHash() [staticcall]
+    │   └─ ← [Return] 0x14a09b053e2d6a1a9960a561cf5e3c0adee142b23c63677c6fe2b467e448d88a
+    ├─ [893] FilesCarrierIndex::expectedNameRuleHash() [staticcall]
+    │   └─ ← [Return] 0x699e8e14108b4b520d0cf3dcec5f92c2875b232bfcf20ddffbfc3796b648da0d
+    ├─ [1069] FilesCarrierIndex::expectedDirectoryRuleHash() [staticcall]
+    │   └─ ← [Return] 0x27b5ce86bb37483fbf8a7d924d6260e6f77340d142bc064a8f9115951cb3f024
+    ├─ [1097421] → new FilesFinalValidator@0x886D6d1eB8D415b00052828CD6d5B321f072073d
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4) [staticcall]
+    │   │   └─ ← [Return] 0x1b2a89d3943033a5e1ba9bb85a8e5c087474e0d3a2f658aa553ee81fbc90ff77, 0x699e8e14108b4b520d0cf3dcec5f92c2875b232bfcf20ddffbfc3796b648da0d, FilesNameRule: [0x3D7Ebc40AF7092E3F1C81F2e996cbA5Cae2090d7], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b) [staticcall]
+    │   │   └─ ← [Return] 0xad07c9f465272d2f09afdd24f73f727eedd24fbca2500ef72508da229c54f5e9, 0x27b5ce86bb37483fbf8a7d924d6260e6f77340d142bc064a8f9115951cb3f024, FilesDirectoryRule: [0xD16d567549A2a2a2005aEACf7fB193851603dd70], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b) [staticcall]
+    │   │   └─ ← [Return] []
+    │   └─ ← [Return] 5417 bytes of code
+    ├─ [6978549] → new LiveFilesIndex@0x3C4293F66941ECa00f4950C10d4255d5c271bAeF
+    │   ├─ [874961] → new IndexReplayDecoder@0x50BA6062e316b49a20A541a78F5cdE118cEc0a98
+    │   │   ├─ [1363] Ledger::layoutId() [staticcall]
+    │   │   │   └─ ← [Return] 0xf20ada07eabba123a843f9a671911f449c50bf068af1213118b5a13b43fd1b31
+    │   │   └─ ← [Return] 4359 bytes of code
+    │   ├─ [1240] Ledger::counts() [staticcall]
+    │   │   └─ ← [Return] 0, 0, 0, 0
+    │   ├─ emit FamilyDeclared(family: 0x1fd035d41e55e585706a270bca0fa36d150e1cc27de3a1b40654d1835f64287e, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xde538e29eab73663949ae6239c90dea8948cf7297cf44d0c79621ef8bf06e8ab, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xf564f360d1f5b65aacc3b70b5aa8bfd24bfcf28df404557ac647ae8d94954eb4, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xe4f7cc7ff76622e194a3ef2a8f23d6632b91cfda1f803fa443e9e04e43baa270, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xd674025fa1091f86834d22a642451cc45057f55537c4b4e65ee1139c390d1b8a, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x03b682942778e8b9a07a8448019ba6862fac962d963305b6b7b613a80d29f2c4, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x77b478e9ae9182fa4afb6af49a4b8b55c121d339d14f0df963ed8eb50225beca, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x29d3bea0a01e3e26f8a6ae33a62bc05c74281c8a392b910123320f4dfa13a897, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0x3c7499618de14cb82dd05236b307f25a4b2da74ae9727c00b07f2f76a9476258, mandatory: true, fromAdmission: 1)
+    │   ├─ emit FamilyDeclared(family: 0xcc34c9c731a73d96bf89953e1479bc76faf75cadd9a9d2301c35fc5978b30aac, mandatory: true, fromAdmission: 1)
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34) [staticcall]
+    │   │   └─ ← [Return] 0x57e874217c2dc4af9469f1feb6939d8c5136c664f28a6856d9a6981e468f308c, 0x1a5b74eb3097326195b34429b4316148ca7a8ec4d3d93b563cc358d2f9533fd8, FilesRootRule: [0x212224D2F2d262cd093eE13240ca4873fcCBbA3C], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [1082] TypeRegistry::descriptor(0xad55cbd219935e416ad4d551ea3cbd22f54c6d88d0cdbc767e102e718716c17f) [staticcall]
+    │   │   └─ ← [Return] 0x443b1824c799f6b64165ddc4420154d5ab628dace224205f27f6a7b6ec244dd7, 0x14a09b053e2d6a1a9960a561cf5e3c0adee142b23c63677c6fe2b467e448d88a, FilesChildRule: [0x2a07706473244BC757E10F2a9E86fB532828afe3], 1, 1, 1
+    │   ├─ [1148] TypeRegistry::refTypes(0xad55cbd219935e416ad4d551ea3cbd22f54c6d88d0cdbc767e102e718716c17f) [staticcall]
+    │   │   └─ ← [Return] [0x0000000000000000000000000000000000000000000000000000000000000000]
+    │   ├─ [148] FilesChildRule::rootType() [staticcall]
+    │   │   └─ ← [Return] 0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34
+    │   ├─ emit FamilyDeclared(family: 0x8053aa071bedd1503af182342576e61687106872dc9b7f072286540112646a01, mandatory: true, fromAdmission: 1)
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4) [staticcall]
+    │   │   └─ ← [Return] 0x1b2a89d3943033a5e1ba9bb85a8e5c087474e0d3a2f658aa553ee81fbc90ff77, 0x699e8e14108b4b520d0cf3dcec5f92c2875b232bfcf20ddffbfc3796b648da0d, FilesNameRule: [0x3D7Ebc40AF7092E3F1C81F2e996cbA5Cae2090d7], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [306030] → new FilesScopeState@0xfa754ED13F1BAA766018e3E0c7aE264f3411A069
+    │   │   └─ ← [Return] 1527 bytes of code
+    │   ├─ emit FamilyDeclared(family: 0xf345775badad4a7c49f709e524319df020077e3571910d3ec364cc9e70d5c482, mandatory: true, fromAdmission: 1)
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b) [staticcall]
+    │   │   └─ ← [Return] 0xad07c9f465272d2f09afdd24f73f727eedd24fbca2500ef72508da229c54f5e9, 0x27b5ce86bb37483fbf8a7d924d6260e6f77340d142bc064a8f9115951cb3f024, FilesDirectoryRule: [0xD16d567549A2a2a2005aEACf7fB193851603dd70], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0x3ad903d4d8fe41f2dfb307d423089594bd75c8a21611ca581db1299eb5f8ab48) [staticcall]
+    │   │   └─ ← [Return] 0x4c0bf2080105ad2a1fd5dd77cb6eecffa0e76dd4fa2e229f1503e2656b308942, 0x57a774e8f150dd4f848d5775065ed1db09324ec2d26f52dbfc26aabf0079b8c1, FilesBytesRule: [0x13aa49bAc059d709dd0a18D6bb63290076a702D7], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x3ad903d4d8fe41f2dfb307d423089594bd75c8a21611ca581db1299eb5f8ab48) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [1082] TypeRegistry::descriptor(0x867140924bd72d8b9e6c142f9ca9fc31af1473fa105d9190b495696ddfd52777) [staticcall]
+    │   │   └─ ← [Return] 0x3125436e3a0ba3f7b5025d69b242b9fa05a52b73c7dac7aa41ace028d04aa808, 0x5d50bc9ca15153965fd673f4e11379c433fb2095f066f317fd825db48ef24319, FilesContentRule: [0xDB25A7b768311dE128BBDa7B8426c3f9C74f3240], 1, 1, 1
+    │   ├─ [1148] TypeRegistry::refTypes(0x867140924bd72d8b9e6c142f9ca9fc31af1473fa105d9190b495696ddfd52777) [staticcall]
+    │   │   └─ ← [Return] [0x3ad903d4d8fe41f2dfb307d423089594bd75c8a21611ca581db1299eb5f8ab48]
+    │   ├─ [1082] TypeRegistry::descriptor(0x6e582668b85311a9f87f3a4fa6eac3a9687a1dd71345a1163ace80afd0b6e48a) [staticcall]
+    │   │   └─ ← [Return] 0xbfb2824c79b139affb0529dc05bbdf1a07fcd0c3f02b177de4aa6a936bf74e4a, 0x7da757ee30d8d5b74c02e1115334f8f6191b04c8b4503918bf9d423f1c5e0bfc, FilesCarrierRootRule: [0x3381cD18e2Fb4dB236BF0525938AB6E43Db0440f], 1, 1, 1
+    │   ├─ [1148] TypeRegistry::refTypes(0x6e582668b85311a9f87f3a4fa6eac3a9687a1dd71345a1163ace80afd0b6e48a) [staticcall]
+    │   │   └─ ← [Return] [0x867140924bd72d8b9e6c142f9ca9fc31af1473fa105d9190b495696ddfd52777]
+    │   ├─ [1082] TypeRegistry::descriptor(0x5e48c978f05c0a3f8204501cef26caa7017fa4a32faca96dfb0b2e25310ef078) [staticcall]
+    │   │   └─ ← [Return] 0xc9fbdaec5b28bc159289f5bade4becae0f628336de4db6c77ad02a635b7f46d5, 0x35bda015f0c951fa07fcd59ef47f681f475eb510d4ed3cf8584378488396c238, FilesCarrierChildRule: [0x756e0562323ADcDA4430d6cb456d9151f605290B], 2, 1, 1
+    │   ├─ [1411] TypeRegistry::refTypes(0x5e48c978f05c0a3f8204501cef26caa7017fa4a32faca96dfb0b2e25310ef078) [staticcall]
+    │   │   └─ ← [Return] [0x0000000000000000000000000000000000000000000000000000000000000000, 0x867140924bd72d8b9e6c142f9ca9fc31af1473fa105d9190b495696ddfd52777]
+    │   ├─ [1082] TypeRegistry::descriptor(0x74d3ab89675d25320dc904ad396d71202868b69c518c17bb383e6fbec829347d) [staticcall]
+    │   │   └─ ← [Return] 0x4067cc03cf3fc892c3315f7414a806b894ca289e2b4ab0a2d074866b15c0c5fb, 0x24ce97ee2ac6095bc32655b3cfb68d8f13cb220ad1f6302f9fd22dfdadb48011, FilesConceptRule: [0x1aF7f588A501EA2B5bB3feeFA744892aA2CF00e6], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0x74d3ab89675d25320dc904ad396d71202868b69c518c17bb383e6fbec829347d) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [164] FilesContentRule::bytesType() [staticcall]
+    │   │   └─ ← [Return] 0x3ad903d4d8fe41f2dfb307d423089594bd75c8a21611ca581db1299eb5f8ab48
+    │   ├─ [216] FilesCarrierChildRule::inlineRoot() [staticcall]
+    │   │   └─ ← [Return] 0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34
+    │   ├─ [148] FilesCarrierChildRule::inlineChild() [staticcall]
+    │   │   └─ ← [Return] 0xad55cbd219935e416ad4d551ea3cbd22f54c6d88d0cdbc767e102e718716c17f
+    │   ├─ [197] FilesCarrierChildRule::carrierRoot() [staticcall]
+    │   │   └─ ← [Return] 0x6e582668b85311a9f87f3a4fa6eac3a9687a1dd71345a1163ace80afd0b6e48a
+    │   ├─ [412098] → new IndexFieldProfile@0xE1b5F479991b55D6955cEf3C7BC976c777b0b03A
+    │   │   └─ ← [Return] 1257 bytes of code
+    │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   ├─ [1082] TypeRegistry::descriptor(0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa) [staticcall]
+    │   │   └─ ← [Return] 0x518364ee605b8e627faf71cbfac1e3f0297025849428591a2c0290c70b121c02, 0x77327c52f4b08ff1d4b9f67f72b59eec0caeb404d6999efaa5e29d66feb04c7a, LiveFilesDescriptorRule: [0x3cb0b7B82686A4cbc432f553004F13d0629Ae610], 0, 1, 1
+    │   ├─ [885] TypeRegistry::refTypes(0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa) [staticcall]
+    │   │   └─ ← [Return] []
+    │   ├─ [166] LiveFilesDescriptorRule::adapter() [staticcall]
+    │   │   └─ ← [Return] LiveFilesAdapter: [0x796f2974e3C1af763252512dd6d521E9E984726C]
+    │   ├─ [175] LiveFilesDescriptorRule::outputType() [staticcall]
+    │   │   └─ ← [Return] 0x5c64366d650ce3e9cafb6d3ef61c82be14476f38ae8a19b60400ccbc3b422fa8
+    │   ├─ [1082] TypeRegistry::descriptor(0x69e7cc34ebc6efb74263c745335165691ba5a05026e3d2e7df169efcd01fa1cb) [staticcall]
+    │   │   └─ ← [Return] 0xcb1aaf985944ba2cbc17e6c86ae810e7e59f5e8cb22e3bd2bf1897243aa6793c, 0x3712a2d4e38dce4e9cf0db4b3c25ee8a7b9cea1dfbe109bd371db99cee01c71a, LiveFilesRootRule: [0x92a6649Fdcc044DA968d94202465578a9371C7b1], 1, 1, 1
+    │   ├─ [1148] TypeRegistry::refTypes(0x69e7cc34ebc6efb74263c745335165691ba5a05026e3d2e7df169efcd01fa1cb) [staticcall]
+    │   │   └─ ← [Return] [0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa]
+    │   ├─ [1082] TypeRegistry::descriptor(0xe7062be87d77aeaa5b490dab4b91bc1b5fcf95367fd2f172e1d483c9dd69d807) [staticcall]
+    │   │   └─ ← [Return] 0x8f52a13b546268d2b55fc2718dcef071604d540efba2b48ddd0b529f36099c88, 0x00205f675e2adc51f2bdd5bf3810deeab4e90e66464129ae60d67258d0692049, LiveFilesChildRule: [0xDA5A5ADC64C8013d334A0DA9e711B364Af7A4C2d], 2, 1, 1
+    │   ├─ [1411] TypeRegistry::refTypes(0xe7062be87d77aeaa5b490dab4b91bc1b5fcf95367fd2f172e1d483c9dd69d807) [staticcall]
+    │   │   └─ ← [Return] [0x0000000000000000000000000000000000000000000000000000000000000000, 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa]
+    │   ├─ [377] LiveFilesChildRule::parents(0) [staticcall]
+    │   │   └─ ← [Return] 0x18263ec0bb88f4816852fd97689e5c69b8ccfa9d24dd295a77fb59dabd42df34
+    │   ├─ [377] LiveFilesChildRule::parents(1) [staticcall]
+    │   │   └─ ← [Return] 0xad55cbd219935e416ad4d551ea3cbd22f54c6d88d0cdbc767e102e718716c17f
+    │   ├─ [377] LiveFilesChildRule::parents(2) [staticcall]
+    │   │   └─ ← [Return] 0x6e582668b85311a9f87f3a4fa6eac3a9687a1dd71345a1163ace80afd0b6e48a
+    │   ├─ [377] LiveFilesChildRule::parents(3) [staticcall]
+    │   │   └─ ← [Return] 0x5e48c978f05c0a3f8204501cef26caa7017fa4a32faca96dfb0b2e25310ef078
+    │   ├─ [377] LiveFilesChildRule::parents(4) [staticcall]
+    │   │   └─ ← [Return] 0x69e7cc34ebc6efb74263c745335165691ba5a05026e3d2e7df169efcd01fa1cb
+    │   ├─ [196] FilesFinalValidator::ledger() [staticcall]
+    │   │   └─ ← [Return] Ledger: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a]
+    │   ├─ [148] FilesFinalValidator::nameType() [staticcall]
+    │   │   └─ ← [Return] 0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4
+    │   ├─ [263] FilesFinalValidator::nameHash() [staticcall]
+    │   │   └─ ← [Return] 0x699e8e14108b4b520d0cf3dcec5f92c2875b232bfcf20ddffbfc3796b648da0d
+    │   ├─ [197] FilesFinalValidator::directoryType() [staticcall]
+    │   │   └─ ← [Return] 0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b
+    │   ├─ [219] FilesFinalValidator::directoryHash() [staticcall]
+    │   │   └─ ← [Return] 0x27b5ce86bb37483fbf8a7d924d6260e6f77340d142bc064a8f9115951cb3f024
+    │   └─ ← [Return] 21205 bytes of code
+    ├─ [9424] Ledger::setIndexModule(LiveFilesIndex: [0x3C4293F66941ECa00f4950C10d4255d5c271bAeF])
+    │   ├─ emit IndexModuleSet(module: LiveFilesIndex: [0x3C4293F66941ECa00f4950C10d4255d5c271bAeF])
+    │   ├─ [2469] LiveFilesIndex::generation() [staticcall]
+    │   │   └─ ← [Return] 0
+    │   ├─ emit ExecutionChanged(executionSet: 0xc5aba39354069709e4f0415e0cc58948535bc4f4012ac8ecf4b806ef2c556ed9, revision: 5)
+    │   └─ ← [Stop]
+    └─ ← [Return]
+
+  [1333193] LiveFilesTest::test_live_provider_code_drift_chain_and_caller_context()
+    ├─ [1240341] Ledger::publish(0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa, 0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000007a690ca83d8f8c0ca4f8e99198591b7064ecf386621f4db1c25fea62bb5c787175800000000000000000000000003cff5e7ebecb676c3cb602d0ef2d46710b88854eb43f7960a247c7f22fd0509c8168b631d9db971e5e3476710d49fbe40904575815f05b050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000075c64366d650ce3e9cafb6d3ef61c82be14476f38ae8a19b60400ccbc3b422fa80000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000c3500000000000000000000000000000000000000000000000000000000000000040000000000000000000000000796f2974e3c1af763252512dd6d521e9e984726c)
+    │   ├─ [118673] PublicationSupport::prepareNative(0, 0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001d829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aaa8fd936a72bae3932c9d0937642dbea0b7ba7d637dc7ccf6ae530c321149ff7e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000) [delegatecall]
+    │   │   ├─ [3840] Ledger::realmOrigin() [staticcall]
+    │   │   │   └─ ← [Return] 0x834bc21e5103f48baf24ad08bb7914026ead6fe12d2e7937391df64dad2a2fdf
+    │   │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   │   ├─ [2595] TypeRegistry::epoch() [staticcall]
+    │   │   │   └─ ← [Return] 19
+    │   │   ├─ [9264] TypeRegistry::typeInfo(0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa) [staticcall]
+    │   │   │   └─ ← [Return] true, LiveFilesDescriptorRule: [0x3cb0b7B82686A4cbc432f553004F13d0629Ae610], 0x77327c52f4b08ff1d4b9f67f72b59eec0caeb404d6999efaa5e29d66feb04c7a, 0x0000000000000000000000000000000000000000, 0x0000000000000000000000000000000000000000000000000000000000000000, 0, 1
+    │   │   ├─ [2543] Ledger::indexModule() [staticcall]
+    │   │   │   └─ ← [Return] LiveFilesIndex: [0x3C4293F66941ECa00f4950C10d4255d5c271bAeF]
+    │   │   ├─ [85710] LiveFilesIndex::manifestHash() [staticcall]
+    │   │   │   ├─ [241] IndexFieldProfile::dataHash() [staticcall]
+    │   │   │   │   └─ ← [Return] 0xa035e5e1bda0cd8a4a3f9753f9fa48f55bb791709be6c1874f5f81c1c3d3a08c
+    │   │   │   └─ ← [Return] 0x4b2189d0bde983471ef1ae57fa62d98cdb4c6bf66657e1b4cbcba0527b56e447
+    │   │   └─ ← [Return] Result({ author: 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496, author32: 0x2dc97c2ba20d89ca7247827b30d08eeaa3822c4831f5b42f3c19164d43e1dfe7, creator: 0x2dc97c2ba20d89ca7247827b30d08eeaa3822c4831f5b42f3c19164d43e1dfe7, imported: false, proofKind: 1, v: 0, nonce: 0, deadline: 0, r: 0x0000000000000000000000000000000000000000000000000000000000000000, s: 0x0000000000000000000000000000000000000000000000000000000000000000, acceptanceProfile: 0x5f1ee8150c0b0af4b84ad8991a5a130187a8e07c197de041599ee5574977dbc5, indexObligations: 0x4f393c3c4dab72985190cd37e2dfc22732422ad2ea39ae968d1c897a56b9d7f9, actionsHash: 0x590ac304f1be82480fe2598a67352d466624201872210694e19043f9f9ad6757, execution: 0x0000000000000000000000000000000000000000000000000000000000000000, intentHash: 0x0000000000000000000000000000000000000000000000000000000000000000, readsHash: 0x0000000000000000000000000000000000000000000000000000000000000000, format: 0 })
+    │   ├─ [595] TypeRegistry::epoch() [staticcall]
+    │   │   └─ ← [Return] 19
+    │   ├─ [2469] LiveFilesIndex::generation() [staticcall]
+    │   │   └─ ← [Return] 0
+    │   ├─ [902] PublicationSupport::legacyDigest(0x503f99d3d2b2f5d98e7138a8b0ad41e58527b4f9e3a1974f485b238cf1f58f09, 0xa1f677df361c0235b1979e7c31d89bcad72b78744ae472963d3bc9f12b384374, [0x684016e05741dc9d511ff3520a16e1da90a35be14b76f9e12ef0287b9beae39f, 0x2838eea6753fb2cae6f115341e1b911421c3681f5070f6752b41809db9639f05, 0x0000000000000000000000007fa9385be102ac3eac297483dd6233d62b3e1496, 0x0000000000000000000000000000000000000000000000000000000000000000, 0x0000000000000000000000000000000000000000000000000000000000000000, 0x5f1ee8150c0b0af4b84ad8991a5a130187a8e07c197de041599ee5574977dbc5, 0x4f393c3c4dab72985190cd37e2dfc22732422ad2ea39ae968d1c897a56b9d7f9], 0x590ac304f1be82480fe2598a67352d466624201872210694e19043f9f9ad6757) [staticcall]
+    │   │   └─ ← [Return] 0x136af455f1186903072ad6f1f2476e4afe790ec44473b94bea019c5790ad05a4
+    │   ├─ [469] LiveFilesIndex::generation() [staticcall]
+    │   │   └─ ← [Return] 0
+    │   ├─ [9795] PublicationSupport::indexAllowance(LiveFilesIndex: [0x3C4293F66941ECa00f4950C10d4255d5c271bAeF], TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f], 0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001d829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aaa8fd936a72bae3932c9d0937642dbea0b7ba7d637dc7ccf6ae530c321149ff7e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000) [staticcall]
+    │   │   ├─ [490] LiveFilesIndex::fieldProfile() [staticcall]
+    │   │   │   └─ ← [Return] IndexFieldProfile: [0xE1b5F479991b55D6955cEf3C7BC976c777b0b03A]
+    │   │   ├─ [1264] TypeRegistry::typeInfo(0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa) [staticcall]
+    │   │   │   └─ ← [Return] true, LiveFilesDescriptorRule: [0x3cb0b7B82686A4cbc432f553004F13d0629Ae610], 0x77327c52f4b08ff1d4b9f67f72b59eec0caeb404d6999efaa5e29d66feb04c7a, 0x0000000000000000000000000000000000000000, 0x0000000000000000000000000000000000000000000000000000000000000000, 0, 1
+    │   │   ├─ [4581] IndexFieldProfile::workUnits(0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa) [staticcall]
+    │   │   │   └─ ← [Return] 0
+    │   │   └─ ← [Return] 375600 [3.756e5]
+    │   ├─ [1264] TypeRegistry::typeInfo(0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa) [staticcall]
+    │   │   └─ ← [Return] true, LiveFilesDescriptorRule: [0x3cb0b7B82686A4cbc432f553004F13d0629Ae610], 0x77327c52f4b08ff1d4b9f67f72b59eec0caeb404d6999efaa5e29d66feb04c7a, 0x0000000000000000000000000000000000000000, 0x0000000000000000000000000000000000000000000000000000000000000000, 0, 1
+    │   ├─ [4633] LiveFilesDescriptorRule::accept(0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa, 0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000007a690ca83d8f8c0ca4f8e99198591b7064ecf386621f4db1c25fea62bb5c787175800000000000000000000000003cff5e7ebecb676c3cb602d0ef2d46710b88854eb43f7960a247c7f22fd0509c8168b631d9db971e5e3476710d49fbe40904575815f05b050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000075c64366d650ce3e9cafb6d3ef61c82be14476f38ae8a19b60400ccbc3b422fa80000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000c3500000000000000000000000000000000000000000000000000000000000000040000000000000000000000000796f2974e3c1af763252512dd6d521e9e984726c, []) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit Admitted(author: 0x2dc97c2ba20d89ca7247827b30d08eeaa3822c4831f5b42f3c19164d43e1dfe7, scope: 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa, recordId: 0xb82723070b73b8f2ce50c5cf04d6ab405d5d7a1bebd415e1d71cc7454c5cf876, admission: 1)
+    │   ├─ [135597] PublicationSupport::fallback() [delegatecall]
+    │   │   ├─ [133591] LiveFilesIndex::onAdmission(1, [Effect({ kind: 1, admission: 1, author: 0x2dc97c2ba20d89ca7247827b30d08eeaa3822c4831f5b42f3c19164d43e1dfe7, recordId: 0xb82723070b73b8f2ce50c5cf04d6ab405d5d7a1bebd415e1d71cc7454c5cf876, typeId: 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa, scopeKey: 0x0000000000000000000000000000000000000000000000000000000000000000, bindingKey: 0x0000000000000000000000000000000000000000000000000000000000000000, bindingOrdinal: 0, target: 0x0000000000000000000000000000000000000000000000000000000000000000, oldTarget: 0x0000000000000000000000000000000000000000000000000000000000000000, freshBinding: false, oldLive: false })])
+    │   │   │   ├─ [1240] Ledger::counts() [staticcall]
+    │   │   │   │   └─ ← [Return] 1, 1, 0, 1
+    │   │   │   ├─ [458] Ledger::extsload(0x14b9fe0692134ff39693ba5862e54953d4b0ff827997f40a5c477699b6bdfb27) [staticcall]
+    │   │   │   │   └─ ← [Return] 0x0000000000000000000000000000000000000000000100000180000000000001
+    │   │   │   ├─ [458] Ledger::extsload(0x14b9fe0692134ff39693ba5862e54953d4b0ff827997f40a5c477699b6bdfb26) [staticcall]
+    │   │   │   │   └─ ← [Return] 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa
+    │   │   │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   │   │   ├─ [1264] TypeRegistry::typeInfo(0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa) [staticcall]
+    │   │   │   │   └─ ← [Return] true, LiveFilesDescriptorRule: [0x3cb0b7B82686A4cbc432f553004F13d0629Ae610], 0x77327c52f4b08ff1d4b9f67f72b59eec0caeb404d6999efaa5e29d66feb04c7a, 0x0000000000000000000000000000000000000000, 0x0000000000000000000000000000000000000000000000000000000000000000, 0, 1
+    │   │   │   ├─ [5917] IndexFieldProfile::spec(0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa) [staticcall]
+    │   │   │   │   └─ ← [Return] Spec({ typeId: 0x0000000000000000000000000000000000000000000000000000000000000000, scalars: [], digest: Digest({ enabled: false, word: 0, algorithmWord: 0, algorithm: 0x0000000000000000000000000000000000000000000000000000000000000000 }) })
+    │   │   │   └─ ← [Return]
+    │   │   └─ ← [Stop]
+    │   ├─ [595] TypeRegistry::epoch() [staticcall]
+    │   │   └─ ← [Return] 19
+    │   ├─ [469] LiveFilesIndex::generation() [staticcall]
+    │   │   └─ ← [Return] 0
+    │   ├─ [45443] PublicationSupport::fallback() [delegatecall]
+    │   │   ├─ [43287] LiveFilesIndex::afterPublication(1, [Effect({ kind: 1, admission: 1, author: 0x2dc97c2ba20d89ca7247827b30d08eeaa3822c4831f5b42f3c19164d43e1dfe7, recordId: 0xb82723070b73b8f2ce50c5cf04d6ab405d5d7a1bebd415e1d71cc7454c5cf876, typeId: 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa, scopeKey: 0x0000000000000000000000000000000000000000000000000000000000000000, bindingKey: 0x0000000000000000000000000000000000000000000000000000000000000000, bindingOrdinal: 0, target: 0x0000000000000000000000000000000000000000000000000000000000000000, oldTarget: 0x0000000000000000000000000000000000000000000000000000000000000000, freshBinding: false, oldLive: false })]) [staticcall]
+    │   │   │   ├─ [1240] Ledger::counts() [staticcall]
+    │   │   │   │   └─ ← [Return] 1, 1, 0, 1
+    │   │   │   ├─ [34381] FilesFinalValidator::validate([Effect({ kind: 1, admission: 1, author: 0x2dc97c2ba20d89ca7247827b30d08eeaa3822c4831f5b42f3c19164d43e1dfe7, recordId: 0xb82723070b73b8f2ce50c5cf04d6ab405d5d7a1bebd415e1d71cc7454c5cf876, typeId: 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa, scopeKey: 0x0000000000000000000000000000000000000000000000000000000000000000, bindingKey: 0x0000000000000000000000000000000000000000000000000000000000000000, bindingOrdinal: 0, target: 0x0000000000000000000000000000000000000000000000000000000000000000, oldTarget: 0x0000000000000000000000000000000000000000000000000000000000000000, freshBinding: false, oldLive: false })]) [staticcall]
+    │   │   │   │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   │   │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   │   │   │   ├─ [7082] TypeRegistry::descriptor(0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4) [staticcall]
+    │   │   │   │   │   └─ ← [Return] 0x1b2a89d3943033a5e1ba9bb85a8e5c087474e0d3a2f658aa553ee81fbc90ff77, 0x699e8e14108b4b520d0cf3dcec5f92c2875b232bfcf20ddffbfc3796b648da0d, FilesNameRule: [0x3D7Ebc40AF7092E3F1C81F2e996cbA5Cae2090d7], 0, 1, 1
+    │   │   │   │   ├─ [2885] TypeRegistry::refTypes(0x27e7a3f6857c29050c2b55fb267729146f6f6126bd6c7a3d6bab0779a5f10bc4) [staticcall]
+    │   │   │   │   │   └─ ← [Return] []
+    │   │   │   │   ├─ [900] Ledger::registry() [staticcall]
+    │   │   │   │   │   └─ ← [Return] TypeRegistry: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    │   │   │   │   ├─ [7082] TypeRegistry::descriptor(0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b) [staticcall]
+    │   │   │   │   │   └─ ← [Return] 0xad07c9f465272d2f09afdd24f73f727eedd24fbca2500ef72508da229c54f5e9, 0x27b5ce86bb37483fbf8a7d924d6260e6f77340d142bc064a8f9115951cb3f024, FilesDirectoryRule: [0xD16d567549A2a2a2005aEACf7fB193851603dd70], 0, 1, 1
+    │   │   │   │   ├─ [2885] TypeRegistry::refTypes(0x24b8d5fea0fd3af599bfad4ad79de9e7d67640a76af2e8032f8c62e7a2cd236b) [staticcall]
+    │   │   │   │   │   └─ ← [Return] []
+    │   │   │   │   └─ ← [Return] 0xcbca2c3c
+    │   │   │   └─ ← [Return] 0x951957f7
+    │   │   └─ ← [Stop]
+    │   ├─ [595] TypeRegistry::epoch() [staticcall]
+    │   │   └─ ← [Return] 19
+    │   ├─ [469] LiveFilesIndex::generation() [staticcall]
+    │   │   └─ ← [Return] 0
+    │   ├─ emit Published(publication: 1, publicationId: 0x96558809bca91f53af4701d2060845dcb02a85c713bd6624c9cd54b78227bf65, author: LiveFilesTest: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], proofKind: 1, firstAdmission: 1, leafCount: 1)
+    │   └─ ← [Return] 0xb82723070b73b8f2ce50c5cf04d6ab405d5d7a1bebd415e1d71cc7454c5cf876
+    ├─ [1240] Ledger::counts() [staticcall]
+    │   └─ ← [Return] 1, 1, 0, 1
+    ├─ [24773] LiveQuoteProvider::update(42, true, 0, LiveFilesAdapter: [0x796f2974e3C1af763252512dd6d521E9E984726C])
+    │   └─ ← [Return]
+    ├─ [409] LiveQuoteProvider::quote(0x0000000000000000000000000000000000000000000000000000000000000007) [staticcall]
+    │   └─ ← [Revert] caller mismatch
+    ├─ [13324] LiveFilesAdapter::observe(0xb82723070b73b8f2ce50c5cf04d6ab405d5d7a1bebd415e1d71cc7454c5cf876, 1) [staticcall]
+    │   ├─ [458] Ledger::extsload(0x14b9fe0692134ff39693ba5862e54953d4b0ff827997f40a5c477699b6bdfb27) [staticcall]
+    │   │   └─ ← [Return] 0x0000000000000000000000000000000000000000000100000180000000000001
+    │   ├─ [458] Ledger::extsload(0x14b9fe0692134ff39693ba5862e54953d4b0ff827997f40a5c477699b6bdfb26) [staticcall]
+    │   │   └─ ← [Return] 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa
+    │   ├─ [5812] Ledger::record(0xb82723070b73b8f2ce50c5cf04d6ab405d5d7a1bebd415e1d71cc7454c5cf876) [staticcall]
+    │   │   └─ ← [Return] 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa, 1, 1, 0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000007a690ca83d8f8c0ca4f8e99198591b7064ecf386621f4db1c25fea62bb5c787175800000000000000000000000003cff5e7ebecb676c3cb602d0ef2d46710b88854eb43f7960a247c7f22fd0509c8168b631d9db971e5e3476710d49fbe40904575815f05b050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000075c64366d650ce3e9cafb6d3ef61c82be14476f38ae8a19b60400ccbc3b422fa80000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000c3500000000000000000000000000000000000000000000000000000000000000040000000000000000000000000796f2974e3c1af763252512dd6d521e9e984726c
+    │   ├─ [648] LiveQuoteProvider::quote(0x0000000000000000000000000000000000000000000000000000000000000007) [staticcall]
+    │   │   └─ ← [Return] 42, true
+    │   └─ ← [Return] Observation({ status: 1, value: 42, flag: true, raw: 0x000000000000000000000000000000000000000000000000000000000000002a0000000000000000000000000000000000000000000000000000000000000001, blockNumber: 1, chainId: 31337 [3.133e4], caller: 0x796f2974e3C1af763252512dd6d521E9E984726C, provider: 0x3Cff5E7eBecb676c3Cb602D0ef2d46710b88854E, outputType: 0x5c64366d650ce3e9cafb6d3ef61c82be14476f38ae8a19b60400ccbc3b422fa8, descriptorFirst: 1 })
+    ├─ [0] VM::chainId(31338 [3.133e4])
+    │   └─ ← [Return]
+    ├─ [11367] LiveFilesAdapter::observe(0xb82723070b73b8f2ce50c5cf04d6ab405d5d7a1bebd415e1d71cc7454c5cf876, 1) [staticcall]
+    │   ├─ [458] Ledger::extsload(0x14b9fe0692134ff39693ba5862e54953d4b0ff827997f40a5c477699b6bdfb27) [staticcall]
+    │   │   └─ ← [Return] 0x0000000000000000000000000000000000000000000100000180000000000001
+    │   ├─ [458] Ledger::extsload(0x14b9fe0692134ff39693ba5862e54953d4b0ff827997f40a5c477699b6bdfb26) [staticcall]
+    │   │   └─ ← [Return] 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa
+    │   ├─ [5812] Ledger::record(0xb82723070b73b8f2ce50c5cf04d6ab405d5d7a1bebd415e1d71cc7454c5cf876) [staticcall]
+    │   │   └─ ← [Return] 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa, 1, 1, 0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000007a690ca83d8f8c0ca4f8e99198591b7064ecf386621f4db1c25fea62bb5c787175800000000000000000000000003cff5e7ebecb676c3cb602d0ef2d46710b88854eb43f7960a247c7f22fd0509c8168b631d9db971e5e3476710d49fbe40904575815f05b050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000075c64366d650ce3e9cafb6d3ef61c82be14476f38ae8a19b60400ccbc3b422fa80000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000c3500000000000000000000000000000000000000000000000000000000000000040000000000000000000000000796f2974e3c1af763252512dd6d521e9e984726c
+    │   └─ ← [Return] Observation({ status: 2, value: 0, flag: false, raw: 0x, blockNumber: 1, chainId: 31338 [3.133e4], caller: 0x796f2974e3C1af763252512dd6d521E9E984726C, provider: 0x3Cff5E7eBecb676c3Cb602D0ef2d46710b88854E, outputType: 0x5c64366d650ce3e9cafb6d3ef61c82be14476f38ae8a19b60400ccbc3b422fa8, descriptorFirst: 1 })
+    ├─ [0] VM::chainId(31338 [3.133e4])
+    │   └─ ← [Return]
+    ├─ [0] VM::etch(LiveQuoteProvider: [0x3Cff5E7eBecb676c3Cb602D0ef2d46710b88854E], 0x00)
+    │   └─ ← [Return]
+    ├─ [11367] LiveFilesAdapter::observe(0xb82723070b73b8f2ce50c5cf04d6ab405d5d7a1bebd415e1d71cc7454c5cf876, 1) [staticcall]
+    │   ├─ [458] Ledger::extsload(0x14b9fe0692134ff39693ba5862e54953d4b0ff827997f40a5c477699b6bdfb27) [staticcall]
+    │   │   └─ ← [Return] 0x0000000000000000000000000000000000000000000100000180000000000001
+    │   ├─ [458] Ledger::extsload(0x14b9fe0692134ff39693ba5862e54953d4b0ff827997f40a5c477699b6bdfb26) [staticcall]
+    │   │   └─ ← [Return] 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa
+    │   ├─ [5812] Ledger::record(0xb82723070b73b8f2ce50c5cf04d6ab405d5d7a1bebd415e1d71cc7454c5cf876) [staticcall]
+    │   │   └─ ← [Return] 0xd829e5ac8d46adf88f5c452a66d6f84a52e1227de1822c791c86b509a238f3aa, 1, 1, 0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000007a690ca83d8f8c0ca4f8e99198591b7064ecf386621f4db1c25fea62bb5c787175800000000000000000000000003cff5e7ebecb676c3cb602d0ef2d46710b88854eb43f7960a247c7f22fd0509c8168b631d9db971e5e3476710d49fbe40904575815f05b050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000075c64366d650ce3e9cafb6d3ef61c82be14476f38ae8a19b60400ccbc3b422fa80000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000c3500000000000000000000000000000000000000000000000000000000000000040000000000000000000000000796f2974e3c1af763252512dd6d521e9e984726c
+    │   └─ ← [Return] Observation({ status: 2, value: 0, flag: false, raw: 0x, blockNumber: 1, chainId: 31338 [3.133e4], caller: 0x796f2974e3C1af763252512dd6d521E9E984726C, provider: 0x3Cff5E7eBecb676c3Cb602D0ef2d46710b88854E, outputType: 0x5c64366d650ce3e9cafb6d3ef61c82be14476f38ae8a19b60400ccbc3b422fa8, descriptorFirst: 1 })
+    └─ ← [Revert] provider code drift accepted
+
+Backtrace:
+  at LiveQuoteProvider.quote
+  at LiveFilesTest.test_live_provider_code_drift_chain_and_caller_context
+
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 5.36ms (514.96µs CPU time)
+
+Ran 1 test suite in 222.37ms (5.36ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/LiveFiles.t.sol:LiveFilesTest
+[FAIL: provider code drift accepted] test_live_provider_code_drift_chain_and_caller_context() (gas: 1333193)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test

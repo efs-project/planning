@@ -1,0 +1,21 @@
+No files changed, compilation skipped
+
+Ran 4 tests for test/LiveFiles.t.sol:LiveFilesTest
+[FAIL: E_REJECTED(0, 0xb6d6b0f06f34ec444f0a4cd231b6cce7998cacc1b7ef33ea4e31eb14675df0c1)] test_live_checked_composition_and_directed_parent_matrix() (gas: 631586)
+[FAIL: exact finite live recipe rejected] test_live_descriptor_admits_exact_recipe() (gas: 631934)
+[FAIL: E_REJECTED(0, 0xb6d6b0f06f34ec444f0a4cd231b6cce7998cacc1b7ef33ea4e31eb14675df0c1)] test_live_descriptor_exact_widths_context_and_cap() (gas: 631412)
+[FAIL: E_REJECTED(0, 0xb6d6b0f06f34ec444f0a4cd231b6cce7998cacc1b7ef33ea4e31eb14675df0c1)] test_live_index_generic_refs_once_on_reuse() (gas: 8287291)
+Suite result: FAILED. 0 passed; 4 failed; 0 skipped; finished in 3.74ms (3.56ms CPU time)
+
+Ran 1 test suite in 4.00ms (3.74ms CPU time): 0 tests passed, 4 failed, 0 skipped (4 total tests)
+
+Failing tests:
+Encountered 4 failing tests in test/LiveFiles.t.sol:LiveFilesTest
+[FAIL: E_REJECTED(0, 0xb6d6b0f06f34ec444f0a4cd231b6cce7998cacc1b7ef33ea4e31eb14675df0c1)] test_live_checked_composition_and_directed_parent_matrix() (gas: 631586)
+[FAIL: exact finite live recipe rejected] test_live_descriptor_admits_exact_recipe() (gas: 631934)
+[FAIL: E_REJECTED(0, 0xb6d6b0f06f34ec444f0a4cd231b6cce7998cacc1b7ef33ea4e31eb14675df0c1)] test_live_descriptor_exact_widths_context_and_cap() (gas: 631412)
+[FAIL: E_REJECTED(0, 0xb6d6b0f06f34ec444f0a4cd231b6cce7998cacc1b7ef33ea4e31eb14675df0c1)] test_live_index_generic_refs_once_on_reuse() (gas: 8287291)
+
+Encountered a total of 4 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 4 failed tests

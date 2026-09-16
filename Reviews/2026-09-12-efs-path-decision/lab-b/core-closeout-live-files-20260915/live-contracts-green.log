@@ -1,0 +1,100 @@
+Compiling 2 files with Solc 0.8.30
+Solc 0.8.30 finished in 15.90s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:92:21:
+   |
+92 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:97:29:
+   |
+97 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:22:
+    |
+117 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:121:25:
+    |
+121 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/FilesDirectoryProfile.t.sol:60:5:
+   |
+60 |     function test_directory_pin_rejects_wrong_rule_hash() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 342522 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/LiveFiles.t.sol:18:1:
+   |
+18 | contract LiveFilesTest is FilesCarrierIndexTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 28 tests for test/LiveFiles.t.sol:LiveFilesTest
+[PASS] test_carrier_child_reverse_parent_postings_and_reuse() (gas: 4047235)
+[PASS] test_directory_exact_body_length_required() (gas: 1103848)
+[PASS] test_directory_pin_rejects_wrong_rule_hash() (gas: 26611)
+[PASS] test_file_subject_parent_raw_ingress_rejected() (gas: 2491345)
+[PASS] test_live_checked_composition_and_directed_parent_matrix() (gas: 15813191)
+[PASS] test_live_child_parent_configuration_changes_exact_rule_identity() (gas: 848490)
+[PASS] test_live_descriptor_admits_exact_recipe() (gas: 1238194)
+[PASS] test_live_descriptor_exact_widths_context_and_cap() (gas: 5772471)
+[PASS] test_live_future_descriptor_and_lookalike_rejected_and_retention_survives_withdrawal() (gas: 4313438)
+[PASS] test_live_helper_max_name_and_multi_bind_preserve_final_obligations() (gas: 4828470)
+[PASS] test_live_helper_wrong_hash_or_ledger_refused_and_code_drift_rolls_back() (gas: 17659053)
+[PASS] test_live_index_generic_refs_once_on_reuse() (gas: 11722101)
+[PASS] test_live_index_refuses_missing_external_helper() (gas: 3001722)
+[PASS] test_live_mounted_consumer_same_transaction_update_and_failure_masking() (gas: 16205024)
+[PASS] test_live_observation_zero_false_not_failure_and_shape_is_not_admission() (gas: 3517159)
+[PASS] test_live_page_recognizes_exact_revision_without_reading_provider() (gas: 20738085)
+[PASS] test_live_paid_duplicate_control_updates_provider_and_retains_output() (gas: 1648843)
+[FAIL: provider code drift accepted] test_live_provider_code_drift_chain_and_caller_context() (gas: 1333193)
+[PASS] test_live_replay_preserves_facts_and_late_name_cannot_repair_history() (gas: 13576881)
+[PASS] test_lookalike_type_with_wrong_rule_is_not_a_directory() (gas: 3746641)
+[PASS] test_missing_zero_and_wrong_length_directory_seeds_rejected() (gas: 1929422)
+[PASS] test_nonexistent_parent_raw_ingress_rejected() (gas: 2090369)
+[PASS] test_required_index_failure_rolls_back_whole_signed_batch() (gas: 1644588)
+[PASS] test_self_link_raw_ingress_rejected() (gas: 2697154)
+[PASS] test_unrelated_record_parent_raw_ingress_rejected() (gas: 2685014)
+[PASS] test_unrelated_record_target_raw_ingress_rejected() (gas: 3268840)
+[PASS] test_valid_directory_bootstrap_and_nested_file_without_head() (gas: 5321518)
+[PASS] test_withdrawn_descriptor_remains_valid_and_bind_before_name_parent_publish_is_atomic() (gas: 3317304)
+Suite result: FAILED. 27 passed; 1 failed; 0 skipped; finished in 20.58ms (65.58ms CPU time)
+
+Ran 1 test suite in 31.19ms (20.58ms CPU time): 27 tests passed, 1 failed, 0 skipped (28 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/LiveFiles.t.sol:LiveFilesTest
+[FAIL: provider code drift accepted] test_live_provider_code_drift_chain_and_caller_context() (gas: 1333193)
+
+Encountered a total of 1 failing tests, 27 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test

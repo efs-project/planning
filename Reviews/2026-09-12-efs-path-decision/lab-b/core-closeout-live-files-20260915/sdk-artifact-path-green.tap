@@ -1,0 +1,18 @@
+✔ read-set evidence output refuses replacement of an existing explicit path (3.46375ms)
+✔ browser transport preserves typed EVM errors without manufacturing metadata for HTTP failures (3.15575ms)
+▶ recognized legacy relabel cannot bypass an actual carrier implementation declaration
+  ✔ declaration (36.027125ms)
+  ✔ unavailable (30.20525ms)
+  ✔ malformed-success (31.094042ms)
+  ✔ undefined-success (29.940833ms)
+✔ recognized legacy relabel cannot bypass an actual carrier implementation declaration (465.646959ms)
+✔ new read-set profile must be explicit and a failed exact probe cannot downgrade to legacy (348.22425ms)
+﹣ actual old browser transport and mixed family qualify old new downgrade restore per implementation (0.068291ms) # SKIP
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 3893.641333

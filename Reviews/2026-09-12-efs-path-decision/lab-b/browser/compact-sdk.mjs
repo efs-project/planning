@@ -19,6 +19,14 @@ export function createCompactSdk(options) {
   if (options.manifest.protocol && options.manifest.protocol !== 'compact-legacy-v1') throw new Error('COMPACT_PROTOCOL');
   return createCompactEngine(options);
 }
+export function filesRevisionProfile(types,typeId) {
+  if(typeof typeId!=='string')return 'unsupported';
+  const is=key=>typeof types[key]==='string'&&types[key].toLowerCase()===typeId.toLowerCase();
+  if(is('root')||is('child'))return 'legacy-inline';
+  if(is('carrierRoot')||is('carrierChild'))return 'carrier-v1';
+  if(is('liveRoot')||is('liveChild'))return 'live-quote-v1';
+  return 'unsupported';
+}
 
 // Raw strings only: decode anew for each caller so ethers Results are never
 // shared mutable cache values. This helper is instantiated inside one engine;
@@ -94,6 +102,8 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   const carriers=config.contentProfile==='raw-sha256-aesgcm-v2';
   check(!config.contentProfile||(carriers&&directories&&contentCodec),'CONTENT_PROFILE');
   const carrierKeys=['bytes','content','carrierRoot','carrierChild','concept'];
+  const lives=config.liveProfile==='quote-u128-bool-v1';
+  check(!config.liveProfile||(lives&&carriers),'LIVE_PROFILE');
   const hash = (types,values) => e.keccak256(coder.encode(types,values));
   const purpose = Object.fromEntries(['head','folder','tag'].map(k => [k,e.id(`efs2/purpose/${k}/1`)]));
   const positionOf = (p,s,r) => hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/position/1'),p,s,r]);
@@ -202,6 +212,26 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
         &&eq(hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/type/1'),shape,hash(['bytes32[]'],[refs]),expected]),type),'CONTENT_PROFILE');
       check(eq(await scalar('index','carrierTypes',[i],context),type)&&eq(await scalar('index','carrierRuleHashes',[i],context),expected),'CONTENT_PROFILE');
     });
+    if(lives){
+      await readGroup(['liveDescriptor','liveRoot','liveChild'],async(key,i)=>{
+        const type=config.types[key],expected=config.ruleHashes[key],shape=e.id(`lab/type/files-live-${['descriptor','root','child'][i]}/1`);
+        const refs=i===0?[]:i===1?[config.types.liveDescriptor]:[Z,config.types.liveDescriptor];
+        const [d,actual]=await Promise.all([call('registry','descriptor',[type],context),scalar('registry','refTypes',[type],context)]);
+        check(expected&&!eq(expected,Z)&&eq(d[0],shape)&&eq(d[1],expected)&&Number(d[3])===i&&actual.length===i
+          &&Array.from(actual).every((r,j)=>eq(r,refs[j]))&&eq(e.keccak256(await code(d[2],context)),expected)
+          &&eq(hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/type/1'),shape,hash(['bytes32[]'],[refs]),expected]),type)
+          &&eq(await scalar('index','liveTypes',[i],context),type)&&eq(await scalar('index','liveRuleHashes',[i],context),expected),'LIVE_PROFILE');
+      });
+      check(eq(await scalar('liveAdapter','ledger',[],context),addresses.ledger)
+        &&eq(await scalar('liveAdapter','descriptorType',[],context),config.types.liveDescriptor)
+        &&eq(await scalar('liveAdapter','expectedProviderRuntimeHash',[],context),config.liveProviderRuntimeHash)
+        &&eq(await scalar('liveAdapter','outputType',[],context),config.liveOutputType),'LIVE_PROFILE');
+      check(eq(await scalar('index','finalValidator',[],context),addresses.finalValidator)
+        &&eq(await scalar('index','finalValidatorHash',[],context),config.contracts.finalValidator.codeHash)
+        &&eq(await scalar('finalValidator','ledger',[],context),addresses.ledger),'LIVE_FINAL_VALIDATOR');
+      for(const [fn,expected] of [['nameType',config.types.name],['nameHash',config.ruleHashes.name],['directoryType',config.types.directory],['directoryHash',config.ruleHashes.directory]])
+        check(eq(await scalar('finalValidator',fn,[],context),expected),'LIVE_FINAL_VALIDATOR');
+    }
   }
 
   async function pinAt(block) {
@@ -341,10 +371,11 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   async function revisionAt(recordId,file,context) {
     const [typeId,first,occurrences,body] = await call('ledger','record',[recordId],context);
     const carrier=carriers&&(eq(typeId,config.types.carrierRoot)||eq(typeId,config.types.carrierChild));
-    const bytes = e.getBytes(body), child = eq(typeId,config.types.child)||(carrier&&eq(typeId,config.types.carrierChild)), prefix = (child ? 64 : 32)+(carrier?32:0);
-    check((carrier || child || eq(typeId,config.types.root)) && first > 0n && first <= BigInt(context.admission)
+    const live=lives&&(eq(typeId,config.types.liveRoot)||eq(typeId,config.types.liveChild)),indirect=carrier||live;
+    const bytes = e.getBytes(body), child = eq(typeId,config.types.child)||(carrier&&eq(typeId,config.types.carrierChild))||(live&&eq(typeId,config.types.liveChild)), prefix = (child ? 64 : 32)+(indirect?32:0);
+    check((indirect || child || eq(typeId,config.types.root)) && first > 0n && first <= BigInt(context.admission)
       && bytes.length >= prefix && bytes.length <= 8192 && eq(recordOf(typeId,e.keccak256(body)),recordId),'FILE_PROFILE');
-    check(!carrier||bytes.length===prefix,'FILE_PROFILE');
+    check(!indirect||bytes.length===prefix,'FILE_PROFILE');
     const embeddedFile = e.hexlify(bytes.slice(prefix-32,prefix));
     const parent = child ? e.hexlify(bytes.slice(0,32)) : Z;
     check(eq(embeddedFile,file),'FILE_ID');
@@ -355,15 +386,16 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     if (child) {
       const [pt,pf,,pb] = await call('ledger','record',[parent],context), pbytes = e.getBytes(pb);
       const parentCarrier=carriers&&(eq(pt,config.types.carrierRoot)||eq(pt,config.types.carrierChild));
-      const pp = eq(pt,config.types.root) ? 32 : eq(pt,config.types.child) ? 64 : carrier&&parentCarrier ? (eq(pt,config.types.carrierRoot)?64:96) : 0;
+      const parentLive=lives&&(eq(pt,config.types.liveRoot)||eq(pt,config.types.liveChild));
+      const pp = eq(pt,config.types.root) ? 32 : eq(pt,config.types.child) ? 64 : indirect&&parentCarrier ? (eq(pt,config.types.carrierRoot)?64:96) : live&&parentLive?(eq(pt,config.types.liveRoot)?64:96):0;
       check(pp && pf > 0n && pf < first && pbytes.length >= pp && pbytes.length <= 8192
-        &&(!parentCarrier||pbytes.length===pp)
+        &&(!(parentCarrier||parentLive)||pbytes.length===pp)
         && eq(recordOf(pt,e.keccak256(pb)),parent) && eq(e.hexlify(pbytes.slice(pp-32,pp)),file),'FILE_PARENT');
     }
-    const document = carrier?null:e.hexlify(bytes.slice(prefix));
-    const descriptorRecord=carrier?e.hexlify(bytes.slice(prefix-64,prefix-32)):null;
-    return {recordId,typeId,file,parent,document,documentHash:carrier?null:e.keccak256(document),
-      ...(carrier?{profile:'carrier-v1',descriptorRecord,content:await descriptorAt(descriptorRecord,context,first)}:{profile:'legacy-inline'}),...await protocol.revisionEvidence(admission[2],context),
+    const document = indirect?null:e.hexlify(bytes.slice(prefix));
+    const descriptorRecord=indirect?e.hexlify(bytes.slice(prefix-64,prefix-32)):null;
+    return {recordId,typeId,file,parent,document,documentHash:indirect?null:e.keccak256(document),
+      ...(live?{profile:'live-quote-v1',descriptorRecord,content:await liveDescriptorAt(descriptorRecord,context,first)}:carrier?{profile:'carrier-v1',descriptorRecord,content:await descriptorAt(descriptorRecord,context,first)}:{profile:'legacy-inline'}),...await protocol.revisionEvidence(admission[2],context),
       firstAdmission:String(first),occurrences:String(occurrences),maintenance:'RETAINED_OCCURRENCE_COUNT',validity:'NOT_ASSESSED'};
   }
   async function retainedAt(id,type,context,through=BigInt(context.admission)) {
@@ -446,6 +478,18 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     let descriptor;try{descriptor=contentCodec.decodeDescriptor(e.getBytes(retained.body));}catch{fail('CONTENT_INTEGRITY');}
     return {...descriptor,recordId:id,firstAdmission:retained.firstAdmission};
   }
+  async function liveDescriptorAt(id,context,through){
+    const retained=await retainedAt(id,config.types.liveDescriptor,context,through);
+    const tuple='tuple(uint256 version,uint256 chainId,bytes32 venue,address provider,bytes32 providerHash,bytes4 selector,bytes32 key,bytes32 outputType,uint256 representation,uint256 callGas,uint256 maxReturn,address caller)';
+    check(e.getBytes(retained.body).length===384,'LIVE_DESCRIPTOR');
+    const r=coder.decode([tuple],retained.body)[0];check(eq(coder.encode([tuple],[r]),retained.body),'LIVE_DESCRIPTOR');
+    check(r.version===1n&&String(r.chainId)===context.chainId&&eq(r.venue,e.id('evm/cancun/staticcall/1'))
+      &&eq(r.selector,e.id('quote(bytes32)').slice(0,10))&&eq(r.outputType,config.liveOutputType)&&r.representation===1n
+      &&eq(r.providerHash,config.liveProviderRuntimeHash)
+      &&r.callGas===50000n&&r.maxReturn===64n&&eq(r.caller,addresses.liveAdapter),'LIVE_DESCRIPTOR');
+    return {...Object.fromEntries(['version','chainId','venue','provider','providerHash','selector','key','outputType','representation','callGas','maxReturn','caller'].map(k=>[k,String(r[k])])),
+      recordId:id,body:retained.body,firstAdmission:retained.firstAdmission};
+  }
   async function readContent(args) {
     check(carriers,'CONTENT_PROFILE');await guard(args.context);
     let revision,selection=null;
@@ -454,6 +498,17 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       if(!revision)return {state:'UNAVAILABLE',reason:point.reason??point.knowledge,basis:point.basis,selection};}
     const extra={basis:args.context,file:args.file,recordId:revision.recordId,selection};
     if(revision.profile==='legacy-inline')return {...extra,state:'AVAILABLE_VERIFIED',bytes:e.getBytes(revision.document),plaintextVerified:true,profile:'legacy-inline'};
+    if(revision.profile==='live-quote-v1'){
+      const o=await scalar('liveAdapter','observe',[revision.descriptorRecord,args.context.admission],args.context),status=Number(o.status);
+      check(String(o.blockNumber)===args.context.blockNumber&&String(o.chainId)===args.context.chainId
+        &&eq(o.caller,addresses.liveAdapter)&&eq(o.outputType,config.liveOutputType),'LIVE_OBSERVATION_CONTEXT');
+      const common={...extra,profile:'live-quote-v1',descriptor:revision.content,descriptorSelectionOrigin:args.context.admission,
+        providerObservation:{blockHash:args.context.blockHash,blockNumber:args.context.blockNumber,chainId:args.context.chainId,caller:o.caller,provider:o.provider,grade:'RPC_OBSERVED'},
+        qualification:'SHAPE_ONLY_NOT_EFS_ADMISSION',descriptorMembership:'COMPLETE',liveValueCoverage:status===1?'POINT_OBSERVED':'UNKNOWN'};
+      if(status!==1)return {...common,state:'LIVE_UNAVAILABLE',reason:['INVALID_DESCRIPTOR','','UNSUPPORTED_CONTEXT','CALLER_MISMATCH','CODE_DRIFT','REVERT_OR_RESOURCE','OVERSIZE','MALFORMED'][status]??'UNSUPPORTED_STATUS'};
+      check(e.getBytes(o.raw).length===64&&eq(o.raw,coder.encode(['uint128','bool'],[o.value,o.flag])),'LIVE_OUTPUT_SHAPE');
+      return {...common,state:'LIVE_SHAPE_OBSERVED',value:String(o.value),flag:o.flag,bytes:e.getBytes(o.raw),fullAdmission:false};
+    }
     const d=revision.content;
     const loadCarrier=async(descriptor,limits)=>{
       if(descriptor.carrier===1){check(args.loadCarrier,'CARRIER_UNAVAILABLE');return args.loadCarrier(descriptor,limits);}
@@ -582,7 +637,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       const head=selected(row.head),headerKnowledge=qualification(h.qualification);
       const revision=head.status===1?{recordId:h.recordId,typeId:h.typeId,firstAdmission:String(h.firstAdmission),bodyLength:Number(h.bodyLength),
         parent:h.parent,file:entry.target,descriptorRecord:eq(h.descriptor,Z)?null:h.descriptor,
-        profile:eq(h.descriptor,Z)?'legacy-inline':'carrier-v1',assurance:Number(h.qualification)===1?'HEADER_VERIFIED_BODY_NOT_FETCHED':'HEADER_UNVERIFIED_BODY_NOT_FETCHED',knowledge:headerKnowledge,carrierAvailability:'NOT_FETCHED'}:null;
+        profile:filesRevisionProfile(config.types,h.typeId),assurance:Number(h.qualification)===1?'HEADER_VERIFIED_BODY_NOT_FETCHED':'HEADER_UNVERIFIED_BODY_NOT_FETCHED',knowledge:headerKnowledge,carrierAvailability:'NOT_FETCHED'}:null;
       const knowledge=kind==='directory'?'PRESENT':kind==='unsupported'?'UNSUPPORTED':head.status===1?headerKnowledge:['ABSENT','PRESENT','MASKED','CONFLICT','UNKNOWN'][head.status];
       const keyedRevisionTag=tag(row.revisionTag);
       // A successful keyed lookup alone does not qualify a selected revision.
@@ -775,6 +830,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       if (operation === 'edit' || operation === 'restoreContents') {
         const current = await selected();
         const historical=operation==='restoreContents'?await revisionAt(args.record,file,context):null;
+        check(current.profile!=='live-quote-v1'&&historical?.profile!=='live-quote-v1','LIVE_CROSS_FAMILY_SNAPSHOT_NEW_FILE_REQUIRED');
         let content=args.content,document;
         if(historical?.profile==='carrier-v1'){
           const d=historical.content;content={descriptor:d,bytes:d.carrier===0?e.getBytes((await retainedAt('0x'+d.inline,config.types.bytes,context)).body).slice(32):undefined};

@@ -1,0 +1,18 @@
+node:internal/fs/promises:1281
+  return new FileHandle(await PromisePrototypeThen(
+                        ^
+
+Error: ENOENT: no such file or directory, open '/tmp/efs-recovery-build-wPDyNv/out/FilesJoinedConsumer.sol/FilesJoinedConsumer.json'
+    at async open (node:internal/fs/promises:1281:25)
+    at async readFile (node:internal/fs/promises:1929:14)
+    at async artifact (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/compact-environment.mjs:109:54)
+    at async deploy (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/compact-environment.mjs:118:15)
+    at async createEnvironment (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/compact-environment.mjs:177:17)
+    at async file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure-live-files-fit.mjs:38:11 {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/tmp/efs-recovery-build-wPDyNv/out/FilesJoinedConsumer.sol/FilesJoinedConsumer.json'
+}
+
+Node.js v26.0.0

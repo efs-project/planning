@@ -120,7 +120,7 @@ contract FilesPageReader {
             tag.selection=Selected(status,value,revision,author,at);tag.qualification=1;tag.present=status==1&&value==target;
         }catch{}
     }
-    function readHeader(bytes32 id,bytes32 file,uint64 through) external view returns(Header memory h){
+    function readHeader(bytes32 id,bytes32 file,uint64 through) public view virtual returns(Header memory h){
         if(msg.sender!=address(this))revert E_QUERY(); // catchable helper, not an unguarded public reader
         h.recordId=id;(h.typeId,h.firstAdmission,h.bodyLength)=FilesLayout.header(ledger,id);
         if(h.firstAdmission==0)return h;
