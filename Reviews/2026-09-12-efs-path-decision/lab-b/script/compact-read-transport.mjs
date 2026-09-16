@@ -1,8 +1,9 @@
-/** Bounded Node-only measurement transport. Diagnostics never retain params,
+/** Bounded browser/Node transport. Diagnostics never retain params,
  * request bodies, signatures, provider URLs, or response bodies. */
 export const READ_TRANSPORT_LIMITS=Object.freeze({batchItems:16,requestBytes:256*1024,responseBytes:4*1024*1024,
   concurrency:4,maxPending:64,timeoutMs:20_000,diagnosticKeys:2048});
 export function createReadTransport({url,batch=false,limits={},fetchImpl=fetch}={}) {
+  const encoder=new TextEncoder(),byteLength=value=>encoder.encode(value).byteLength;
   const bound={...READ_TRANSPORT_LIMITS,...limits};
   for(const n of Object.values(bound))if(!Number.isSafeInteger(n)||n<1)throw Error('COMPACT_TRANSPORT_LIMIT');
   const metrics={calls:0,wireCalls:0,httpRequests:0,httpBatches:0,requestBytes:0,responseBytes:0,fallbacks:0,
@@ -16,7 +17,7 @@ export function createReadTransport({url,batch=false,limits={},fetchImpl=fetch}=
     return value;
   }
   async function post(request,deadline,p) {
-    const body=JSON.stringify(request),bytes=Buffer.byteLength(body);
+    const body=JSON.stringify(request),bytes=byteLength(body);
     if(bytes>bound.requestBytes)throw error('REQUEST_LIMIT');
     const remaining=deadline-Date.now();if(remaining<=0)throw error('TIMEOUT');
     const controller=new AbortController();let timer;
@@ -31,7 +32,9 @@ export function createReadTransport({url,batch=false,limits={},fetchImpl=fetch}=
       try {while(true){const {done,value}=await reader.read();if(done)break;length+=value.byteLength;inc('responseBytes',value.byteLength,p);
         if(length>bound.responseBytes){controller.abort();throw error('RESPONSE_LIMIT');}chunks.push(value);}}
       catch(cause){await reader.cancel().catch(()=>{});throw cause;}
-      return JSON.parse(Buffer.concat(chunks,length).toString('utf8'));
+      const joined=new Uint8Array(length);let offset=0;
+      for(const chunk of chunks){joined.set(chunk,offset);offset+=chunk.byteLength;}
+      return JSON.parse(new TextDecoder().decode(joined));
     })()]);}finally{clearTimeout(timer);}
   }
   function settle(item,value,cause) {
@@ -65,7 +68,7 @@ export function createReadTransport({url,batch=false,limits={},fetchImpl=fetch}=
       if(batch&&batchSupported&&first.read)while(items.length<bound.batchItems&&queue.length){
         const next=queue[0];if(next.done){queue.shift();continue;}
         if(!next.read||next.phase!==first.phase||next.blockHash!==first.blockHash)break;
-        if(Buffer.byteLength(JSON.stringify([...items.map(i=>i.request),next.request]))>bound.requestBytes)break;
+        if(byteLength(JSON.stringify([...items.map(i=>i.request),next.request]))>bound.requestBytes)break;
         items.push(queue.shift());
       }
       active++;execute(items).finally(()=>{active--;pump();});
@@ -81,7 +84,7 @@ export function createReadTransport({url,batch=false,limits={},fetchImpl=fetch}=
     ({method,params}=req);
     if(read&&(!['eth_call','eth_getCode'].includes(method)||!/^0x[0-9a-f]{64}$/i.test(params[1]?.blockHash)||params[1]?.requireCanonical!==true))return Promise.reject(error('READ_ONLY_PIN_REQUIRED'));
     if(pending>=bound.maxPending)return Promise.reject(error('QUEUE_LIMIT'));
-    if(Buffer.byteLength(serialized)>bound.requestBytes)return Promise.reject(error('REQUEST_LIMIT'));
+    if(byteLength(serialized)>bound.requestBytes)return Promise.reject(error('REQUEST_LIMIT'));
     const p=phase;inc('calls',1,p);metrics.byMethod[method]=(metrics.byMethod[method]??0)+1;
     const key=JSON.stringify({phase:p,method,target:method==='eth_call'?params[0]?.to:method==='eth_getCode'?params[0]:null,
       selector:method==='eth_call'?params[0]?.data?.slice(0,10):null,blockHash:params[1]?.blockHash??null});

@@ -62,6 +62,7 @@ export async function startBrowser(env,{seed=true,directory=false,carrierFixture
       if(path==='/config.json'){res.setHeader('Content-Type','application/json');res.end(json(config));return;}
       if(path==='/demo-wallets.json'){res.setHeader('Content-Type','application/json');res.end(json({alice:env.wallets.alice.privateKey,bob:env.wallets.bob.privateKey}));return;}
       if(path==='/vendor/ethers.mjs'){res.setHeader('Content-Type','text/javascript');res.end(await readFile(join(resolve(process.env.EFS_ETHERS_PATH),'dist/ethers.min.js')));return;}
+      if(path==='/compact-read-transport.mjs'){res.setHeader('Content-Type','text/javascript');res.end(await readFile(new URL('./compact-read-transport.mjs',import.meta.url)));return;}
       const name=path==='/'?'index.html':path.slice(1);
       if(!allowed.has(name)){res.writeHead(404).end('Not found');return;}
       res.setHeader('Content-Type',mime[name.slice(name.lastIndexOf('.'))]??'application/octet-stream');

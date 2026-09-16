@@ -55,3 +55,29 @@ export async function verifyPng(bytes,{signal,decode=createImageBitmap}={}) {
   try{signal?.throwIfAborted();need(bitmap.width===header.width&&bitmap.height===header.height,'PNG_DECODE');return {blob,...header};}
   finally{bitmap.close();}
 }
+
+/** Normal raster uploads, not executable document rendering. Dimensions are
+ * bounded before invoking the browser decoder; exact bytes were checked by SDK. */
+export async function verifyRaster(bytes,{signal,decode=createImageBitmap}={}){
+  need(bytes instanceof Uint8Array&&bytes.length>=24&&bytes.length<=MAX_CONTENT_BYTES,'IMAGE');
+  const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
+  let width,height,type;
+  if([137,80,78,71,13,10,26,10].every((b,i)=>bytes[i]===b)){
+    need(view.getUint32(8)===13&&view.getUint32(12)===0x49484452,'PNG');
+    width=view.getUint32(16);height=view.getUint32(20);type='image/png';
+  }else if(bytes[0]===255&&bytes[1]===216){
+    let at=2;
+    while(at+4<=bytes.length){
+      need(bytes[at++]===255,'JPEG');while(bytes[at]===255)at++;
+      const marker=bytes[at++];if(marker===0xda||marker===0xd9)break;
+      const length=view.getUint16(at);need(length>=2&&at+length<=bytes.length,'JPEG');
+      if([0xc0,0xc1,0xc2].includes(marker)){need(length>=8,'JPEG');height=view.getUint16(at+3);width=view.getUint16(at+5);break;}
+      at+=length;
+    }
+    type='image/jpeg';
+  }else need(false,'IMAGE_UNSUPPORTED');
+  need(width>0&&height>0&&width<=8192&&height<=8192&&width*height<=16777216,'PIXEL_LIMIT');
+  signal?.throwIfAborted();const blob=new Blob([bytes],{type}),bitmap=await decode(blob);
+  try{signal?.throwIfAborted();need(bitmap.width===width&&bitmap.height===height,'IMAGE_DECODE');return {blob,width,height};}
+  finally{bitmap.close();}
+}

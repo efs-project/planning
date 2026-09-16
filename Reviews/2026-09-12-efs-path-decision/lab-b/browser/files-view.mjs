@@ -14,7 +14,7 @@ export function folderState(result) {
 // Fallback filtering uses valid AND inference: a known nonmatch can exclude a
 // row despite another unknown predicate. The joined matcher conservatively
 // retains some such rows for diagnostics; this is not a false-absence repair.
-export function filterRows(rows, {search='',tag=false,scope='either'}={}) {
+export function filterRows(rows, {search='',tag=false,scope='either',exclude=false}={}) {
   let uncertain = 0;
   const visible = rows.filter(row => {
     let unknown = false;
@@ -27,8 +27,8 @@ export function filterRows(rows, {search='',tag=false,scope='either'}={}) {
       const tags = scope === 'file' ? [point?.value?.fileTag] : scope === 'revision'
         ? [point?.value?.revisionTag] : [point?.value?.fileTag,point?.value?.revisionTag];
       if (point?.coverage !== 'COMPLETE' || point?.knowledge !== 'PRESENT') unknown = true;
-      else if (tags.some(t => t?.assessment === 'PRESENT')) { /* A known-positive OR is sufficient. */ }
-      else if (tags.every(t => ['NOT_PRESENT','NOT_APPLICABLE'].includes(t?.assessment))) return false;
+      else if (tags.some(t => t?.assessment === 'PRESENT')) { if(exclude)return false; }
+      else if (tags.every(t => ['NOT_PRESENT','NOT_APPLICABLE'].includes(t?.assessment))) { if(!exclude)return false; }
       else unknown = true;
     }
     if (unknown) uncertain++;
