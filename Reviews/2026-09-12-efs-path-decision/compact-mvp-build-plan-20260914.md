@@ -2,7 +2,7 @@
 
 September 14, 2026 · v2 PM recommendation · no repository/deployment authority implied.
 
-**Current checkpoint, September16:** implementation has advanced through independently reviewed prototype`a3ec1f0`; use [[core-closeout-results-20260915|the closeout results]] before reading the dated history below. Ordered acceptance, full required indexing/replay, qualified progressing reads, described Types, wallet signatures, finite live contract-backed Files and required stance tags with both query directions, planners and attributed diagnostics have passed their scoped gates. Native proofs are active; final whole-operation/resource measurements and the final integration review still precede the real-code handoff. The repo boundaries and one-path recommendation below remain the intended build plan, not authorization to create/deploy repos or a claim that every large workload is affordable.
+**Current checkpoint, September16:** implementation has advanced through independently reviewed prototype`86c3649`; use [[core-closeout-results-20260915|the closeout results]] before reading the dated history below. Ordered acceptance, full required indexing/replay, qualified progressing reads, described Types, wallet signatures, finite live contract-backed Files, stance tags/queries/diagnostics and bounded native retained-state proofs have passed their scoped gates. Final whole-operation/resource measurements are active from a coherent clean build; final integration review still precedes the real-code handoff. Native proofs cost11.6–13.4Mgas even for small records and fail the tested joint maximum, so this is not general cheap proof portability. The repo boundaries and one-path recommendation below remain the intended build plan, not authorization to create/deploy repos or a claim that every large workload is affordable.
 
 **September 15 whole-core audit update:** [[core-design-audit-20260915]] is now
 the current prototype closeout queue. It reproduces four composition/resource
@@ -254,6 +254,19 @@ This is an implementation-layout recommendation, not a change to Type meaning or
 an identity-preserving migration claim.
 
 ### Requirements the prototype does not silently waive
+
+- **Portable evidence is not a finished cross-chain bridge.** The reviewed native
+  profile authenticates retained rows against a selected local checkpoint and
+  trustworthy direct deployment; it excludes general proxy/batch histories and
+  foreign finality. Small onchain verification/retention is expensive; the tested
+  maximum-body/guard combination writes successfully but its proof refuses at15M.
+  Offline verification works. Keep broader onchain portability as a measured
+  follow-up, not a permanent feature waiver or a recurring charge on every write.
+- **Build artifacts are part of exact identity.** Final native evidence retains
+  an explicitly mixed-cache build; changing compiler remappings changes metadata
+  and can change code-derived Types even without a semantic source edit. Use clean,
+  reproducible production builds and exact release artifacts; never relabel old
+  proofs, receipts or records to a new clean build's hashes.
 
 - **Location tags are not File tags.** The current fixtures distinguish a stable
   File, an exact revision and a Directory. They do not implement a persistent

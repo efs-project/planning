@@ -45,6 +45,15 @@ This is a reversible implementation boundary needed to complete the authorized c
 
 ## Task 2: Cold integrated receipts, limited attribution and feasible combinations
 
+**Execution status September16:** active from reviewed/published prototype
+`86c3649`, after the native-proof gate. One Astra Extra High worker owns the
+source/build/bounded-chain lease; parent owns canonical main docs/publication.
+Start with a coherent clean build: the native final-1 packet intentionally retains
+mixed-cache artifact identities, not the output of a clean default build at its
+source commit. Record actual new hashes/Types and preserve earlier receipts under
+their own identities. Its expensive recovery-proof operations are not recurring
+File-write charges and need no repeated proof campaign in this resource task.
+
 **Final-profile clarification, September16:** ordinary Files/native measurements
 must use the reviewed `TagStanceIndex` composition, including inherited generic,
 carrier, live and stance obligations. The general environment's older

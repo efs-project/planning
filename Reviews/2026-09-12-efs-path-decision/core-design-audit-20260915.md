@@ -4,7 +4,7 @@ September 15, 2026 · v2 PM · core-audit-20260915
 
 **Status:** audit findings and prototype closeout recommendation; no protocol choice, requirement waiver, public deployment or production-repository authority.
 
-**September16 execution checkpoint:** the findings below describe the pinned audit source, not defects all still present at today's HEAD. [[core-closeout-results-20260915|The live results ledger]] is the current completion map, independently reviewed through`a3ec1f0`: ordered acceptance, required index/replay, query progress and read work, guarded storage, described Types, deployed-wallet authority, finite live Files and qualified stance tags/queries/diagnostics are implemented within their stated bounds. Native state proofs are active; final integrated resource measurements and whole-branch review remain. Neither the historical red fixtures nor individual green packets constitute whole-prototype completion.
+**September16 execution checkpoint:** the findings below describe the pinned audit source, not defects all still present at today's HEAD. [[core-closeout-results-20260915|The live results ledger]] is the current completion map, independently reviewed through`86c3649`: ordered acceptance, required index/replay, query progress and read work, guarded storage, described Types, deployed-wallet authority, finite live Files, qualified stance tags/queries/diagnostics and bounded native proofs are implemented within stated profiles. Final integrated resource measurements are active with a coherent clean-build requirement; whole-branch review remains. Native proof affordability is narrow and the tested joint maximum refuses. Neither historical red fixtures nor individual green packets constitute whole-prototype completion.
 
 ## Bottom line
 

@@ -31,13 +31,16 @@
 
 ## Task 2: Actual native state proofs with explicit root and source anchors
 
-**Execution status September16:** active from reviewed prototype`a3ec1f0` after
-the stance-query gate. One Astra Extra High worker owns source/build/bounded
-chains; parent owns main documents and publication. Partial verifier controls
-are not the paid source-off journey or independent task approval. Final results
-will be recorded in [[core-closeout-results-20260915]].
+**Execution status September16:** complete and independently reviewed through
+`86c3649`, with exact paid source`86e10ee`. Five actual paid/source-off journeys,
+late-only recovery and adversarial source/instance controls pass. Parent fresh
+20Forge/7Node and retained evidence checks pass; [[core-closeout-results-20260915]]
+records the substantial cost limits, mixed-cache build provenance and unproven
+foreign/proxy boundaries. Source/build ownership passes to final Resource2, which
+must clean-build and use actual new identities. Original specification checkboxes
+below are not a second pending implementation queue.
 
-**Measured resource finding, September16 (worker evidence, pending review):**
+**Historical baseline resource finding, September16 (subsequently reviewed):**
 the first corrected five-packet source-off journey succeeds, but onchain
 retention costs12,643,943–14,994,650gas for20,824–26,360proof bytes. One matched
 verify-only call costs12,445,456 versus12,643,943for retention: verification,
