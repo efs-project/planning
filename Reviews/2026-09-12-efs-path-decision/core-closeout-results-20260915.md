@@ -4,7 +4,7 @@ September15,2026 · v2 PM · core-closeout-20260915
 
 **Status:** implementation in progress. James authorized finishing the six-packet [[core-design-audit-20260915|Core audit closeout]]. This page separates reviewed fixes from work still being implemented; no whole-prototype completion or permanent protocol claim.
 
-**Latest reviewed checkpoint: `f2d7b01`.** SDK tag assessments now distinguish known presence/absence, unknown and not-applicable; joined coverage no longer becomes complete merely because a filter matched. Queries at the earlier2e8838d checkpoint finish despite unrelated writes and preserve one historical placement/HEAD/tag snapshot, with a separate retained-inventory profile for selected-folder churn. These close correctness gaps, not the performance budget: a64-author joined scan is still about3.1M gas per candidate, and a seven-candidate call refused under15M. Bounded SDK transport/read-set economics, recoverable Types, wallet/native evidence, live Files, the stance-tag experiment and final integrated economics remain in flight or queued below.
+**Latest reviewed checkpoint: `6869e26`.** Bounded exact-basis SDK reuse and optional read batching reduce local cold-create HTTP requests286→87 (inline) and431→104 (descriptor-backed), with unchanged signed calldata/gas and fresh canonicality checks. Qualified tag assessments and origin-stable queries remain intact. This is RPC efficiency, not cheaper onchain storage: a64-author joined scan is still about3.1M gas per candidate, and a seven-candidate call refused under15M. Read-set storage economics, recoverable Types, wallet/native evidence, live Files, the stance-tag experiment and final integrated economics remain in flight or queued below.
 
 ## Reviewed now
 
@@ -104,7 +104,28 @@ Joined tag coverage now checks the requested joins, not the filter's match resul
 - Worker initial covering100/100 and amended61/61 pass; final adverse control3/3 passes. Parent fresh initial assessment/consumer6/6, requested-join1/1 and final committed unavailable-header3/3 pass. Scoped Astra High review and fix re-review approve spec and quality with no remaining Critical/Important/Minor findings; output contains no warnings. These counts are overlapping focused/covering executions, not independent feature totals.
 - No contract, ABI, transaction semantics, journal format, deployment or gas limit changed. Existing guarded write/reconciliation controls remain in the covering evidence. Owner HTTP check returned200 and only its original chain remained after fixture shutdown. No claim of cheaper gas or broader tag completeness follows from this task.
 
-Prototype commits are published on the existing work branch. SDK Task2 now owns source/build/bounded-chain work for exact-hash caching, independent read batching and matched RPC measurements; storage-carrier Task3 follows its review.
+Prototype commits are published on the existing work branch. The bounded transport task is now separately reviewed below; no broader tag query or UI-default change is implied.
+
+## Bounded SDK transport reviewed
+
+**Checkpoint `6869e2680d75521de851eaa67631cc05a1eb35a9`, measured source `63cb36bc5dca7cc3b4ff7b4f634af1642109697e`:** successful exact-hash reads have instance-owned, entry/byte-bounded reuse and in-flight deduplication. Verified context evidence can be reused, but each public pin creates a fresh owned capability. Public reads independently recheck canonicality; exact signed preflight, journaling, guards and canonical effect verification remain distinct.
+
+| Matched local operation | Uncached logical/HTTP | Cache + optional batch logical/HTTP |
+| --- | ---: | ---: |
+| Inline cold create lifecycle |286/286|164/87|
+| Descriptor-backed cold create lifecycle |431/431|241/104|
+| Inline repeated same-block public read |69/69|5/5|
+| Descriptor-backed repeated public read |122/122|7/7|
+| Inline new-block cold SDK read |70/70|66/27|
+| Descriptor-backed new-block cold SDK read |124/124|106/37|
+
+- All four modes retain byte-identical signed payloads and identical gas: inline create2,369,847/edit1,314,841; descriptor-backed create2,947,610/edit2,147,334. These are the actual41-byte fixtures, not final integrated prices or all-in network fees. Eight independent worlds isolate uncached/cache/batch/combined; grouping is shared. Single loopback timings are not public latency forecasts.
+- Public repeated reads still use network checks. Internal64×4 authorization/preflight alone falls513→257logical and513→17HTTP on its first combined pass; its cached repeat0RPC excludes pin, chain/currentness, signing, sends and reconciliation. Post-write reads may be warmed; the separate cold-instance rows above are not.
+- Batch transport is explicitly Node-injected in these fixtures. The untouched owner host is not claimed to batch HTTP; exact-hash caching is browser-compatible. Raw success cache512entries/8MiB, contexts8/128KiB, raw in-flight64, groups/batches16, HTTP concurrency4/pending64, request256KiB/response4MiB and20s total deadline are experimental resource defaults, not adopted protocol limits or total JS-heap bounds.
+- Review found and fixed caller-owned queued parameters: mutating an input could change fallback calldata and replace its exact pin with latest. Admission now snapshots its JSON request. The initial covering run also exposed/fixed reused-context pagination authority; both failure transcripts are retained. The refreshed runner records per-method work and identifies receipt-poll timing variance without normalizing actual traffic totals; all non-receipt method counts remain matched.
+- Worker initial covering122/122 and amended focused9/9 pass; parent fresh9/9+4/4 then final transport7/7 pass. Scoped Astra Extra High review and fix review approve the task with no remaining Critical/Important finding. Parent matched48source pins, current gzip SHA, payload/receipt equality and the final evidence-only diff. Existing Forge warnings stay disclosed; final Node checks are warning-free. No contracts, storage, authority, gas limits or owner deployment changed.
+
+Evidence:`lab-b/core-closeout-sdk-20260915/` in the published prototype branch; bundle SHA256`42bd4ae70e49c5562eec71a25419d95dc6d6231816d0fce0b75e492e53d95abf`. SDK Task3 now owns source/build/bounded-chain work for the additive immutable read-set carrier comparison; no storage savings claimed yet.
 
 ## Six-packet finish line
 
@@ -115,7 +136,7 @@ Prototype commits are published on the existing work branch. SDK Task2 now owns 
 | 3. Resource envelope and avoidable overhead | Name/search waste repaired; [[core-closeout-resource-plan-20260915|packed-count repair and preparation extraction]] reviewed at 4c1098f; normal sizes fit and 65 selected checks pass. | Cold paid joint body/ref/name/Lens bounds and same-guarantee storage/evidence decomposition. |
 | 4. Contract query progress and live-backed Files | [[core-closeout-query-plan-20260915|Bounded origin-query task]] reviewed at2e8838d, including paid owned continuation and retained churn; [[core-closeout-live-files-plan-20260915|typed live Files plan]] queued. | Practical wide/deep query costs, bounded retained initialization, typed live provider and immutable snapshot comparison. |
 | 5. Type interpretation, participation and authority | [[core-closeout-types-plan-20260915|Finite Type/participation plan]] and [[core-closeout-authority-plan-20260915|wallet/native-proof plan]] ready; not yet implemented. | Recoverable third-party descriptors/compatibility, non-griefable public registration, smart-wallet evidence, authenticated native provenance and honest private/external boundaries. |
-| 6. Integrated access and complete economics | [[core-closeout-sdk-plan-20260915|Qualified-tag Task1]] reviewed throughf2d7b01; bounded transport Task2 implementing and read-set Task3 queued. [[core-closeout-network-preflight-20260915|Small public-RPC preflight]] passed hash/batch controls on Base/Era; Era root-proof limitation confirmed. | Final cold Files/native-app journey, measured SDK transport/read-set storage, integrated public-provider access and all-in network fees. |
+| 6. Integrated access and complete economics | [[core-closeout-sdk-plan-20260915|Qualified tags and bounded transport]] reviewed through6869e26; additive read-set Task3 implementing. [[core-closeout-network-preflight-20260915|Small public-RPC preflight]] passed hash/batch controls on Base/Era; Era root-proof limitation confirmed. | Final cold Files/native-app journey, read-set storage prices, integrated public-provider access and all-in network fees. |
 
 ## Engineering direction from this pass
 
