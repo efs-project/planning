@@ -33,6 +33,15 @@
 
 **Files:** separate `RecentStateRootCheckpoint`, `NativePublicationProof`, `NativeClaimArchive`, bounded proof libraries/NOTICE, independent `browser/native-proof.mjs`, focused tests and an actual Anvil export/offline runner. No Ledger growth required.
 
+**Journey sequencing clarification, September16:** actual same-chain checkpoint,
+third-party retention and onchain retained-claim consumption run while the local
+chain is alive. After stopping its RPC, the independent verifier and a concrete
+offline consumer must still recover/use the retained claim. A distinct live
+destination chain needs a separately authenticated foreign root or an explicitly
+TRUSTED adapter; it cannot inherit consensus verification from a stopped local
+chain. Do not add an arbitrary-root setter to fake this distinction. This
+reversible experiment boundary leaves foreign-finality integration explicit.
+
 - [ ] First exact profile is one guarded-native PUBLISH from an ordinary deployed app into a direct Ledger on Cancun. Pin actual final compiler layout/runtime/helper identities and source deployment/initialization anchor. Current proxy implementation/codehash alone is not a historical execution proof. Keep the existing EOA archive lane separate.
 - [ ] Permissionless write-once checkpoint accepts a canonical20-field Cancun RLP header, extracts number/root and checks its hash against recent `BLOCKHASH`: past nonzero block, age≤256, exact hash. No arbitrary-root/admin setter. Identical retry is allowed; mutation, unknown fork/header, nonminimal integer/trailing data, current/future/expired block reject. Checkpoint remains usable after its acquisition window, subject to chain canonicality/finality assumptions.
 - [ ] Export real `eth_getProof` at a retained-state checkpoint blockC at or after the stored acceptance blockB, capture raw header and recheck hash around number-pinned RPC fallback if hash pinning is unavailable. Verify every proof against C's state root; do not trust convenient RPC `value`, `storageHash` or `codeHash` fields. For this anchored direct immutable Ledger profile, old publications remain provable from later retained state: original-day checkpointing and B-state archival RPC are not prerequisites. Preserve complete C proof bytes before source shutdown/pruning. The checkpoint still must be acquired within256blocks of C; this does not authenticate B's block hash or transaction inclusion.
