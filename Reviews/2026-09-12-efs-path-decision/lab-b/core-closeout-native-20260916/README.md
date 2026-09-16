@@ -8,6 +8,23 @@ new native source was uncommitted; it is **not** a claim that BASE contained thi
 new implementation. Artifact metadata pins the exact compiled source hashes.
 Final runs name their committed source revision separately.
 
+Final outcome and qualifications: [task-2-report.md](task-2-report.md).
+`final-1` has five paid checkpoint/third-party-retention/pinned-consumer journeys,
+then five independent source-off consumers, plus the finite falsifiers. It is
+an **exact retained mixed-cache artifact** run at source `86e10eee86bb4ce959c1c99b43d5591e67661825`,
+not a claim that a clean default build reproduces every paid metadata/code hash.
+The forced layout inspection changed Ledger metadata by including the new
+remapping; paid artifacts and anchors are not relabelled. See the report and
+`final-1/storage-layout.json` before Resource2 integration.
+
+Successful small-proof retention costs 11,617,114–13,382,546 gas. The fixed joint
+8,192-body/10,592-read-set probe succeeds at source but verification/retention
+revert under 15M. The 256KiB proof ceiling is a safety bound, not an affordable
+envelope. `final-1/manifest.json` indexes exact artifact/source/file pins, roots,
+actual receipts and observations; `other-instance.json.gz` records the separate
+same-chain-ID/address/runtime negative. These are local retained consistency
+facts, not foreign consensus or independent block-membership proofs.
+
 - `attempt-1`: stopped on the positive-only profile's unsupported default index
   generation zero. Twenty-one real receipts; not end-to-end pricing. No failed
   proof packet was saved before the initial error boundary was strengthened.

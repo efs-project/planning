@@ -1,0 +1,104 @@
+Compiling 20 files with Solc 0.8.30
+Solc 0.8.30 finished in 17.56s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:92:21:
+   |
+92 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:97:29:
+   |
+97 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:22:
+    |
+117 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:121:25:
+    |
+121 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> test/NativeSemantic.t.sol:34:45:
+   |
+34 |         for(uint256 i;i<changed.length;i++){uint256[30] memory x=v;x[changed[i]]^=1;_reject(x);}
+   |                                             ^^^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> test/NativeSemantic.t.sol:35:9:
+   |
+35 |         uint256[30] memory x=v;x[28]=1;_reject(x);x=v;x[29]=0;_reject(x);x=v;x[26]=1;_reject(x);
+   |         ^^^^^^^^^^^^^^^^^^^^
+
+Warning (3860): Contract initcode size is 168145 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/PublicationPreparation.t.sol:30:1:
+   |
+30 | contract PublicationPreparationTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 119139 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/ReadSetCarrier.t.sol:15:1:
+   |
+15 | contract ReadSetCarrierTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 3 tests for test/NativeStateProof.t.sol:NativeStateProofTest
+[PASS] test_checkpoint_rejects_current_future_expired_nonminimal_and_trailing() (gas: 1279855)
+[PASS] test_checkpoint_write_once_recent_cancun_and_retained_retry() (gas: 1020051)
+[PASS] test_positive_storage_exact_secure_key_and_complete_consumption() (gas: 1390250)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 8.96ms (7.44ms CPU time)
+
+Ran 4 tests for test/NativeSemantic.t.sol:NativeSemanticTest
+[PASS] test_actual_semantic_vector_and_later_withdrawal_preserve_claim() (gas: 403690)
+[PASS] test_missing_retained_rows_wrong_keys_and_checkpoint_before_acceptance_refuse() (gas: 429507)
+[PASS] test_principal_action_origin_execution_and_lower_observations_refuse() (gas: 858481)
+[PASS] test_reserved_bits_and_immutable_admission_mutation_refuse() (gas: 601887)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 10.58ms (2.83ms CPU time)
+
+Ran 9 tests for test/PublicationPreparation.t.sol:PublicationPreparationTest
+[PASS] test_admission_action_bound_is_early_but_public_profile_getter_stays_available() (gas: 543153)
+[PASS] test_changed_helper_code_is_refused_before_preparation() (gas: 45001)
+[PASS] test_guard_hash_mismatch_precedes_stale_head_and_bad_signature() (gas: 224083)
+[PASS] test_guarded_proxy_uses_proxy_heads_not_relayer_and_preserves_exact_preimage() (gas: 6545905)
+[PASS] test_maximum_guard_preimage_survives_preparation_and_deduplicates() (gas: 7498585)
+[PASS] test_native_preparation_is_static_544_bytes_and_uses_actual_caller() (gas: 12017337)
+[PASS] test_native_preparation_rejects_wrong_return_sizes_before_any_write() (gas: 104756)
+[PASS] test_preparation_preserves_bounded_errors_and_refuses_oversized_error_copy() (gas: 65529)
+[PASS] test_unused_preparation_ceiling_is_not_an_outer_gas_reserve() (gas: 691838)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 14.71ms (14.46ms CPU time)
+
+Ran 4 tests for test/ReadSetCarrier.t.sol:ReadSetCarrierTest
+[PASS] testCorruptPrefixSizeAndHashCannotMasqueradeAsReadSet() (gas: 1558364)
+[PASS] testLargeReadSetLivesInCarrierAndRepeatCreatesNothing() (gas: 8867422)
+[PASS] testRejectedPublicationRollsBackCarrierNoncePointerEvidenceAndAuthorNonce() (gas: 1705266)
+[PASS] testUnknownAndCanonicalEmptyRemainDifferent() (gas: 856669)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 16.05ms (9.76ms CPU time)
+
+Ran 4 test suites in 28.02ms (50.30ms CPU time): 20 tests passed, 0 failed, 0 skipped (20 total tests)

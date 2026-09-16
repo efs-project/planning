@@ -1,0 +1,15 @@
+✔ positive secure inclusion consumes the exact leaf and refuses wrong keys and trailing nodes (2.518375ms)
+✔ embedded nodes are canonical lists, not short byte-string references (0.417666ms)
+✔ real retained packets preserve claim identity across zero occurrences and later state (66.231708ms)
+✔ real proof fails closed for missing, duplicate, trailing, tampered, mixed roots and preimages (19.527875ms)
+✔ authenticated-value semantic controls reject impossible eras, immutable mutation and reduced counters (11.580875ms)
+✔ fabricated state roots and packet trust flags never authenticate root or source execution (119.104625ms)
+✔ canonical RLP and bounded positive-only paths reject nonminimal integers and valid absence (0.304958ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 336.238416

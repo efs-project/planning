@@ -1,0 +1,1187 @@
+{
+  "sourceCommit": "86e10eee86bb4ce959c1c99b43d5591e67661825",
+  "contracts": {
+    "Ledger": {
+      "layout": {
+        "storage": [
+          {
+            "astId": 3803,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "indexModule",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 3805,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_counters",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 3810,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_record",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_bytes32,t_struct(RecordCell)3648_storage)"
+          },
+          {
+            "astId": 3816,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_bodyWord",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_bytes32,t_mapping(t_uint256,t_bytes32))"
+          },
+          {
+            "astId": 3820,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_subject",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_bytes32,t_uint64)"
+          },
+          {
+            "astId": 3825,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_admission",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_uint64,t_struct(AdmissionRow)3655_storage)"
+          },
+          {
+            "astId": 3830,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_evidence",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_uint64,t_struct(EvidenceCell)3682_storage)"
+          },
+          {
+            "astId": 3834,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_publicationOrdinal",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_bytes32,t_uint64)"
+          },
+          {
+            "astId": 3839,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_head",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_mapping(t_bytes32,t_struct(HeadRow)3660_storage)"
+          },
+          {
+            "astId": 3843,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_bindingPosition",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_uint64,t_bytes32)"
+          },
+          {
+            "astId": 3848,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_position",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_mapping(t_bytes32,t_struct(PositionCell)3667_storage)"
+          },
+          {
+            "astId": 3852,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "nonces",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_mapping(t_address,t_uint64)"
+          },
+          {
+            "astId": 3857,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_source",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_mapping(t_uint64,t_struct(SourceEvidence)3708_storage)"
+          },
+          {
+            "astId": 3862,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_context",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_mapping(t_uint64,t_struct(PublicationContext)3556_storage)"
+          },
+          {
+            "astId": 3867,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_execution",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_mapping(t_bytes32,t_struct(ExecutionInfo)3577_storage)"
+          },
+          {
+            "astId": 3871,
+            "contract": "src/Ledger.sol:Ledger",
+            "label": "_readSets",
+            "offset": 0,
+            "slot": "15",
+            "type": "t_mapping(t_bytes32,t_bytes_storage)"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "encoding": "inplace",
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bytes32": {
+            "encoding": "inplace",
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_bytes_storage": {
+            "encoding": "bytes",
+            "label": "bytes",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint64)": {
+            "encoding": "mapping",
+            "key": "t_address",
+            "label": "mapping(address => uint64)",
+            "numberOfBytes": "32",
+            "value": "t_uint64"
+          },
+          "t_mapping(t_bytes32,t_bytes_storage)": {
+            "encoding": "mapping",
+            "key": "t_bytes32",
+            "label": "mapping(bytes32 => bytes)",
+            "numberOfBytes": "32",
+            "value": "t_bytes_storage"
+          },
+          "t_mapping(t_bytes32,t_mapping(t_uint256,t_bytes32))": {
+            "encoding": "mapping",
+            "key": "t_bytes32",
+            "label": "mapping(bytes32 => mapping(uint256 => bytes32))",
+            "numberOfBytes": "32",
+            "value": "t_mapping(t_uint256,t_bytes32)"
+          },
+          "t_mapping(t_bytes32,t_struct(ExecutionInfo)3577_storage)": {
+            "encoding": "mapping",
+            "key": "t_bytes32",
+            "label": "mapping(bytes32 => struct Ledger.ExecutionInfo)",
+            "numberOfBytes": "32",
+            "value": "t_struct(ExecutionInfo)3577_storage"
+          },
+          "t_mapping(t_bytes32,t_struct(HeadRow)3660_storage)": {
+            "encoding": "mapping",
+            "key": "t_bytes32",
+            "label": "mapping(bytes32 => struct Ledger.HeadRow)",
+            "numberOfBytes": "32",
+            "value": "t_struct(HeadRow)3660_storage"
+          },
+          "t_mapping(t_bytes32,t_struct(PositionCell)3667_storage)": {
+            "encoding": "mapping",
+            "key": "t_bytes32",
+            "label": "mapping(bytes32 => struct Ledger.PositionCell)",
+            "numberOfBytes": "32",
+            "value": "t_struct(PositionCell)3667_storage"
+          },
+          "t_mapping(t_bytes32,t_struct(RecordCell)3648_storage)": {
+            "encoding": "mapping",
+            "key": "t_bytes32",
+            "label": "mapping(bytes32 => struct Ledger.RecordCell)",
+            "numberOfBytes": "32",
+            "value": "t_struct(RecordCell)3648_storage"
+          },
+          "t_mapping(t_bytes32,t_uint64)": {
+            "encoding": "mapping",
+            "key": "t_bytes32",
+            "label": "mapping(bytes32 => uint64)",
+            "numberOfBytes": "32",
+            "value": "t_uint64"
+          },
+          "t_mapping(t_uint256,t_bytes32)": {
+            "encoding": "mapping",
+            "key": "t_uint256",
+            "label": "mapping(uint256 => bytes32)",
+            "numberOfBytes": "32",
+            "value": "t_bytes32"
+          },
+          "t_mapping(t_uint64,t_bytes32)": {
+            "encoding": "mapping",
+            "key": "t_uint64",
+            "label": "mapping(uint64 => bytes32)",
+            "numberOfBytes": "32",
+            "value": "t_bytes32"
+          },
+          "t_mapping(t_uint64,t_struct(AdmissionRow)3655_storage)": {
+            "encoding": "mapping",
+            "key": "t_uint64",
+            "label": "mapping(uint64 => struct Ledger.AdmissionRow)",
+            "numberOfBytes": "32",
+            "value": "t_struct(AdmissionRow)3655_storage"
+          },
+          "t_mapping(t_uint64,t_struct(EvidenceCell)3682_storage)": {
+            "encoding": "mapping",
+            "key": "t_uint64",
+            "label": "mapping(uint64 => struct Ledger.EvidenceCell)",
+            "numberOfBytes": "32",
+            "value": "t_struct(EvidenceCell)3682_storage"
+          },
+          "t_mapping(t_uint64,t_struct(PublicationContext)3556_storage)": {
+            "encoding": "mapping",
+            "key": "t_uint64",
+            "label": "mapping(uint64 => struct Ledger.PublicationContext)",
+            "numberOfBytes": "32",
+            "value": "t_struct(PublicationContext)3556_storage"
+          },
+          "t_mapping(t_uint64,t_struct(SourceEvidence)3708_storage)": {
+            "encoding": "mapping",
+            "key": "t_uint64",
+            "label": "mapping(uint64 => struct Ledger.SourceEvidence)",
+            "numberOfBytes": "32",
+            "value": "t_struct(SourceEvidence)3708_storage"
+          },
+          "t_struct(AdmissionRow)3655_storage": {
+            "encoding": "inplace",
+            "label": "struct Ledger.AdmissionRow",
+            "numberOfBytes": "96",
+            "members": [
+              {
+                "astId": 3650,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "meta",
+                "offset": 0,
+                "slot": "0",
+                "type": "t_uint256"
+              },
+              {
+                "astId": 3652,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "a",
+                "offset": 0,
+                "slot": "1",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3654,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "b",
+                "offset": 0,
+                "slot": "2",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(EvidenceCell)3682_storage": {
+            "encoding": "inplace",
+            "label": "struct Ledger.EvidenceCell",
+            "numberOfBytes": "224",
+            "members": [
+              {
+                "astId": 3669,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "w0",
+                "offset": 0,
+                "slot": "0",
+                "type": "t_uint256"
+              },
+              {
+                "astId": 3671,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "r",
+                "offset": 0,
+                "slot": "1",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3673,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "s",
+                "offset": 0,
+                "slot": "2",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3675,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "w3",
+                "offset": 0,
+                "slot": "3",
+                "type": "t_uint256"
+              },
+              {
+                "astId": 3677,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "acceptanceProfile",
+                "offset": 0,
+                "slot": "4",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3679,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "indexObligations",
+                "offset": 0,
+                "slot": "5",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3681,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "actionsHash",
+                "offset": 0,
+                "slot": "6",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(ExecutionInfo)3577_storage": {
+            "encoding": "inplace",
+            "label": "struct Ledger.ExecutionInfo",
+            "numberOfBytes": "320",
+            "members": [
+              {
+                "astId": 3558,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "origin",
+                "offset": 0,
+                "slot": "0",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3560,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "revision",
+                "offset": 0,
+                "slot": "1",
+                "type": "t_uint256"
+              },
+              {
+                "astId": 3562,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "shellCodeHash",
+                "offset": 0,
+                "slot": "2",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3564,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "implementation",
+                "offset": 0,
+                "slot": "3",
+                "type": "t_address"
+              },
+              {
+                "astId": 3566,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "implementationCodeHash",
+                "offset": 0,
+                "slot": "4",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3568,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "registryAddress",
+                "offset": 0,
+                "slot": "5",
+                "type": "t_address"
+              },
+              {
+                "astId": 3570,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "registryCodeHash",
+                "offset": 0,
+                "slot": "6",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3572,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "indexAddress",
+                "offset": 0,
+                "slot": "7",
+                "type": "t_address"
+              },
+              {
+                "astId": 3574,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "indexCodeHash",
+                "offset": 0,
+                "slot": "8",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3576,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "indexGeneration",
+                "offset": 0,
+                "slot": "9",
+                "type": "t_uint64"
+              }
+            ]
+          },
+          "t_struct(HeadRow)3660_storage": {
+            "encoding": "inplace",
+            "label": "struct Ledger.HeadRow",
+            "numberOfBytes": "64",
+            "members": [
+              {
+                "astId": 3657,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "meta",
+                "offset": 0,
+                "slot": "0",
+                "type": "t_uint256"
+              },
+              {
+                "astId": 3659,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "target",
+                "offset": 0,
+                "slot": "1",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(PositionCell)3667_storage": {
+            "encoding": "inplace",
+            "label": "struct Ledger.PositionCell",
+            "numberOfBytes": "96",
+            "members": [
+              {
+                "astId": 3662,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "purpose",
+                "offset": 0,
+                "slot": "0",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3664,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "subject",
+                "offset": 0,
+                "slot": "1",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3666,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "role",
+                "offset": 0,
+                "slot": "2",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(PublicationContext)3556_storage": {
+            "encoding": "inplace",
+            "label": "struct Ledger.PublicationContext",
+            "numberOfBytes": "160",
+            "members": [
+              {
+                "astId": 3543,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "principalId",
+                "offset": 0,
+                "slot": "0",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3545,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "executionSet",
+                "offset": 0,
+                "slot": "1",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3547,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "readSetHash",
+                "offset": 0,
+                "slot": "2",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3549,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "intentDigest",
+                "offset": 0,
+                "slot": "3",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3551,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "principalKind",
+                "offset": 0,
+                "slot": "4",
+                "type": "t_uint8"
+              },
+              {
+                "astId": 3553,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "authorizationProfile",
+                "offset": 1,
+                "slot": "4",
+                "type": "t_uint8"
+              },
+              {
+                "astId": 3555,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "intentFormat",
+                "offset": 2,
+                "slot": "4",
+                "type": "t_uint8"
+              }
+            ]
+          },
+          "t_struct(RecordCell)3648_storage": {
+            "encoding": "inplace",
+            "label": "struct Ledger.RecordCell",
+            "numberOfBytes": "64",
+            "members": [
+              {
+                "astId": 3645,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "typeId",
+                "offset": 0,
+                "slot": "0",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3647,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "meta",
+                "offset": 0,
+                "slot": "1",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_struct(SourceEvidence)3708_storage": {
+            "encoding": "inplace",
+            "label": "struct Ledger.SourceEvidence",
+            "numberOfBytes": "288",
+            "members": [
+              {
+                "astId": 3685,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "realmId",
+                "offset": 0,
+                "slot": "0",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3687,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "coreCodeCommitment",
+                "offset": 0,
+                "slot": "1",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3689,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "acceptanceProfile",
+                "offset": 0,
+                "slot": "2",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3691,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "indexObligations",
+                "offset": 0,
+                "slot": "3",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3693,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "r",
+                "offset": 0,
+                "slot": "4",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3695,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "s",
+                "offset": 0,
+                "slot": "5",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3697,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "sourcePrincipal",
+                "offset": 0,
+                "slot": "6",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 3699,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "author",
+                "offset": 0,
+                "slot": "7",
+                "type": "t_address"
+              },
+              {
+                "astId": 3701,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "nonce",
+                "offset": 20,
+                "slot": "7",
+                "type": "t_uint64"
+              },
+              {
+                "astId": 3703,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "deadline",
+                "offset": 0,
+                "slot": "8",
+                "type": "t_uint64"
+              },
+              {
+                "astId": 3705,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "v",
+                "offset": 8,
+                "slot": "8",
+                "type": "t_uint8"
+              },
+              {
+                "astId": 3707,
+                "contract": "src/Ledger.sol:Ledger",
+                "label": "grade",
+                "offset": 9,
+                "slot": "8",
+                "type": "t_uint8"
+              }
+            ]
+          },
+          "t_uint256": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "encoding": "inplace",
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_uint8": {
+            "encoding": "inplace",
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      },
+      "sourceHashes": {
+        "src/ContractSignatureEvidenceStore.sol": {
+          "keccak256": "0xa058f02c0449945937c99f1b697ac63ecf5d656844c13e7c3ee731c7e1d11bb9",
+          "urls": [
+            "bzz-raw://8d70aa4d3a48c2ea6ed13f2aa1164e354ecc429903671396947a3ad9222b51d8",
+            "dweb:/ipfs/QmacDCVBu8B9ZWhr73w6zwuWRBwEtfus4Za2EqVLZJ1DNJ"
+          ],
+          "license": "MIT"
+        },
+        "src/ExecutionSlots.sol": {
+          "keccak256": "0xd3373859ef68327e54a0c761c7863c4456d34e1b444fc5036f465d76feb9e927",
+          "urls": [
+            "bzz-raw://16cb47f12401ec27b06e717a6e9976262504596eb6d3268c279d7aa4ecc9a1d5",
+            "dweb:/ipfs/QmXv3Qu6bXAFxiKFnEPpZ5UQNCwatq5dXneVDgnnqaM6Xo"
+          ],
+          "license": "MIT"
+        },
+        "src/IndexFieldProfile.sol": {
+          "keccak256": "0x6cb34544f088a35809b28da518c27d0344052e9e76068dce08e498c203f9cae9",
+          "urls": [
+            "bzz-raw://c41060a4288f3657edbef6133be12fb885e27b9d9db3ae36966bb8b539136005",
+            "dweb:/ipfs/QmPsEmGDDZweqDPNgnJ3zmrgZz4BwPwUVY45JQiwQVJ5Wd"
+          ],
+          "license": "MIT"
+        },
+        "src/IndexReplaySource.sol": {
+          "keccak256": "0xa3606e14b9b126d2f98194078706dfa45677809f40893090eca280d347a0b367",
+          "urls": [
+            "bzz-raw://560977dd69f57fc6a489d9e58e4d3895652d02a1bd86f25ce01659a586c5ab67",
+            "dweb:/ipfs/QmdnDvVzEh271a3qMFmGpH9Y4Zt9PpPcWYn1rZgGLswGso"
+          ],
+          "license": "MIT"
+        },
+        "src/IndexSource.sol": {
+          "keccak256": "0xdb8c85802584f29530fc4484a3280f94474efcd72219ec1ea6dccfb270d07639",
+          "urls": [
+            "bzz-raw://51d3555c336028898f57af09303b600ca8f7f9723f32107ac8a11e452a196dbe",
+            "dweb:/ipfs/QmSM53CmsUrdLFzmgiec7fBvQBXXnuQkRi8xsGSbmHoHnm"
+          ],
+          "license": "MIT"
+        },
+        "src/IndexWork.sol": {
+          "keccak256": "0x62960f1d86ab4c8db13f33764dedef9ad84747175aaa4a264524e37630fe244e",
+          "urls": [
+            "bzz-raw://f4e98ca5712b907c47910159c94eecb74e0c3d37606ae73b658b9fae280d3d3c",
+            "dweb:/ipfs/QmPiz24TUcC8qQoo8ZTcrDb3qeowRCkX31Rq3fAnocwDHT"
+          ],
+          "license": "MIT"
+        },
+        "src/Interfaces.sol": {
+          "keccak256": "0x18dc4570d0866f1d3d7cae70fdea2a75e7eeb1de7dc3bdebec8237a3e4ccddcf",
+          "urls": [
+            "bzz-raw://3668b271df9cd1f45f1f1614859ef3f929c674d67f344345af34cb3a3cd403d2",
+            "dweb:/ipfs/QmZRpfdwdwNYrbzNZxTQeF1mwNnxZxRM6JnuhoitAMkNiW"
+          ],
+          "license": "MIT"
+        },
+        "src/Keys.sol": {
+          "keccak256": "0x7072116cb4809ae6d857031bdadb2d23e2373203a335781ee2383ae9fbf7abee",
+          "urls": [
+            "bzz-raw://f71c9ca0f6f6f6be7b85cda997c35bbd5f84ae40c4af54ec5f0f9687223d04d1",
+            "dweb:/ipfs/Qmb3WEKpaj8Z4sKgbDHv1e6PJDUwWzL6YieKBEdF3tPkkw"
+          ],
+          "license": "MIT"
+        },
+        "src/Ledger.sol": {
+          "keccak256": "0x1ffb43a38b23de1ca6ae86c46c14018a8550f5b008ac8c78297f6fdf68a74ed6",
+          "urls": [
+            "bzz-raw://bd6aba07b13d50ae1a87beda75f3beecaeea65ba252ff6174e30fc3aea50af9e",
+            "dweb:/ipfs/QmW2PCzRs9hZjWUpN8NexHsGqoWjrQbya8NZC27nwGqYDf"
+          ],
+          "license": "MIT"
+        },
+        "src/PublicationPreparation.sol": {
+          "keccak256": "0x30ca7927d2aeaa989785beed80e03dfdb3cfef71ca9288538f8496f187635600",
+          "urls": [
+            "bzz-raw://d5300aab08435680d1e4c494e52db054068f1c3a250f85c99a36000bf3785970",
+            "dweb:/ipfs/QmSZzF1a8dk9ar2AVPNkSuN9e1V2s5EeGTXHYxS5EnjhQZ"
+          ],
+          "license": "MIT"
+        },
+        "src/PublicationSupport.sol": {
+          "keccak256": "0x4d5300acb1f5fb2c5809832db23bda9b890f6657441163265cd27099bad19132",
+          "urls": [
+            "bzz-raw://fc87d079693d49c94485753fbfd105df85abdcbf7d852dc84d350e3ad7d93eb8",
+            "dweb:/ipfs/QmXrcxMiW755mvjUtF8UisD5rWvcYEznaYn5gC5TVwksPF"
+          ],
+          "license": "MIT"
+        },
+        "src/ReadSetStorage.sol": {
+          "keccak256": "0x132c48a528664721b3e170de19fe478d40c59180be64755d7729a5c97cf8ab04",
+          "urls": [
+            "bzz-raw://8bc202dc3426607ae9bf1d3c5c08c33311a33603b83086cbd3c9a0d02192075d",
+            "dweb:/ipfs/QmcVAFaF2EPXFqCxDd195PHZd2btTKtxvo9ccHYaab6tZB"
+          ],
+          "license": "MIT"
+        }
+      },
+      "inspectionSettings": {
+        "remappings": [
+          "src/libraries/=src/vendor/optimism/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/Ledger.sol": "Ledger"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "paidSettings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/Ledger.sol": "Ledger"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "creationByteIdentical": false,
+      "runtimeWithoutTrailingMetadataIdentical": true,
+      "inspectionCreationKeccak": "0x70b14ebb91da5f0994e7b0b6382218683155eed3d66f7d88188b4c0ca9406f3e",
+      "inspectionRuntimeTemplateKeccak": "0xde7f7aa1547150baea2622fa2354f883f5b09523d754800f17672a66d5f914e6"
+    },
+    "NativeClaimArchive": {
+      "layout": {
+        "storage": [
+          {
+            "astId": 9333,
+            "contract": "src/NativeClaimArchive.sol:NativeClaimArchive",
+            "label": "retained",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_bytes32,t_struct(Receipt)9328_storage)"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "encoding": "inplace",
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "encoding": "inplace",
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "encoding": "inplace",
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_bytes_storage": {
+            "encoding": "bytes",
+            "label": "bytes",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(Receipt)9328_storage)": {
+            "encoding": "mapping",
+            "key": "t_bytes32",
+            "label": "mapping(bytes32 => struct NativeClaimArchive.Receipt)",
+            "numberOfBytes": "32",
+            "value": "t_struct(Receipt)9328_storage"
+          },
+          "t_struct(Receipt)9328_storage": {
+            "encoding": "inplace",
+            "label": "struct NativeClaimArchive.Receipt",
+            "numberOfBytes": "256",
+            "members": [
+              {
+                "astId": 9307,
+                "contract": "src/NativeClaimArchive.sol:NativeClaimArchive",
+                "label": "claimId",
+                "offset": 0,
+                "slot": "0",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 9309,
+                "contract": "src/NativeClaimArchive.sol:NativeClaimArchive",
+                "label": "recordId",
+                "offset": 0,
+                "slot": "1",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 9311,
+                "contract": "src/NativeClaimArchive.sol:NativeClaimArchive",
+                "label": "principalId",
+                "offset": 0,
+                "slot": "2",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 9313,
+                "contract": "src/NativeClaimArchive.sol:NativeClaimArchive",
+                "label": "root",
+                "offset": 0,
+                "slot": "3",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 9315,
+                "contract": "src/NativeClaimArchive.sol:NativeClaimArchive",
+                "label": "anchorHash",
+                "offset": 0,
+                "slot": "4",
+                "type": "t_bytes32"
+              },
+              {
+                "astId": 9317,
+                "contract": "src/NativeClaimArchive.sol:NativeClaimArchive",
+                "label": "checkpoint",
+                "offset": 0,
+                "slot": "5",
+                "type": "t_uint64"
+              },
+              {
+                "astId": 9319,
+                "contract": "src/NativeClaimArchive.sol:NativeClaimArchive",
+                "label": "acceptanceBlock",
+                "offset": 8,
+                "slot": "5",
+                "type": "t_uint64"
+              },
+              {
+                "astId": 9321,
+                "contract": "src/NativeClaimArchive.sol:NativeClaimArchive",
+                "label": "importer",
+                "offset": 0,
+                "slot": "6",
+                "type": "t_address"
+              },
+              {
+                "astId": 9323,
+                "contract": "src/NativeClaimArchive.sol:NativeClaimArchive",
+                "label": "withdrawn",
+                "offset": 20,
+                "slot": "6",
+                "type": "t_bool"
+              },
+              {
+                "astId": 9325,
+                "contract": "src/NativeClaimArchive.sol:NativeClaimArchive",
+                "label": "occurrences",
+                "offset": 21,
+                "slot": "6",
+                "type": "t_uint32"
+              },
+              {
+                "astId": 9327,
+                "contract": "src/NativeClaimArchive.sol:NativeClaimArchive",
+                "label": "body",
+                "offset": 0,
+                "slot": "7",
+                "type": "t_bytes_storage"
+              }
+            ]
+          },
+          "t_uint32": {
+            "encoding": "inplace",
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint64": {
+            "encoding": "inplace",
+            "label": "uint64",
+            "numberOfBytes": "8"
+          }
+        }
+      },
+      "sourceHashes": {
+        "src/BoundedStateProof.sol": {
+          "keccak256": "0xf0fc8a8ff98579f167d5cd6295c0a4adf689a2b3ca949947d56bb900d04bea3f",
+          "urls": [
+            "bzz-raw://7b776adb57c13531ec7dc620afd762b5b1c3f283b726e0d523b024f13496011e",
+            "dweb:/ipfs/Qmf52d13UQmU1qaBiYRRT9SvD3GMbx7w6JnPor9XBaF5gM"
+          ],
+          "license": "MIT"
+        },
+        "src/ContractSignatureEvidenceStore.sol": {
+          "keccak256": "0xa058f02c0449945937c99f1b697ac63ecf5d656844c13e7c3ee731c7e1d11bb9",
+          "urls": [
+            "bzz-raw://8d70aa4d3a48c2ea6ed13f2aa1164e354ecc429903671396947a3ad9222b51d8",
+            "dweb:/ipfs/QmacDCVBu8B9ZWhr73w6zwuWRBwEtfus4Za2EqVLZJ1DNJ"
+          ],
+          "license": "MIT"
+        },
+        "src/ExecutionSlots.sol": {
+          "keccak256": "0xd3373859ef68327e54a0c761c7863c4456d34e1b444fc5036f465d76feb9e927",
+          "urls": [
+            "bzz-raw://16cb47f12401ec27b06e717a6e9976262504596eb6d3268c279d7aa4ecc9a1d5",
+            "dweb:/ipfs/QmXv3Qu6bXAFxiKFnEPpZ5UQNCwatq5dXneVDgnnqaM6Xo"
+          ],
+          "license": "MIT"
+        },
+        "src/IndexFieldProfile.sol": {
+          "keccak256": "0x6cb34544f088a35809b28da518c27d0344052e9e76068dce08e498c203f9cae9",
+          "urls": [
+            "bzz-raw://c41060a4288f3657edbef6133be12fb885e27b9d9db3ae36966bb8b539136005",
+            "dweb:/ipfs/QmPsEmGDDZweqDPNgnJ3zmrgZz4BwPwUVY45JQiwQVJ5Wd"
+          ],
+          "license": "MIT"
+        },
+        "src/IndexReplaySource.sol": {
+          "keccak256": "0xa3606e14b9b126d2f98194078706dfa45677809f40893090eca280d347a0b367",
+          "urls": [
+            "bzz-raw://560977dd69f57fc6a489d9e58e4d3895652d02a1bd86f25ce01659a586c5ab67",
+            "dweb:/ipfs/QmdnDvVzEh271a3qMFmGpH9Y4Zt9PpPcWYn1rZgGLswGso"
+          ],
+          "license": "MIT"
+        },
+        "src/IndexSource.sol": {
+          "keccak256": "0xdb8c85802584f29530fc4484a3280f94474efcd72219ec1ea6dccfb270d07639",
+          "urls": [
+            "bzz-raw://51d3555c336028898f57af09303b600ca8f7f9723f32107ac8a11e452a196dbe",
+            "dweb:/ipfs/QmSM53CmsUrdLFzmgiec7fBvQBXXnuQkRi8xsGSbmHoHnm"
+          ],
+          "license": "MIT"
+        },
+        "src/IndexWork.sol": {
+          "keccak256": "0x62960f1d86ab4c8db13f33764dedef9ad84747175aaa4a264524e37630fe244e",
+          "urls": [
+            "bzz-raw://f4e98ca5712b907c47910159c94eecb74e0c3d37606ae73b658b9fae280d3d3c",
+            "dweb:/ipfs/QmPiz24TUcC8qQoo8ZTcrDb3qeowRCkX31Rq3fAnocwDHT"
+          ],
+          "license": "MIT"
+        },
+        "src/Interfaces.sol": {
+          "keccak256": "0x18dc4570d0866f1d3d7cae70fdea2a75e7eeb1de7dc3bdebec8237a3e4ccddcf",
+          "urls": [
+            "bzz-raw://3668b271df9cd1f45f1f1614859ef3f929c674d67f344345af34cb3a3cd403d2",
+            "dweb:/ipfs/QmZRpfdwdwNYrbzNZxTQeF1mwNnxZxRM6JnuhoitAMkNiW"
+          ],
+          "license": "MIT"
+        },
+        "src/Keys.sol": {
+          "keccak256": "0x7072116cb4809ae6d857031bdadb2d23e2373203a335781ee2383ae9fbf7abee",
+          "urls": [
+            "bzz-raw://f71c9ca0f6f6f6be7b85cda997c35bbd5f84ae40c4af54ec5f0f9687223d04d1",
+            "dweb:/ipfs/Qmb3WEKpaj8Z4sKgbDHv1e6PJDUwWzL6YieKBEdF3tPkkw"
+          ],
+          "license": "MIT"
+        },
+        "src/Ledger.sol": {
+          "keccak256": "0x1ffb43a38b23de1ca6ae86c46c14018a8550f5b008ac8c78297f6fdf68a74ed6",
+          "urls": [
+            "bzz-raw://bd6aba07b13d50ae1a87beda75f3beecaeea65ba252ff6174e30fc3aea50af9e",
+            "dweb:/ipfs/QmW2PCzRs9hZjWUpN8NexHsGqoWjrQbya8NZC27nwGqYDf"
+          ],
+          "license": "MIT"
+        },
+        "src/NativeClaimArchive.sol": {
+          "keccak256": "0x12a1fdbc8e8f6ba777a94e18698e25c4e3666e0398cfc789eec2b46227761a61",
+          "urls": [
+            "bzz-raw://be2da6dd6ca1d1707c73378859e8a7b18352557d277935108afdd9af866d62e8",
+            "dweb:/ipfs/QmR7sxfWCsPDfH9NR59tqMCjZRjQpSvM5cW2cdYrvq5CBg"
+          ],
+          "license": "MIT"
+        },
+        "src/NativePublicationProof.sol": {
+          "keccak256": "0xf56ccdc169b1ed1f2d447b90af41beff278107c3cd3349dca22513c62878d84f",
+          "urls": [
+            "bzz-raw://bdd208db9a3f1403db8107cb0b9f4e42186a5cbf10b1d7f730e2b7c5026c6e2e",
+            "dweb:/ipfs/QmUrFDUqmvehXArQSHh5d4y5PjS1XyWoHaJeP4uPimxSUA"
+          ],
+          "license": "MIT"
+        },
+        "src/PublicationPreparation.sol": {
+          "keccak256": "0x30ca7927d2aeaa989785beed80e03dfdb3cfef71ca9288538f8496f187635600",
+          "urls": [
+            "bzz-raw://d5300aab08435680d1e4c494e52db054068f1c3a250f85c99a36000bf3785970",
+            "dweb:/ipfs/QmSZzF1a8dk9ar2AVPNkSuN9e1V2s5EeGTXHYxS5EnjhQZ"
+          ],
+          "license": "MIT"
+        },
+        "src/PublicationSupport.sol": {
+          "keccak256": "0x4d5300acb1f5fb2c5809832db23bda9b890f6657441163265cd27099bad19132",
+          "urls": [
+            "bzz-raw://fc87d079693d49c94485753fbfd105df85abdcbf7d852dc84d350e3ad7d93eb8",
+            "dweb:/ipfs/QmXrcxMiW755mvjUtF8UisD5rWvcYEznaYn5gC5TVwksPF"
+          ],
+          "license": "MIT"
+        },
+        "src/ReadSetStorage.sol": {
+          "keccak256": "0x132c48a528664721b3e170de19fe478d40c59180be64755d7729a5c97cf8ab04",
+          "urls": [
+            "bzz-raw://8bc202dc3426607ae9bf1d3c5c08c33311a33603b83086cbd3c9a0d02192075d",
+            "dweb:/ipfs/QmcVAFaF2EPXFqCxDd195PHZd2btTKtxvo9ccHYaab6tZB"
+          ],
+          "license": "MIT"
+        },
+        "src/RecentStateRootCheckpoint.sol": {
+          "keccak256": "0x1fbfb5e14dd55dd2308131bfcf3ced0bc4ae4a87de72bfc7321d0aba7e84deb8",
+          "urls": [
+            "bzz-raw://8a8a7c4f1d5328021e05285d4d5ee6f3b42ff702231b2e9b6cf482a3b080417d",
+            "dweb:/ipfs/Qmb8Vz7DrNbeWpU3hHrhw18mXC9E6aGfYj9BuM3sV1gZ4n"
+          ],
+          "license": "MIT"
+        },
+        "src/vendor/optimism/Bytes.sol": {
+          "keccak256": "0x70360a56c7bfeeb1e954da969fd1804f8666e14b858f5e8e0a40abf27592627d",
+          "urls": [
+            "bzz-raw://e8e0f2f7cbf013dd2e4b69585aa00c9a1e95c790b49c09739ace3a4ec6092ca7",
+            "dweb:/ipfs/Qmf8UpacaLTV1VVPTVwD3fGBWj9tPtApqukH9fpSJMsNai"
+          ],
+          "license": "MIT"
+        },
+        "src/vendor/optimism/rlp/RLPErrors.sol": {
+          "keccak256": "0x2b7fa174e6c62962f7c3ce1960298d325ed0e5ff4ee3fd426848e88b4500eb26",
+          "urls": [
+            "bzz-raw://f5528dd355691e6e2dffa3ecf11388f51e3bd29f27693c5dcd11be182559ba47",
+            "dweb:/ipfs/QmTqZ5ZzBPwLYg3JNZttHZYaXv5zyzQfakSz4B8sYkAz42"
+          ],
+          "license": "MIT"
+        },
+        "src/vendor/optimism/rlp/RLPReader.sol": {
+          "keccak256": "0xaa010fd014790a150d4db8d519940ce4b2828a8591c247469f246e5c177b2350",
+          "urls": [
+            "bzz-raw://2702c2a0413fcdf2ed57af6dc5ffcf5f5b155fdbba0bb52375c037f06c4b2456",
+            "dweb:/ipfs/QmW6kTq8pj3LTmYRHr7CqsZb157XmXUzHJzEkMgeBAr4EJ"
+          ],
+          "license": "MIT"
+        },
+        "src/vendor/optimism/trie/MerkleTrie.sol": {
+          "keccak256": "0x80b48f8d6a88ff26dd81ab028ad82df24a1783ddd81056e610efd4b185213b5d",
+          "urls": [
+            "bzz-raw://702c3a796e67763e98b63cec3dfbb66d2deba6bcaca3e7e3c541be5dae777ecb",
+            "dweb:/ipfs/QmcYReevyWx2WwtptNGVFQGwDeuZyqH9TXxewXKCST8WHo"
+          ],
+          "license": "MIT"
+        },
+        "src/vendor/optimism/trie/SecureMerkleTrie.sol": {
+          "keccak256": "0xab860119aa5d43f2cf6f60776e6ffabe2d84b5e0552bbc07740fac4c8738ec7c",
+          "urls": [
+            "bzz-raw://4f28823f351342d5c27004259174df9cd0c4efd2c8cee803a5cc60186c877497",
+            "dweb:/ipfs/QmZQDbBS9Xnz3F3GkWvyu7vnMPq59BRXB8kfxfjZa35ygN"
+          ],
+          "license": "MIT"
+        }
+      },
+      "inspectionSettings": {
+        "remappings": [
+          "src/libraries/=src/vendor/optimism/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/NativeClaimArchive.sol": "NativeClaimArchive"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "paidSettings": {
+        "remappings": [
+          "src/libraries/=src/vendor/optimism/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/NativeClaimArchive.sol": "NativeClaimArchive"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "creationByteIdentical": true,
+      "runtimeWithoutTrailingMetadataIdentical": true,
+      "inspectionCreationKeccak": "0xb5a15138728de2d11478445ae35db145e5c8f2582bf0a75ce8b14b12c0e9b07e",
+      "inspectionRuntimeTemplateKeccak": "0x38c955d8379835995cde90504e3f83c58b56bfc5331c266cfaec6f14fc9ad58c"
+    }
+  }
+}
