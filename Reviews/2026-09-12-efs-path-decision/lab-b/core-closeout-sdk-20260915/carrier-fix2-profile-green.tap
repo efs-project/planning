@@ -1,0 +1,97 @@
+TAP version 13
+# Subtest: read-set evidence output refuses replacement of an existing explicit path
+ok 1 - read-set evidence output refuses replacement of an existing explicit path
+  ---
+  duration_ms: 2.951417
+  type: 'test'
+  ...
+# Subtest: browser transport preserves typed EVM errors without manufacturing metadata for HTTP failures
+ok 2 - browser transport preserves typed EVM errors without manufacturing metadata for HTTP failures
+  ---
+  duration_ms: 3.341
+  type: 'test'
+  ...
+# Subtest: recognized legacy relabel cannot bypass an actual carrier implementation declaration
+    # Subtest: declaration
+    ok 1 - declaration
+      ---
+      duration_ms: 36.297708
+      type: 'test'
+      ...
+    # Subtest: unavailable
+    ok 2 - unavailable
+      ---
+      duration_ms: 29.606125
+      type: 'test'
+      ...
+    # Subtest: malformed-success
+    ok 3 - malformed-success
+      ---
+      duration_ms: 29.42675
+      type: 'test'
+      ...
+    # Subtest: undefined-success
+    ok 4 - undefined-success
+      ---
+      duration_ms: 28.888792
+      type: 'test'
+      ...
+    1..4
+ok 3 - recognized legacy relabel cannot bypass an actual carrier implementation declaration
+  ---
+  duration_ms: 444.320167
+  type: 'test'
+  ...
+# Subtest: new read-set profile must be explicit and a failed exact probe cannot downgrade to legacy
+ok 4 - new read-set profile must be explicit and a failed exact probe cannot downgrade to legacy
+  ---
+  duration_ms: 305.8765
+  type: 'test'
+  ...
+# Subtest: actual old browser transport and mixed family qualify old new downgrade restore per implementation
+    # Subtest: bare-message
+    ok 1 - bare-message
+      ---
+      duration_ms: 27.5105
+      type: 'test'
+      ...
+    # Subtest: timeout
+    ok 2 - timeout
+      ---
+      duration_ms: 22.998292
+      type: 'test'
+      ...
+    # Subtest: wrong-code
+    ok 3 - wrong-code
+      ---
+      duration_ms: 25.477292
+      type: 'test'
+      ...
+    # Subtest: nonempty-revert
+    ok 4 - nonempty-revert
+      ---
+      duration_ms: 27.518083
+      type: 'test'
+      ...
+    # Subtest: missing-revert-data
+    ok 5 - missing-revert-data
+      ---
+      duration_ms: 23.438417
+      type: 'test'
+      ...
+    1..5
+ok 5 - actual old browser transport and mixed family qualify old new downgrade restore per implementation
+  ---
+  duration_ms: 889.189417
+  type: 'test'
+  ...
+# Read-set profile evidence: /var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-gtflHT/readset-profile.json.gz
+1..5
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4738.626375

@@ -1,12 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile,writeFile} from 'node:fs/promises';
+import {mkdtemp,readFile,writeFile} from 'node:fs/promises';
 import {Script} from 'node:vm';
 import {join} from 'node:path';
+import {tmpdir} from 'node:os';
 import {gzipSync} from 'node:zlib';
 import {createEnvironment} from '../script/compact-environment.mjs';
 import {createGuardedCompactSdk} from './compact-sdk-v2.mjs';
 import {verifyGuardedClaim} from './guarded-archive.mjs';
+
+const writeProfileEvidence=(path,bytes)=>writeFile(path,bytes,{flag:'wx'});
+
+test('read-set evidence output refuses replacement of an existing explicit path',async()=>{
+  const dir=await mkdtemp(join(tmpdir(),'efs-readset-evidence-')),path=join(dir,'explicit.json.gz');
+  await writeProfileEvidence(path,Buffer.from('original packet'));
+  await assert.rejects(writeProfileEvidence(path,Buffer.from('replacement packet')),{code:'EEXIST'});
+  assert.equal(await readFile(path,'utf8'),'original packet');
+});
 
 // Execute the actual browser transport boundary without app bootstrap, DOM,
 // imports, UI or stored state. Tests exercise its behavior, not source spelling.
@@ -152,5 +162,9 @@ test('actual old browser transport and mixed family qualify old new downgrade re
     pid:env.anvilPid,port:env.port,history:env.historyPolicy,savedManifest:saved,mixedManifest:mixed,observedLegacyRefusal:observed[0],executions,
     legacyReadSetHash:legacy.intent.readSetHash,carrierReadSetHash:fresh.intent.readSetHash,legacyBytesHash:e.keccak256(legacyBytes),carrierBytesHash:e.keccak256(freshBytes),
     downgradeCurrentArchive:'ARCHIVE_READSET_MISSING',downgradeCommittedReconciliation:historical.status,restoreExactBytes:true,transactions:env.transactions};
-  await writeFile(new URL('../core-closeout-sdk-20260915/carrier-fix1-mixed.json.gz',import.meta.url),gzipSync(JSON.stringify(plain(evidence),null,2)));
+  // Ordinary verification belongs to this run's temp directory. Publishing a
+  // durable packet requires an explicit new path; exclusive create forbids reuse.
+  const output=process.env.EFS_READSET_PROFILE_EVIDENCE_OUT??join(env.dir,'readset-profile.json.gz');
+  await writeProfileEvidence(output,gzipSync(JSON.stringify(plain(evidence),null,2)));
+  t.diagnostic(`Read-set profile evidence: ${output}`);
 });
