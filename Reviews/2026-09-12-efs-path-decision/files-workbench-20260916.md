@@ -2,7 +2,7 @@
 
 September 16, 2026 · v2 PM · disposable integration prototype, not production or complete v1 parity.
 
-> Later September 16 checkpoint: use **http://127.0.0.1:60627/** for wallet setup and real Arweave/IPFS links. See the continuation below; the original run/evidence remains recorded here.
+> Latest September 16 checkpoint: **http://127.0.0.1:60627/** now runs Vite; RPC is **http://127.0.0.1:8545**, chain **31337**. The three older demo chains were retired with James's disposable-state authorization. See the final continuation for static-build and actual v1 comparison evidence; earlier ports below are historical.
 
 James asked for a quick working browser before a clean-slate engineering pass.
 V1 was inspected for behavior only. No v1 code, components or contracts were copied.
@@ -204,3 +204,110 @@ checks above. No broad new audit or v1 code reuse. Entry point remains
 Next gaps: owner MetaMask click-through; paid/durable upload workflow; one-approval
 transport; static/IPFS-hosted packaging; remaining extra application tools from
 the original list. Do not restart architecture research to polish this disposable UI.
+
+## September 16 continuation — Vite, stable Hardhat RPC, static build
+
+Code checkpoint: **`1d817a4`** on the existing `codex/efs-warroom-b-run` branch.
+
+The existing prototype now has pinned Vite 8.3.0 and ethers 6.15.0 dependencies.
+Vite serves UI 60627; a separate process owns the pruned Anvil chain on RPC 8545,
+chain 31337. Restarting the UI no longer redeploys contracts or resets the chain.
+Explicit alternate ports remain available for parallel runs. Vite refuses an
+occupied requested port rather than silently changing the URL. The older owned
+UI 57215/60608/60627 runners and their three chains were stopped; their volatile
+test state is gone, but source and evidence files were not deleted.
+
+### Run it
+
+From `Reviews/2026-09-12-efs-path-decision/lab-b/` in the existing prototype checkout:
+
+```sh
+npm ci
+# First prepare coherent artifacts for the current source; requires Foundry.
+forge build --skip test --skip script
+# Terminal 1: owns the disposable local chain, deployment and seed.
+npm run chain
+# Terminal 2: Vite only; safe to restart without resetting the chain.
+npm run dev
+```
+
+`FOUNDRY_OUT` can point to an already-built coherent artifact directory;
+`ANVIL_BIN` selects Anvil when it is not on PATH. The current run reuses the
+coherent final-closeout plus external-profile artifacts from the preceding
+session; no Solidity source changed in this pass. `EFS_RPC_PORT=0` asks the
+chain runner for an ephemeral port, or set an explicit alternate. For another
+UI, set the same `EFS_UI_PORT` in both terminals so the optional raw-byte test
+fixture permits that UI origin. Defaults stay 8545 and 60627.
+
+For MetaMask use the existing Hardhat network if it points to
+`http://localhost:8545` or `http://127.0.0.1:8545`, chain 31337. The app's explicit
+add-network button and copy-RPC fallback remain. The browser still checks actual
+deployment identity, not merely the chain ID. Do not import demo keys into a
+real wallet. A reset local chain may require clearing stale wallet activity if
+the wallet reports an old nonce; this pass did not change wallet settings.
+
+### Static-SPA evidence
+
+`npm run build` emits `dist/`: HTML/CSS/JS plus an ordinary deployment
+`config.json`. Relative assets/config and hash routes support path-prefix
+hosting. The build excludes demo keys, disables the local faucet/demo signers,
+and omits the temporary raw-byte store origin. There is no application API,
+RPC proxy, server-side file listing, signing service or backend cache.
+
+With Vite actually stopped, `npm run static` served only these files under
+`http://127.0.0.1:4173/ipfs/local-workbench/`. A cold deep link opened
+`docs/meeting.txt`; reversing the Lens changed Alice's 10:00 text to Bob's 11:00;
+`photos/red.png` rendered from 70 verified onchain bytes. Static assets/config
+returned 200; demo-wallet and traversal probes returned 404. The static test
+caught a production-only entrypoint omission: Vite's HTML transform now runs
+before module-graph extraction. The corrected build was browser-retested.
+
+An EIP-1193 harness using this static manifest completed eight real local-chain
+writes (directory/file/edit/tag/rename/move/remove/restore), all with independent
+effect reconciliation. This is not an actual MetaMask extension approval test.
+Vite then restarted on 60627; the original block 79 hash remained unchanged.
+CSS hot reload was observed without losing the open folder. 34 focused existing
+JS checks passed. An independent Astra High review found no remaining
+Critical/Important issue in this migration.
+
+**Boundary:** this proves static packaging against a local RPC, not a public
+IPFS deployment or public-network wallet journey. Existing wallet setup helpers
+deliberately require an HTTP loopback origin; HTTPS/public-network setup remains
+follow-up work. Paid Arweave uploads and IPFS pinning still need storage drivers.
+Minor runner follow-up: install cleanup earlier so a direct termination during
+initial deployment cannot orphan Anvil. Some static-build help copy still
+describes the development-only raw-byte fixture; it is not shipped as a service.
+
+### V1 was now run, not just inspected
+
+A separate Astra High worker used an isolated snapshot of canonical
+`contracts/packages/nextjs` at `c6b4075308dd37bb36665eabecb66ec8b47fc7dd`, with
+RPC 59680/UI 59681. No v1 code entered v2 and canonical v1 checkouts were unchanged.
+The worker reported 153 fresh contract checks and 34 client utility checks
+passing, and verified relevant artifacts against current-source build-info.
+This reused matching compiled artifacts; it was not a fresh v1 compilation or
+the full v1 suite. Output is retained in the review task transcript, not a new
+checked-in log bundle. Contract coverage comprised PIN/TAG/filtered FileView/
+WHITEOUT (128), selected FileView fallback/placement/empty-folder cases (5),
+and duplicate/canonical-name cases (20); the four client utility suites cover
+upload, transports, fetchFileContent and excludeFilter.
+In the real browser, explicit seed-author Lenses recovered `docs/images/shared`,
+`shared/photo.png` rendered, and Lens reversal changed its mirror author. Both
+comparison services were then shut down. Client utility checks use mocked
+clients; this is not evidence of paid storage or public-chain writes.
+
+The v1 launcher already supports dynamic per-run ports. We followed that
+operational separation without copying it; the user-facing v2 run keeps the
+standard wallet endpoint. Avoid root v1 `yarn preview` in a read-only checkout:
+its deploy chain can rewrite sibling client ABI files.
+
+| Hidden behavior | Concrete v2 follow-up |
+|---|---|
+| V1 revoking one's PIN permits lower-author fallback; WHITEOUT separately blocks fallback | V2's current remove is a mask. Distinguish withdrawal from masking in controls; run both Lens orders and restore. |
+| V1 folder removal recursively revokes own placements/tags | V2 currently removes only the directory placement. Test nonempty folders and direct descendant routes; do not call it recursive deletion. |
+| V1 checks canonical names, collisions and replacement | V2 lowercase ASCII is still a prototype limit. Test file/folder collision and stale replacement confirmation. |
+| V1 negative/cross-author tags and empty continuation pages have specific behavior | Exercise revision replacement and cross-author tag filtering without treating UNKNOWN as absent; newer stance semantics are not the same as weighted v1 labels. |
+| Shared DATA can have distinct placement authors; mirrors are attributed | Keep File identity, selected revision and placement author separate. Copy/link and multiple-mirror UI remain unwired. |
+
+Highest-leverage next parity check: a small **withdraw / mask / nonempty-folder /
+restore** matrix under both Lens orders, rather than another broad UI rewrite.
