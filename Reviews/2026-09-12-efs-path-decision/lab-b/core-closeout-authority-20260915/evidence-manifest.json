@@ -1,0 +1,66 @@
+{
+  "allGzipDecode": true,
+  "currentDeploymentBytecodeMatchesMeasured": true,
+  "files": {
+    "artifact-ContractSignatureCode.json.gz": {
+      "bytes": 1298,
+      "sha256": "ade4f40ac7ff8beb90d3e11a56e86380d3ddd009917b1c06ea2a3a813debf90b"
+    },
+    "artifact-ContractSignatureEvidenceArchive.json.gz": {
+      "bytes": 15787,
+      "sha256": "1545a324d25cea6bcb0bdf7b2d1b321bb06d1e329b6052e499dfe7fe8b5548d4"
+    },
+    "artifact-ContractSignatureEvidenceStore.json.gz": {
+      "bytes": 3503,
+      "sha256": "71a3db81d02fcc8e55a556033ae02593733262bfd3e2242e4d51ed35960c77ce"
+    },
+    "artifact-ContractSignatureWallet.json.gz": {
+      "bytes": 6204,
+      "sha256": "8aa9302c319aa51ed92248e2aae842f6388a0c5fb21e00255da1b4ffc2af0ddd"
+    },
+    "artifact-Ledger.json.gz": {
+      "bytes": 65393,
+      "sha256": "a0be88708f8ceecfc854a50b6b83a91da6e56842fa4d75ca189b5cd7ffd7eebb"
+    },
+    "artifact-PublicationSupport.json.gz": {
+      "bytes": 22721,
+      "sha256": "bac8f5448b91fa1511b57801c52bb66f66f87f977c2ad38ed400ab63ebcb2406"
+    },
+    "artifact-SignaturePaidRead.json.gz": {
+      "bytes": 1992,
+      "sha256": "0cd9682f426891c2e208c2f48e715193afa4109cc38aa157411fd4de1e83b2c9"
+    },
+    "base-upgrade-runner-measured.mjs.gz": {
+      "bytes": 3164,
+      "sha256": "3f178f39fa092c6273e35ae4639f92df0fa50eecf546035c5b2878ed25d77292"
+    },
+    "covering-forge.log": {
+      "bytes": 15245,
+      "sha256": "c6273ccf434a885169af151b7f4829c9c176374c3d27636094b458180ab33c23"
+    },
+    "exact-base-upgrade.json.gz": {
+      "bytes": 234828,
+      "sha256": "5091ae386dea2f1ec9404ad6dda6df311ec0bb9a5d129b76fb5c158a3d75efa0"
+    },
+    "paid-progress.json.gz": {
+      "bytes": 382357,
+      "sha256": "bd11730c2132231808a345de788fd5136559d9666da5e95ac7ce55ab63014415"
+    },
+    "paid-runner-9941d3b.mjs.gz": {
+      "bytes": 5140,
+      "sha256": "514e3becee6ba5dcb7eedba1f19025f8419c1ffc1d142534015ac23cbe7b364a"
+    },
+    "paid.json.gz": {
+      "bytes": 383774,
+      "sha256": "29925107d8dd27d61d2e602bdd4fc1b903454543e17aa4ec0b8b2fa6908dcb32"
+    },
+    "rollback-create-nonce.log": {
+      "bytes": 2875,
+      "sha256": "8799a2aaea967b743b67d86116c16b074ebfbc3b576c9b3e9b6e96d86cd7ed23"
+    },
+    "storage-layout.json": {
+      "bytes": 18072,
+      "sha256": "97594447388ade242a237cc0d8d02eabebadcb1185eb6e97110543a874cf68cb"
+    }
+  }
+}

@@ -9,7 +9,7 @@ import {UpgradeProxy} from "./UpgradeProxy.sol";
 import {IndexModule} from "../src/IndexModule.sol";
 import {FailingIndexModule} from "../src/LabHarness.sol";
 
-interface SignatureVm {function etch(address,bytes calldata) external;function prank(address) external;}
+interface SignatureVm {function etch(address,bytes calldata) external;function prank(address) external;function getNonce(address) external view returns(uint64);}
 
 interface WalletIngress {
     function executeGuarded1271(Ledger.IntentV2 calldata intent,Ledger.Action[] calldata actions,
@@ -210,6 +210,9 @@ contract Guarded1271Test is Guarded1271Harness {
         (address support,)=ledger.publicationSupportIdentity();
         (bool ok,bytes memory raw)=support.staticcall(abi.encodeWithSignature("signatureStoreIdentity()"));require(ok);
         (address store,)=abi.decode(raw,(address,bytes32));
+        require(svm.getNonce(store)==1,"failed publication leaked store CREATE nonce");
+        address predicted=address(uint160(uint256(keccak256(abi.encodePacked(hex"d694",store,hex"01")))));
+        require(predicted.code.length==0,"failed publication leaked signature carrier code");
         (ok,)=store.staticcall(abi.encodeCall(ContractSignatureEvidenceStore.evidence,(address(ledger),uint64(1))));
         require(!ok,"signature-store residue");
     }

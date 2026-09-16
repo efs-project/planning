@@ -1,0 +1,686 @@
+{
+  "storage": [
+    {
+      "astId": 3028,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "indexModule",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_address"
+    },
+    {
+      "astId": 3030,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_counters",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 3035,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_record",
+      "offset": 0,
+      "slot": "2",
+      "type": "t_mapping(t_bytes32,t_struct(RecordCell)2873_storage)"
+    },
+    {
+      "astId": 3041,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_bodyWord",
+      "offset": 0,
+      "slot": "3",
+      "type": "t_mapping(t_bytes32,t_mapping(t_uint256,t_bytes32))"
+    },
+    {
+      "astId": 3045,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_subject",
+      "offset": 0,
+      "slot": "4",
+      "type": "t_mapping(t_bytes32,t_uint64)"
+    },
+    {
+      "astId": 3050,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_admission",
+      "offset": 0,
+      "slot": "5",
+      "type": "t_mapping(t_uint64,t_struct(AdmissionRow)2880_storage)"
+    },
+    {
+      "astId": 3055,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_evidence",
+      "offset": 0,
+      "slot": "6",
+      "type": "t_mapping(t_uint64,t_struct(EvidenceCell)2907_storage)"
+    },
+    {
+      "astId": 3059,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_publicationOrdinal",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_mapping(t_bytes32,t_uint64)"
+    },
+    {
+      "astId": 3064,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_head",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_bytes32,t_struct(HeadRow)2885_storage)"
+    },
+    {
+      "astId": 3068,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_bindingPosition",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_uint64,t_bytes32)"
+    },
+    {
+      "astId": 3073,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_position",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_bytes32,t_struct(PositionCell)2892_storage)"
+    },
+    {
+      "astId": 3077,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "nonces",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_mapping(t_address,t_uint64)"
+    },
+    {
+      "astId": 3082,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_source",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_mapping(t_uint64,t_struct(SourceEvidence)2933_storage)"
+    },
+    {
+      "astId": 3087,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_context",
+      "offset": 0,
+      "slot": "13",
+      "type": "t_mapping(t_uint64,t_struct(PublicationContext)2781_storage)"
+    },
+    {
+      "astId": 3092,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_execution",
+      "offset": 0,
+      "slot": "14",
+      "type": "t_mapping(t_bytes32,t_struct(ExecutionInfo)2802_storage)"
+    },
+    {
+      "astId": 3096,
+      "contract": "src/Ledger.sol:Ledger",
+      "label": "_readSets",
+      "offset": 0,
+      "slot": "15",
+      "type": "t_mapping(t_bytes32,t_bytes_storage)"
+    }
+  ],
+  "types": {
+    "t_address": {
+      "encoding": "inplace",
+      "label": "address",
+      "numberOfBytes": "20"
+    },
+    "t_bytes32": {
+      "encoding": "inplace",
+      "label": "bytes32",
+      "numberOfBytes": "32"
+    },
+    "t_bytes_storage": {
+      "encoding": "bytes",
+      "label": "bytes",
+      "numberOfBytes": "32"
+    },
+    "t_mapping(t_address,t_uint64)": {
+      "encoding": "mapping",
+      "key": "t_address",
+      "label": "mapping(address => uint64)",
+      "numberOfBytes": "32",
+      "value": "t_uint64"
+    },
+    "t_mapping(t_bytes32,t_bytes_storage)": {
+      "encoding": "mapping",
+      "key": "t_bytes32",
+      "label": "mapping(bytes32 => bytes)",
+      "numberOfBytes": "32",
+      "value": "t_bytes_storage"
+    },
+    "t_mapping(t_bytes32,t_mapping(t_uint256,t_bytes32))": {
+      "encoding": "mapping",
+      "key": "t_bytes32",
+      "label": "mapping(bytes32 => mapping(uint256 => bytes32))",
+      "numberOfBytes": "32",
+      "value": "t_mapping(t_uint256,t_bytes32)"
+    },
+    "t_mapping(t_bytes32,t_struct(ExecutionInfo)2802_storage)": {
+      "encoding": "mapping",
+      "key": "t_bytes32",
+      "label": "mapping(bytes32 => struct Ledger.ExecutionInfo)",
+      "numberOfBytes": "32",
+      "value": "t_struct(ExecutionInfo)2802_storage"
+    },
+    "t_mapping(t_bytes32,t_struct(HeadRow)2885_storage)": {
+      "encoding": "mapping",
+      "key": "t_bytes32",
+      "label": "mapping(bytes32 => struct Ledger.HeadRow)",
+      "numberOfBytes": "32",
+      "value": "t_struct(HeadRow)2885_storage"
+    },
+    "t_mapping(t_bytes32,t_struct(PositionCell)2892_storage)": {
+      "encoding": "mapping",
+      "key": "t_bytes32",
+      "label": "mapping(bytes32 => struct Ledger.PositionCell)",
+      "numberOfBytes": "32",
+      "value": "t_struct(PositionCell)2892_storage"
+    },
+    "t_mapping(t_bytes32,t_struct(RecordCell)2873_storage)": {
+      "encoding": "mapping",
+      "key": "t_bytes32",
+      "label": "mapping(bytes32 => struct Ledger.RecordCell)",
+      "numberOfBytes": "32",
+      "value": "t_struct(RecordCell)2873_storage"
+    },
+    "t_mapping(t_bytes32,t_uint64)": {
+      "encoding": "mapping",
+      "key": "t_bytes32",
+      "label": "mapping(bytes32 => uint64)",
+      "numberOfBytes": "32",
+      "value": "t_uint64"
+    },
+    "t_mapping(t_uint256,t_bytes32)": {
+      "encoding": "mapping",
+      "key": "t_uint256",
+      "label": "mapping(uint256 => bytes32)",
+      "numberOfBytes": "32",
+      "value": "t_bytes32"
+    },
+    "t_mapping(t_uint64,t_bytes32)": {
+      "encoding": "mapping",
+      "key": "t_uint64",
+      "label": "mapping(uint64 => bytes32)",
+      "numberOfBytes": "32",
+      "value": "t_bytes32"
+    },
+    "t_mapping(t_uint64,t_struct(AdmissionRow)2880_storage)": {
+      "encoding": "mapping",
+      "key": "t_uint64",
+      "label": "mapping(uint64 => struct Ledger.AdmissionRow)",
+      "numberOfBytes": "32",
+      "value": "t_struct(AdmissionRow)2880_storage"
+    },
+    "t_mapping(t_uint64,t_struct(EvidenceCell)2907_storage)": {
+      "encoding": "mapping",
+      "key": "t_uint64",
+      "label": "mapping(uint64 => struct Ledger.EvidenceCell)",
+      "numberOfBytes": "32",
+      "value": "t_struct(EvidenceCell)2907_storage"
+    },
+    "t_mapping(t_uint64,t_struct(PublicationContext)2781_storage)": {
+      "encoding": "mapping",
+      "key": "t_uint64",
+      "label": "mapping(uint64 => struct Ledger.PublicationContext)",
+      "numberOfBytes": "32",
+      "value": "t_struct(PublicationContext)2781_storage"
+    },
+    "t_mapping(t_uint64,t_struct(SourceEvidence)2933_storage)": {
+      "encoding": "mapping",
+      "key": "t_uint64",
+      "label": "mapping(uint64 => struct Ledger.SourceEvidence)",
+      "numberOfBytes": "32",
+      "value": "t_struct(SourceEvidence)2933_storage"
+    },
+    "t_struct(AdmissionRow)2880_storage": {
+      "encoding": "inplace",
+      "label": "struct Ledger.AdmissionRow",
+      "numberOfBytes": "96",
+      "members": [
+        {
+          "astId": 2875,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "meta",
+          "offset": 0,
+          "slot": "0",
+          "type": "t_uint256"
+        },
+        {
+          "astId": 2877,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "a",
+          "offset": 0,
+          "slot": "1",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2879,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "b",
+          "offset": 0,
+          "slot": "2",
+          "type": "t_bytes32"
+        }
+      ]
+    },
+    "t_struct(EvidenceCell)2907_storage": {
+      "encoding": "inplace",
+      "label": "struct Ledger.EvidenceCell",
+      "numberOfBytes": "224",
+      "members": [
+        {
+          "astId": 2894,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "w0",
+          "offset": 0,
+          "slot": "0",
+          "type": "t_uint256"
+        },
+        {
+          "astId": 2896,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "r",
+          "offset": 0,
+          "slot": "1",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2898,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "s",
+          "offset": 0,
+          "slot": "2",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2900,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "w3",
+          "offset": 0,
+          "slot": "3",
+          "type": "t_uint256"
+        },
+        {
+          "astId": 2902,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "acceptanceProfile",
+          "offset": 0,
+          "slot": "4",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2904,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "indexObligations",
+          "offset": 0,
+          "slot": "5",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2906,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "actionsHash",
+          "offset": 0,
+          "slot": "6",
+          "type": "t_bytes32"
+        }
+      ]
+    },
+    "t_struct(ExecutionInfo)2802_storage": {
+      "encoding": "inplace",
+      "label": "struct Ledger.ExecutionInfo",
+      "numberOfBytes": "320",
+      "members": [
+        {
+          "astId": 2783,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "origin",
+          "offset": 0,
+          "slot": "0",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2785,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "revision",
+          "offset": 0,
+          "slot": "1",
+          "type": "t_uint256"
+        },
+        {
+          "astId": 2787,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "shellCodeHash",
+          "offset": 0,
+          "slot": "2",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2789,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "implementation",
+          "offset": 0,
+          "slot": "3",
+          "type": "t_address"
+        },
+        {
+          "astId": 2791,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "implementationCodeHash",
+          "offset": 0,
+          "slot": "4",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2793,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "registryAddress",
+          "offset": 0,
+          "slot": "5",
+          "type": "t_address"
+        },
+        {
+          "astId": 2795,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "registryCodeHash",
+          "offset": 0,
+          "slot": "6",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2797,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "indexAddress",
+          "offset": 0,
+          "slot": "7",
+          "type": "t_address"
+        },
+        {
+          "astId": 2799,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "indexCodeHash",
+          "offset": 0,
+          "slot": "8",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2801,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "indexGeneration",
+          "offset": 0,
+          "slot": "9",
+          "type": "t_uint64"
+        }
+      ]
+    },
+    "t_struct(HeadRow)2885_storage": {
+      "encoding": "inplace",
+      "label": "struct Ledger.HeadRow",
+      "numberOfBytes": "64",
+      "members": [
+        {
+          "astId": 2882,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "meta",
+          "offset": 0,
+          "slot": "0",
+          "type": "t_uint256"
+        },
+        {
+          "astId": 2884,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "target",
+          "offset": 0,
+          "slot": "1",
+          "type": "t_bytes32"
+        }
+      ]
+    },
+    "t_struct(PositionCell)2892_storage": {
+      "encoding": "inplace",
+      "label": "struct Ledger.PositionCell",
+      "numberOfBytes": "96",
+      "members": [
+        {
+          "astId": 2887,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "purpose",
+          "offset": 0,
+          "slot": "0",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2889,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "subject",
+          "offset": 0,
+          "slot": "1",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2891,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "role",
+          "offset": 0,
+          "slot": "2",
+          "type": "t_bytes32"
+        }
+      ]
+    },
+    "t_struct(PublicationContext)2781_storage": {
+      "encoding": "inplace",
+      "label": "struct Ledger.PublicationContext",
+      "numberOfBytes": "160",
+      "members": [
+        {
+          "astId": 2768,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "principalId",
+          "offset": 0,
+          "slot": "0",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2770,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "executionSet",
+          "offset": 0,
+          "slot": "1",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2772,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "readSetHash",
+          "offset": 0,
+          "slot": "2",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2774,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "intentDigest",
+          "offset": 0,
+          "slot": "3",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2776,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "principalKind",
+          "offset": 0,
+          "slot": "4",
+          "type": "t_uint8"
+        },
+        {
+          "astId": 2778,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "authorizationProfile",
+          "offset": 1,
+          "slot": "4",
+          "type": "t_uint8"
+        },
+        {
+          "astId": 2780,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "intentFormat",
+          "offset": 2,
+          "slot": "4",
+          "type": "t_uint8"
+        }
+      ]
+    },
+    "t_struct(RecordCell)2873_storage": {
+      "encoding": "inplace",
+      "label": "struct Ledger.RecordCell",
+      "numberOfBytes": "64",
+      "members": [
+        {
+          "astId": 2870,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "typeId",
+          "offset": 0,
+          "slot": "0",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2872,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "meta",
+          "offset": 0,
+          "slot": "1",
+          "type": "t_uint256"
+        }
+      ]
+    },
+    "t_struct(SourceEvidence)2933_storage": {
+      "encoding": "inplace",
+      "label": "struct Ledger.SourceEvidence",
+      "numberOfBytes": "288",
+      "members": [
+        {
+          "astId": 2910,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "realmId",
+          "offset": 0,
+          "slot": "0",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2912,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "coreCodeCommitment",
+          "offset": 0,
+          "slot": "1",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2914,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "acceptanceProfile",
+          "offset": 0,
+          "slot": "2",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2916,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "indexObligations",
+          "offset": 0,
+          "slot": "3",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2918,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "r",
+          "offset": 0,
+          "slot": "4",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2920,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "s",
+          "offset": 0,
+          "slot": "5",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2922,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "sourcePrincipal",
+          "offset": 0,
+          "slot": "6",
+          "type": "t_bytes32"
+        },
+        {
+          "astId": 2924,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "author",
+          "offset": 0,
+          "slot": "7",
+          "type": "t_address"
+        },
+        {
+          "astId": 2926,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "nonce",
+          "offset": 20,
+          "slot": "7",
+          "type": "t_uint64"
+        },
+        {
+          "astId": 2928,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "deadline",
+          "offset": 0,
+          "slot": "8",
+          "type": "t_uint64"
+        },
+        {
+          "astId": 2930,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "v",
+          "offset": 8,
+          "slot": "8",
+          "type": "t_uint8"
+        },
+        {
+          "astId": 2932,
+          "contract": "src/Ledger.sol:Ledger",
+          "label": "grade",
+          "offset": 9,
+          "slot": "8",
+          "type": "t_uint8"
+        }
+      ]
+    },
+    "t_uint256": {
+      "encoding": "inplace",
+      "label": "uint256",
+      "numberOfBytes": "32"
+    },
+    "t_uint64": {
+      "encoding": "inplace",
+      "label": "uint64",
+      "numberOfBytes": "8"
+    },
+    "t_uint8": {
+      "encoding": "inplace",
+      "label": "uint8",
+      "numberOfBytes": "1"
+    }
+  }
+}
