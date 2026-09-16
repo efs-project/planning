@@ -11,7 +11,7 @@ import {guardedProtocol} from '../browser/compact-sdk-v2.mjs';
 import * as contentCodec from '../browser/compact-content.mjs';
 const lab=fileURLToPath(new URL('../',import.meta.url));
 const numeric=['calls','wireCalls','httpRequests','httpBatches','requestBytes','responseBytes','fallbacks'];
-const work=['attempts','hits','misses','inflightHits','evictions','oversize'];
+const work=['attempts','hits','misses','inflightHits','evictions','oversize','contextHits','contextMisses'];
 const diff=(a,b,keys)=>Object.fromEntries(keys.map(k=>[k,(a[k]??0)-(b[k]??0)]));
 const reports=[],sourceHead=execFileSync('git',['rev-parse','HEAD'],{cwd:lab,encoding:'utf8'}).trim();
 const files=['browser/compact-sdk.mjs','browser/compact-sdk-v2.mjs','browser/compact-content.mjs',

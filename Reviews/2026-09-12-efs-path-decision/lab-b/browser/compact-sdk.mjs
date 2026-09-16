@@ -79,7 +79,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   };
   const config = freeze(plain(manifest));
   const cache=createExactReadCache({identity:e.keccak256(e.toUtf8Bytes(JSON.stringify(config))),...readCache});
-  const verifiedContexts=new Map();let contextBytes=0;
+  const verifiedContexts=new Map();let contextBytes=0,contextHits=0,contextMisses=0;
   const contextLimits={maxEntries:8,maxBytes:128*1024};
   // Chunk inputs rather than constructing an unbounded pending Promise queue.
   const readGroup=async(values,visit)=>{
@@ -214,8 +214,10 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     await canonical(context);
     const cached=verifiedContexts.get(context.blockHash);
     if(cached){check(cached.value.blockNumber===context.blockNumber&&cached.value.timestamp===context.timestamp,'BLOCK_METADATA');
+      contextHits++;
       verifiedContexts.delete(context.blockHash);verifiedContexts.set(context.blockHash,cached);
       const fresh=freeze({...cached.value});contexts.add(fresh);return fresh;}
+    contextMisses++;
     try {
     [context.admission,context.generation,context.epoch] = (await Promise.all([
       scalar('ledger','counts',[],context),scalar('index','generation',[],context),scalar('registry','epoch',[],context),
@@ -952,6 +954,6 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   }
   const publicRead=fn=>async args=>{const value=await fn(args);await canonical(args.context);return value;};
   return Object.freeze({pin,...Object.fromEntries(Object.entries({listFolder,listFolderPage,readFile,readName,readDirectory,readPlacement,readContent,readTypedRecord,readConcept,readTag}).map(([name,fn])=>[name,publicRead(fn)])),conceptId,prepare,authorize,submit,reconcile,
-    readMetrics:()=>({...cache.stats(),contexts:verifiedContexts.size,contextBytes,contextLimits:{...contextLimits},groupWidth:16}),
+    readMetrics:()=>({...cache.stats(),contexts:verifiedContexts.size,contextHits,contextMisses,contextBytes,contextLimits:{...contextLimits},groupWidth:16}),
     capabilities:()=>freeze(plain({...protocol.capabilities,typedDirectories:directories,globalTree:false}))});
 }

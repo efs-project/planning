@@ -185,6 +185,7 @@ test('verified same-hash context reuse still acquires latest header and chain id
   const again=await sdk.pin(),actual=calls.slice(before);assert.equal(again.blockHash,blockHash);
   assert(actual.some(c=>c.method==='eth_chainId'));assert(actual.some(c=>c.method==='eth_getBlockByNumber'&&c.params[0]==='latest'));
   assert(!actual.some(c=>['eth_call','eth_getCode'].includes(c.method)));
+  assert.equal(sdk.readMetrics().contextHits,1);assert.equal(sdk.readMetrics().contextMisses,1);
 });
 test('bounded independent groups preserve global order and indices across the 64-principal fixture',async()=>{
   let group;compact.createCompactEngine({ethers,rpc:async()=>{},manifest},scope=>{group=scope.readGroup;return {};});
