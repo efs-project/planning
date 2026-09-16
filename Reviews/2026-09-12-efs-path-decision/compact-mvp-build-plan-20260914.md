@@ -242,6 +242,17 @@ Use the existing PM responsibilities and small handoff documents. A dedicated
 production Contracts/Dev task is useful once real repositories exist; no new
 permanent agent orchestration system is needed for this prototype.
 
+**Source-layout lesson from the September16 experiments:** isolate Type-defining
+validators and their minimal versioned interfaces from mutable index/reader
+implementation files. In the prototype, adding `virtual` to an index method in
+a shared source changes Solidity metadata and therefore exact rule/Type hashes,
+even when validation behavior is unchanged. Retain reproducible compiler/settings,
+source closure and deployable artifacts for every released Type; reuse its exact
+artifact when preserving identity, or publish an explicitly new Type/profile.
+Do not relabel old records after a refactor or silently strip identity inputs.
+This is an implementation-layout recommendation, not a change to Type meaning or
+an identity-preserving migration claim.
+
 ## 3. Build one vertical, in this order
 
 1. **Port the tested kernel/index contracts and the two gate fixes.** Preserve
