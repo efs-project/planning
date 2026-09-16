@@ -1,0 +1,136 @@
+Compiling 20 files with Solc 0.8.30
+Solc 0.8.30 finished in 223.19s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:92:21:
+   |
+92 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:97:29:
+   |
+97 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:22:
+    |
+117 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:121:25:
+    |
+121 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/FilesDirectoryProfile.t.sol:60:5:
+   |
+60 |     function test_directory_pin_rejects_wrong_rule_hash() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 142249 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesDirectoryProfile.t.sol:11:1:
+   |
+11 | contract FilesDirectoryProfileTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 107314 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesCarrierProfile.t.sol:10:1:
+   |
+10 | contract FilesCarrierProfileTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 187747 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesCarrierProfile.t.sol:71:1:
+   |
+71 | contract FilesCarrierIndexTest is FilesDirectoryProfileTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 236230 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/CoreIndexFiles.t.sol:10:1:
+   |
+10 | contract CoreIndexFilesTest is FilesCarrierIndexTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 283690 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/CoreIndexReplayFiles.t.sol:13:1:
+   |
+13 | contract CoreIndexReplayFilesTest is CoreIndexFilesTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 272327 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesPageReader.t.sol:14:1:
+   |
+14 | contract FilesPageReaderTest is FilesCarrierIndexTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 277376 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesBytework.t.sol:10:1:
+   |
+10 | contract FilesByteworkTest is FilesPageReaderTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 316592 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesQueryOrigin.t.sol:10:1:
+   |
+10 | contract FilesQueryOriginTest is FilesPageReaderTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 301282 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+ --> test/FilesRetainedQuery.t.sol:9:1:
+  |
+9 | contract FilesRetainedQueryTest is FilesPageReaderTest {
+  | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 1 test for test/FilesRetainedQuery.t.sol:FilesRetainedQueryTest
+[PASS] test_retained_query_advances_across_selected_folder_churn() (gas: 17699191)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 58.33ms (35.25ms CPU time)
+
+Ran 2 tests for test/FilesBytework.t.sol:FilesByteworkTest
+[PASS] test_bytework_nonmatching_search_keeps_unknown_axes() (gas: 13171711)
+[PASS] test_bytework_substring_boundaries() (gas: 15808074)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 65.95ms (73.50ms CPU time)
+
+Ran 3 tests for test/CoreIndexReplayFiles.t.sol:CoreIndexReplayFilesTest
+[PASS] test_replayed_late_files_index_qualifies_actual_page_reader() (gas: 25070165)
+[PASS] test_replayed_scope_stamps_dense_order_two_authors_two_folders() (gas: 17903008)
+[PASS] test_scope_code_pin_rejects_replacement_and_live_write() (gas: 10654662)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 69.50ms (50.82ms CPU time)
+
+Ran 9 tests for test/FilesQueryOrigin.t.sol:FilesQueryOriginTest
+[PASS] test_query_empty_consumed_terminal_scopes_guarded_other_folder_allowed() (gas: 15581191)
+[PASS] test_query_historical_heads_masks_first_head_tags_and_conflict() (gas: 25995007)
+[PASS] test_query_missing_history_keeps_unknown_and_never_falls_through() (gas: 15953527)
+[PASS] test_query_nested_origin_generation_epoch_execution_and_gap_refuse() (gas: 15676307)
+[PASS] test_query_owned_negative_is_historical_not_current_authority() (gas: 13980624)
+[PASS] test_query_owned_prefix_progress_and_reject_foreign_restart_suffix() (gas: 16269004)
+[PASS] test_query_owned_unknown_and_old_empty_start_refuse_absence() (gas: 14740438)
+[PASS] test_query_post_origin_withdrawal_preserves_retained_headers() (gas: 15271040)
+[PASS] test_query_selected_overwrite_mask_swap_restore_refuse() (gas: 55672686)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 102.75ms (286.22ms CPU time)
+
+Ran 4 test suites in 118.43ms (296.53ms CPU time): 15 tests passed, 0 failed, 0 skipped (15 total tests)

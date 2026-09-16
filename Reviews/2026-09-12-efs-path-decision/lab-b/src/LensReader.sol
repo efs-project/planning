@@ -94,6 +94,9 @@ contract LensReader {
         uint8 status;
         bool mutated;
         PrincipalCursor next;
+        bytes32 inventoryPin; // zero for the current-inventory profile
+        uint64 prefixProbes; // retained origin-length comparisons, not row scans
+        uint64 prefixGas; // in-call prefix-discovery diagnostic, not receipt gas
     }
     // Internal reducers return selector ordinals, so wrappers can expose either
     // addresses or explicit IDs without a second scan or reverse identity lookup.
@@ -107,6 +110,9 @@ contract LensReader {
         uint8 status;
         bool mutated;
         PrincipalCursor next;
+        bytes32 inventoryPin;
+        uint64 prefixProbes;
+        uint64 prefixGas;
     }
     bytes32 private constant SUPPORTED_LAYOUT = keccak256("efs.lab.ledger-layout/2:roots-0-12-preserved:context-13:execution-14:readsets-15");
 
@@ -170,17 +176,73 @@ contract LensReader {
             c.basisAdmission = current;
             c.executionSet = execution; c.indexGeneration = generation; c.rulesEpoch = epoch;
             c.scopeKey = scopeKey; c.lensHash = lensHash;
-        } else if (c.basisAdmission != current || c.executionSet != execution || c.indexGeneration != generation || c.rulesEpoch != epoch
-            || c.scopeKey != scopeKey || c.lensHash != lensHash) revert E_CURSOR();
+        } else {
+            if (c.executionSet != execution || c.indexGeneration != generation || c.rulesEpoch != epoch
+                || c.scopeKey != scopeKey || c.lensHash != lensHash) revert E_CURSOR();
+            _continuationBasis(principals,purpose,subject,c.basisAdmission,current);
+        }
         ScanPage memory scanned = _scan(principals,purpose,subject,c,budget);
         return PrincipalPage(_principalEntries(scanned.items,principals),scanned.scanned,scanned.hydrations,scanned.rawTotal,
-            scanned.selectedSoFar,scanned.status,scanned.mutated,scanned.next);
+            scanned.selectedSoFar,scanned.status,scanned.mutated,scanned.next,scanned.inventoryPin,scanned.prefixProbes,scanned.prefixGas);
+    }
+
+    /// Strict by default. A derived candidate profile may relax only when it
+    /// proves every selected inventory and masking head unchanged since origin.
+    function _continuationBasis(bytes32[] memory,bytes32,bytes32,uint64 origin,uint64 current) internal view virtual {
+        if(origin!=current)revert E_CURSOR();
+    }
+
+    function _historicalBasis(uint64 asOf,bytes32 execution) internal view {
+        _explicitBasis(execution);
+        (uint64 current,,,)=ledger.counts();
+        if(asOf>current||address(index)==address(0))revert E_CURSOR();
+        (uint8 cov,uint64 from,uint64 through)=index.coverage(index.FAMILY_HISTORY(),0);
+        if(cov!=COMPLETE||from!=1||through!=current||index.provenFrom()!=1)revert E_CURSOR();
+    }
+
+    /// Explicit retained-origin reducers. History UNKNOWN is not point ABSENT:
+    /// unavailable history reverts into callers' unavailable/catch path.
+    function resolvePrincipalsAt(bytes32[] calldata principals,bytes32 purpose,bytes32 subject,bytes32 role,uint64 asOf,bytes32 execution)
+        external view returns(uint8 status,bytes32 target,uint32 revision,bytes32 principalId,uint64 admissionOrdinal)
+    {
+        _historicalBasis(asOf,execution);
+        if(principals.length==0||principals.length>255)revert E_LENS();
+        bytes32 position=Keys.position(purpose,subject,role);
+        for(uint256 i;i<principals.length;i++){
+            (uint8 state,bytes32 value,uint32 rev,uint64 at)=_headAt(principals[i],position,asOf);
+            if(state!=0)return(state==1?FOUND:MASKED,state==1?value:bytes32(0),rev,principals[i],at);
+        }
+    }
+
+    function resolveNoTiebreakPrincipalsAt(bytes32[] calldata principals,bytes32 purpose,bytes32 subject,bytes32 role,uint64 asOf,bytes32 execution)
+        external view returns(uint8 status,PrincipalEntry[] memory candidates)
+    {
+        _historicalBasis(asOf,execution);
+        if(principals.length==0||principals.length>255)revert E_LENS();
+        bytes32 position=Keys.position(purpose,subject,role);
+        candidates=new PrincipalEntry[](principals.length);uint256 live;bool removed;
+        for(uint256 i;i<principals.length;i++){
+            (uint8 state,bytes32 value,uint32 rev,uint64 at)=_headAt(principals[i],position,asOf);
+            if(state==1)candidates[live++]=PrincipalEntry(position,principals[i],value,rev,at);
+            else if(state==2)removed=true;
+        }
+        assembly("memory-safe"){mstore(candidates,live)}
+        status=live==0?(removed?MASKED:ABSENT):(live==1&&!removed?FOUND:CONFLICT);
+    }
+
+    function _headAt(bytes32 principal,bytes32 position,uint64 asOf) internal view returns(uint8 state,bytes32 value,uint32 revision,uint64 at){
+        (state,revision,at,,,value)=ledger.head(Keys.binding(principal,position));
+        if(at<=asOf)return(state,value,revision,at);
+        (uint8 h,bool live,bytes32 target,uint32 rev,uint64 admission)=historyPrincipal(principal,position,asOf);
+        if(h==UNKNOWN)revert E_CURSOR();
+        if(h==H_NONE)return(0,0,0,0);
+        return(live?1:2,target,rev,admission);
     }
 
     /// One candidate/mask/paging reducer for both public ABIs. The wrappers own
     /// their basis laws; only traversal fields and scopeKey are interpreted here.
     function _scan(bytes32[] memory principals, bytes32 purpose, bytes32 subject, PrincipalCursor memory c, uint256 budget)
-        private view returns (ScanPage memory page)
+        internal view virtual returns (ScanPage memory page)
     {
         if (budget > MAX_BUDGET) budget = MAX_BUDGET;
         page.items = new Selection[](budget);
@@ -218,7 +280,7 @@ contract LensReader {
     }
 
     function _finishScan(ScanPage memory page, PrincipalCursor memory c, uint256 filled, uint8 status)
-        private pure returns (ScanPage memory)
+        internal pure returns (ScanPage memory)
     {
         Selection[] memory items = page.items;
         assembly ("memory-safe") { mstore(items, filled) }

@@ -7,6 +7,7 @@ import {FilesLayout} from "./FilesJoinedProfile.sol";
 import {FilesNameLayout} from "./FilesNamesProfile.sol";
 import {FilesDirectoryLayout} from "./FilesDirectoryProfile.sol";
 import {FilesCarrierIndex} from "./FilesCarrierProfile.sol";
+import {FilesScopeState} from "./FilesScopeState.sol";
 
 /// Disposable header projection, not a second Files selection engine. The
 /// mandatory live Lens owns inventory/masking and all point/conflict selection.
@@ -28,7 +29,9 @@ contract FilesPageReader {
     // EXHAUSTED is suffix traversal, not authenticated prefix coverage. The
     // domain hash is not a MAC. Only an origin-started single call can prove
     // completeFromOrigin; SDK-owned chains may compose their own full coverage.
-    struct Page {Row[] rows;uint8 scanStatus;bool startsAtOrigin;bool completeFromOrigin;uint64 scanned;uint64 hydrations;uint64 rawTotal;uint64 selectedSoFar;bytes continuation;}
+    // hydrations counts logical inventory selections/mask probes, not their
+    // historical reads, joins, prefix discovery, headers, bytes or RPC calls.
+    struct Page {Row[] rows;uint8 scanStatus;bool startsAtOrigin;bool completeFromOrigin;uint64 scanned;uint64 hydrations;uint64 rawTotal;uint64 selectedSoFar;bytes continuation;uint64 observedCurrent;bytes32 inventoryPin;uint64 prefixProbes;uint64 prefixGas;}
     Ledger public immutable ledger;
     LensReader public immutable lens;
     FilesCarrierIndex public immutable index;
@@ -45,15 +48,18 @@ contract FilesPageReader {
     {
         page.startsAtOrigin=continuation.length==0;
         (uint64 current,,,)=ledger.counts();
-        if(basis.admission!=current||basis.generation!=index.generation()||basis.epoch!=ledger.registry().epoch()
+        page.observedCurrent=current;
+        if(basis.admission>current||(page.startsAtOrigin&&basis.admission!=current)||basis.generation!=index.generation()||basis.epoch!=ledger.registry().epoch()
             ||basis.executionSet!=ledger.executionSet()||ledger.layoutId()!=LAYOUT||ledger.indexModule()!=address(index)
             ||address(lens.ledger())!=address(ledger)||address(lens.index())!=address(index)||index.ledger()!=address(ledger)
             ||address(ledger).codehash!=coreHash||address(lens).codehash!=lensHash||address(index).codehash!=indexHash)revert E_BASIS();
+        FilesScopeState scope=index.scopeState();
+        if(address(scope.ledger())!=address(ledger)||scope.writer()!=address(index)||address(scope).codehash!=index.scopeStateCodehash())revert E_BASIS();
         if(budget==0||budget>256||principals.length==0||principals.length>64||query.tagScope>3||bytes(query.search).length>255)revert E_QUERY();
-        if(!FilesDirectoryLayout.validate(ledger,index.directoryType(),folder,current))revert E_QUERY();
+        if(!FilesDirectoryLayout.validate(ledger,index.directoryType(),folder,basis.admission))revert E_QUERY();
         bytes32 queryHash=keccak256(abi.encode(msg.sender,address(this),folder,principals,query,basis));
         LensReader.PrincipalCursor memory cursor;
-        if(continuation.length!=0){bytes32 previous;(previous,cursor)=abi.decode(continuation,(bytes32,LensReader.PrincipalCursor));if(previous!=queryHash)revert E_CONTINUATION();}
+        if(continuation.length!=0){bytes32 previous;(previous,cursor)=abi.decode(continuation,(bytes32,LensReader.PrincipalCursor));if(previous!=queryHash||cursor.basisAdmission!=basis.admission)revert E_CONTINUATION();}
         (uint8 coverage,uint64 from,uint64 through)=index.coverage(index.FAMILY_LIVE_SCOPE(),keccak256(abi.encode(FOLDER,folder)));
         if(coverage!=2||from!=1||through!=current||index.provenFrom()!=1)return page;
         FilesNameLayout.pin(ledger,index.nameType(),index.expectedNameRuleHash());
@@ -61,6 +67,7 @@ contract FilesPageReader {
         if(source.mutated)revert E_BASIS();
         page.scanStatus=source.status;page.scanned=source.scanned;page.hydrations=source.hydrations;
         page.rawTotal=source.rawTotal;page.selectedSoFar=source.selectedSoFar;page.rows=new Row[](source.items.length);
+        page.inventoryPin=source.inventoryPin;page.prefixProbes=source.prefixProbes;page.prefixGas=source.prefixGas;
         page.completeFromOrigin=page.startsAtOrigin&&source.status==2&&source.scanned==source.rawTotal;
         bytes memory needle=bytes(query.search);
         uint256[] memory prefix=_prefix(needle);
@@ -68,26 +75,31 @@ contract FilesPageReader {
         for(uint256 k;k<source.items.length;k++){
             Row memory row;row.placement=source.items[k];
             (,,row.role)=ledger.positionCell(row.placement.position);
-            row.name=_name(row.role,current);
+            row.name=_name(row.role,basis.admission);
             bytes32 target=row.placement.target;uint64 created=ledger.subjectCreatedAt(target);
-            if(created!=0&&created<=current)row.kind=1;
-            else if(FilesDirectoryLayout.validate(ledger,index.directoryType(),target,current))row.kind=2;
+            if(created!=0&&created<=basis.admission)row.kind=1;
+            else if(FilesDirectoryLayout.validate(ledger,index.directoryType(),target,basis.admission))row.kind=2;
             else row.kind=4;
             if(row.kind==1){
-                if(query.diagnosticHead){try lens.resolveNoTiebreakPrincipals(principals,HEAD,target,0,basis.executionSet) returns(uint8 status,LensReader.PrincipalEntry[] memory entries){row.head.status=status;
-                    if(status==1){LensReader.PrincipalEntry memory item=entries[0];row.head=Selected(1,item.target,item.revision,item.principalId,item.admission);}}catch{row.head.status=4;}}
-                else row.head=_selected(principals,HEAD,target,0,basis.executionSet);
-                if(row.head.status==1){try this.readHeader(row.head.target,target,current) returns(Header memory h){row.header=h;}catch{row.header.recordId=row.head.target;}}
+                if(query.diagnosticHead)row.head=_diagnosticHead(principals,target,basis);
+                else row.head=_selected(principals,HEAD,target,0,basis.admission,basis.executionSet);
+                if(row.head.status==1){try this.readHeader(row.head.target,target,basis.admission) returns(Header memory h){row.header=h;}catch{row.header.recordId=row.head.target;}}
             }else if(row.kind==2){row.header.qualification=2;row.revisionTag.qualification=2;}
             if(query.concept!=0){
-                row.stableTag=_tag(principals,target,target,query.concept,basis.executionSet);
-                if(row.kind==1&&row.head.status==1)row.revisionTag=_tag(principals,row.head.target,target,query.concept,basis.executionSet);
+                row.stableTag=_tag(principals,target,target,query.concept,basis.admission,basis.executionSet);
+                if(row.kind==1&&row.head.status==1)row.revisionTag=_tag(principals,row.head.target,target,query.concept,basis.admission,basis.executionSet);
             }
             row.matchStatus=_match(row,query,needle,prefix);
             if(row.matchStatus!=2)page.rows[n++]=row; // unknown assessments remain visible
         }
         Row[] memory rows=page.rows;assembly("memory-safe"){mstore(rows,n)}
         if(page.scanStatus==1)page.continuation=abi.encode(queryHash,source.next);
+    }
+    function _diagnosticHead(bytes32[] calldata principals,bytes32 target,Basis calldata basis) private view returns(Selected memory selected){
+        try lens.resolveNoTiebreakPrincipalsAt(principals,HEAD,target,0,basis.admission,basis.executionSet) returns(uint8 status,LensReader.PrincipalEntry[] memory entries){
+            selected.status=status;
+            if(status==1){LensReader.PrincipalEntry memory item=entries[0];selected=Selected(1,item.target,item.revision,item.principalId,item.admission);}
+        }catch{selected.status=4;}
     }
     function _name(bytes32 role,uint64 through) private view returns(Name memory result){
         result.recordId=Keys.recordFromHash(index.nameType(),role);
@@ -98,13 +110,13 @@ contract FilesPageReader {
         if(status!=1||t!=index.nameType()||first==0||first>through||!FilesNameLayout.valid(value)||keccak256(value)!=role){result.qualification=3;return result;}
         result.qualification=1;result.value=value;
     }
-    function _selected(bytes32[] calldata principals,bytes32 p,bytes32 s,bytes32 r,bytes32 execution) private view returns(Selected memory selected){
-        try lens.resolvePrincipals(principals,p,s,r,execution) returns(uint8 status,bytes32 target,uint32 revision,bytes32 author,uint64 at){selected=Selected(status,target,revision,author,at);}
+    function _selected(bytes32[] calldata principals,bytes32 p,bytes32 s,bytes32 r,uint64 asOf,bytes32 execution) private view returns(Selected memory selected){
+        try lens.resolvePrincipalsAt(principals,p,s,r,asOf,execution) returns(uint8 status,bytes32 target,uint32 revision,bytes32 author,uint64 at){selected=Selected(status,target,revision,author,at);}
         catch{selected.status=4;}
     }
-    function _tag(bytes32[] calldata principals,bytes32 subject,bytes32 target,bytes32 concept,bytes32 execution) private view returns(Tag memory tag){
+    function _tag(bytes32[] calldata principals,bytes32 subject,bytes32 target,bytes32 concept,uint64 asOf,bytes32 execution) private view returns(Tag memory tag){
         tag.subject=subject;
-        try lens.resolvePrincipals(principals,TAG,subject,concept,execution) returns(uint8 status,bytes32 value,uint32 revision,bytes32 author,uint64 at){
+        try lens.resolvePrincipalsAt(principals,TAG,subject,concept,asOf,execution) returns(uint8 status,bytes32 value,uint32 revision,bytes32 author,uint64 at){
             tag.selection=Selected(status,value,revision,author,at);tag.qualification=1;tag.present=status==1&&value==target;
         }catch{}
     }

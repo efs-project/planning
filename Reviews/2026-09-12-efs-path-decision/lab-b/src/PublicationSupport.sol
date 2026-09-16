@@ -212,11 +212,18 @@ contract PublicationSupport {
         (uint64 a,,,uint64 p)=abi.decode(_fixedBytes(msg.sender,abi.encodeWithSignature("counts()"),30_000,128),(uint64,uint64,uint64,uint64));
         if(a!=r.expectedAdmission||p!=r.expectedPublication)revert E_REPLACEMENT();
         IIndexReadiness.Ready memory ready=abi.decode(_fixedBytes(r.replacement,abi.encodeCall(IIndexReadiness.replayReadiness,()),100_000,320),(IIndexReadiness.Ready));
-        if(ready.sourceLedger!=msg.sender||ready.physicalProfile!=IndexReadinessProfile.PHYSICAL
+        if(ready.sourceLedger!=msg.sender
+            ||(ready.physicalProfile!=IndexReadinessProfile.PHYSICAL&&ready.physicalProfile!=IndexReadinessProfile.FILES_SPLIT)
             ||ready.callbackProfile!=IndexReadinessProfile.CALLBACK||ready.obligationManifest!=r.requiredManifest
             ||ready.coveredManifest!=r.requiredManifest||ready.provenFrom!=1||ready.completedAdmission!=a
             ||ready.completedPublication!=p||ready.generation!=r.expectedGeneration||ready.phase!=1)revert E_REPLACEMENT();
         if(_fixedRead(r.replacement,abi.encodeCall(IIndexModule.manifestHash,()),100_000)!=r.requiredManifest)revert E_REPLACEMENT();
+        if(ready.physicalProfile==IndexReadinessProfile.FILES_SPLIT){
+            address state=address(uint160(uint256(_fixedRead(r.replacement,abi.encodeWithSignature("scopeState()"),30_000))));
+            if(state.code.length==0||state.codehash!=_fixedRead(r.replacement,abi.encodeWithSignature("scopeStateCodehash()"),30_000)
+                ||uint256(_fixedRead(state,abi.encodeWithSignature("ledger()"),30_000))!=uint160(msg.sender)
+                ||uint256(_fixedRead(state,abi.encodeWithSignature("writer()"),30_000))!=uint160(r.replacement))revert E_REPLACEMENT();
+        }
         return IndexReadinessProfile.ACK;
     }
 

@@ -37,8 +37,8 @@ contract FilesByteworkTest is FilesPageReaderTest {
         for (uint256 fault; fault < 3; ++fault) {
             if (fault == 0) faults.mockCallRevert(address(ledger), abi.encodeCall(ledger.record, (Keys.recordFromHash(nt, keccak256("aaaaa")))), hex"01");
             if (fault == 1) faults.mockCallRevert(address(ledger), abi.encodeCall(ledger.extsload, (FilesLayout.recordBase(revision))), hex"01");
-            if (fault == 2) faults.mockCallRevert(address(r.lens()), abi.encodeWithSelector(r.lens().resolvePrincipals.selector,
-                selectors(), TAG, revision, q.concept, ledger.executionSet()), hex"01");
+            if (fault == 2) faults.mockCallRevert(address(r.lens()), abi.encodeWithSelector(r.lens().resolvePrincipalsAt.selector,
+                selectors(), TAG, revision, q.concept, admissions(), ledger.executionSet()), hex"01");
             FilesPageReader.Page memory p = r.readPage(folder, selectors(), q, basis(), "", 8);
             require(p.completeFromOrigin && p.rows.length == 1 && p.rows[0].matchStatus == 0, "unknown row filtered by negative search");
             require(!paid.queryAbsent(r, folder, selectors(), q, basis(), "", 8), "unknown became paid absence");

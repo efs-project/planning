@@ -60,7 +60,7 @@ contract FilesPageReaderTest is FilesCarrierIndexTest {
         p=r.readPage(folder,selectors(),q,basis(),"",8);
         require(p.rows.length==1&&p.rows[0].header.qualification==0&&p.rows[0].name.qualification==1&&p.rows[0].stableTag.present,"header failure loses independent axes");
         probe.clearMockedCalls();
-        probe.mockCallRevert(address(r.lens()),abi.encodeWithSelector(r.lens().resolvePrincipals.selector,selectors(),TAG,revision,tag,ledger.executionSet()),hex"01");
+        probe.mockCallRevert(address(r.lens()),abi.encodeWithSelector(r.lens().resolvePrincipalsAt.selector,selectors(),TAG,revision,tag,admissions(),ledger.executionSet()),hex"01");
         q.tagScope=2;p=r.readPage(folder,selectors(),q,basis(),"",8);
         require(p.rows.length==1&&p.rows[0].matchStatus==0&&p.rows[0].revisionTag.qualification==0,"unknown tag filtered as false");
     }
@@ -104,7 +104,7 @@ contract FilesPageReaderTest is FilesCarrierIndexTest {
         require(!consumer.queryAbsent(r,folder,selectors(),q,basis(),"",8),"missing Name turned into filtered empty proof");probe.clearMockedCalls();
         probe.mockCallRevert(address(ledger),abi.encodeCall(ledger.extsload,(FilesLayout.recordBase(revision))),hex"01");
         require(!consumer.queryAbsent(r,folder,selectors(),q,basis(),"",8),"missing header turned into filtered empty proof");probe.clearMockedCalls();
-        probe.mockCallRevert(address(r.lens()),abi.encodeWithSelector(r.lens().resolvePrincipals.selector,selectors(),TAG,revision,q.concept,ledger.executionSet()),hex"01");
+        probe.mockCallRevert(address(r.lens()),abi.encodeWithSelector(r.lens().resolvePrincipalsAt.selector,selectors(),TAG,revision,q.concept,admissions(),ledger.executionSet()),hex"01");
         q.tagScope=2;q.search="no-match";
         require(!consumer.queryAbsent(r,folder,selectors(),q,basis(),"",8),"unknown requested tag turned into filtered empty proof");
     }
@@ -132,7 +132,7 @@ contract FilesPageReaderTest is FilesCarrierIndexTest {
     }
     function test_page_unavailable_head_keeps_selected_placement_name_and_file_tag() public {
         FilesPageReader r=reader();bytes32 folder=_directory(1);(bytes32 f,)=file(folder,"a",2);bytes32 tag=bytes32(uint256(99));ledger.bind(TAG,f,tag,f,0);
-        probe.mockCallRevert(address(r.lens()),abi.encodeWithSelector(r.lens().resolvePrincipals.selector,selectors(),HEAD,f,bytes32(0),ledger.executionSet()),hex"01");
+        probe.mockCallRevert(address(r.lens()),abi.encodeWithSelector(r.lens().resolvePrincipalsAt.selector,selectors(),HEAD,f,bytes32(0),admissions(),ledger.executionSet()),hex"01");
         FilesPageReader.Query memory q=FilesPageReader.Query(tag,1,false,"");FilesPageReader.Page memory p=r.readPage(folder,selectors(),q,basis(),"",8);
         require(p.scanStatus==2&&p.rows.length==1&&p.rows[0].head.status==4&&p.rows[0].name.qualification==1&&p.rows[0].stableTag.present,"HEAD failure erases independent selection evidence");
     }

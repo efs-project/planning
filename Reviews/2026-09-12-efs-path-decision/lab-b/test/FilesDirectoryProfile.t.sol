@@ -85,7 +85,7 @@ contract FilesDirectoryProfileTest is LabBase {
         require(admissions()==0 && ledger.nonces(eoaA)==0 && ledger.subjectCreatedAt(file)==0 && index.lastProcessed()==0,"partial core/index commit");
         (bytes32 t,,,)=ledger.record(rid(nt,bytes("late-name")));require(t==0,"Name leaked");
         bytes32 key=Keys.scopeList(Keys.scope(pid(eoaA),FOLDER,bytes32(uint256(999))));
-        (uint64 count,,,)=index.postingHead(key);require(count==0 && live.liveCount(key)==0,"postings leaked");
+        (uint64 count,,,)=index.postingHead(key);require(count==0 && live.liveCount(key)==0 && live.lastMutation(key)==0,"postings or companion stamp leaked");
         (uint8 state,uint32 revision,,,,)=ledger.head(Keys.binding(pid(eoaA),Keys.position(FOLDER,bytes32(uint256(999)),role)));
         require(state==0 && revision==0 && ledger.bindingPosition(1)==0,"head/coordinate leaked");
     }

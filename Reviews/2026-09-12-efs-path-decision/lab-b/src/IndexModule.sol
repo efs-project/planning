@@ -50,7 +50,7 @@ contract IndexModule is IIndexModule {
     bytes32 public constant FAMILY_REFERENCE_POSITION = keccak256("efs2/family/reference-position/1");
     bytes32 public constant FAMILY_SCALAR = keccak256("efs2/family/scalar-equality/1");
     bytes32 public constant FAMILY_DIGEST = keccak256("efs2/family/content-digest/1");
-    bytes32 public constant PHYSICAL_PROFILE = IndexReadinessProfile.PHYSICAL;
+    function PHYSICAL_PROFILE() public pure returns(bytes32) { return _physicalProfile(); }
     uint64 private constant GUARD = (uint64(1) << 48) - 1;
 
     struct Family {
@@ -209,11 +209,13 @@ contract IndexModule is IIndexModule {
 
     function provenFrom() public view returns(uint64){return gapped?0:1;}
 
+    function _physicalProfile() internal pure virtual returns(bytes32) { return IndexReadinessProfile.PHYSICAL; }
+
     function replayReadiness() external view returns(IIndexReadiness.Ready memory r){
         (uint64 a,,,uint64 p)=ILedgerCounts(ledger).counts();
         bool active=ILedgerCounts(ledger).extsload(ExecutionSlots.PUBLICATION_ACTIVE)!=0;
         bytes32 manifest=manifestHash();
-        r=IIndexReadiness.Ready(ledger,PHYSICAL_PROFILE,IndexReadinessProfile.CALLBACK,manifest,
+        r=IIndexReadiness.Ready(ledger,_physicalProfile(),IndexReadinessProfile.CALLBACK,manifest,
             gapped?bytes32(0):manifest,provenFrom(),lastProcessed,lastPublication,generation,
             active?2:(!gapped&&lastProcessed==a&&lastPublication==p?1:0));
     }
@@ -400,9 +402,10 @@ contract IndexModule is IIndexModule {
     function _validatePublication(Effect[] memory) internal view virtual {}
 
     // ---------------------------------------------------------------- coverage
-    /// COMPLETE only if the family is mandatory, maintained from admission 1, and no
-    /// admission was ever made while this module was detached. Otherwise PARTIAL with the
-    /// honest range; undeclared families are UNKNOWN. A nonzero scope on Type
+    /// COMPLETE only if the mandatory family has a proven genesis prefix through
+    /// current admission, from shared live folds or canonical replay with final
+    /// checks. A detach without catch-up is PARTIAL; undeclared families are UNKNOWN.
+    /// A nonzero scope on Type
     /// families is an exact registered Type, not an unbounded future universe.
     /// Scalar/digest coverage covers that Type's enumerated specs ONLY; a query
     /// must match its kind/ordinal/algorithm against the immutable profile first.

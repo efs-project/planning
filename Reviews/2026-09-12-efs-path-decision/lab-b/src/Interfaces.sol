@@ -74,6 +74,7 @@ interface IIndexReadiness {
 
 library IndexReadinessProfile {
     bytes32 internal constant PHYSICAL=keccak256("efs.lab.index-layout/3:inline-singleton:five-u48:header-u64-u64-u48-u16:genesis-shadow-replay");
+    bytes32 internal constant FILES_SPLIT=keccak256("efs.lab.index-layout/4:genesis-shadow-replay:fixed-files-scope-companion:dense-swap:last-mutation");
     bytes32 internal constant CALLBACK=keccak256("efs.lab.index-callback/1:ordered-prefix:static-final:canonical-replay-final");
     bytes32 internal constant ACK=keccak256("REPLACEMENT_READY_V1");
 }

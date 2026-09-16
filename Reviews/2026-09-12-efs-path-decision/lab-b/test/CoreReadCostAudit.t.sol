@@ -5,7 +5,7 @@ import {FilesPageReaderTest} from "./FilesPageReader.t.sol";
 import {FilesPageReader} from "./FilesPageReader.sol";
 import {Ledger} from "../src/Ledger.sol";
 
-/// A2/A3 regression requirements; A4 remains an open audit reproduction.
+/// A2/A3/A4 regression requirements.
 /// Setup is an unconstrained Foundry fixture; every measured read is separately
 /// gas-fenced. Setup has warmed state, so these are not cold transaction receipts.
 contract CoreReadCostAuditTest is FilesPageReaderTest {
@@ -87,7 +87,7 @@ contract CoreReadCostAuditTest is FilesPageReaderTest {
             && page.rows[0].name.qualification == 1 && keccak256(page.rows[0].name.value) == keccak256(label), "native Name255 placement not independently readable");
     }
 
-    function test_audit_unrelated_admission_invalidates_contract_page() public {
+    function test_audit_unrelated_admission_preserves_contract_page_origin() public {
         FilesPageReader r = reader();
         bytes32 folder = _directory(900);
         file(folder, "a", 901);
@@ -102,11 +102,14 @@ contract CoreReadCostAuditTest is FilesPageReaderTest {
         (bool ok, bytes memory reason) = address(r).staticcall(
             abi.encodeCall(r.readPage, (folder, authors, q, pinned, first.continuation, 1))
         );
-        require(!ok && bytes4(reason) == FilesPageReader.E_BASIS.selector, "hypothesis disproved: old basis resumed");
+        require(ok, "unrelated admission must preserve paid continuation at origin");
+        FilesPageReader.Page memory resumed = abi.decode(reason, (FilesPageReader.Page));
+        require(resumed.scanStatus == 2 && resumed.rows.length == 1 && resumed.scanned == 1
+            && keccak256(resumed.rows[0].name.value) == keccak256("b"), "origin continuation skipped remaining row");
         (ok, reason) = address(r).staticcall(
             abi.encodeCall(r.readPage, (folder, authors, q, basis(), first.continuation, 1))
         );
         require(!ok && bytes4(reason) == FilesPageReader.E_CONTINUATION.selector, "hypothesis disproved: cursor accepted rebased snapshot");
-        emit log_named_string("classification", "unrelated admission forces paid-current-state page restart; archived RPC snapshots are a separate browser capability");
+        emit log_named_string("classification", "unchanged selected folder inventory permits retained-origin continuation");
     }
 }

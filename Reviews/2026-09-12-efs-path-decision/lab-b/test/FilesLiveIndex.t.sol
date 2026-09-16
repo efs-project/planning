@@ -15,6 +15,24 @@ contract FilesLiveIndexTest is FilesNamesTest {
         namesIndex=liveIndex;index=liveIndex;ledger.setIndexModule(address(index));lens=new FilesLiveLens(ledger,index);
     }
     function _liveKey(address author) internal view returns(bytes32){return Keys.scopeList(Keys.scope(pid(author),FOLDER,MOUNT));}
+    function test_live_scope_stamp_tracks_overwrite_removal_and_restore() public {
+        bytes32 key=_liveKey(eoaA);
+        require(liveIndex.lastMutation(key)==0,"fresh scope has a mutation");
+        (bytes32 file,)=_create(1,bytes("a.txt"),true,0);
+        uint64 first=liveIndex.lastMutation(key);require(first!=0,"bind stamp missing");
+        _submit(one(aBind(FOLDER,MOUNT,keccak256("a.txt"),file,1)),new bytes[](1));
+        require(liveIndex.lastMutation(key)==admissions()&&liveIndex.lastMutation(key)>first
+            &&liveIndex.liveCount(key)==1,"overwrite must stamp unchanged membership");
+        _submit(one(aUnbind(FOLDER,MOUNT,keccak256("a.txt"),2)),new bytes[](1));
+        require(liveIndex.lastMutation(key)==admissions()&&liveIndex.liveCount(key)==0,"empty scope lost tombstone stamp");
+        _submit(one(aBind(FOLDER,MOUNT,keccak256("a.txt"),file,3)),new bytes[](1));
+        require(liveIndex.lastMutation(key)==admissions()&&liveIndex.liveCount(key)==1,"restore must stamp once");
+        uint64 stamp=liveIndex.lastMutation(key);
+        bob.bind(HEAD,file,0,file,0);
+        require(liveIndex.lastMutation(key)==stamp,"unselected HEAD changed folder stamp");
+        (bool ok,)=address(liveIndex.scopeState()).call(abi.encodeWithSignature("fold(uint8,uint64,bytes32,uint64)",3,1,Keys.scope(pid(eoaA),FOLDER,MOUNT),stamp+1));
+        require(!ok&&liveIndex.lastMutation(key)==stamp,"foreign writer changed mandatory companion");
+    }
     function test_live_removal_swaps_dense_candidate_without_erasing_audit() public {
         _create(1,bytes("a.txt"),true,0);_create(2,bytes("b.txt"),true,0);_create(3,bytes("c.txt"),true,0);
         require(liveIndex.liveCount(_liveKey(eoaA))==3,"three live placements");
