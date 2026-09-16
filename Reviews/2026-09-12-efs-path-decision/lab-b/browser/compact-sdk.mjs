@@ -490,7 +490,13 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
         parent:h.parent,file:entry.target,descriptorRecord:eq(h.descriptor,Z)?null:h.descriptor,
         profile:eq(h.descriptor,Z)?'legacy-inline':'carrier-v1',assurance:Number(h.qualification)===1?'HEADER_VERIFIED_BODY_NOT_FETCHED':'HEADER_UNVERIFIED_BODY_NOT_FETCHED',knowledge:headerKnowledge,carrierAvailability:'NOT_FETCHED'}:null;
       const knowledge=kind==='directory'?'PRESENT':kind==='unsupported'?'UNSUPPORTED':head.status===1?headerKnowledge:['ABSENT','PRESENT','MASKED','CONFLICT','UNKNOWN'][head.status];
-      const value={file:entry.target,selection:kind==='directory'?null:head,revision,fileTag:tag(row.stableTag),revisionTag:tag(row.revisionTag)};
+      const keyedRevisionTag=tag(row.revisionTag);
+      // A successful keyed lookup alone does not qualify a selected revision.
+      // Keep its provenance and exact selected subject without certifying a tag
+      // on an unavailable/invalid revision (the point reader has the same gate).
+      const revisionTag=kind==='file'&&(head.status!==1||headerKnowledge!=='PRESENT')
+        ?normalizeTagAssessment({...keyedRevisionTag,subject:head.status===1?head.target:null,assessment:'UNKNOWN'}):keyedRevisionTag;
+      const value={file:entry.target,selection:kind==='directory'?null:head,revision,fileTag:tag(row.stableTag),revisionTag};
       return {file:entry.target,target:entry.target,kind,knowledge:kind==='unsupported'?'UNSUPPORTED':'PRESENT',position:entry.position,folder,role:row.role,
         selection:{status:1,target:entry.target,revision:Number(entry.revision),author:entry.principalId,admission:String(entry.admission)},name,
         point:result(basis,knowledge,kind==='directory'||head.status===0||head.status===2||headerKnowledge==='PRESENT'?'COMPLETE':'PARTIAL',value),

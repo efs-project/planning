@@ -3,6 +3,37 @@ import assert from 'node:assert/strict';
 import {createEnvironment} from '../script/compact-environment.mjs';
 import {createFilesCompactSdk} from './compact-files-sdk.mjs';
 const profile={protocol:'compact-guarded-v2',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v2'};
+test('unavailable selected header makes positive and negative keyed revision tags unknown',{timeout:120000},async t=>{
+  const env=await createEnvironment(profile);t.after(()=>env.close());
+  const {ethers:e,manifest,rpc,wallets}=env,authors=Object.values(manifest.authors);
+  const sdk=createFilesCompactSdk({ethers:e,manifest,rpc,journal:await env.createJournal('unavailable-header')});
+  const run=async(operation,args)=>{
+    const plan=await sdk.prepare({operation,author:wallets.alice.address,authors,...args});
+    await sdk.submit(await sdk.authorize(plan,d=>wallets.alice.signingKey.sign(d).serialized),tx=>env.send(operation,tx,'alice'));return plan;
+  };
+  const file=await run('create',{name:'a.txt',salt:e.id('header-file'),document:'a'});
+  const other=await run('create',{name:'b.txt',salt:e.id('header-subject'),document:'b'});
+  const concept=(await run('addTag',{file:file.file,scope:'file',conceptLabel:'header-control'})).concept;
+  // Core permits an existing untyped subject as a binding target. A selected
+  // HEAD pointing there has no revision Record/header, but keyed tags can be
+  // read successfully. Exercise the real producer, without forged page data.
+  await env.transact('ledger','bind',[e.id('efs2/purpose/head/1'),file.file,e.ZeroHash,other.file,1],'unavailable-selected-record','alice');
+  for(const rawPresent of [false,true])await t.test(`raw keyed presence ${rawPresent}`,async()=>{
+    if(rawPresent)await env.transact('ledger','bind',[e.id('efs2/purpose/tag/1'),other.file,concept,file.file,0],'positive-keyed-revision-tag','alice');
+    const context=await sdk.pin(),basis=[context.admission,context.generation,context.epoch,context.executionSet];
+    const [raw]=await env.call('joined','readPage',[manifest.folder,authors.map(a=>e.zeroPadValue(a,32)),[concept,3,false,''],basis,'0x',32],{blockHash:context.blockHash,requireCanonical:true});
+    const observed=raw.rows.find(row=>row.placement.target===file.file);
+    assert.equal(Number(observed.head.status),1);assert.equal(Number(observed.header.qualification),0);
+    assert.equal(Number(observed.revisionTag.qualification),1);assert.equal(observed.revisionTag.present,rawPresent);
+    const page=await sdk.listFolderPage({authors,context,concept,tagScope:'either'}),joined=page.pageRows.find(row=>row.file===file.file).point.value;
+    const point=await sdk.readFile({file:file.file,authors,context,concept});
+    assert.equal(joined.revisionTag.assessment,'UNKNOWN');assert.equal(joined.revisionTag.present,null);
+    assert.equal(joined.revisionTag.subject,other.file);assert.equal(joined.revisionTag.selection.status,rawPresent?1:0);
+    for(const key of ['assessment','present','subject','concept'])assert.equal(joined.revisionTag[key],point.value.revisionTag[key],key);
+    assert.equal(joined.fileTag.assessment,'PRESENT','independent stable tag remains known');
+    assert.equal(page.tagCoverage,'PARTIAL');assert.equal(page.tagCoverageScope,'PAGE');
+  });
+});
 test('requested tag joins stay partial independently of either and none matches',{timeout:120000},async t=>{
   const env=await createEnvironment(profile);t.after(()=>env.close());
   const {ethers:e,manifest,rpc,wallets}=env,authors=Object.values(manifest.authors);
