@@ -1,0 +1,74 @@
+Compiling 7 files with Solc 0.8.30
+Solc 0.8.30 finished in 9.18s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:92:21:
+   |
+92 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:97:29:
+   |
+97 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:22:
+    |
+117 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:121:25:
+    |
+121 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 143436 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/DescribedTypeProfile.t.sol:23:1:
+   |
+23 | contract DescribedTypeProfileTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 16 tests for test/DescribedTypeProfile.t.sol:DescribedTypeProfileTest
+[PASS] test_all_kinds_optional_presence_and_checked_reference_projection() (gas: 6180842)
+[PASS] test_custom_bad_bool_oversized_return_exhaustion_and_code_drift_refuse() (gas: 4700865)
+[PASS] test_custom_instance_valid_structure_and_callback_both_mandatory() (gas: 4845395)
+[PASS] test_custom_signature_scope_and_same_code_different_state_squatting() (gas: 2659633)
+[PASS] test_descriptor_canonicality_and_body_negative_matrix() (gas: 5425263)
+[PASS] test_direct_forged_context_and_fake_ledger_cannot_impersonate() (gas: 3075801)
+[PASS] test_final_failure_rolls_back_described_records_and_nonce() (gas: 1217230)
+[PASS] test_note_maxima_and_max_descriptor_field_reference_body_bytes_combination() (gas: 8293835)
+[PASS] test_ordered_prefix_custom_reads_and_whole_batch_rollback() (gas: 4504646)
+[PASS] test_portable_destination_unchanged_declaration_and_custom_retention_only() (gas: 6890058)
+[PASS] test_public_registration_retains_bytes_and_requires_structure() (gas: 1563090)
+[PASS] test_public_relayer_wrong_signature_zero_custom_fields_and_opaque_boundary() (gas: 741534)
+[PASS] test_retained_declaration_before_opaque_registration_does_not_install_interpretation() (gas: 925887)
+[PASS] test_signed_native_duplicate_and_portable_record_identity() (gas: 14036202)
+[PASS] test_unknown_future_leaf_refuses_before_callback_registration() (gas: 713375)
+[PASS] test_unknown_publish_and_reuse_refuse_initial_profile() (gas: 40824)
+Suite result: ok. 16 passed; 0 failed; 0 skipped; finished in 6.57ms (24.10ms CPU time)
+
+Ran 1 test suite in 7.11ms (6.57ms CPU time): 16 tests passed, 0 failed, 0 skipped (16 total tests)

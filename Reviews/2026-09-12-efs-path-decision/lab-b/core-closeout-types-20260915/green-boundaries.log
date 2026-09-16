@@ -1,0 +1,145 @@
+Compiling 14 files with Solc 0.8.30
+Solc 0.8.30 finished in 35.07s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:92:21:
+   |
+92 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:97:29:
+   |
+97 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:22:
+    |
+117 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:121:25:
+    |
+121 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/FilesDirectoryProfile.t.sol:60:5:
+   |
+60 |     function test_directory_pin_rejects_wrong_rule_hash() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 158550 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesDirectoryProfile.t.sol:11:1:
+   |
+11 | contract FilesDirectoryProfileTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 123615 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesCarrierProfile.t.sol:10:1:
+   |
+10 | contract FilesCarrierProfileTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 204048 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesCarrierProfile.t.sol:71:1:
+   |
+71 | contract FilesCarrierIndexTest is FilesDirectoryProfileTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 288101 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/FilesPageReader.t.sol:14:1:
+   |
+14 | contract FilesPageReaderTest is FilesCarrierIndexTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 301766 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/DescribedTypeParticipation.t.sol:10:1:
+   |
+10 | contract DescribedTypeParticipationTest is FilesPageReaderTest {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 142271 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/DescribedTypeProfile.t.sol:23:1:
+   |
+23 | contract DescribedTypeProfileTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 25 tests for test/DescribedTypeParticipation.t.sol:DescribedTypeParticipationTest
+[PASS] test_carrier_child_reverse_parent_postings_and_reuse() (gas: 3896047)
+[PASS] test_directory_exact_body_length_required() (gas: 1074916)
+[PASS] test_directory_pin_rejects_wrong_rule_hash() (gas: 26457)
+[PASS] test_file_subject_parent_raw_ingress_rejected() (gas: 2443985)
+[PASS] test_lookalike_type_with_wrong_rule_is_not_a_directory() (gas: 3664536)
+[PASS] test_missing_zero_and_wrong_length_directory_seeds_rejected() (gas: 1863276)
+[PASS] test_nonexistent_parent_raw_ingress_rejected() (gas: 2047452)
+[PASS] test_page_conflict_keeps_file_tag_and_unknown_revision_tag() (gas: 13066151)
+[PASS] test_page_continuations_bind_caller_filter_basis_and_swap_removal() (gas: 14537459)
+[PASS] test_page_fault_matrix_matches_independent_point_and_name_oracles() (gas: 17398213)
+[PASS] test_page_forged_terminal_cannot_license_whole_query_absence() (gas: 15266040)
+[PASS] test_page_header_helper_refuses_unguarded_external_use() (gas: 10930081)
+[PASS] test_page_masked_budget_exhaustion_is_partial_not_empty() (gas: 13380148)
+[PASS] test_page_name_header_and_tag_failures_keep_known_axes() (gas: 12467433)
+[PASS] test_page_partial_family_coverage_is_unknown() (gas: 10988735)
+[PASS] test_page_unavailable_head_keeps_selected_placement_name_and_file_tag() (gas: 11722499)
+[PASS] test_page_uncertain_join_cannot_license_filtered_empty_origin() (gas: 12344059)
+[PASS] test_page_unsupported_header_cannot_disappear_under_filter() (gas: 12176370)
+[PASS] test_registration_preserves_pending_signed_bytes_and_owned_query_policy_change_invalidates() (gas: 18695865)
+[PASS] test_required_index_failure_rolls_back_whole_signed_batch() (gas: 1605729)
+[PASS] test_self_link_raw_ingress_rejected() (gas: 2636767)
+[PASS] test_unrelated_record_parent_raw_ingress_rejected() (gas: 2624601)
+[PASS] test_unrelated_record_target_raw_ingress_rejected() (gas: 3191167)
+[PASS] test_valid_directory_bootstrap_and_nested_file_without_head() (gas: 5229264)
+[PASS] test_withdrawn_descriptor_remains_valid_and_bind_before_name_parent_publish_is_atomic() (gas: 3250921)
+Suite result: ok. 25 passed; 0 failed; 0 skipped; finished in 14.76ms (79.60ms CPU time)
+
+Ran 15 tests for test/DescribedTypeProfile.t.sol:DescribedTypeProfileTest
+[PASS] test_all_kinds_optional_presence_and_checked_reference_projection() (gas: 6175882)
+[PASS] test_custom_bad_bool_oversized_return_exhaustion_and_code_drift_refuse() (gas: 4699130)
+[PASS] test_custom_instance_valid_structure_and_callback_both_mandatory() (gas: 4842035)
+[PASS] test_custom_signature_scope_and_same_code_different_state_squatting() (gas: 2658484)
+[PASS] test_descriptor_canonicality_and_body_negative_matrix() (gas: 5421354)
+[PASS] test_direct_forged_context_and_fake_ledger_cannot_impersonate() (gas: 3074357)
+[PASS] test_final_failure_rolls_back_described_records_and_nonce() (gas: 1216432)
+[PASS] test_note_maxima_and_max_descriptor_field_reference_body_bytes_combination() (gas: 8290951)
+[PASS] test_ordered_prefix_custom_reads_and_whole_batch_rollback() (gas: 4502490)
+[PASS] test_portable_destination_unchanged_declaration_and_custom_retention_only() (gas: 6832274)
+[PASS] test_public_registration_retains_bytes_and_requires_structure() (gas: 1561769)
+[PASS] test_public_relayer_wrong_signature_zero_custom_fields_and_opaque_boundary() (gas: 740595)
+[FAIL: AlreadyAdmitted(1)] test_signed_native_duplicate_and_portable_record_identity() (gas: 1421307)
+[PASS] test_unknown_future_leaf_refuses_before_callback_registration() (gas: 713221)
+[PASS] test_unknown_publish_and_reuse_refuse_initial_profile() (gas: 40714)
+Suite result: FAILED. 14 passed; 1 failed; 0 skipped; finished in 14.76ms (31.54ms CPU time)
+
+Ran 2 test suites in 15.68ms (29.52ms CPU time): 39 tests passed, 1 failed, 0 skipped (40 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/DescribedTypeProfile.t.sol:DescribedTypeProfileTest
+[FAIL: AlreadyAdmitted(1)] test_signed_native_duplicate_and_portable_record_identity() (gas: 1421307)
+
+Encountered a total of 1 failing tests, 39 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test

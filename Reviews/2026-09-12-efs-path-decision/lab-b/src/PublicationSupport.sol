@@ -26,6 +26,7 @@ contract PublicationSupport {
     error E_SOURCE_SIGNATURE();
     error E_SOURCE_UNSUPPORTED();
     error E_DESTINATION_AUTH();
+    error E_UNKNOWN_TYPE(bytes32 typeId);
 
     uint256 private constant SECP256K1_N_HALF = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0;
     bytes32 private constant LEGACY_TYPE = keccak256("PublicationIntent(bytes32 realmId,bytes32 coreCodeCommitment,address author,uint64 nonce,uint64 deadline,bytes32 acceptanceProfile,bytes32 indexObligations,bytes32 actionsHash)");
@@ -333,7 +334,8 @@ contract PublicationSupport {
         // Preserve the public getter's ability to hash oversized candidates; Core
         // still refuses more than 64 actions at admission. Validate the exact
         // fixed-width ABI without multiplication overflow or trusting n alone.
-        // Unknown Types retain their former zero row; _typeOf refuses admission.
+        // Refuse unknown Types before callbacks. Otherwise a callback could
+        // install a later leaf after its all-zero initial profile was signed.
         if(encoded.length<64 || offset!=32 || (encoded.length-64)%288!=0 || n!=(encoded.length-64)/288)revert E_BOUNDS(0);
         ITypeRegistry types=ITypeRegistry(registry);
         profile=keccak256(abi.encode(keccak256("efs.lab.acceptance-profile/2"),registry,types.epoch()));
@@ -344,7 +346,8 @@ contract PublicationSupport {
                 kind:=calldataload(ptr) typeId:=calldataload(add(ptr,32))
             }
             if(kind!=1 && kind!=2)continue;
-            (,address mandatory,bytes32 ruleId,address policy,bytes32 policyCodehash,,uint16 activation)=types.typeInfo(typeId);
+            (bool registered,address mandatory,bytes32 ruleId,address policy,bytes32 policyCodehash,,uint16 activation)=types.typeInfo(typeId);
+            if(!registered)revert E_UNKNOWN_TYPE(typeId);
             profile=keccak256(abi.encode(profile,typeId,mandatory,ruleId,policy,policyCodehash,activation));
         }
     }

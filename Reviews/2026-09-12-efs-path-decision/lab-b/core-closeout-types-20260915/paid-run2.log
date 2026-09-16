@@ -1,0 +1,90 @@
+deploy/TypeRegistry SUCCESS 4257218
+deploy/Ledger SUCCESS 7803668
+deploy/IndexModule SUCCESS 4381278
+setup/index SUCCESS 66512
+deploy/standalone-wrapper-cost SUCCESS 1000317
+deploy/standalone-descriptor-cost SUCCESS 125782
+deploy/DescribedPaidConsumer SUCCESS 223344
+legacy/reference-type SUCCESS 126024
+legacy/reference-publish SUCCESS 886927
+vector/register/unit SUCCESS 332181
+vector/publish/unit/0 SUCCESS 658142
+vector/register/note-v1 SUCCESS 358437
+vector/publish/note-v1/0 SUCCESS 671924
+vector/register/note-v11 SUCCESS 398013
+vector/publish/note-v11/0 SUCCESS 657144
+vector/publish/note-v11/1 SUCCESS 668568
+vector/register/note-rich-v2 SUCCESS 398901
+vector/publish/note-rich-v2/0 SUCCESS 657568
+vector/register/note-restricted SUCCESS 409199
+vector/publish/note-restricted/0 SUCCESS 674733
+vector/register/all-kinds SUCCESS 663349
+vector/publish/all-kinds/0 SUCCESS 754787
+vector/refuse/nonempty unit REFUSED 412813
+vector/refuse/length mismatch REFUSED 415255
+vector/refuse/tab outside text domain REFUSED 415582
+vector/refuse/presence2 REFUSED 417957
+vector/refuse/enum3 REFUSED 418308
+vector/refuse/boolean2 REFUSED 418373
+register/identical-relay SUCCESS 49669
+recurring/duplicate-note SUCCESS 578473
+recurring/reuse-note SUCCESS 526067
+recurring/signed-note SUCCESS 736834
+read/cold-note SUCCESS 46654
+read/repeated-note SUCCESS 46654
+deploy/DescribedPredicateFixture SUCCESS 325886
+register/custom-with-wrapper SUCCESS 1729348
+recurring/custom-note SUCCESS 665734
+register/custom-identical-relay SUCCESS 64249
+custom/reject-mode SUCCESS 43528
+custom/reject-valid-dedup REFUSED 426945
+custom/accept-mode SUCCESS 21616
+register/note-max SUCCESS 389814
+maximum/note1024-title64 SUCCESS 1574386
+register/joint-max SUCCESS 1396036
+maximum/descriptor4096-fields16-refs8-body8192-bytes SUCCESS 1770302
+register/text8190 SUCCESS 352122
+maximum/text8190-shared300k-refusal REFUSED 826782
+deploy/destination-registry SUCCESS 4257218
+deploy/destination-ledger SUCCESS 7803668
+destination/original-portable-declaration SUCCESS 375537
+destination/same-record SUCCESS 696712
+destination/custom-retain-only SUCCESS 249318
+deploy/NoteV1Rule SUCCESS 261839
+legacy/note-register SUCCESS 131793
+legacy/note1024 SUCCESS 1579300
+{
+  "output": "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/core-closeout-types-20260915/paid-run2",
+  "summary": {
+    "checks": 2,
+    "transactions": 55,
+    "refusals": 8,
+    "wrapperRuntimeHash": "0x685da87926b52f471eca3b7994db46cccf1f3e8166c2af378fb45d7768806ec8",
+    "identity": {
+      "type": "0xd5466c9243a44a10ff60e1ad6b5fd9900a7d373b871aa1f97d04ccee9b90ba08",
+      "record": "0xd84251fcebda6fdac5425036f14815baad31cb98abdd5644026eaf51b8cf263e",
+      "sourceRegistry": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+      "destinationRegistry": "0x9a676e781a523b5d0c0e43731313a708cb607508"
+    },
+    "setupAmortization": [
+      {
+        "admissions": 1,
+        "customRegistrationPerAdmission": "1729348"
+      },
+      {
+        "admissions": 10,
+        "customRegistrationPerAdmission": "172934"
+      },
+      {
+        "admissions": 100,
+        "customRegistrationPerAdmission": "17293"
+      },
+      {
+        "admissions": 1000,
+        "customRegistrationPerAdmission": "1729"
+      }
+    ],
+    "limits": "local paid receipts; no consensus proof, wallet UI, stateful custom migration or universal maxima claim"
+  },
+  "closed": true
+}

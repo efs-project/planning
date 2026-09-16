@@ -1,0 +1,20 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: stale src/Ledger.sol
++ actual - expected
+
++ '0x5d6c054f0f0a4186240b81292db62ffae975446ea38b6c0bbd3858ca2a3a54f2'
+- '0x36544ded90adbdab9ff67e42dfa8589e47eb527bbc93533dcc6dfca2a1fab9ef'
+
+    at file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/core-closeout-types-20260915/paid.mjs:29:107 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '0x5d6c054f0f0a4186240b81292db62ffae975446ea38b6c0bbd3858ca2a3a54f2',
+  expected: '0x36544ded90adbdab9ff67e42dfa8589e47eb527bbc93533dcc6dfca2a1fab9ef',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v26.0.0

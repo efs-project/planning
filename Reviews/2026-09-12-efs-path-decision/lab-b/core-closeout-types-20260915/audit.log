@@ -1,0 +1,349 @@
+{
+  "verifiedSourceFiles": 21,
+  "transactions": 55,
+  "intendedRefusals": 8,
+  "wrapperRuntimeHash": "0x685da87926b52f471eca3b7994db46cccf1f3e8166c2af378fb45d7768806ec8",
+  "wrapperInitcodeHash": "0xe9eef707a978ff6519b427f0ffb6de5a01a73b076b3aa1591b18c3879991e725",
+  "wrapperSourceKeccak": "0x9571406c5007d3924a0efdaba2af415f26507aa1eb97a0be9187c4e66cfef2a0",
+  "wrapperCosts": [
+    {
+      "label": "recurring/custom-note",
+      "calls": 34,
+      "allowance": "300000",
+      "consumed": "40473",
+      "error": null
+    },
+    {
+      "label": "maximum/note1024-title64",
+      "calls": 33,
+      "allowance": "300000",
+      "consumed": "152372",
+      "error": null
+    },
+    {
+      "label": "maximum/descriptor4096-fields16-refs8-body8192-bytes",
+      "calls": 42,
+      "allowance": "300000",
+      "consumed": "93973",
+      "error": null
+    },
+    {
+      "label": "maximum/text8190-shared300k-refusal",
+      "calls": 19,
+      "allowance": "300000",
+      "consumed": "300000",
+      "error": "out of gas"
+    }
+  ],
+  "density": [
+    {
+      "label": "legacy/reference-publish",
+      "status": true,
+      "totalBytes": 1,
+      "nonzeroBytes": 1,
+      "zeroBytes": 0,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "886927"
+    },
+    {
+      "label": "vector/publish/unit/0",
+      "status": true,
+      "totalBytes": 0,
+      "nonzeroBytes": 0,
+      "zeroBytes": 0,
+      "nonzeroWords": 0,
+      "totalWords": 0,
+      "gasUsed": "658142"
+    },
+    {
+      "label": "vector/publish/note-v1/0",
+      "status": true,
+      "totalBytes": 4,
+      "nonzeroBytes": 3,
+      "zeroBytes": 1,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "671924"
+    },
+    {
+      "label": "vector/publish/note-v11/0",
+      "status": true,
+      "totalBytes": 5,
+      "nonzeroBytes": 3,
+      "zeroBytes": 2,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "657144"
+    },
+    {
+      "label": "vector/publish/note-v11/1",
+      "status": true,
+      "totalBytes": 8,
+      "nonzeroBytes": 6,
+      "zeroBytes": 2,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "668568"
+    },
+    {
+      "label": "vector/publish/note-rich-v2/0",
+      "status": true,
+      "totalBytes": 5,
+      "nonzeroBytes": 4,
+      "zeroBytes": 1,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "657568"
+    },
+    {
+      "label": "vector/publish/note-restricted/0",
+      "status": true,
+      "totalBytes": 5,
+      "nonzeroBytes": 4,
+      "zeroBytes": 1,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "674733"
+    },
+    {
+      "label": "vector/publish/all-kinds/0",
+      "status": true,
+      "totalBytes": 77,
+      "nonzeroBytes": 42,
+      "zeroBytes": 35,
+      "nonzeroWords": 3,
+      "totalWords": 3,
+      "gasUsed": "754787"
+    },
+    {
+      "label": "vector/refuse/nonempty unit",
+      "status": false,
+      "totalBytes": 1,
+      "nonzeroBytes": 0,
+      "zeroBytes": 1,
+      "nonzeroWords": 0,
+      "totalWords": 1,
+      "gasUsed": "412813"
+    },
+    {
+      "label": "vector/refuse/length mismatch",
+      "status": false,
+      "totalBytes": 4,
+      "nonzeroBytes": 3,
+      "zeroBytes": 1,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "415255"
+    },
+    {
+      "label": "vector/refuse/tab outside text domain",
+      "status": false,
+      "totalBytes": 3,
+      "nonzeroBytes": 2,
+      "zeroBytes": 1,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "415582"
+    },
+    {
+      "label": "vector/refuse/presence2",
+      "status": false,
+      "totalBytes": 5,
+      "nonzeroBytes": 4,
+      "zeroBytes": 1,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "417957"
+    },
+    {
+      "label": "vector/refuse/enum3",
+      "status": false,
+      "totalBytes": 5,
+      "nonzeroBytes": 4,
+      "zeroBytes": 1,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "418308"
+    },
+    {
+      "label": "vector/refuse/boolean2",
+      "status": false,
+      "totalBytes": 5,
+      "nonzeroBytes": 4,
+      "zeroBytes": 1,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "418373"
+    },
+    {
+      "label": "recurring/duplicate-note",
+      "status": true,
+      "totalBytes": 4,
+      "nonzeroBytes": 3,
+      "zeroBytes": 1,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "578473"
+    },
+    {
+      "label": "recurring/custom-note",
+      "status": true,
+      "totalBytes": 4,
+      "nonzeroBytes": 3,
+      "zeroBytes": 1,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "665734"
+    },
+    {
+      "label": "custom/reject-valid-dedup",
+      "status": false,
+      "totalBytes": 4,
+      "nonzeroBytes": 3,
+      "zeroBytes": 1,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "426945"
+    },
+    {
+      "label": "maximum/note1024-title64",
+      "status": true,
+      "totalBytes": 1093,
+      "nonzeroBytes": 1091,
+      "zeroBytes": 2,
+      "nonzeroWords": 35,
+      "totalWords": 35,
+      "gasUsed": "1574386"
+    },
+    {
+      "label": "maximum/descriptor4096-fields16-refs8-body8192-bytes",
+      "status": true,
+      "totalBytes": 8192,
+      "nonzeroBytes": 265,
+      "zeroBytes": 7927,
+      "nonzeroWords": 9,
+      "totalWords": 256,
+      "gasUsed": "1770302"
+    },
+    {
+      "label": "maximum/text8190-shared300k-refusal",
+      "status": false,
+      "totalBytes": 8192,
+      "nonzeroBytes": 8192,
+      "zeroBytes": 0,
+      "nonzeroWords": 256,
+      "totalWords": 256,
+      "gasUsed": "826782"
+    },
+    {
+      "label": "destination/same-record",
+      "status": true,
+      "totalBytes": 4,
+      "nonzeroBytes": 3,
+      "zeroBytes": 1,
+      "nonzeroWords": 1,
+      "totalWords": 1,
+      "gasUsed": "696712"
+    },
+    {
+      "label": "legacy/note1024",
+      "status": true,
+      "totalBytes": 1030,
+      "nonzeroBytes": 1029,
+      "zeroBytes": 1,
+      "nonzeroWords": 33,
+      "totalWords": 33,
+      "gasUsed": "1579300"
+    }
+  ],
+  "deploymentSizes": [
+    {
+      "name": "TypeRegistry",
+      "label": "TypeRegistry",
+      "runtime": 14914,
+      "initcode": 19512,
+      "argumentBytes": 0,
+      "gasUsed": "4257218"
+    },
+    {
+      "name": "Ledger",
+      "label": "Ledger",
+      "runtime": 24247,
+      "initcode": 36378,
+      "argumentBytes": 64,
+      "gasUsed": "7803668"
+    },
+    {
+      "name": "IndexModule",
+      "label": "IndexModule",
+      "runtime": 12897,
+      "initcode": 21706,
+      "argumentBytes": 32,
+      "gasUsed": "4381278"
+    },
+    {
+      "name": "DescribedTypeRule",
+      "label": "standalone-wrapper-cost",
+      "runtime": 4380,
+      "initcode": 4406,
+      "argumentBytes": 0,
+      "gasUsed": "1000317"
+    },
+    {
+      "name": "DescriptorCode",
+      "label": "standalone-descriptor-cost",
+      "runtime": 323,
+      "initcode": 660,
+      "argumentBytes": 416,
+      "gasUsed": "125782"
+    },
+    {
+      "name": "DescribedPaidConsumer",
+      "label": "DescribedPaidConsumer",
+      "runtime": 786,
+      "initcode": 812,
+      "argumentBytes": 0,
+      "gasUsed": "223344"
+    },
+    {
+      "name": "DescribedPredicateFixture",
+      "label": "DescribedPredicateFixture",
+      "runtime": 1043,
+      "initcode": 1253,
+      "argumentBytes": 64,
+      "gasUsed": "325886"
+    },
+    {
+      "name": "TypeRegistry",
+      "label": "destination-registry",
+      "runtime": 14914,
+      "initcode": 19512,
+      "argumentBytes": 0,
+      "gasUsed": "4257218"
+    },
+    {
+      "name": "Ledger",
+      "label": "destination-ledger",
+      "runtime": 24247,
+      "initcode": 36378,
+      "argumentBytes": 64,
+      "gasUsed": "7803668"
+    },
+    {
+      "name": "NoteV1Rule",
+      "label": "NoteV1Rule",
+      "runtime": 965,
+      "initcode": 991,
+      "argumentBytes": 0,
+      "gasUsed": "261839"
+    }
+  ],
+  "qualifications": [
+    "Joint maximum payload is7927zero bytes, not worst-case nonzero storage writes.",
+    "Eight checked-reference slots repeat ONE existing target; not eight cold distinct records.",
+    "Cold means separate transaction boundary; all retained target storage naturally warms within one transaction.",
+    "Full8190text is structurally legal but cannot be admitted by this300k profile.",
+    "Raw ECDSA signing is not evidence of ordinary wallet UI support."
+  ]
+}

@@ -312,7 +312,7 @@ contract CoreOrderedAcceptanceTest is LabBase {
             owner.run();
         }
     }
-    function test_static_codecs_preserve_hashes_order_and_unknown_type_behavior() public {
+    function test_static_codecs_preserve_registered_hashes_and_refuse_unknown_profiles() public {
         Ledger.ReadSetV2 memory rs;
         rs.principalIds=new bytes32[](2);rs.principalIds[0]=bytes32(uint256(11));rs.principalIds[1]=bytes32(uint256(22));
         rs.positions=new bytes32[](1);rs.positions[0]=bytes32(uint256(33));
@@ -320,13 +320,16 @@ contract CoreOrderedAcceptanceTest is LabBase {
         bytes32 expected=keccak256(abi.encode(keccak256("efs.lab.read-set/2:ordered-first-binding"),rs));
         uint256 beforeGas=gasleft();require(ledger.readSetHash(rs)==expected,"read-set codec changed hash");
         emit log_named_uint("read-set 2x1 warm call gas",beforeGas-gasleft());
-        bytes32 unknown=bytes32(uint256(123));Ledger.Action[] memory a=two(aPublish(QUOTE,q(1)),aPublish(unknown,q(2)));
+        bytes32 unknown=bytes32(uint256(123));Ledger.Action[] memory a=two(aPublish(QUOTE,q(1)),aPublish(BINARY,q(2)));
         expected=keccak256(abi.encode(keccak256("efs.lab.acceptance-profile/2"),address(registry),registry.epoch()));
         expected=keccak256(abi.encode(expected,QUOTE,address(quoteRule),address(quoteRule).codehash,address(acceptor),address(acceptor).codehash,uint16(2)));
-        expected=keccak256(abi.encode(expected,unknown,address(0),bytes32(0),address(0),bytes32(0),uint16(0)));
+        expected=keccak256(abi.encode(expected,BINARY,address(0),bytes32(0),address(0),bytes32(0),uint16(1)));
         beforeGas=gasleft();require(ledger.acceptanceProfileOf(a)==expected,"profile codec changed fields/order");
         emit log_named_uint("two-action profile warm call gas",beforeGas-gasleft());
-        (bool ok,bytes memory err)=address(ledger).call(abi.encodeCall(ledger.publish,(unknown,q(2))));
+        a[1]=aPublish(unknown,q(2));
+        (bool ok,bytes memory err)=address(ledger).staticcall(abi.encodeCall(ledger.acceptanceProfileOf,(a)));
+        require(!ok&&bytes4(err)==Ledger.E_UNKNOWN_TYPE.selector,"unknown Type profile became signable");
+        (ok,err)=address(ledger).call(abi.encodeCall(ledger.publish,(unknown,q(2))));
         require(!ok && bytes4(err)==Ledger.E_UNKNOWN_TYPE.selector,"unknown Type admission semantics changed");
     }
     function test_legacy_fallback_index_cannot_skip_mandatory_final_phase() public {

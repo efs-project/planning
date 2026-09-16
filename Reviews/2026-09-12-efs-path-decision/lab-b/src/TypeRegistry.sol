@@ -3,6 +3,7 @@ pragma solidity 0.8.30;
 
 import {Keys} from "./Keys.sol";
 import {ITypeRegistry} from "./Interfaces.sol";
+import {DescribedCodec,DescriptorCode,DescribedTypeRule,IDescribedRegistry} from "./DescribedTypeProfile.sol";
 
 /// @title TypeRegistry — exact Type identity + mandatory rule + separate Realm acceptance policy (lab)
 /// @notice DISPOSABLE LAB, NO PROTOCOL CLAIM. Authority repair 2026-09-13 (REPAIR.md R2, F5).
@@ -61,11 +62,21 @@ contract TypeRegistry is ITypeRegistry {
     }
 
     address public immutable admin;
-    uint64 public epoch; // rules epoch: bumped by every register / activate / setBindingRefType
+    uint64 public epoch; // legacy register and policy/role changes, NOT described catalog additions
     mapping(bytes32 => TypeInfo) private _types;
     mapping(bytes32 => bytes32[]) private _refTypes; // typeId => expected Type per leading body word
     mapping(bytes32 => mapping(uint16 => Activation)) private _activation; // typeId => 1-based index => row
     mapping(bytes32 => mapping(bytes32 => bytes32)) private _bindingRefTypes; // purpose => role => expected Type
+
+    address public immutable describedRule;
+    uint64 public catalogRevision;
+    struct Declaration {address blob;bool installed;bytes signature;}
+    struct LocalBinding {address custom;address allowedLedger;bytes32 id;bytes preimage;bytes signature;}
+    mapping(bytes32=>Declaration) private _declarations;
+    mapping(bytes32=>LocalBinding) private _localBindings;
+    bytes32 private constant DECLARATION_DOMAIN=keccak256("efs.lab.portable-type-declaration/1");
+    bytes32 private constant BINDING_DOMAIN=keccak256("efs.lab.local-type-binding/1");
+    uint256 private constant HALF_N=0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0;
 
     event TypeRegistered(bytes32 indexed typeId, bytes32 shape, bytes32 ruleId, address mandatoryAcceptor, uint8 refCount);
     event PolicyActivated(bytes32 indexed typeId, uint16 activation, address acceptor, bytes32 acceptorCodehash, uint64 epoch);
@@ -77,9 +88,126 @@ contract TypeRegistry is ITypeRegistry {
     error E_ACCEPTOR_CODE();
     error E_TOO_MANY_REFS();
     error E_ACTIVATION(bytes32 typeId, uint16 index);
+    error E_DECLARATION();
+    error E_BINDING();
+    event DeclarationRetained(bytes32 indexed typeId,address blob);
+    event DescribedInstalled(bytes32 indexed typeId,bytes32 bindingId,uint64 catalogRevision);
 
     constructor() {
         admin = msg.sender;
+        describedRule=address(new DescribedTypeRule());
+    }
+
+    function describedTypeId(bytes calldata descriptor_) public view returns(bytes32){
+        DescribedCodec.Schema memory s=DescribedCodec.parse(descriptor_);
+        return Keys.typeId(DescribedCodec.shape(descriptor_),s.refs,describedRule.codehash);
+    }
+
+    /// Portable EOA declaration namespace; raw digest (not personal_sign).
+    /// No destination chain, registry, payer, local instance or address.
+    function declarationDigest(bytes32 typeId) public pure returns(bytes32){return keccak256(abi.encode(DECLARATION_DOMAIN,typeId));}
+
+    /// Retaining/reading meaning does not grant a destination custom installation.
+    function retainDeclaration(bytes calldata descriptor_,bytes calldata signature) external returns(bytes32 typeId){
+        DescribedCodec.Schema memory s=DescribedCodec.parse(descriptor_);
+        typeId=Keys.typeId(DescribedCodec.shape(descriptor_),s.refs,describedRule.codehash);
+        _retain(typeId,descriptor_,signature,s.key);
+    }
+
+    function _retain(bytes32 typeId,bytes calldata descriptor_,bytes calldata signature,address key) private {
+        _verify(declarationDigest(typeId),signature,key);
+        Declaration storage d=_declarations[typeId];
+        if(d.blob!=address(0))return;
+        // An admin's opaque registration remains opaque even for matching bytes.
+        if(_types[typeId].registered)revert E_TYPE_EXISTS(typeId);
+        d.blob=address(new DescriptorCode(descriptor_));d.signature=signature;
+        emit DeclarationRetained(typeId,d.blob);
+    }
+
+    /// Atomic, permissionless, immutable installation. Local authority is the
+    /// descriptor key; it can authorize any exact instance, never "same code".
+    function registerDescribed(bytes calldata descriptor_,bytes calldata declaration,address custom,address allowedLedger,bytes calldata bindingSignature)
+        external returns(bytes32 typeId)
+    {
+        DescribedCodec.Schema memory s=DescribedCodec.parse(descriptor_);
+        bytes32 shape=DescribedCodec.shape(descriptor_);bytes32 rule=describedRule.codehash;
+        typeId=Keys.typeId(shape,s.refs,rule);
+        _retain(typeId,descriptor_,declaration,s.key);
+        bytes32 bindingId;bytes memory preimage;
+        if(s.customHash==0){
+            if(custom!=address(0)||allowedLedger!=address(0)||bindingSignature.length!=0)revert E_BINDING();
+        }else{
+            if(custom.code.length==0||custom.codehash!=s.customHash||allowedLedger.code.length==0)revert E_BINDING();
+            // The exact local Ledger must actually be pinned to this registry.
+            bytes memory input=abi.encodeWithSignature("registry()");bool ok;uint256 size;uint256 returned;
+            assembly("memory-safe"){
+                let ptr:=mload(0x40)
+                ok:=staticcall(15000,allowedLedger,add(input,32),mload(input),ptr,32)
+                size:=returndatasize() returned:=mload(ptr)
+            }
+            if(!ok||size!=32||returned!=uint160(address(this)))revert E_BINDING();
+            preimage=_bindingPreimage(typeId,custom,allowedLedger,s);
+            bindingId=keccak256(preimage);_verify(bindingId,bindingSignature,s.key);
+        }
+        TypeInfo storage existing=_types[typeId];
+        if(existing.registered){
+            if(!_declarations[typeId].installed||_localBindings[typeId].id!=bindingId||existing.shape!=shape||existing.ruleId!=rule)revert E_BINDING();
+            return typeId;
+        }
+        address mandatory=describedRule;
+        if(bindingId!=0){
+            mandatory=address(new DescribedTypeRule{salt:bindingId}());
+            if(mandatory!=bindingAddress(bindingId)||mandatory.codehash!=rule)revert E_BINDING();
+            _localBindings[typeId]=LocalBinding(custom,allowedLedger,bindingId,preimage,bindingSignature);
+        }
+        _types[typeId]=TypeInfo(true,uint8(s.refs.length),1,uint64(block.number),mandatory,shape,rule);
+        _declarations[typeId].installed=true;
+        _refTypes[typeId]=s.refs;
+        _activation[typeId][1]=Activation(address(0),uint48(epoch),uint40(block.number),bytes32(0));
+        emit TypeRegistered(typeId,shape,rule,mandatory,uint8(s.refs.length));
+        emit PolicyActivated(typeId,1,address(0),bytes32(0),epoch);
+        emit DescribedInstalled(typeId,bindingId,++catalogRevision);
+    }
+
+    function bindingPreimage(bytes calldata descriptor_,address custom,address allowedLedger) external view returns(bytes memory){
+        DescribedCodec.Schema memory s=DescribedCodec.parse(descriptor_);
+        if(s.customHash==0)revert E_BINDING();
+        bytes32 t=Keys.typeId(DescribedCodec.shape(descriptor_),s.refs,describedRule.codehash);
+        return _bindingPreimage(t,custom,allowedLedger,s);
+    }
+    function _bindingPreimage(bytes32 t,address custom,address allowedLedger,DescribedCodec.Schema memory s) private view returns(bytes memory){
+        return abi.encode(BINDING_DOMAIN,DescribedCodec.PROFILE,describedRule.codehash,keccak256(type(DescribedTypeRule).creationCode),
+            block.chainid,address(this),t,allowedLedger,custom,s.customHash,uint256(s.customAbi),s.key);
+    }
+    function bindingAddress(bytes32 id) public view returns(address){
+        return address(uint160(uint256(keccak256(abi.encodePacked(hex"ff",address(this),id,keccak256(type(DescribedTypeRule).creationCode))))));
+    }
+    function describedInfo(bytes32 t) external view returns(IDescribedRegistry.Info memory info){
+        // Retention is not interpretation/installation, in either call order.
+        if(!_declarations[t].installed){info.blob=_declarations[t].blob;return info;}
+        TypeInfo storage row=_types[t];LocalBinding storage b=_localBindings[t];
+        return IDescribedRegistry.Info(_declarations[t].blob,row.mandatoryAcceptor,row.shape,row.ruleId,b.custom,b.allowedLedger,b.id);
+    }
+    /// Empty means OPAQUE_LEGACY or missing declaration, not an empty valid schema.
+    function descriptorBytes(bytes32 t) external view returns(bytes memory d){
+        address blob=_declarations[t].blob;if(blob==address(0))return "";
+        uint256 size=blob.code.length;if(size<91||size>4097)revert E_DECLARATION();
+        d=new bytes(size-1);assembly("memory-safe"){extcodecopy(blob,add(d,32),1,sub(size,1))}
+    }
+    function declarationSignature(bytes32 t) external view returns(bytes memory){return _declarations[t].signature;}
+    /// 0 opaque/missing, 1 retained declaration only, 2 installed described Type.
+    function describedStatus(bytes32 t) external view returns(uint8){
+        Declaration storage d=_declarations[t];
+        if(d.installed)return 2;
+        return _types[t].registered||d.blob==address(0)?0:1;
+    }
+    function describedBinding(bytes32 t) external view returns(bytes32 id,bytes memory preimage,bytes memory signature){
+        LocalBinding storage b=_localBindings[t];return(b.id,b.preimage,b.signature);
+    }
+    function _verify(bytes32 digest,bytes calldata signature,address key) private pure {
+        if(signature.length!=65)revert E_DECLARATION();bytes32 r;bytes32 s;uint8 v;
+        assembly("memory-safe"){r:=calldataload(signature.offset) s:=calldataload(add(signature.offset,32)) v:=byte(0,calldataload(add(signature.offset,64)))}
+        if(uint256(s)>HALF_N||(v!=27&&v!=28)||ecrecover(digest,v,r,s)!=key)revert E_DECLARATION();
     }
 
     /// Register a Type by descriptor. Returns the derived exact id. Refused if that id exists

@@ -1,0 +1,17 @@
+No files changed, compilation skipped
+
+Ran 2 tests for test/DescribedTypeProfile.t.sol:DescribedTypeProfileTest
+[FAIL: EvmError: Revert] test_public_registration_retains_bytes_and_requires_structure() (gas: 11075)
+[FAIL: unknown publish profile was signable] test_unknown_publish_and_reuse_refuse_initial_profile() (gas: 22956)
+Suite result: FAILED. 0 passed; 2 failed; 0 skipped; finished in 8.86ms (469.96µs CPU time)
+
+Ran 1 test suite in 17.57ms (8.86ms CPU time): 0 tests passed, 2 failed, 0 skipped (2 total tests)
+
+Failing tests:
+Encountered 2 failing tests in test/DescribedTypeProfile.t.sol:DescribedTypeProfileTest
+[FAIL: EvmError: Revert] test_public_registration_retains_bytes_and_requires_structure() (gas: 11075)
+[FAIL: unknown publish profile was signable] test_unknown_publish_and_reuse_refuse_initial_profile() (gas: 22956)
+
+Encountered a total of 2 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 2 failed tests
