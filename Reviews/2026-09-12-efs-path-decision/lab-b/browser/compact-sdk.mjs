@@ -511,7 +511,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     }
     const d=revision.content;
     const loadCarrier=async(descriptor,limits)=>{
-      if(descriptor.carrier===1){check(args.loadCarrier,'CARRIER_UNAVAILABLE');return args.loadCarrier(descriptor,limits);}
+      if(descriptor.carrier!==0){check(args.loadCarrier,'CARRIER_UNAVAILABLE');return args.loadCarrier(descriptor,limits);}
       const stored=await retainedAt('0x'+descriptor.inline,config.types.bytes,args.context,BigInt(d.firstAdmission));
       const body=e.getBytes(stored.body);check(body.length>=32&&eq(e.hexlify(body.slice(0,32)),'0x'+descriptor.digest),'CONTENT_INTEGRITY');return body.slice(32);
     };
@@ -781,6 +781,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       if(content){
         check(carriers,'CONTENT_PROFILE');
         let d=content.descriptor??await contentCodec.describe(bytesOf(content.bytes),{media:content.media??0});
+        check(d.version!==2||config.externalContentProfile==='ar-ipfs-locator-v2','EXTERNAL_CONTENT_PROFILE');
         const raw=d.carrier===0?bytesOf(content.bytes):new Uint8Array();
         if(d.carrier===0)check(raw.length<=8160&&raw.length===d.length&&await contentCodec.digest(raw)===d.digest,'CONTENT_INTEGRITY');
         const inline=await retain(config.types.bytes,e.concat(['0x'+await contentCodec.digest(raw),raw]));d={...d,inline:inline.slice(2)};

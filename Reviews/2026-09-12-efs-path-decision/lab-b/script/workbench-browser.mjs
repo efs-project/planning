@@ -8,9 +8,10 @@ import {startBrowser} from './compact-browser.mjs';
 import {startRawCarrier} from './raw-carrier-fixture.mjs';
 import {samplePng} from './carrier-fixtures.mjs';
 import {describe,encryptContent} from '../browser/compact-content.mjs';
+import {externalGateways,publicExternalSamples,externalSampleDescriptor} from './external-content-fixtures.mjs';
 
 export async function startWorkbench(){
-  const env=await createTagEnvironment();let fixture;
+  const env=await createTagEnvironment({externalContent:true});let fixture;
   try{
     const e=env.ethers,c=env.contracts,t=env.manifest.types,h=env.manifest.ruleHashes;
     c.index=c.tagIndex;
@@ -19,7 +20,7 @@ export async function startWorkbench(){
     await env.deploy('joined','LiveFilesReader.sol','LiveFilesPageReader',[c.ledger.address,c.lens.address,c.index.address]);
     Object.assign(env.manifest,{folder:env.tags.directoryD,folders:[env.tags.directoryD],filesProfile:'typed-directory-v1',
       contentProfile:'raw-sha256-aesgcm-v2',liveProfile:'quote-u128-bool-v1',liveOutputType:t.quote,liveProviderRuntimeHash:env.tags.selectedProviderHash,
-      workbench:true});
+      workbench:true,externalGateways});
     for(const key of ['index','lens','files','joined','liveAdapter','finalValidator'])env.manifest.contracts[key]=c[key];
     assert.equal((await env.call('ledger','indexModule'))[0].toLowerCase(),c.index.address.toLowerCase());
     fixture=await startRawCarrier([samplePng()]);
@@ -40,6 +41,8 @@ export async function startWorkbench(){
     await run('create',{folder:docs.file,name:'alice-only.txt',salt:e.id('workbench/fallback'),document:'Bob has no entry here, so Bob → Alice falls back to Alice.\n'});
     const image=await run('create',{folder:photos.file,name:'red.png',salt:e.id('workbench/red'),content:{bytes:samplePng(),media:2}});
     await run('create',{folder:photos.file,name:'external.png',salt:e.id('workbench/external'),content:{descriptor:await describe(samplePng(),{carrier:1,media:2})}});
+    const externalSamples=[];
+    for(const sample of publicExternalSamples)externalSamples.push(await run('create',{folder:docs.file,name:sample.name,salt:e.id('workbench/'+sample.name),content:{descriptor:externalSampleDescriptor(sample)}}));
     const secret=await encryptContent(e.toUtf8Bytes('A real encrypted file. Wrong keys do not open it.'),new Uint8Array(32).fill(17),{media:1});
     await run('create',{folder:docs.file,name:'encrypted.txt',salt:e.id('workbench/encrypted'),content:secret});
     await run('addTag',{file:meeting.file,scope:'file',conceptLabel:'efs',conceptNamespace:env.manifest.folder});
@@ -65,7 +68,7 @@ export async function startWorkbench(){
     assert.equal((await sdk.readContent({file,authors,context})).state,'LIVE_SHAPE_OBSERVED');
     console.log('Workbench seeded on final required index. Example decryption key: '+'11'.repeat(32));
     const browser=await startBrowser(env,{seed:false,directory:true,carrierFixture:fixture});
-    return {...browser,env,sdk,run,seed:{docs,photos,meeting,image}};
+    return {...browser,env,sdk,run,seed:{docs,photos,meeting,image,externalSamples}};
   }catch(error){await fixture?.close();await env.close();throw error;}
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){

@@ -48,12 +48,19 @@ async function openContent(){
   const current=()=>routeCurrent(navigation)&&generation===state.readGeneration&&position===state.selected&&request===state.contentRequest;
   const keyText=$('content-key')?.value.trim();
   const useExternal=$('allow-carrier')?.checked===true;
+  if(row.point.value.revision.content?.carrier>0&&!useExternal){
+    state.contentRequest=null;state.contentResult={state:'FETCH_PERMISSION_REQUIRED'};renderDetail();controls();return;
+  }
   renderDetail();controls();
   try {
     if(keyText&&!/^(?:0x)?[0-9a-f]{64}$/i.test(keyText))throw Error('KEY_FORMAT');
     const key=keyText?ethers.getBytes('0x'+keyText.replace(/^0x/i,'')):undefined;
+    const external=row.point.value.revision.content?.carrier>=2;
+    const loader=useExternal?(external&&state.externalContent
+      ?state.externalContent.createExternalLoader({gateways:state.config.manifest.externalGateways})
+      :state.config.carrierOrigin?state.paths.content.createRawTransport({origin:state.config.carrierOrigin,maxBytes:1048576,timeoutMs:5000}):undefined):undefined;
     const result=await state.sdk.readContent({file:row.file,record,authors:authors(),context:state.context,key,signal:request.abort.signal,
-      ...(useExternal&&state.config.carrierOrigin?{loadCarrier:state.paths.content.createRawTransport({origin:state.config.carrierOrigin,maxBytes:1048576,timeoutMs:5000})}:{})});
+      ...(loader?{loadCarrier:loader}:{}),...(external?{maxBytes:state.externalContent?.MAX_EXTERNAL_BYTES??1048576}:{})});
     if(!current())return;state.contentResult=result;
     if(result.state==='AVAILABLE_VERIFIED'){
       try{const preview=await state.paths.content.verifyRaster(result.bytes,{signal:request.abort.signal});if(!current())return;state.previewUrl=URL.createObjectURL(preview.blob);state.previewSize={width:preview.width,height:preview.height};}
@@ -124,6 +131,7 @@ function controls() {
   $('signer').disabled=!state.keys || state.busy; $('lens').disabled=state.busy || !state.sdk;
   $('connect').hidden=!!state.wallet; $('disconnect').hidden=!state.wallet;
   $('connect-wallet').hidden=!!state.wallet;
+  if($('test-funds'))$('test-funds').disabled=!state.wallet?.external||state.busy;
   $('signer-status').textContent=state.wallet ? state.wallet.external?`${short(state.wallet.address)} · wallet`:`${$('signer').value} · disposable test signer` : 'Guest · read only';
   $('editor-submit').disabled=state.busy || state.routeLoading || !!state.operation?.pending;
   document.querySelectorAll('[data-write]').forEach(button=>{button.disabled=!writesAllowed() || button.dataset.blocked==='true';});
@@ -274,10 +282,11 @@ function renderDetail() {
   }
   if(revision?.profile==='carrier-v1'){
     const bytes=verifiedBytes(row),text=bytes?textPreview(bytes):null,d=revision.content,content=state.contentResult;
-    $('detail').innerHTML=`<h2>${escape(name)}</h2><p>${escape(contentMessage(content))}${state.contentRequest?' · opening…':''}</p>
+    $('detail').innerHTML=`<h2>${escape(name)}</h2><p>${escape(content?.state==='FETCH_PERMISSION_REQUIRED'?'Not downloaded yet — allow a gateway fetch below.':contentMessage(content))}${state.contentRequest?' · opening…':''}</p>
       <div class="file-actions"><button data-action="openContent">Open verified bytes</button><button data-action="download" data-blocked="${!bytes}" ${bytes?'':'disabled'}>↓ Download bytes</button>${action('edit','Edit / replace contents',d.encryption===1)}${action('rename','Rename',!knownName)}${action('move','Move',!knownName)}${action('remove','Remove placement',!knownName)}</div>
       ${d.encryption?'<label>Supplied key (64 hexadecimal digits)<input id="content-key" type="password" autocomplete="off"></label><p>Key stays in this open operation; it is not saved to the journal. Encrypted files are read-only in this text editor; opening or downloading does not publish plaintext.</p>':''}
       ${d.carrier===1?`<label><input id="allow-carrier" type="checkbox"> Allow this open to fetch from ${escape(state.config.carrierOrigin??'no configured transport')}</label><p>Explicit raw SHA-256 transport; no credentials or redirects, 1 MiB / 5-second cap.</p>`:''}
+      ${d.carrier>=2?`<p><strong>${d.carrier===2?'Arweave':'IPFS'}</strong> · ${pretty(d.length)} bytes</p><code style="overflow-wrap:anywhere">${escape(d.locator)}</code><p><label><input id="allow-carrier" type="checkbox"> Fetch from public ${d.carrier===2?'Arweave':'IPFS'} gateways</label></p><p>Downloads are checked against the EFS publisher’s saved fingerprint. This is not an independent proof of Arweave inclusion or the IPFS DAG. The gateways can see which content you request.</p>`:''}
       ${state.previewUrl?`<figure style="margin:12px 0"><div style="min-height:160px;max-height:420px;width:100%;display:grid;place-items:center;background:repeating-conic-gradient(#e6e6e6 0% 25%,#fafafa 0% 50%) 50% / 20px 20px;border:1px solid #aaa;overflow:hidden"><img class="verified-image" src="${escape(state.previewUrl)}" alt="Verified static PNG preview" style="width:${Math.max(64,Math.min(640,state.previewSize.width))}px;max-width:100%;max-height:420px;object-fit:contain;image-rendering:pixelated"></div><figcaption>${state.previewSize.width} × ${state.previewSize.height} intrinsic pixels · bounded inert preview</figcaption></figure>`:''}
       ${bytes?`<p>${pretty(bytes.length)} verified bytes. ${text.utf8?'UTF-8 interpretation below.':'Binary bytes; download preserves them exactly.'}</p>${text.utf8?`<pre class="document">${escape(text.text)}</pre>`:''}`:''}
       ${tagControls(point)}<p>Verified PNG/JPEG can be previewed. Other bytes can be downloaded; HTML and SVG are never executed.</p>
@@ -340,27 +349,37 @@ async function connect() {
 }
 async function connectWallet(){
   if(!state.paths)throw Error('Wallet signing is supported in the guarded v2 workbench, not the old compact demo.');
-  if(!window.ethereum)throw Error('No injected wallet found. Use a browser with MetaMask, or try the disposable Alice/Bob signers.');
-  const provider=new ethers.BrowserProvider(window.ethereum);
-  await provider.send('eth_requestAccounts',[]);
+  const ethereum=state.walletOptions?.find(w=>w.id===$('wallet-provider')?.value)?.provider??window.ethereum;
+  if(!ethereum)throw Error('No wallet extension found. Open this exact URL in Chrome, Brave or Firefox with MetaMask installed. The Codex in-app browser does not supply MetaMask.');
+  await ethereum.request({method:'eth_requestAccounts'});
+  if(state.walletTools){
+    await state.walletTools.requestLocalNetwork({ethereum,config:state.config,pageUrl:location.href});
+    await state.walletTools.verifyWalletEnvironment({ethereum,config:state.config,rpc,keccak256:ethers.keccak256});
+  }
+  const provider=new ethers.BrowserProvider(ethereum);
   if(BigInt(await provider.send('eth_chainId',[]))!==BigInt(state.config.manifest.chainId))throw Error(`Select local chain ${state.config.manifest.chainId} in your wallet. RPC: ${state.config.rpcUrl}. No real funds needed.`);
   const signer=await provider.getSigner(),address=await signer.getAddress();
-  state.keys=null;state.wallet={external:true,address,signer,provider};
-  const changed=()=>{state.wallet=null;state.keys=null;notice('Wallet account or chain changed. Reconnect before writing.','warning');controls();};
-  if(!state.walletListeners){window.ethereum.on?.('accountsChanged',changed);window.ethereum.on?.('chainChanged',changed);state.walletListeners=true;}
+  state.walletUnsubscribe?.();state.keys=null;state.wallet={external:true,address,signer,provider,ethereum};
+  const changed=()=>{state.walletUnsubscribe?.();state.walletUnsubscribe=null;state.wallet=null;state.keys=null;notice('Wallet account or chain changed. Reconnect before writing.','warning');controls();};
+  ethereum.on?.('accountsChanged',changed);ethereum.on?.('chainChanged',changed);
+  state.walletUnsubscribe=()=>{ethereum.removeListener?.('accountsChanged',changed);ethereum.removeListener?.('chainChanged',changed);};
   applyCustomLens([address,...Object.values(state.config.manifest.authors).filter(a=>a.toLowerCase()!==address.toLowerCase())]);
-  await refresh();notice('Wallet connected. This prototype asks for a data signature, then a transaction. The account needs local test ETH; guest reads never need it.');
+  await refresh();if($('wallet-setup'))$('wallet-setup').open=true;
+  notice('Wallet connected. Click Get local test ETH, then create files. Each write currently asks for a data signature and a transaction. No real funds needed.');
 }
 async function checkWallet(wallet){
   if(wallet!==state.wallet)throw Error('Writer changed; no further signature or transaction requested.');
   if(wallet.external){
+    if(state.walletTools)await state.walletTools.verifyWalletEnvironment({ethereum:wallet.ethereum,config:state.config,rpc,keccak256:ethers.keccak256});
     const [chain,accounts]=await Promise.all([wallet.provider.send('eth_chainId',[]),wallet.provider.send('eth_accounts',[])]);
     if(BigInt(chain)!==BigInt(state.config.manifest.chainId)||accounts[0]?.toLowerCase()!==wallet.address.toLowerCase())throw Error('Wallet account or network changed.');
   }
+  if(wallet!==state.wallet)throw Error('Wallet changed during validation. Reconnect before continuing.');
 }
 async function signIntent(wallet,digest,plan){
   await checkWallet(wallet);
   if(!wallet.external)return wallet.signingKey.sign(digest).serialized;
+  if(state.walletTools)return state.walletTools.signPlanIntent({signer:wallet.signer,plan,digest,ethers});
   const domain={name:'EFS2-RoadB-Lab',version:'2'},types={IntentV2:[
     'realmId:bytes32','realmOrigin:bytes32','executionSet:bytes32','author:address','nonce:uint64','deadline:uint64',
     'acceptanceProfile:bytes32','indexObligations:bytes32','readSetHash:bytes32','actionsHash:bytes32'
@@ -376,7 +395,7 @@ async function sendTransaction(transaction,navigation,wallet=state.wallet) {
     const estimate=BigInt(await rpc('eth_estimateGas',[{...transaction,from:wallet.address}]));
     if(estimate>16777216n)throw Error('Transaction exceeds this prototype’s gas cap.');
     checkRoute(navigation);await checkWallet(wallet);
-    return wallet.signer.sendTransaction({...transaction,gasLimit:estimate*120n/100n>16777216n?16777216n:estimate*120n/100n});
+    return wallet.signer.sendTransaction({...transaction,chainId:BigInt(state.config.manifest.chainId),gasLimit:estimate*120n/100n>16777216n?16777216n:estimate*120n/100n});
   }
   if(BigInt(await rpc('eth_chainId'))!==31337n) throw new Error('Chain changed; no transaction signed.');
   checkRoute(navigation);const from=wallet.address;
@@ -391,7 +410,7 @@ async function sendTransaction(transaction,navigation,wallet=state.wallet) {
 }
 async function write(operation,args,navigation=state.navigation) {
   checkRoute(navigation);
-  if(!state.wallet||$('lens').value==='conflict') throw new Error('Choose an ordered Lens and explicitly enable a disposable signer first.');
+  if(!state.wallet||$('lens').value==='conflict') throw new Error('Connect your wallet or enable a demo signer, and choose an ordered Lens first.');
   if(state.paths&&!navigation?.ready)throw Error('A qualified directory observation is required before signing.');
   const wallet=state.wallet,lens=authors();
   notice(`Preparing exact ${actionLabel(operation)} action…`);
@@ -453,11 +472,12 @@ function openEditor(operation,record) {
   if(operation==='create'||operation==='edit') fields+=field('Text contents (or choose a file below)','document',previous?.utf8?previous.text:'','textarea');
   if(state.paths&&['create','edit'].includes(operation))fields+=`<label class="field-label" for="field-upload">Upload exact bytes (${hasCarriers()?'up to 8160 onchain or 1 MiB external':'up to 8160 bytes'}; replaces text)</label><input type="file" id="field-upload">`;
   if(hasCarriers()&&['create','edit'].includes(operation))fields+=`<label>Byte storage<select name="carriage"><option value="inline">Onchain · small files</option>${state.config.carrierOrigin?`<option value="external">Local byte store · up to 1 MiB</option>`:''}</select></label><p>The local byte store is temporary. Metadata and content hashes stay onchain; its bytes disappear when this demo stops.</p><label>Optional encryption key (64 hexadecimal digits; not saved)<input type="password" name="encryptionKey" autocomplete="off"></label>`;
+  if(state.externalContent&&['create','edit'].includes(operation))fields+=`<label>Arweave / IPFS file address<input name="externalUri" placeholder="ar://transaction-id or ipfs://CID/path" autocomplete="off"></label><p>If supplied, this links an existing public file instead of uploading the text or chosen file above. It downloads up to 16 MiB and saves its fingerprint onchain. No pinning account or storage payment; this does not upload new files to Arweave. Do not paste private links.</p>`;
   if(operation==='move') fields+=state.paths?field('Destination directory path · verified before signing','destinationPath','/')+'<button type="button" data-action="destination">Browse / verify this path</button><div id="destination-children"></div>':`<label class="field-label" for="field-folder">Destination explicit mount</label><select name="toFolder" id="field-folder">${state.config.mounts.filter(mount=>mount.id!==state.folder).map(mount=>`<option value="${escape(mount.id)}">${escape(mount.label)}</option>`).join('')}</select>`;
   if(operation==='remove') fields+=`<p>Remove <strong>${escape(name)}</strong> from this Lens? This adds a placement mask; retained records and other authors' views are not erased.</p>`;
   if(operation==='restorePlacement') fields+=`<p>Restore the locally remembered placement <strong>${escape(state.removed.name)}</strong> in ${escape(state.config.mounts.find(m=>m.id===state.removed.folder)?.label??short(state.removed.folder))}? The SDK will revalidate the retained File and Name.</p>`;
   if(operation==='restoreContents') fields+=field('Historical Record ID · verified against this File before signing','record',record??'');
-  $('editor-fields').innerHTML=fields; $('editor-submit').textContent=`Sign ${actionLabel(operation)} locally`;
+  $('editor-fields').innerHTML=fields; $('editor-submit').textContent=state.wallet?.external?'Continue in MetaMask / wallet':`Sign ${actionLabel(operation)} locally`;
   $('field-upload')?.addEventListener('change',()=>{
     const file=$('field-upload').files[0];if(!file)return;
     if($('field-name')&&!$('field-name').value)$('field-name').value=file.name.toLowerCase().replace(/[^a-z0-9._-]/g,'-').slice(0,255);
@@ -525,7 +545,13 @@ document.addEventListener('click',event=>{
   run(async navigation=>{
     if(action==='connect') await connect();
     if(action==='connectWallet')await connectWallet();
-    if(action==='disconnect') {state.keys=null;state.wallet=null;notice('Guest mode. Demo keys removed from this screen’s active state.');}
+    if(action==='testFunds'){
+      if(!state.wallet?.external||!state.walletTools)throw Error('Connect a wallet on this local demo first.');
+      const wallet=state.wallet;await checkWallet(wallet);
+      await state.walletTools.fundLocalWallet({config:state.config,pageUrl:location.href,address:wallet.address,rpc});
+      notice('Your wallet now has at least 100 local test ETH. It has no real-world value. You can create files and folders.');
+    }
+    if(action==='disconnect') {state.walletUnsubscribe?.();state.keys=null;state.wallet=null;notice('Guest mode. No wallet remains active in this screen.');}
     if(action==='mount') {state.folder=button.dataset.folder;state.selected=null;await refresh();}
     if(action==='path')await navigate(state.paths.decodePath(button.dataset.path));
     if(action==='up'&&state.paths)await navigate(state.segments.slice(0,-1));
@@ -557,6 +583,14 @@ $('editor-form').addEventListener('submit',event=>{
       checkRoute(navigation);let args={...values,file:row?.file,folder:job.folder};
       if(operation==='create'||operation==='createDirectory') args.salt=ethers.hexlify(ethers.randomBytes(32));
       if(state.paths&&['create','edit'].includes(operation)){
+        const externalUri=values.externalUri?.trim();
+        if(externalUri){
+          if(!state.externalContent)throw Error('External file references are not supported by this deployment.');
+          if(values.encryptionKey||$('field-upload')?.files?.length)throw Error('For a file link, clear the upload and encryption fields.');
+          notice('Fetching the external file to compute its saved fingerprint…');
+          const observed=await state.externalContent.inspectExternal(externalUri,{gateways:state.config.manifest.externalGateways});
+          checkRoute(navigation);args.content={descriptor:observed.descriptor};delete args.document;delete args.encryptionKey;
+        }else{
         const upload=$('field-upload')?.files?.[0],external=hasCarriers()&&values.carriage==='external',encrypted=!!values.encryptionKey;
         if(job.replacementRequired&&!upload&&!job.replacementTyped)throw Error('Choose replacement bytes or enter replacement text. Existing contents have not been loaded; a blank editor is not an empty file.');
         const limit=(external?1048576:8160)-(encrypted?16:0);
@@ -571,6 +605,7 @@ $('editor-form').addEventListener('submit',event=>{
           // Keep that cheaper v2 path; uploads/encryption/external storage use
           // the full descriptor profile and its independently verified bytes.
           if(upload||encrypted||external)args.content=external?{descriptor:payload.descriptor}:payload;
+        }
         }
       }
       if(state.paths&&operation==='move'){const {route}=await destinationRoute(values.destinationPath,undefined,navigation);args.toFolder=route.target;}
@@ -624,6 +659,17 @@ await run(async()=>{
   const response=await fetch('/config.json',{cache:'no-store'});
   if(!response.ok) throw new Error(`Configuration unavailable (${response.status}).`);
   state.config=await response.json(); state.folder=state.config.manifest.folder;
+  if(state.config.manifest.externalContentProfile==='ar-ipfs-locator-v2')state.externalContent=await import('./external-content.mjs');
+  if(state.config.localWallet){
+    state.walletTools=await import('./wallet-session.mjs');
+    $('wallet-setup').hidden=false;
+    $('wallet-network').textContent=`RPC: ${state.config.rpcUrl} · chain ID ${state.config.manifest.chainId}. If you already have another Anvil network, update its RPC to this one.`;
+    state.walletTools.discoverWallets(window,options=>{
+      state.walletOptions=options;const select=$('wallet-provider'),previous=select.value;
+      select.replaceChildren(...options.map(w=>new Option(w.name,w.id)));
+      select.value=options.some(w=>w.id===previous)?previous:(options.find(w=>w.rdns==='io.metamask')?.id??options[0]?.id??'');
+    });
+  }
   readTransport=state.config.manifest.workbench
     ?(await import('./compact-read-transport.mjs')).createReadTransport({url:state.config.rpcUrl,batch:true})
     :legacyReadTransport(state.config.rpcUrl);
@@ -649,7 +695,8 @@ await run(async()=>{
   if(state.config.manifest.workbench){
     document.title='EFS v2 · Files workbench';document.querySelector('.lab-pill').textContent='V2 WORKBENCH · LOCAL';
     document.querySelector('h1').textContent='Files, folders, and shared views.';
-    document.querySelector('.about').innerHTML='<summary>About this prototype</summary><p>This is v2 end to end: typed records, the required index, ordered Lenses and guarded atomic writes. No v1 code or contracts. All metadata reads go directly to the local chain; the web server only serves static files and configuration.</p><p>Try docs/meeting.txt with either Lens order, photos/red.png, and create/upload/edit/rename/move/remove/restore. Small files fit onchain; larger uploads use a temporary byte store (1 MiB demo cap). Encrypted sample key: 11 repeated 32 times. Ordinary images are inert PNG/JPEG previews.</p><p>Rough edges: lowercase ASCII names, locally witnessed revision history, generic File/revision tags, no persistent IPFS/Arweave driver or recursive delete yet. Wallet mode needs local test ETH and currently uses two approvals. This is not a production deployment.</p>';
+    document.querySelector('.below-workspace .about').innerHTML='<summary>About this prototype</summary><p>This is v2 end to end: typed records, the required index, ordered Lenses and guarded atomic writes. No v1 code or contracts. All metadata reads go directly to the local chain; the web server only serves static files and configuration.</p><p>Try docs/meeting.txt with either Lens order, photos/red.png, and create/upload/edit/rename/move/remove/restore. Small files fit onchain; larger uploads use a temporary byte store (1 MiB demo cap). Encrypted sample key: 11 repeated 32 times. Ordinary images are inert PNG/JPEG previews.</p><p>Rough edges: lowercase ASCII names, locally witnessed revision history, generic File/revision tags, no persistent IPFS/Arweave driver or recursive delete yet. Wallet mode needs local test ETH and currently uses two approvals. This is not a production deployment.</p>';
   }
+  if(state.externalContent)document.querySelector('.below-workspace .about').lastElementChild.textContent='Arweave/IPFS file links retain their address and fingerprint onchain. Public gateways retrieve the bytes; the browser verifies the saved fingerprint. New paid Arweave uploads, IPFS pinning and recursive deletion are not wired yet. Local test wallet writes currently use two approvals. This is not a production deployment.';
   await refresh();
 });

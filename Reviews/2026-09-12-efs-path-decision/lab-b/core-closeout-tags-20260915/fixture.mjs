@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {createEnvironment} from '../script/compact-environment.mjs';
 
-export async function createTagEnvironment(){
+export async function createTagEnvironment({externalContent=false}={}){
   const env=await createEnvironment({protocol:'compact-guarded-v2',evidenceMode:'append'});
   try{
     const e=env.ethers,Z=e.ZeroHash,coder=e.AbiCoder.defaultAbiCoder();
@@ -17,7 +17,8 @@ export async function createTagEnvironment(){
     };
     await reg('directory','FilesDirectoryProfile.sol','FilesDirectoryRule','lab/type/files-directory/1');
     await reg('bytes','FilesCarrierProfile.sol','FilesBytesRule','lab/type/files-bytes/1');
-    await reg('content','FilesCarrierProfile.sol','FilesContentRule','lab/type/files-content/1',[t.bytes],[t.bytes]);
+    await reg('content',externalContent?'FilesExternalContentProfile.sol':'FilesCarrierProfile.sol',externalContent?'FilesExternalContentRule':'FilesContentRule','lab/type/files-content/1',[t.bytes],[t.bytes]);
+    if(externalContent)env.manifest.externalContentProfile='ar-ipfs-locator-v2';
     await reg('carrierRoot','FilesCarrierProfile.sol','FilesCarrierRootRule','lab/type/files-carrier-root/1',[],[t.content]);
     await reg('carrierChild','FilesCarrierProfile.sol','FilesCarrierChildRule','lab/type/files-carrier-child/1',[t.root,t.child,t.carrierRoot],[Z,t.content]);
     await reg('concept','FilesCarrierProfile.sol','FilesConceptRule','lab/type/files-concept/1');
