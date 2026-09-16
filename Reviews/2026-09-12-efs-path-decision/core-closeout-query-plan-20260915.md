@@ -15,7 +15,7 @@
 - Existing compact prototype worktree only; one implementation/build/chain writer. Preserve the owner demo. No production repo, public deployment, package installation, Fable, unbounded logs or cap inflation. New Anvil worlds must have run-specific bounded history and be closed after evidence.
 - Retain runtime24,576/initcode49,152; ordinary paid allowance15M and hard16,777,216 ceiling. Do not silently shrink filename, Type, Lens, tag or privacy goals.
 - Existing strict point reads and SDK fixed-block `ReadContext` remain supported. Do not quietly turn a frozen context into a floating-current one. The new continuation guarantee must state both origin and observed-current bases.
-- Execution identity, module attachment/code, registry epoch and index generation remain exact. Coverage must be COMPLETE from1 through actual current C. Missing history/metadata stays UNKNOWN, never negative evidence.
+- Execution identity, module attachment/code, registry epoch and index generation remain exact. Folder-origin Tasks1/3 require coverage COMPLETE from1 through actual current C. Incoming-quote Task2 preserves its existing exhausted-PARTIAL result when coverage is incomplete; it cannot certify complete absence. Missing history/metadata stays UNKNOWN, never negative evidence.
 - Historical query completion is not authorization for a current mutation. Current effects independently validate their current dependency read-set in the same transaction. A stored `complete` flag is never a timeless current-absence oracle.
 
 ## Task 1: Local folder versions, historical joins and owned continuation
@@ -49,9 +49,31 @@
 - [ ] Evaluate a separate retained-inventory query for continuous selected-folder mutation: pin origin lengths for append-only scope inventories, resolve placement/masks/HEAD/tags all at A, authenticate lengths/prefix in the accumulator. If it fits a bounded extension, implement one churn fixture. Otherwise report exact implementation/economic gap; do not describe the fast unchanged-folder profile as closing this stronger guarantee.
 - [ ] Run focused Lens, Files, paid continuation and bytework regression checks; capture source/runtime sizes and paid evidence. Commit exact task files and return a report for independent review. Parent publishes; no broad suite, UI polish or production scaffold.
 
-## Task 2: One bounded selection-head cost experiment
+## Task 2: Restore exact-Type coverage in incoming-quote readers
 
-**Added September16 after the reviewed Task1 measurements.** This task does not reopen origin correctness or add a broad query engine. Run after reviewed SDK transport/read-set work and before final runtime/proof/resource pins; the head projection is independent of later Type/live/tag semantics. The parent used the writing-plans workflow and a read-only Astra High source preflight to select this smaller candidate instead of the initially proposed multi-row join batch.
+**Added September16 from the SDK carrier covering run.** Eleven failures reproduce on unchanged BASE6869e26: nine reader E_COVERAGE refusals, one stale direct-coverage assertion, and one stale gap-creation fixture. Execute after reviewed SDK3, before the optional cost experiment. This restores the existing reverse-reference query, not a new query architecture.
+
+**Files:** `src/IncomingQuotesReader.sol`, `test/IncomingQuotes.t.sol`, and only the stale late-construction comment in `src/SelectiveReferenceIndexModule.sol`. Retain focused evidence under `core-closeout-query-20260915/incoming-quotes/`. No Ledger, coverage implementation, index materialization, storage, SDK or limit change.
+
+**Interfaces:** `IndexModule.coverage(family, exactType)` qualifies these Type families; `postingHead(key)` and `postingAt(key,ordinal)` consume the distinct physical posting identity. The existing exact Quote profile and Pair identity checks stay mandatory.
+
+- [ ] Read the retained baseline/candidate failure logs under `core-closeout-sdk-20260915/`; do not repeat their entire suite. Add a focused positive real-module check: both Type/reference families are COMPLETE for `joinedType`, but their physical posting keys and the Pair Record ID are UNKNOWN. Both scan/indexed readers must return the exact admitted Quote. Run this control before repair and retain its E_COVERAGE failure.
+- [ ] Change only the reader's semantic coverage argument; keep the pair-specific posting key for enumeration:
+
+  ```solidity
+  (uint8 coverage, uint64 from, uint64 through) = index.coverage(family, quoteType);
+  ```
+
+  Preserve profile/code/Type identity, cursor domain/generation, retained membership, first-admission filtering, bounds and existing UNKNOWN/PARTIAL/COMPLETE refusal rules. Global zero scope or UNKNOWN→empty COMPLETE is not a substitute.
+- [ ] Fix the required-family assertion to call `index.coverage(families[i], joinedType)`, retaining exact E_MANDATORY_FAMILY, COMPLETE/from1/through4 and actual returned-record checks. Update obsolete wording: the selective profile aliases the generic required reference family; it does not maintain a second independent family.
+- [ ] Replace the stale gap creation with the existing diagnostic-only ablation `ledger.setIndexModule(address(0))`; admit the missing Quote, then restore the original index. The next publication must refuse with exact `Ledger.E_INDEX(abi.encodeWithSelector(IndexModule.E_SEGMENT.selector))`, with counters, author nonce and index frontier unchanged. Both readers must exhaust as PARTIAL, including a terminal continuation and after generation bump; generation cannot heal missing history. Rename the misleading optional-family test. Do not permit a fresh late index to ingest admission4 while its proven frontier is0.
+- [ ] Add one small detached selective-index recovery: replay the canonical small history from genesis, checked cutover at the current basis, re-pin both readers, and obtain the same retained set COMPLETE. Pair with unreplayed late attachment remaining PARTIAL. Update the construction comment to distinguish unreplayed late state from successful canonical replay; do not imply deployment time proves coverage.
+- [ ] Run only `IncomingQuotesTest` and focused `IndexConfigExpectationTest`, `CoreIndexMaterializationTest`, `CoreIndexReplayTest` covering controls once. Preserve every existing page/order/work-counter/maximum-output/cursor-mutation/cross-mode assertion. The original16 tests and new controls must pass; record exact counts, warnings, source/runtime and commands. No new paid matrix or whole-Forge tournament is required for this small interface repair.
+- [ ] Commit exact source/tests/evidence with report, then independent scoped review. Parent publishes and owns the canonical ledger. A remaining true query defect cannot be hidden as a stale fixture or waived to continue.
+
+## Task 3: One bounded selection-head cost experiment
+
+**Added September16 after the reviewed Task1 measurements; renumbered after the incoming-quote repair.** This task does not reopen origin correctness or add a broad query engine. Run after reviewed SDK transport/read-set and incoming-quote work and before final runtime/proof/resource pins; the head projection is independent of later Type/live/tag semantics. The parent used the writing-plans workflow and a read-only Astra High source preflight to select this smaller candidate instead of the initially proposed multi-row join batch.
 
 **Files:** narrow additive view in `src/Ledger.sol`; one shared internal primitive and its selection-only callers in `src/LensReader.sol`; focused `test/SelectionHead.t.sol` and a test-only raw-getter Lens control; bounded `script/core-selection-head-cost.mjs` and evidence in `core-closeout-query-20260915/selection-head/`. Existing raw getters, snapshot/guard codecs, Files index and storage roots remain unchanged.
 
