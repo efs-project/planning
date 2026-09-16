@@ -1,0 +1,15 @@
+node:internal/fs/promises:1501
+  return await PromisePrototypeThen(
+         ^
+
+Error: EEXIST: file already exists, mkdir '/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/core-closeout-query-20260915/selection-head/paid'
+    at async mkdir (node:internal/fs/promises:1501:10)
+    at async file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/core-selection-head-cost.mjs:15:42 {
+  errno: -17,
+  code: 'EEXIST',
+  syscall: 'mkdir',
+  path: '/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/core-closeout-query-20260915/selection-head/paid'
+}
+
+Node.js v26.0.0
+PASS: explicit existing output refused before fixture; paid packet unchanged: 65570efed1ba7d61110493627c990e7e868b62ce20e56f1eb5b0b11f669805fa

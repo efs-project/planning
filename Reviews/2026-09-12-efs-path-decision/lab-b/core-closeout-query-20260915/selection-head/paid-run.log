@@ -1,0 +1,127 @@
+{
+  "output": "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/core-closeout-query-20260915/selection-head/paid",
+  "status": "COMPLETE",
+  "decision": {
+    "retained": true,
+    "criterion": "P64 ordinary and historical continuation and complete two-page totals >=10% lower; P1/P8 each whole step <=5% regression; identical qualified outcomes; ordinary caps",
+    "comparisons": [
+      {
+        "P": 1,
+        "mode": "ordinary",
+        "raw": [
+          641587,
+          403093
+        ],
+        "selection": [
+          631274,
+          392781
+        ],
+        "firstReduction": 0.016074203498512282,
+        "continuationReduction": 0.02558218574869819,
+        "rawTotal": 1044680,
+        "selectionTotal": 1024055,
+        "totalReduction": 0.01974288777424666,
+        "rawSessionDeployment": 1598276,
+        "selectionSessionDeployment": 1598276
+      },
+      {
+        "P": 1,
+        "mode": "historical",
+        "raw": [
+          641575,
+          531341
+        ],
+        "selection": [
+          631274,
+          525310
+        ],
+        "firstReduction": 0.016055800179246387,
+        "continuationReduction": 0.01135052630984622,
+        "rawTotal": 1172916,
+        "selectionTotal": 1156584,
+        "totalReduction": 0.013924270791770254,
+        "rawSessionDeployment": 1598264,
+        "selectionSessionDeployment": 1598276
+      },
+      {
+        "P": 8,
+        "mode": "ordinary",
+        "raw": [
+          944826,
+          699957
+        ],
+        "selection": [
+          832440,
+          587568
+        ],
+        "firstReduction": 0.11894888582659664,
+        "continuationReduction": 0.16056557759976683,
+        "rawTotal": 1644783,
+        "selectionTotal": 1420008,
+        "totalReduction": 0.1366593647915865,
+        "rawSessionDeployment": 1755685,
+        "selectionSessionDeployment": 1755685
+      },
+      {
+        "P": 8,
+        "mode": "historical",
+        "raw": [
+          944826,
+          833099
+        ],
+        "selection": [
+          832440,
+          724971
+        ],
+        "firstReduction": 0.11894888582659664,
+        "continuationReduction": 0.12979009697526944,
+        "rawTotal": 1777925,
+        "selectionTotal": 1557411,
+        "totalReduction": 0.12402885386053968,
+        "rawSessionDeployment": 1755685,
+        "selectionSessionDeployment": 1755685
+      },
+      {
+        "P": 64,
+        "mode": "ordinary",
+        "raw": [
+          3223216,
+          3103282
+        ],
+        "selection": [
+          2292473,
+          2172494
+        ],
+        "firstReduction": 0.2887622176112305,
+        "continuationReduction": 0.29993664771683654,
+        "rawTotal": 6326498,
+        "selectionTotal": 4464967,
+        "totalReduction": 0.29424351355204725,
+        "rawSessionDeployment": 3015023,
+        "selectionSessionDeployment": 3015023
+      },
+      {
+        "P": 64,
+        "mode": "historical",
+        "raw": [
+          3223204,
+          3236682
+        ],
+        "selection": [
+          2292473,
+          2310131
+        ],
+        "firstReduction": 0.2887595696704273,
+        "continuationReduction": 0.2862656881337122,
+        "rawTotal": 6459886,
+        "selectionTotal": 4602604,
+        "totalReduction": 0.287510027266735,
+        "rawSessionDeployment": 3015023,
+        "selectionSessionDeployment": 3015035
+      }
+    ],
+    "operationModel": "P64 negative live-row topology calls up to256 head getters: placement64 + HEAD64 + stableTAG64 + revisionTAG64. Metadata still read on every call; target load avoided only for state !=1, plus previous/bindingOrdinal projection and ABI words. No component gas allocation or claim that head reads disappear.",
+    "deployment": "Actual matched Lens/page/session deployment receipts retained; Ledger +121 runtime/initcode bytes against exact BASE. Control/selection share the new Ledger, so no fictitious matched old-Ledger deployment receipt."
+  },
+  "transactions": 108
+}

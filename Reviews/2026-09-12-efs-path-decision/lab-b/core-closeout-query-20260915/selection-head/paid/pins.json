@@ -1,0 +1,347 @@
+{
+  "base": "e35c575b9976288150f9f5b89a9b5923ff944f23",
+  "sources": {
+    "src/ExecutionSlots.sol": {
+      "sha256": "99a7212a6626801a0d27b267054843f318af10786930bd0c119b9d7398a0726c",
+      "keccak256": "0xd3373859ef68327e54a0c761c7863c4456d34e1b444fc5036f465d76feb9e927"
+    },
+    "src/IndexFieldProfile.sol": {
+      "sha256": "f96c978e7f8417325645501f6e8bb21dd9504c8555a8d7cbc19ceb15da3b0f0a",
+      "keccak256": "0x6cb34544f088a35809b28da518c27d0344052e9e76068dce08e498c203f9cae9"
+    },
+    "src/IndexReplaySource.sol": {
+      "sha256": "8ec96effe00b38a3f96490b58af15ccff5f3882b8954d0cefd145de7363a3e53",
+      "keccak256": "0xa3606e14b9b126d2f98194078706dfa45677809f40893090eca280d347a0b367"
+    },
+    "src/IndexSource.sol": {
+      "sha256": "73e15986f4bb25ab30888452fee04bf4b7da425129284443d1d65f6150a48261",
+      "keccak256": "0xdb8c85802584f29530fc4484a3280f94474efcd72219ec1ea6dccfb270d07639"
+    },
+    "src/IndexWork.sol": {
+      "sha256": "40a4b01bcd69ceeba295900c5075d804d281f2fb4f390dd29e9e66a3de5e0db8",
+      "keccak256": "0x62960f1d86ab4c8db13f33764dedef9ad84747175aaa4a264524e37630fe244e"
+    },
+    "src/Interfaces.sol": {
+      "sha256": "6dca8aec0261ffe613299e319df802d8722375e886edc83b77a8b2147fa96570",
+      "keccak256": "0x18dc4570d0866f1d3d7cae70fdea2a75e7eeb1de7dc3bdebec8237a3e4ccddcf"
+    },
+    "src/Keys.sol": {
+      "sha256": "df431514956297b6b8d68782c18ed93957fa7f64676f694895f3647538f5aa8e",
+      "keccak256": "0x7072116cb4809ae6d857031bdadb2d23e2373203a335781ee2383ae9fbf7abee"
+    },
+    "src/Ledger.sol": {
+      "sha256": "ee313dc60386c64c925cc47ce5890b40b139fa81b2e86eba814cf28ae55c665a",
+      "keccak256": "0x5d6c054f0f0a4186240b81292db62ffae975446ea38b6c0bbd3858ca2a3a54f2"
+    },
+    "src/PublicationPreparation.sol": {
+      "sha256": "436e3c866c7cffd3957952bfb3ae90559fa1a368841e9d27719aa98a9ad4f51a",
+      "keccak256": "0x30ca7927d2aeaa989785beed80e03dfdb3cfef71ca9288538f8496f187635600"
+    },
+    "src/PublicationSupport.sol": {
+      "sha256": "7e30c94c1240025dbf9e62e8c9600153483fb918855719cbc3f36eb6fde74a09",
+      "keccak256": "0xc835e67c5cab6a37127f44adc1c58b8cc6ec9c99effe107700cb61c39a4649bf"
+    },
+    "src/ReadSetStorage.sol": {
+      "sha256": "a4f7ad5803e8195aa153d1ee9ba28e54db0247582afe578ff1bcb9875107660e",
+      "keccak256": "0x132c48a528664721b3e170de19fe478d40c59180be64755d7729a5c97cf8ab04"
+    },
+    "src/IndexModule.sol": {
+      "sha256": "9e4051f424e695fb0e928383040434e2d0894fe45f84fdbf97407bf22f6dae06",
+      "keccak256": "0xd9557716472bad4126a5f6be71ad4d0d91dbfcbf7330c9717e0ea5d042bee280"
+    },
+    "src/LensReader.sol": {
+      "sha256": "9fa4b72e34bb3e873ea93a3f8dca4e7b08ce0d7268a79501d600612c119e1f30",
+      "keccak256": "0xa2f7ddf22ab07b8f85aa57fac3c69a8fc4c26eb91abde65f9ed945c0b36dcfd5"
+    },
+    "src/TypeRegistry.sol": {
+      "sha256": "ef2bd89de58298977058ba98a4ac2c03416a3fde991d74cc52fdc00634c09459",
+      "keccak256": "0xf8de1adb162a6727f560a3274f8662f373a633d34e68814c9a92da97dd7c12b5"
+    },
+    "test/FilesJoinedProfile.sol": {
+      "sha256": "1e1ff9e58552d7b6c3984e6ad7ad155b3b405016a333e5fd7d71e215e41d1c3d",
+      "keccak256": "0xcf86667d05ada0bef5fce3f7550991699c202ca0a15f7731a6b7f62b3553136b"
+    },
+    "test/FilesLiveIndex.sol": {
+      "sha256": "4ab977bb2b023eaf455a1c145addc08fec14d37dff6f4dca31bc1b4e322204b4",
+      "keccak256": "0x5b5f4fdf67784dbc223aa3df8dfaa7543b8b173f1d571f6baed020814d2bd7d1"
+    },
+    "test/FilesNamesProfile.sol": {
+      "sha256": "5511205d94c255c0483c1404a7d9f5df7af724ec1d55ac9b5510eef50044bb43",
+      "keccak256": "0x892bc262ba82b57a7f6a06e793f0380f35446e196efdd2daf83f524875d22189"
+    },
+    "test/FilesScopeState.sol": {
+      "sha256": "52793051153d2fb1de05655c884300de46ba1f969e900bc2d3cf65ca030f640b",
+      "keccak256": "0x4f709664c799310a67abe9fb8059446e1406d37105e497bef2158d725ba4c6a0"
+    },
+    "test/SelectionHeadControl.sol": {
+      "sha256": "32a288d2d6f5f8551b3b3c908d3e5d6b26e8a6afcdf9c89bee1130550137048f",
+      "keccak256": "0x4084e0066b648b61945ddd496d0147804a9bf3af18bc02a99b0098fa45f2fede"
+    },
+    "test/FilesCarrierProfile.sol": {
+      "sha256": "32899512c3b04c5dc3b0a67e6e8965c25151715140799c6f9b627c72784bb919",
+      "keccak256": "0xbca4a85287c94637fa7fcfed9934edc8fb364647e0394bbecc74e4e98638cc41"
+    },
+    "test/FilesDirectoryProfile.sol": {
+      "sha256": "7b12bde1e9872f9e27e52e70c6a04cb2129f08912d0efcaca6aa5c931a9cb6af",
+      "keccak256": "0xd5a78dd9cb3a63894dc6c7e9def5d9a9c1dceab065470e59e85aadb85007e7f6"
+    },
+    "test/FilesPageReader.sol": {
+      "sha256": "fc4df27e6498e59536eaf25f4048cc2acfa4e92356dee7f8a08c37241b8708df",
+      "keccak256": "0x0ec6bb9c5b17615745d7102de4e042e38cb18631390d9a5a175a88b0a0d7f4ab"
+    },
+    "test/FilesQueryAccumulator.sol": {
+      "sha256": "774f0f7f210424c182c34be472b1e6d738584cfd5eb00d0d634d21fe7cc662fc",
+      "keccak256": "0x33805034bc9492cb77e0f34e4f0a2667d47592408da43c2597f1fdf18031ac54"
+    },
+    "test/ProfiledFilesIndex.sol": {
+      "sha256": "dc1d897aeff071017b5cf1c8ae539db5e9bc64db22bf7c8666302dfffed6ed63",
+      "keccak256": "0x74df30e087494d8bbda1556338fd22452ef4037ba3e0613b1993b75895e1f6a9"
+    },
+    "script/core-selection-head-cost.mjs": {
+      "sha256": "54ce65cff9e23ec116560919a01fd59519b0b7f1a23b352c792e9e63749e6e1f",
+      "keccak256": "0x9b7bfcc84fbe6408c09af42ffa2ff1296d39c09b179a8bbad9efaaae89d3567a"
+    },
+    "script/compact-environment.mjs": {
+      "sha256": "4cde051fec321b0c7f1aac52881e223877c1f3cf1cc39ca0943e4e3012443b68",
+      "keccak256": "0x34fbb447f3034535504d557483ba28a7d1d69e062ccc8e61ca10212525b9313d"
+    },
+    "script/compact-read-transport.mjs": {
+      "sha256": "4c30d29b9bd7efd1d392c41e7fd6ffa371613ae3eb1a9b25531706533bc56710",
+      "keccak256": "0x28b0cdf0e236d5633eeac2d622bc98b36f049e019b74790e633421283b9b716a"
+    },
+    "browser/compact-sdk.mjs": {
+      "sha256": "0eef50df230796e4efae9c5b2e0f353ac8bc4a5931eddb3821e5d5dade97e5ef",
+      "keccak256": "0x45bfe758941bd09b28e08674a37c444f18cfa3852719ababf813960580eef07d"
+    },
+    "browser/compact-sdk-v2.mjs": {
+      "sha256": "34f73da06629efba91f071ff8a57e0910c16cbe6374a95511383350437bdfdb6",
+      "keccak256": "0xd8b61877826f54c74c0cf300b2851f75e7b2979e1fa029b27569bcccd37c7c66"
+    },
+    "browser/compact-files-sdk.mjs": {
+      "sha256": "aeb6639c8f7affadafa042580e4793e15833bf94a6e696790a25693cdba175fc",
+      "keccak256": "0xbbdc6b69c5364427772fffa284f30dec0b07b41d03a5aacf7627d824029a2d30"
+    },
+    "browser/compact-content.mjs": {
+      "sha256": "d7cd87651766c873bb574f0dc00fb34f1cbcbd34f6881f0d3b4d715926b92952",
+      "keccak256": "0xffc80726735b41510ffb0ac2088470af5aff706a629a45bef128970ae9011b23"
+    },
+    "foundry.toml": {
+      "sha256": "6ea7c7198bc697f74b6286ec830edbefc20e7c549eafda2343c863702055bf2c",
+      "keccak256": "0xfa62a0e52f2ab420fa0da8112d48a64f165aafb7fd101f5df98695d8e607a860"
+    }
+  },
+  "artifacts": [
+    {
+      "file": "Ledger.sol",
+      "name": "Ledger",
+      "artifactSha256": "1923cb1059d4e39a116a7ba9e1b2294a82f7ea23d3004a28e8f35b729955f13e",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/Ledger.sol": "Ledger"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "runtime": 24247,
+      "creation": 36284,
+      "constructorArgumentBytes": 64,
+      "initcode": 36348,
+      "creationSha256": "fe26c0be13570b15c0ea0dd74d67d8669c9ba83644662ad132ed143c78ae79d1",
+      "runtimeTemplateSha256": "ef525e585b1ab19de909a289a4ba3ee4e77c6f7e4612be28f951e36cb05378cd"
+    },
+    {
+      "file": "LensReader.sol",
+      "name": "LensReader",
+      "artifactSha256": "0cf1cdefc26ee975e3eca586bf4f332f1d0c5cd1d06daf94aa8532591a6069fc",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/LensReader.sol": "LensReader"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "runtime": 14422,
+      "creation": 14755,
+      "constructorArgumentBytes": 64,
+      "initcode": 14819,
+      "creationSha256": "af623e56c9a5d6e79d539a7c74dddd005eb1aa1bd44dff270d2ebe7f681ee47f",
+      "runtimeTemplateSha256": "16bf063edc9a0666ca31d025998d76e1dcec7d155d58746e1cf9fd1bb26b0534"
+    },
+    {
+      "file": "FilesLiveIndex.sol",
+      "name": "FilesLiveLens",
+      "artifactSha256": "72a40a3d3f1a9a6de87e5f445456ce5bcf39d0c4b8f382d682b1cef60f7779d8",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/FilesLiveIndex.sol": "FilesLiveLens"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "runtime": 16415,
+      "creation": 16797,
+      "constructorArgumentBytes": 64,
+      "initcode": 16861,
+      "creationSha256": "2a6c843e242fcf497fbf3497f83e0c5c42785bdb9c97caa273132b7438a2d2fc",
+      "runtimeTemplateSha256": "d5797aeb0edafa5110cf63adbbe0b7c92a616338200fcbfffc0c70b5580e879d"
+    },
+    {
+      "file": "SelectionHeadControl.sol",
+      "name": "RawHeadFilesLiveLens",
+      "artifactSha256": "536645ae19c6e496fae008334365c249f0089a0a8c3bbb1d235577b6300e329b",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/SelectionHeadControl.sol": "RawHeadFilesLiveLens"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "runtime": 16389,
+      "creation": 16771,
+      "constructorArgumentBytes": 64,
+      "initcode": 16835,
+      "creationSha256": "26dd6fb3f09975ccb1fb07d1c208591ab6993aefc8e5d6ce852a12b81de75885",
+      "runtimeTemplateSha256": "80db9fbf75b942a7af758607be7b16f77dd8733271ec2f14dec9c7a152228d8c"
+    },
+    {
+      "file": "FilesPageReader.sol",
+      "name": "FilesPageReader",
+      "artifactSha256": "7aa06816ff1cecb4c84f9ad14d9fd6afa2b069f25ee4ea77bf688133d4cb2bc7",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/FilesPageReader.sol": "FilesPageReader"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "runtime": 16966,
+      "creation": 17576,
+      "constructorArgumentBytes": 96,
+      "initcode": 17672,
+      "creationSha256": "614709335709c0a3f9ed25e7bd8040840d2b3e97a5d3c081c24ed19d5bdc047f",
+      "runtimeTemplateSha256": "dcddf62b34030126e98bd0f2605288e9ee2f989e5035769de63bfb970e88572d"
+    },
+    {
+      "file": "FilesQueryAccumulator.sol",
+      "name": "FilesQueryAccumulator",
+      "artifactSha256": "034b95b1b1b1c363b9fbc11c9810d7ed9b705eb35ef41d4df68e40059318b928",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/FilesQueryAccumulator.sol": "FilesQueryAccumulator"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "runtime": 6165,
+      "creation": 7943,
+      "constructorArgumentBytes": null,
+      "initcode": null,
+      "creationSha256": "cfe00e3eaa2f8cdbf015fa9fa665e283db008370c81cb017ac933b17dccaab1d",
+      "runtimeTemplateSha256": "437143073b71d922fd2b1291e8477107f5d7b910bacc03bcde66b6d57cb4cc0c"
+    },
+    {
+      "file": "ProfiledFilesIndex.sol",
+      "name": "ProfiledFilesIndex",
+      "artifactSha256": "b22033fe33e2b9f8ddc7c00a242411ef2b62eef5eb5faf5563fc66e39d1934af",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/ProfiledFilesIndex.sol": "ProfiledFilesIndex"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "runtime": 24491,
+      "creation": 44129,
+      "constructorArgumentBytes": 608,
+      "initcode": 44737,
+      "creationSha256": "080d379a4ae079deb5164e27d6f9258599e9786a5c1019f5a9a57fc9a0152fd1",
+      "runtimeTemplateSha256": "d0179eeb6a7cd33bcc8f3e7464b7dcb2be0c3258b37ac17aa39b6a2698111e20"
+    }
+  ],
+  "node": "v26.0.0",
+  "anvil": "anvil Version: 1.7.1\nCommit SHA: 4072e48705af9d93e3c0f6e29e93b5e9a40caed8\nBuild Timestamp: 2026-05-08T07:54:31.470926000Z (1778226871)\nBuild Profile: dist"
+}

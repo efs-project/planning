@@ -1,0 +1,1542 @@
+{
+  "status": "COMPLETE",
+  "decision": {
+    "retained": true,
+    "criterion": "P64 ordinary and historical continuation and complete two-page totals >=10% lower; P1/P8 each whole step <=5% regression; identical qualified outcomes; ordinary caps",
+    "comparisons": [
+      {
+        "P": 1,
+        "mode": "ordinary",
+        "raw": [
+          641587,
+          403093
+        ],
+        "selection": [
+          631274,
+          392781
+        ],
+        "firstReduction": 0.016074203498512282,
+        "continuationReduction": 0.02558218574869819,
+        "rawTotal": 1044680,
+        "selectionTotal": 1024055,
+        "totalReduction": 0.01974288777424666,
+        "rawSessionDeployment": 1598276,
+        "selectionSessionDeployment": 1598276
+      },
+      {
+        "P": 1,
+        "mode": "historical",
+        "raw": [
+          641575,
+          531341
+        ],
+        "selection": [
+          631274,
+          525310
+        ],
+        "firstReduction": 0.016055800179246387,
+        "continuationReduction": 0.01135052630984622,
+        "rawTotal": 1172916,
+        "selectionTotal": 1156584,
+        "totalReduction": 0.013924270791770254,
+        "rawSessionDeployment": 1598264,
+        "selectionSessionDeployment": 1598276
+      },
+      {
+        "P": 8,
+        "mode": "ordinary",
+        "raw": [
+          944826,
+          699957
+        ],
+        "selection": [
+          832440,
+          587568
+        ],
+        "firstReduction": 0.11894888582659664,
+        "continuationReduction": 0.16056557759976683,
+        "rawTotal": 1644783,
+        "selectionTotal": 1420008,
+        "totalReduction": 0.1366593647915865,
+        "rawSessionDeployment": 1755685,
+        "selectionSessionDeployment": 1755685
+      },
+      {
+        "P": 8,
+        "mode": "historical",
+        "raw": [
+          944826,
+          833099
+        ],
+        "selection": [
+          832440,
+          724971
+        ],
+        "firstReduction": 0.11894888582659664,
+        "continuationReduction": 0.12979009697526944,
+        "rawTotal": 1777925,
+        "selectionTotal": 1557411,
+        "totalReduction": 0.12402885386053968,
+        "rawSessionDeployment": 1755685,
+        "selectionSessionDeployment": 1755685
+      },
+      {
+        "P": 64,
+        "mode": "ordinary",
+        "raw": [
+          3223216,
+          3103282
+        ],
+        "selection": [
+          2292473,
+          2172494
+        ],
+        "firstReduction": 0.2887622176112305,
+        "continuationReduction": 0.29993664771683654,
+        "rawTotal": 6326498,
+        "selectionTotal": 4464967,
+        "totalReduction": 0.29424351355204725,
+        "rawSessionDeployment": 3015023,
+        "selectionSessionDeployment": 3015023
+      },
+      {
+        "P": 64,
+        "mode": "historical",
+        "raw": [
+          3223204,
+          3236682
+        ],
+        "selection": [
+          2292473,
+          2310131
+        ],
+        "firstReduction": 0.2887595696704273,
+        "continuationReduction": 0.2862656881337122,
+        "rawTotal": 6459886,
+        "selectionTotal": 4602604,
+        "totalReduction": 0.287510027266735,
+        "rawSessionDeployment": 3015023,
+        "selectionSessionDeployment": 3015035
+      }
+    ],
+    "operationModel": "P64 negative live-row topology calls up to256 head getters: placement64 + HEAD64 + stableTAG64 + revisionTAG64. Metadata still read on every call; target load avoided only for state !=1, plus previous/bindingOrdinal projection and ABI words. No component gas allocation or claim that head reads disappear.",
+    "deployment": "Actual matched Lens/page/session deployment receipts retained; Ledger +121 runtime/initcode bytes against exact BASE. Control/selection share the new Ledger, so no fictitious matched old-Ledger deployment receipt."
+  },
+  "findings": [
+    {
+      "key": "P1-ordinary-raw",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "641587",
+      "A": "12",
+      "C": "12",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0x59079e1a47ba4ced05e0ac86c9879944e38aafe70c77b3963848f1aad3726308"
+    },
+    {
+      "key": "P1-ordinary-selection",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "631274",
+      "A": "12",
+      "C": "12",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0x1e68ec8f9fdd330a69c166ae21a6585b49f1bc4aea512e9bc7de0e9608bba9f8"
+    },
+    {
+      "key": "P1-ordinary-raw",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "403093",
+      "A": "12",
+      "C": "12",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0x5cebf1c2dc04b7a1d7a1f5ea580d8952d86ad89d17e94d1e44fee9f408d40a68"
+    },
+    {
+      "key": "P1-ordinary-selection",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "392781",
+      "A": "12",
+      "C": "12",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0x926aec0cc127da9f867e9fa27705ff32e291805f88bde4635da7a5391b0393aa"
+    },
+    {
+      "key": "P1-historical-raw",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "641575",
+      "A": "12",
+      "C": "12",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0x02a2fc0f5e386b747108a2de7abe346b952e99ebb95a2ce6e11908444732890b"
+    },
+    {
+      "key": "P1-historical-selection",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "631274",
+      "A": "12",
+      "C": "12",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0xf92a063ff9495b2bc08b995dd55d3ffb285d5dd437716137959007e9b49c00d2"
+    },
+    {
+      "key": "P1-historical-raw",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "531341",
+      "A": "12",
+      "C": "204",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0x1133669a06ed6ca7ce05fadc550e0a08633ed7292d12658e1864cf0edb8986c6"
+    },
+    {
+      "key": "P1-historical-selection",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "525310",
+      "A": "12",
+      "C": "204",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0xe99b3a174fb0a1a0ab3c428529dc04a6b523e4d1f22e4ab5c52b7df0249f6e02"
+    },
+    {
+      "key": "P8-ordinary-raw",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "944826",
+      "A": "204",
+      "C": "204",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0x986715ffb757217748406e12359217c402335c70379d3e7e5463db0ca8a987b3"
+    },
+    {
+      "key": "P8-ordinary-selection",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "832440",
+      "A": "204",
+      "C": "204",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0xe271cc992f55263aea7d96f07b80fdd1b126a8e6d4eb5283c9b2af10879c845c"
+    },
+    {
+      "key": "P8-ordinary-raw",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "699957",
+      "A": "204",
+      "C": "204",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0x907661696cce7e1a591894749900584df6fa227f88d3513ae1fe50f260ac99fd"
+    },
+    {
+      "key": "P8-ordinary-selection",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "587568",
+      "A": "204",
+      "C": "204",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0xdbd531385c33e7e88e088a8cc6da02eedd357472ec65a6dd344e1960b4e71bb7"
+    },
+    {
+      "key": "P8-historical-raw",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "944826",
+      "A": "204",
+      "C": "204",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0x67f25d8d7092bdbf90cf73b6bbc1859fe354d633bd68f356955f49b402ca58b5"
+    },
+    {
+      "key": "P8-historical-selection",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "832440",
+      "A": "204",
+      "C": "204",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0x880e7b921197342bc1dcb71ec58b5b1ed89485b8b165a48486a8a558dc072bc2"
+    },
+    {
+      "key": "P8-historical-raw",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "833099",
+      "A": "204",
+      "C": "396",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0x8d52f5956c38cc989716702e00c651b8257eff3b571ed7779653b0afb72aa55e"
+    },
+    {
+      "key": "P8-historical-selection",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "724971",
+      "A": "204",
+      "C": "396",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0x76bdd825aeb290fa0a2268a9152f74cdf54ca5f69335473e8745564a45b65731"
+    },
+    {
+      "key": "P64-ordinary-raw",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "3223216",
+      "A": "396",
+      "C": "396",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0x4040c3f015ebcdbd1cdcf0a6d4dfe568ae227b05fdca25cd3de38a209f22e61a"
+    },
+    {
+      "key": "P64-ordinary-selection",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "2292473",
+      "A": "396",
+      "C": "396",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0x44859549ca7fbf0d328402bf1d150166c35da21aa58d3c150df88c7804bea712"
+    },
+    {
+      "key": "P64-ordinary-raw",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "3103282",
+      "A": "396",
+      "C": "396",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0xe4957a81948a4f30c0c95a96b651872d136bde9bbb80689c53a1835a17c4a1c9"
+    },
+    {
+      "key": "P64-ordinary-selection",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "2172494",
+      "A": "396",
+      "C": "396",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0xb690fcf143ab5ca7b67d69fef430fb05f4b0fd398004669bc5b07225207213e4"
+    },
+    {
+      "key": "P64-historical-raw",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "3223204",
+      "A": "396",
+      "C": "396",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0x7692b0da64e04e379af7f1c1968f256d7b5c36278385f52536bc76c565fc7089"
+    },
+    {
+      "key": "P64-historical-selection",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "2292473",
+      "A": "396",
+      "C": "396",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0x830ab7c4f74265b49ae3085c87eff0a57198aae485f31832326adb75b508afed"
+    },
+    {
+      "key": "P64-historical-raw",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "3236682",
+      "A": "396",
+      "C": "588",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0xf45e11b97e8fb128cc057712ed0480951e403ae0f36e91d73635fe7a975b6c6e"
+    },
+    {
+      "key": "P64-historical-selection",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "2310131",
+      "A": "396",
+      "C": "588",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0x8e70619d5ddaa58e68cd3b0c0b4f1642d4a5dd9fd38e24478f1263832d67e267"
+    },
+    {
+      "key": "P64-positive-raw",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "3246045",
+      "A": "592",
+      "C": "592",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0x54b849bad42a33012cd705279ac42515eabcdd31baf97504cddf33b3bc445231"
+    },
+    {
+      "key": "P64-positive-selection",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "2319570",
+      "A": "592",
+      "C": "592",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0x5ae84c5fd47376574ed5cff8225b2cefbf53f7f11d3033ef59e5450e5e14de92"
+    },
+    {
+      "key": "P64-positive-raw",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "3128660",
+      "A": "592",
+      "C": "593",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0xc0b8241606d92d3c70a8a814f2ad3a450b876da8537d02f0e2318b10a703366b"
+    },
+    {
+      "key": "P64-positive-selection",
+      "step": 2,
+      "status": "SUCCESS",
+      "gasUsed": "2202140",
+      "A": "592",
+      "C": "593",
+      "scannedBefore": "1",
+      "scannedAfter": "2",
+      "transactionHash": "0xfabe42eaecb1fd9a1440241a473280be717364b23ba16dadde4650764c09ef0e"
+    },
+    {
+      "key": "selected-scope-refusal-raw",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "641587",
+      "A": "593",
+      "C": "593",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0x47f663dec64c5ddcfe3faa1826443d3d8077d0d32bc0f514db2c4074e8db15b1"
+    },
+    {
+      "key": "selected-scope-refusal-selection",
+      "step": 1,
+      "status": "SUCCESS",
+      "gasUsed": "631274",
+      "A": "593",
+      "C": "593",
+      "scannedBefore": "0",
+      "scannedAfter": "1",
+      "transactionHash": "0xa17575ef10eebe1f68cdd61b16a856475b70b215cdb41f8dcc3f4f5547d7a1a3"
+    },
+    {
+      "key": "selected-scope-refusal-raw",
+      "step": 2,
+      "status": "REVERTED",
+      "gasUsed": "204771",
+      "A": "593",
+      "C": "594",
+      "scannedBefore": "1",
+      "scannedAfter": "1",
+      "transactionHash": "0x39b8f0c91161b386f11b78400bfc5c8d76cb271a8e9b5b9e7e427d5501a4b830"
+    },
+    {
+      "key": "selected-scope-refusal-selection",
+      "step": 2,
+      "status": "REVERTED",
+      "gasUsed": "204771",
+      "A": "593",
+      "C": "594",
+      "scannedBefore": "1",
+      "scannedAfter": "1",
+      "transactionHash": "0x34425d78e183c160594884efddac691132d26af274987d8ccf8c673312335c55"
+    }
+  ],
+  "contracts": {
+    "registry": {
+      "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+      "codeHash": "0xcacc4fa52c0d1183ec716d580f675f94b10f8d5da095b65d358f5a0f013df9e3",
+      "runtimeBytes": 3270,
+      "initcodeBytes": 3329,
+      "constructorArgs": [],
+      "transactionHash": "0x526305ab7f6e9726d1ded32c42c2f68d75f9b61d198a7ca6f8600e4bab53895f"
+    },
+    "ledger": {
+      "address": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+      "codeHash": "0xd01dc5f595e30bf38d1619d2449b4e4c971a82bedf2ce346885d69d372853497",
+      "runtimeBytes": 24247,
+      "initcodeBytes": 36348,
+      "constructorArgs": [
+        "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+        "0xd2c0689ece09797951177e2e3edb01a8e7a5f57d5a22904b28c16d802e732135"
+      ],
+      "transactionHash": "0x034824548f52119d8cd0d685128814db12b02c17ffbc5ea7805f62719abb7779"
+    },
+    "rootRule": {
+      "address": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+      "codeHash": "0x2e38c847ad1490c9f12eb91aaf9fa833fe896f8ff0bfe2baa12aa1c7428a5986",
+      "runtimeBytes": 513,
+      "initcodeBytes": 539,
+      "constructorArgs": [],
+      "transactionHash": "0x1986563b7c5267f3f911abd11a676a2ef2887fd4b601bc7c11eea2b34936de50"
+    },
+    "childRule": {
+      "address": "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
+      "codeHash": "0x7501b728615b5cd6be12c1ac405b986138c45e6930d14ba8eb0acfa26a7d9fb5",
+      "runtimeBytes": 1284,
+      "initcodeBytes": 1434,
+      "constructorArgs": [
+        "0x41a0fc240ad70e2af8efa8f92e7ae70970017e3b0e909e5c0256c4f08ce44c48"
+      ],
+      "transactionHash": "0x0212701043b0c708291f00e4308b695710de226c8753a6c9cfcbaf5915f8ef49"
+    },
+    "nameRule": {
+      "address": "0x0165878a594ca255338adfa4d48449f69242eb8f",
+      "codeHash": "0x0396934d6d2db45515c45885327d357db81c00ba2e13e8b42f6e7c5e4e915526",
+      "runtimeBytes": 646,
+      "initcodeBytes": 672,
+      "constructorArgs": [],
+      "transactionHash": "0xd23d1281c023ac3c75de3ba5565adc5339ba191258b2128313889d80f6b90e65"
+    },
+    "directoryRule": {
+      "address": "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6",
+      "codeHash": "0xa1383da842e81ee86c49471d28fcb2a2bbb69f65b66700b588f08798d372ba9c",
+      "runtimeBytes": 514,
+      "initcodeBytes": 540,
+      "constructorArgs": [],
+      "transactionHash": "0xbb4a7ae3f86acfa4634d54bbd35db0691fa6064fd8637f3ac6cc02479c350505"
+    },
+    "bytesRule": {
+      "address": "0x610178da211fef7d417bc0e6fed39f05609ad788",
+      "codeHash": "0xad9283b383b3d6c5a4a522cd78707e5b42c8b94f0366b0de85c96c1bb8ec0fa6",
+      "runtimeBytes": 383,
+      "initcodeBytes": 409,
+      "constructorArgs": [],
+      "transactionHash": "0xa1ef52aa909ba88abffff401d108e9b865b7f968bee0c143097bb880471ad653"
+    },
+    "contentRule": {
+      "address": "0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0",
+      "codeHash": "0x99e40db19e93ab59149c798159e7f7cac9acc0df785e46dc3fd36ec7117e46a7",
+      "runtimeBytes": 1539,
+      "initcodeBytes": 1689,
+      "constructorArgs": [
+        "0xcb44a5f24763d67bb8217e2ad297ae4565184ea39655c87f6b312fce52af5552"
+      ],
+      "transactionHash": "0xa13bd7d0df1a27b1ae1c6dfc8c64bc66daf19c83b9f384ca56743cf59c435265"
+    },
+    "carrierRootRule": {
+      "address": "0x9a676e781a523b5d0c0e43731313a708cb607508",
+      "codeHash": "0x5e63f84c67b627296a76a94c598583c0459babb1bfec41ef25a5a153cbc08fc7",
+      "runtimeBytes": 576,
+      "initcodeBytes": 602,
+      "constructorArgs": [],
+      "transactionHash": "0x4e2e76f0f2f5c702a4a5b9897ad221f090e163c5feb40a0c4a29e34c1ea188fb"
+    },
+    "carrierChildRule": {
+      "address": "0x959922be3caee4b8cd9a407cc3ac1c251c2007b1",
+      "codeHash": "0xe681d8d6c3860d66e5f2161a01ff6c211d220ce534e10b76ef8cfc363236c316",
+      "runtimeBytes": 1895,
+      "initcodeBytes": 2162,
+      "constructorArgs": [
+        "0x41a0fc240ad70e2af8efa8f92e7ae70970017e3b0e909e5c0256c4f08ce44c48",
+        "0x2c8ab6d68711300fbbc9260464090e7b2e08eb111a6dd8ada98280a425403680",
+        "0xec0014f3b1723c88202099d7de418cdeb5f399d8e452da45920232486cc79826"
+      ],
+      "transactionHash": "0x860f7655c194416bd063547707b3859200caa466ec428682299c7acbd3ba9896"
+    },
+    "conceptRule": {
+      "address": "0x68b1d87f95878fe05b998f19b66f4baba5de1aed",
+      "codeHash": "0xd7b74f7371f8654e286636bcd044824a5653befe9ac20b6fbda370823d05be85",
+      "runtimeBytes": 463,
+      "initcodeBytes": 489,
+      "constructorArgs": [],
+      "transactionHash": "0xc1e5e933c65face42d1da0dfe3a43b09ab3ecbb0f9406f1ff5b68ddbe00a1fa5"
+    },
+    "index": {
+      "address": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
+      "codeHash": "0x26380fb7443689fbb87f8bd70f552067c5be123b11f0b81d069867aa818138b4",
+      "runtimeBytes": 24491,
+      "initcodeBytes": 44737,
+      "constructorArgs": [
+        "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+        [
+          "0x41a0fc240ad70e2af8efa8f92e7ae70970017e3b0e909e5c0256c4f08ce44c48",
+          "0x2c8ab6d68711300fbbc9260464090e7b2e08eb111a6dd8ada98280a425403680",
+          "0x2e38c847ad1490c9f12eb91aaf9fa833fe896f8ff0bfe2baa12aa1c7428a5986",
+          "0x7501b728615b5cd6be12c1ac405b986138c45e6930d14ba8eb0acfa26a7d9fb5",
+          "0x0838cdc879c838cad1de6b8bf568f54a3fb0d37c92e28e23b2cf646f8e5eae24",
+          "0x0396934d6d2db45515c45885327d357db81c00ba2e13e8b42f6e7c5e4e915526",
+          "0x17e1e5a18e8e2b21da57648dad7d1a890300a652762661aa25144d2d0068737d",
+          "0xa1383da842e81ee86c49471d28fcb2a2bbb69f65b66700b588f08798d372ba9c"
+        ],
+        [
+          "0xcb44a5f24763d67bb8217e2ad297ae4565184ea39655c87f6b312fce52af5552",
+          "0x6b4b1deb8aa8e5210afae32b0ba93a45211e7f331ddbcd1cf43b91c2ea6a03e8",
+          "0xec0014f3b1723c88202099d7de418cdeb5f399d8e452da45920232486cc79826",
+          "0xd8abe7e400ba03b63d9952479c614b6d20a4d3aa73f05232ddb84c64b6d65aa8",
+          "0xcbe208e55e13d8bc1f47fc3671fd900e5720fe8fb86adb9c6d64dcba81172fdc"
+        ],
+        [
+          "0xad9283b383b3d6c5a4a522cd78707e5b42c8b94f0366b0de85c96c1bb8ec0fa6",
+          "0x99e40db19e93ab59149c798159e7f7cac9acc0df785e46dc3fd36ec7117e46a7",
+          "0x5e63f84c67b627296a76a94c598583c0459babb1bfec41ef25a5a153cbc08fc7",
+          "0xe681d8d6c3860d66e5f2161a01ff6c211d220ce534e10b76ef8cfc363236c316",
+          "0xd7b74f7371f8654e286636bcd044824a5653befe9ac20b6fbda370823d05be85"
+        ]
+      ],
+      "transactionHash": "0x6e21f8cc1c7d3e9e41bde1c9935686563ae64fdb3bffaaa831f072d4500ab880"
+    },
+    "lens": {
+      "address": "0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1",
+      "codeHash": "0x03e02ca387f3659dbbbffe4a06b811ca8cad3482005dd7a53a9c14e737100281",
+      "runtimeBytes": 16415,
+      "initcodeBytes": 16861,
+      "constructorArgs": [
+        "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+        "0xc6e7df5e7b4f2a278906862b61205850344d4e7d"
+      ],
+      "transactionHash": "0x747505e4014ae2beb19b9d538aa77b2508138ee9d2e6d6da2014c03332b4aacf"
+    },
+    "files": {
+      "address": "0x322813fd9a801c5507c9de605d63cea4f2ce6c44",
+      "codeHash": "0x3723f7cbee6f8aae3ddfb919059be1513568100f1f920200c02a68489b907fe5",
+      "runtimeBytes": 15356,
+      "initcodeBytes": 19585,
+      "constructorArgs": [
+        "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+        "0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1",
+        "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
+        "0x41a0fc240ad70e2af8efa8f92e7ae70970017e3b0e909e5c0256c4f08ce44c48",
+        "0x2c8ab6d68711300fbbc9260464090e7b2e08eb111a6dd8ada98280a425403680",
+        "0x2e38c847ad1490c9f12eb91aaf9fa833fe896f8ff0bfe2baa12aa1c7428a5986",
+        "0x7501b728615b5cd6be12c1ac405b986138c45e6930d14ba8eb0acfa26a7d9fb5"
+      ],
+      "transactionHash": "0x48b8c6792173614464452e994cbec4f3c05c10a3980a9744ff8a401017982f9e"
+    },
+    "names": {
+      "address": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+      "codeHash": "0x9eb921a6774a1013603a5819f638bfc8a96c89f48d04304d7fb5960615afe408",
+      "runtimeBytes": 5120,
+      "initcodeBytes": 6455,
+      "constructorArgs": [
+        "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+        "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+        "0x0838cdc879c838cad1de6b8bf568f54a3fb0d37c92e28e23b2cf646f8e5eae24",
+        "0x0396934d6d2db45515c45885327d357db81c00ba2e13e8b42f6e7c5e4e915526"
+      ],
+      "transactionHash": "0x54db94ca2aeb8da27f940581f74fa8293141e9e1ed4e14c8c1264c0d61a8ad4a"
+    },
+    "joined": {
+      "address": "0x4a679253410272dd5232b3ff7cf5dbb88f295319",
+      "codeHash": "0xef172b243eea6a7b1ef5d78fb73b36bf120bc6214a0bc8e706307afbd32c6fe3",
+      "runtimeBytes": 16966,
+      "initcodeBytes": 17672,
+      "constructorArgs": [
+        "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+        "0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1",
+        "0xc6e7df5e7b4f2a278906862b61205850344d4e7d"
+      ],
+      "transactionHash": "0x23384f656ff3c76e5363b159d1c267a0f3c95d74de789bbe1f2e4526e16ee18b"
+    },
+    "application": {
+      "address": "0x7a2088a1bfc9d81c55368ae168c2c02570cb814f",
+      "codeHash": "0xf698998ff6336597c2effd7bc848cd30f37b5ce4879704519ce193117c4b93c9",
+      "runtimeBytes": 4869,
+      "initcodeBytes": 5955,
+      "constructorArgs": [
+        "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+        "0x322813fd9a801c5507c9de605d63cea4f2ce6c44",
+        "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "0x2b29265fc125740ae6bbc5035ae7af720b6932f4a3e44ba5ac02955c21ca9a05"
+      ],
+      "transactionHash": "0xc8aca30dc8ea6f852d5f060b6d20ab0462aca62f272ab81db1439c7c2dd08edf"
+    },
+    "raw-lens": {
+      "address": "0xc5a5c42992decbae36851359345fe25997f5c42d",
+      "codeHash": "0x8e1a1cc9e65b5aef23ec33a425956d83ed99055ee81fb3192613731a58ba69cf",
+      "runtimeBytes": 16389,
+      "initcodeBytes": 16835,
+      "constructorArgs": [
+        "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+        "0xc6e7df5e7b4f2a278906862b61205850344d4e7d"
+      ],
+      "transactionHash": "0xd1689603cf6af49b8a90265355828b9b3384cbfe0b6858f6b0b32c730c332eea"
+    },
+    "raw-reader": {
+      "address": "0x67d269191c92caf3cd7723f116c85e6e9bf55933",
+      "codeHash": "0xf6c31b4fe3476d58c5083787fd634ef6cfbcc0097a1008ffd1b673c3ce574aee",
+      "runtimeBytes": 16966,
+      "initcodeBytes": 17672,
+      "constructorArgs": [
+        "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+        "0xc5a5c42992decbae36851359345fe25997f5c42d",
+        "0xc6e7df5e7b4f2a278906862b61205850344d4e7d"
+      ],
+      "transactionHash": "0x36dc9ef722f459fda02113f87c998ff71c9b372d149883c0a870dd856730068a"
+    },
+    "P1-ordinary-raw": {
+      "address": "0x84ea74d481ee0a5332c457a4d796187f6ba67feb",
+      "codeHash": "0x248fc59445eb032ede692a4e98fcaa94ccbe58e53294d58a0a0fda48f2feddad",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 8455,
+      "constructorArgs": [
+        "0x67d269191c92caf3cd7723f116c85e6e9bf55933",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0xb1ca039fd844904b7cca967c061db01ff69ce8cc0d7a5fcfbe2b325d4e839f11",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "12",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0xfa6a82bf558c24052c5989261c54e105a647386b7177a7752d4d321af681cac2"
+      ],
+      "transactionHash": "0x3ce8131623d6cb18361c885e0065ec3bb0d450ac71ce06d2e40b9d460d824126"
+    },
+    "P1-ordinary-selection": {
+      "address": "0x9e545e3c0baab3e08cdfd552c960a1050f373042",
+      "codeHash": "0x8562253033d633ed4a0063dc5c92aefa74ce5a8f6afa34a6dcc7025b2410c488",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 8455,
+      "constructorArgs": [
+        "0x4a679253410272dd5232b3ff7cf5dbb88f295319",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0xb1ca039fd844904b7cca967c061db01ff69ce8cc0d7a5fcfbe2b325d4e839f11",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "12",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0x6a31b63742a6449142b272d62f4c2655df8c667dc2ab7840a912bf1ccb13d90a"
+      ],
+      "transactionHash": "0xead7fc544b667b4ddd804e0ba0c9673d024f9566dcda8f9c60a44dfb8833f829"
+    },
+    "P1-historical-raw": {
+      "address": "0x95401dc811bb5740090279ba06cfa8fcf6113778",
+      "codeHash": "0x0d0b6a8a9143d7bd5e51831cc55efcd288a8496100c3e4b5d219f2025e3ba101",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 8455,
+      "constructorArgs": [
+        "0x67d269191c92caf3cd7723f116c85e6e9bf55933",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0x7d1ef7cd7e7e72f19bb25f5b7bac05b1f39d9cc0c070e5f7812248c536aedaed",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "12",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0xc50f0e708fba84d2bca8dc5d26add6000abffdeb5c9c2e8aebe25bd9c8720c87"
+      ],
+      "transactionHash": "0x012406956fea26b46c755736f880de1c6ab14b904afdb6c74f118cd0d523436d"
+    },
+    "P1-historical-selection": {
+      "address": "0x998abeb3e57409262ae5b751f60747921b33613e",
+      "codeHash": "0xab8768fe49587003478112aba779ea77613f293301ec812af4a95bd33edd63a6",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 8455,
+      "constructorArgs": [
+        "0x4a679253410272dd5232b3ff7cf5dbb88f295319",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0x7d1ef7cd7e7e72f19bb25f5b7bac05b1f39d9cc0c070e5f7812248c536aedaed",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "12",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0x9898c4113ec441bf8f87a28e78909a1144189940601d6005095a37874e91a240"
+      ],
+      "transactionHash": "0x19187502463c1a42efe228ef04d5ce6b0306dd424af7d32f051e80771aee123f"
+    },
+    "P8-ordinary-raw": {
+      "address": "0xb7278a61aa25c888815afc32ad3cc52ff24fe575",
+      "codeHash": "0x680649f787b83fb7343b6d94f56092c367917a928cdcf2389a34f7cdb02449dd",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 8679,
+      "constructorArgs": [
+        "0x67d269191c92caf3cd7723f116c85e6e9bf55933",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000000000000000000000000002",
+          "0x0000000000000000000000000000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000000000000000000000000000004",
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000000000000000000000000000006",
+          "0x0000000000000000000000000000000000000000000000000000000000000007",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0x7e8fb34258e8678c261cd6d82ed553d2807345dc2543ac6779e420da39715b3c",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "204",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0x49f0a339e77087affa546bc7ade5f8155fe8313f5da6251b06cc81cbacb10edb"
+      ],
+      "transactionHash": "0xe8e61edcf5c7787af4ec1978cac0b592248d6f2083f93bf9ed3605b7c9d30f6e"
+    },
+    "P8-ordinary-selection": {
+      "address": "0xcd8a1c3ba11cf5ecfa6267617243239504a98d90",
+      "codeHash": "0x8ca69998c1d4f42ea6808c1c5ef9bba28b9caaad1b1a87ef43e87978ac6bbb90",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 8679,
+      "constructorArgs": [
+        "0x4a679253410272dd5232b3ff7cf5dbb88f295319",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000000000000000000000000002",
+          "0x0000000000000000000000000000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000000000000000000000000000004",
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000000000000000000000000000006",
+          "0x0000000000000000000000000000000000000000000000000000000000000007",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0x7e8fb34258e8678c261cd6d82ed553d2807345dc2543ac6779e420da39715b3c",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "204",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0x12bb745ee3dc8c2b169ace795b4da9552cd3f6a9f691b6d7043d2bfb80793608"
+      ],
+      "transactionHash": "0x16327ed8caadeff203426c235cecbf190b511c5847b50f415206242f3c4a822e"
+    },
+    "P8-historical-raw": {
+      "address": "0xc351628eb244ec633d5f21fbd6621e1a683b1181",
+      "codeHash": "0x7287d48d2a2d350a7a584395bb8d19355ba7a7056b645d23eee66772fd56fac9",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 8679,
+      "constructorArgs": [
+        "0x67d269191c92caf3cd7723f116c85e6e9bf55933",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000000000000000000000000002",
+          "0x0000000000000000000000000000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000000000000000000000000000004",
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000000000000000000000000000006",
+          "0x0000000000000000000000000000000000000000000000000000000000000007",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0x149f44ccea42a3daac95cfe7d296aa30281df63e1f842b60b8184597b488a530",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "204",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0x1e34d4a04a50fd8740b88ab5213a3d23b028957e36329b57a8802ef086b34d91"
+      ],
+      "transactionHash": "0x7c86cbf98b2de50c815b82e463341cbbce4bab7758fdcc05f6fb3f552d0c6caf"
+    },
+    "P8-historical-selection": {
+      "address": "0xfd471836031dc5108809d173a067e8486b9047a3",
+      "codeHash": "0xa2dd7323a086b357872680407b0bfeb2ec59c6fe680530d24cd22020a7ebe842",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 8679,
+      "constructorArgs": [
+        "0x4a679253410272dd5232b3ff7cf5dbb88f295319",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000000000000000000000000002",
+          "0x0000000000000000000000000000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000000000000000000000000000004",
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000000000000000000000000000006",
+          "0x0000000000000000000000000000000000000000000000000000000000000007",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0x149f44ccea42a3daac95cfe7d296aa30281df63e1f842b60b8184597b488a530",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "204",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0xfba786c2b5a45f81028460dd11669d4cf427354ad41aeec108ac9ce532bdfac2"
+      ],
+      "transactionHash": "0xd71a2d62f34f2d9c65161c5f6f1344ff441282a5676e74040a283279ae33cecb"
+    },
+    "P64-ordinary-raw": {
+      "address": "0xd8a5a9b31c3c0232e196d518e89fd8bf83acad43",
+      "codeHash": "0x3389730498a289507162fd2f7e71e069b8b5deadd457b100bb10847405540fae",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 10471,
+      "constructorArgs": [
+        "0x67d269191c92caf3cd7723f116c85e6e9bf55933",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000000000000000000000000002",
+          "0x0000000000000000000000000000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000000000000000000000000000004",
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000000000000000000000000000006",
+          "0x0000000000000000000000000000000000000000000000000000000000000007",
+          "0x0000000000000000000000000000000000000000000000000000000000000008",
+          "0x0000000000000000000000000000000000000000000000000000000000000009",
+          "0x000000000000000000000000000000000000000000000000000000000000000a",
+          "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "0x000000000000000000000000000000000000000000000000000000000000000c",
+          "0x000000000000000000000000000000000000000000000000000000000000000d",
+          "0x000000000000000000000000000000000000000000000000000000000000000e",
+          "0x000000000000000000000000000000000000000000000000000000000000000f",
+          "0x0000000000000000000000000000000000000000000000000000000000000010",
+          "0x0000000000000000000000000000000000000000000000000000000000000011",
+          "0x0000000000000000000000000000000000000000000000000000000000000012",
+          "0x0000000000000000000000000000000000000000000000000000000000000013",
+          "0x0000000000000000000000000000000000000000000000000000000000000014",
+          "0x0000000000000000000000000000000000000000000000000000000000000015",
+          "0x0000000000000000000000000000000000000000000000000000000000000016",
+          "0x0000000000000000000000000000000000000000000000000000000000000017",
+          "0x0000000000000000000000000000000000000000000000000000000000000018",
+          "0x0000000000000000000000000000000000000000000000000000000000000019",
+          "0x000000000000000000000000000000000000000000000000000000000000001a",
+          "0x000000000000000000000000000000000000000000000000000000000000001b",
+          "0x000000000000000000000000000000000000000000000000000000000000001c",
+          "0x000000000000000000000000000000000000000000000000000000000000001d",
+          "0x000000000000000000000000000000000000000000000000000000000000001e",
+          "0x000000000000000000000000000000000000000000000000000000000000001f",
+          "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "0x0000000000000000000000000000000000000000000000000000000000000021",
+          "0x0000000000000000000000000000000000000000000000000000000000000022",
+          "0x0000000000000000000000000000000000000000000000000000000000000023",
+          "0x0000000000000000000000000000000000000000000000000000000000000024",
+          "0x0000000000000000000000000000000000000000000000000000000000000025",
+          "0x0000000000000000000000000000000000000000000000000000000000000026",
+          "0x0000000000000000000000000000000000000000000000000000000000000027",
+          "0x0000000000000000000000000000000000000000000000000000000000000028",
+          "0x0000000000000000000000000000000000000000000000000000000000000029",
+          "0x000000000000000000000000000000000000000000000000000000000000002a",
+          "0x000000000000000000000000000000000000000000000000000000000000002b",
+          "0x000000000000000000000000000000000000000000000000000000000000002c",
+          "0x000000000000000000000000000000000000000000000000000000000000002d",
+          "0x000000000000000000000000000000000000000000000000000000000000002e",
+          "0x000000000000000000000000000000000000000000000000000000000000002f",
+          "0x0000000000000000000000000000000000000000000000000000000000000030",
+          "0x0000000000000000000000000000000000000000000000000000000000000031",
+          "0x0000000000000000000000000000000000000000000000000000000000000032",
+          "0x0000000000000000000000000000000000000000000000000000000000000033",
+          "0x0000000000000000000000000000000000000000000000000000000000000034",
+          "0x0000000000000000000000000000000000000000000000000000000000000035",
+          "0x0000000000000000000000000000000000000000000000000000000000000036",
+          "0x0000000000000000000000000000000000000000000000000000000000000037",
+          "0x0000000000000000000000000000000000000000000000000000000000000038",
+          "0x0000000000000000000000000000000000000000000000000000000000000039",
+          "0x000000000000000000000000000000000000000000000000000000000000003a",
+          "0x000000000000000000000000000000000000000000000000000000000000003b",
+          "0x000000000000000000000000000000000000000000000000000000000000003c",
+          "0x000000000000000000000000000000000000000000000000000000000000003d",
+          "0x000000000000000000000000000000000000000000000000000000000000003e",
+          "0x000000000000000000000000000000000000000000000000000000000000003f",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0x44c7f6e9c3f2f91d0e6a2ab943458c68777fa56066003730a66e124801652ac7",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "396",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0xf17e1c65e1cb63b1b601d5e19e2a853df7bfdef49022939cb9767b763774407c"
+      ],
+      "transactionHash": "0x3d4f8cce2183cb723889a1baeb07e76b31b34ff07d7c5d3214674af5cd55576c"
+    },
+    "P64-ordinary-selection": {
+      "address": "0xdc11f7e700a4c898ae5caddb1082cffa76512add",
+      "codeHash": "0x113f5f0618009e6b9f6b7c6d87654f085659f2bddeee89400349e492b1bcd956",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 10471,
+      "constructorArgs": [
+        "0x4a679253410272dd5232b3ff7cf5dbb88f295319",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000000000000000000000000002",
+          "0x0000000000000000000000000000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000000000000000000000000000004",
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000000000000000000000000000006",
+          "0x0000000000000000000000000000000000000000000000000000000000000007",
+          "0x0000000000000000000000000000000000000000000000000000000000000008",
+          "0x0000000000000000000000000000000000000000000000000000000000000009",
+          "0x000000000000000000000000000000000000000000000000000000000000000a",
+          "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "0x000000000000000000000000000000000000000000000000000000000000000c",
+          "0x000000000000000000000000000000000000000000000000000000000000000d",
+          "0x000000000000000000000000000000000000000000000000000000000000000e",
+          "0x000000000000000000000000000000000000000000000000000000000000000f",
+          "0x0000000000000000000000000000000000000000000000000000000000000010",
+          "0x0000000000000000000000000000000000000000000000000000000000000011",
+          "0x0000000000000000000000000000000000000000000000000000000000000012",
+          "0x0000000000000000000000000000000000000000000000000000000000000013",
+          "0x0000000000000000000000000000000000000000000000000000000000000014",
+          "0x0000000000000000000000000000000000000000000000000000000000000015",
+          "0x0000000000000000000000000000000000000000000000000000000000000016",
+          "0x0000000000000000000000000000000000000000000000000000000000000017",
+          "0x0000000000000000000000000000000000000000000000000000000000000018",
+          "0x0000000000000000000000000000000000000000000000000000000000000019",
+          "0x000000000000000000000000000000000000000000000000000000000000001a",
+          "0x000000000000000000000000000000000000000000000000000000000000001b",
+          "0x000000000000000000000000000000000000000000000000000000000000001c",
+          "0x000000000000000000000000000000000000000000000000000000000000001d",
+          "0x000000000000000000000000000000000000000000000000000000000000001e",
+          "0x000000000000000000000000000000000000000000000000000000000000001f",
+          "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "0x0000000000000000000000000000000000000000000000000000000000000021",
+          "0x0000000000000000000000000000000000000000000000000000000000000022",
+          "0x0000000000000000000000000000000000000000000000000000000000000023",
+          "0x0000000000000000000000000000000000000000000000000000000000000024",
+          "0x0000000000000000000000000000000000000000000000000000000000000025",
+          "0x0000000000000000000000000000000000000000000000000000000000000026",
+          "0x0000000000000000000000000000000000000000000000000000000000000027",
+          "0x0000000000000000000000000000000000000000000000000000000000000028",
+          "0x0000000000000000000000000000000000000000000000000000000000000029",
+          "0x000000000000000000000000000000000000000000000000000000000000002a",
+          "0x000000000000000000000000000000000000000000000000000000000000002b",
+          "0x000000000000000000000000000000000000000000000000000000000000002c",
+          "0x000000000000000000000000000000000000000000000000000000000000002d",
+          "0x000000000000000000000000000000000000000000000000000000000000002e",
+          "0x000000000000000000000000000000000000000000000000000000000000002f",
+          "0x0000000000000000000000000000000000000000000000000000000000000030",
+          "0x0000000000000000000000000000000000000000000000000000000000000031",
+          "0x0000000000000000000000000000000000000000000000000000000000000032",
+          "0x0000000000000000000000000000000000000000000000000000000000000033",
+          "0x0000000000000000000000000000000000000000000000000000000000000034",
+          "0x0000000000000000000000000000000000000000000000000000000000000035",
+          "0x0000000000000000000000000000000000000000000000000000000000000036",
+          "0x0000000000000000000000000000000000000000000000000000000000000037",
+          "0x0000000000000000000000000000000000000000000000000000000000000038",
+          "0x0000000000000000000000000000000000000000000000000000000000000039",
+          "0x000000000000000000000000000000000000000000000000000000000000003a",
+          "0x000000000000000000000000000000000000000000000000000000000000003b",
+          "0x000000000000000000000000000000000000000000000000000000000000003c",
+          "0x000000000000000000000000000000000000000000000000000000000000003d",
+          "0x000000000000000000000000000000000000000000000000000000000000003e",
+          "0x000000000000000000000000000000000000000000000000000000000000003f",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0x44c7f6e9c3f2f91d0e6a2ab943458c68777fa56066003730a66e124801652ac7",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "396",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0x30082e40e276caeb044fa13ad158e3276127b5433c8c4d5e9a54e47f2ef75179"
+      ],
+      "transactionHash": "0x2fd220876bd6358d7291c7f151550a3c6085bbd2108d44357ed02aba6a093032"
+    },
+    "P64-historical-raw": {
+      "address": "0x202cce504e04bed6fc0521238ddf04bc9e8e15ab",
+      "codeHash": "0xdc215bab70a5dd43e694cd87422141dd0c6639c32fcbb48c13aabceb38301b18",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 10471,
+      "constructorArgs": [
+        "0x67d269191c92caf3cd7723f116c85e6e9bf55933",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000000000000000000000000002",
+          "0x0000000000000000000000000000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000000000000000000000000000004",
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000000000000000000000000000006",
+          "0x0000000000000000000000000000000000000000000000000000000000000007",
+          "0x0000000000000000000000000000000000000000000000000000000000000008",
+          "0x0000000000000000000000000000000000000000000000000000000000000009",
+          "0x000000000000000000000000000000000000000000000000000000000000000a",
+          "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "0x000000000000000000000000000000000000000000000000000000000000000c",
+          "0x000000000000000000000000000000000000000000000000000000000000000d",
+          "0x000000000000000000000000000000000000000000000000000000000000000e",
+          "0x000000000000000000000000000000000000000000000000000000000000000f",
+          "0x0000000000000000000000000000000000000000000000000000000000000010",
+          "0x0000000000000000000000000000000000000000000000000000000000000011",
+          "0x0000000000000000000000000000000000000000000000000000000000000012",
+          "0x0000000000000000000000000000000000000000000000000000000000000013",
+          "0x0000000000000000000000000000000000000000000000000000000000000014",
+          "0x0000000000000000000000000000000000000000000000000000000000000015",
+          "0x0000000000000000000000000000000000000000000000000000000000000016",
+          "0x0000000000000000000000000000000000000000000000000000000000000017",
+          "0x0000000000000000000000000000000000000000000000000000000000000018",
+          "0x0000000000000000000000000000000000000000000000000000000000000019",
+          "0x000000000000000000000000000000000000000000000000000000000000001a",
+          "0x000000000000000000000000000000000000000000000000000000000000001b",
+          "0x000000000000000000000000000000000000000000000000000000000000001c",
+          "0x000000000000000000000000000000000000000000000000000000000000001d",
+          "0x000000000000000000000000000000000000000000000000000000000000001e",
+          "0x000000000000000000000000000000000000000000000000000000000000001f",
+          "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "0x0000000000000000000000000000000000000000000000000000000000000021",
+          "0x0000000000000000000000000000000000000000000000000000000000000022",
+          "0x0000000000000000000000000000000000000000000000000000000000000023",
+          "0x0000000000000000000000000000000000000000000000000000000000000024",
+          "0x0000000000000000000000000000000000000000000000000000000000000025",
+          "0x0000000000000000000000000000000000000000000000000000000000000026",
+          "0x0000000000000000000000000000000000000000000000000000000000000027",
+          "0x0000000000000000000000000000000000000000000000000000000000000028",
+          "0x0000000000000000000000000000000000000000000000000000000000000029",
+          "0x000000000000000000000000000000000000000000000000000000000000002a",
+          "0x000000000000000000000000000000000000000000000000000000000000002b",
+          "0x000000000000000000000000000000000000000000000000000000000000002c",
+          "0x000000000000000000000000000000000000000000000000000000000000002d",
+          "0x000000000000000000000000000000000000000000000000000000000000002e",
+          "0x000000000000000000000000000000000000000000000000000000000000002f",
+          "0x0000000000000000000000000000000000000000000000000000000000000030",
+          "0x0000000000000000000000000000000000000000000000000000000000000031",
+          "0x0000000000000000000000000000000000000000000000000000000000000032",
+          "0x0000000000000000000000000000000000000000000000000000000000000033",
+          "0x0000000000000000000000000000000000000000000000000000000000000034",
+          "0x0000000000000000000000000000000000000000000000000000000000000035",
+          "0x0000000000000000000000000000000000000000000000000000000000000036",
+          "0x0000000000000000000000000000000000000000000000000000000000000037",
+          "0x0000000000000000000000000000000000000000000000000000000000000038",
+          "0x0000000000000000000000000000000000000000000000000000000000000039",
+          "0x000000000000000000000000000000000000000000000000000000000000003a",
+          "0x000000000000000000000000000000000000000000000000000000000000003b",
+          "0x000000000000000000000000000000000000000000000000000000000000003c",
+          "0x000000000000000000000000000000000000000000000000000000000000003d",
+          "0x000000000000000000000000000000000000000000000000000000000000003e",
+          "0x000000000000000000000000000000000000000000000000000000000000003f",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0x7eb97875f9e4644b7751d99573312445934cb0925e5fd98c071eba092edd4464",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "396",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0x9596776dc70706d561e2cfd7b08688a9ad12fdc91e13820092aa3f7bd98d191a"
+      ],
+      "transactionHash": "0x452362c9d15b1257fe12c1c962be1ae3562437234a14f766c46febc20b259e86"
+    },
+    "P64-historical-selection": {
+      "address": "0xf4b146fba71f41e0592668ffbf264f1d186b2ca8",
+      "codeHash": "0x8870f3f3273e15c19508f9f94d862c30e9f956dd016e7208784861829caef356",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 10471,
+      "constructorArgs": [
+        "0x4a679253410272dd5232b3ff7cf5dbb88f295319",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000000000000000000000000002",
+          "0x0000000000000000000000000000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000000000000000000000000000004",
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000000000000000000000000000006",
+          "0x0000000000000000000000000000000000000000000000000000000000000007",
+          "0x0000000000000000000000000000000000000000000000000000000000000008",
+          "0x0000000000000000000000000000000000000000000000000000000000000009",
+          "0x000000000000000000000000000000000000000000000000000000000000000a",
+          "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "0x000000000000000000000000000000000000000000000000000000000000000c",
+          "0x000000000000000000000000000000000000000000000000000000000000000d",
+          "0x000000000000000000000000000000000000000000000000000000000000000e",
+          "0x000000000000000000000000000000000000000000000000000000000000000f",
+          "0x0000000000000000000000000000000000000000000000000000000000000010",
+          "0x0000000000000000000000000000000000000000000000000000000000000011",
+          "0x0000000000000000000000000000000000000000000000000000000000000012",
+          "0x0000000000000000000000000000000000000000000000000000000000000013",
+          "0x0000000000000000000000000000000000000000000000000000000000000014",
+          "0x0000000000000000000000000000000000000000000000000000000000000015",
+          "0x0000000000000000000000000000000000000000000000000000000000000016",
+          "0x0000000000000000000000000000000000000000000000000000000000000017",
+          "0x0000000000000000000000000000000000000000000000000000000000000018",
+          "0x0000000000000000000000000000000000000000000000000000000000000019",
+          "0x000000000000000000000000000000000000000000000000000000000000001a",
+          "0x000000000000000000000000000000000000000000000000000000000000001b",
+          "0x000000000000000000000000000000000000000000000000000000000000001c",
+          "0x000000000000000000000000000000000000000000000000000000000000001d",
+          "0x000000000000000000000000000000000000000000000000000000000000001e",
+          "0x000000000000000000000000000000000000000000000000000000000000001f",
+          "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "0x0000000000000000000000000000000000000000000000000000000000000021",
+          "0x0000000000000000000000000000000000000000000000000000000000000022",
+          "0x0000000000000000000000000000000000000000000000000000000000000023",
+          "0x0000000000000000000000000000000000000000000000000000000000000024",
+          "0x0000000000000000000000000000000000000000000000000000000000000025",
+          "0x0000000000000000000000000000000000000000000000000000000000000026",
+          "0x0000000000000000000000000000000000000000000000000000000000000027",
+          "0x0000000000000000000000000000000000000000000000000000000000000028",
+          "0x0000000000000000000000000000000000000000000000000000000000000029",
+          "0x000000000000000000000000000000000000000000000000000000000000002a",
+          "0x000000000000000000000000000000000000000000000000000000000000002b",
+          "0x000000000000000000000000000000000000000000000000000000000000002c",
+          "0x000000000000000000000000000000000000000000000000000000000000002d",
+          "0x000000000000000000000000000000000000000000000000000000000000002e",
+          "0x000000000000000000000000000000000000000000000000000000000000002f",
+          "0x0000000000000000000000000000000000000000000000000000000000000030",
+          "0x0000000000000000000000000000000000000000000000000000000000000031",
+          "0x0000000000000000000000000000000000000000000000000000000000000032",
+          "0x0000000000000000000000000000000000000000000000000000000000000033",
+          "0x0000000000000000000000000000000000000000000000000000000000000034",
+          "0x0000000000000000000000000000000000000000000000000000000000000035",
+          "0x0000000000000000000000000000000000000000000000000000000000000036",
+          "0x0000000000000000000000000000000000000000000000000000000000000037",
+          "0x0000000000000000000000000000000000000000000000000000000000000038",
+          "0x0000000000000000000000000000000000000000000000000000000000000039",
+          "0x000000000000000000000000000000000000000000000000000000000000003a",
+          "0x000000000000000000000000000000000000000000000000000000000000003b",
+          "0x000000000000000000000000000000000000000000000000000000000000003c",
+          "0x000000000000000000000000000000000000000000000000000000000000003d",
+          "0x000000000000000000000000000000000000000000000000000000000000003e",
+          "0x000000000000000000000000000000000000000000000000000000000000003f",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0x7eb97875f9e4644b7751d99573312445934cb0925e5fd98c071eba092edd4464",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "396",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0xddb4e065ec7009a0b1265a11c2828edd7c3c1eaeeee032ed71420986728742b8"
+      ],
+      "transactionHash": "0x4025f7abcce84f47f7c3ba24fb3480b88a99fe719f2a56ddd128b50e1ad21164"
+    },
+    "P64-positive-raw": {
+      "address": "0x86a2ee8faf9a840f7a2c64ca3d51209f9a02081d",
+      "codeHash": "0xbd3122ffcf1937ea1b4467626627d72294c547ce123958e16ddaaa8c0c8b1cc8",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 10471,
+      "constructorArgs": [
+        "0x67d269191c92caf3cd7723f116c85e6e9bf55933",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000000000000000000000000002",
+          "0x0000000000000000000000000000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000000000000000000000000000004",
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000000000000000000000000000006",
+          "0x0000000000000000000000000000000000000000000000000000000000000007",
+          "0x0000000000000000000000000000000000000000000000000000000000000008",
+          "0x0000000000000000000000000000000000000000000000000000000000000009",
+          "0x000000000000000000000000000000000000000000000000000000000000000a",
+          "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "0x000000000000000000000000000000000000000000000000000000000000000c",
+          "0x000000000000000000000000000000000000000000000000000000000000000d",
+          "0x000000000000000000000000000000000000000000000000000000000000000e",
+          "0x000000000000000000000000000000000000000000000000000000000000000f",
+          "0x0000000000000000000000000000000000000000000000000000000000000010",
+          "0x0000000000000000000000000000000000000000000000000000000000000011",
+          "0x0000000000000000000000000000000000000000000000000000000000000012",
+          "0x0000000000000000000000000000000000000000000000000000000000000013",
+          "0x0000000000000000000000000000000000000000000000000000000000000014",
+          "0x0000000000000000000000000000000000000000000000000000000000000015",
+          "0x0000000000000000000000000000000000000000000000000000000000000016",
+          "0x0000000000000000000000000000000000000000000000000000000000000017",
+          "0x0000000000000000000000000000000000000000000000000000000000000018",
+          "0x0000000000000000000000000000000000000000000000000000000000000019",
+          "0x000000000000000000000000000000000000000000000000000000000000001a",
+          "0x000000000000000000000000000000000000000000000000000000000000001b",
+          "0x000000000000000000000000000000000000000000000000000000000000001c",
+          "0x000000000000000000000000000000000000000000000000000000000000001d",
+          "0x000000000000000000000000000000000000000000000000000000000000001e",
+          "0x000000000000000000000000000000000000000000000000000000000000001f",
+          "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "0x0000000000000000000000000000000000000000000000000000000000000021",
+          "0x0000000000000000000000000000000000000000000000000000000000000022",
+          "0x0000000000000000000000000000000000000000000000000000000000000023",
+          "0x0000000000000000000000000000000000000000000000000000000000000024",
+          "0x0000000000000000000000000000000000000000000000000000000000000025",
+          "0x0000000000000000000000000000000000000000000000000000000000000026",
+          "0x0000000000000000000000000000000000000000000000000000000000000027",
+          "0x0000000000000000000000000000000000000000000000000000000000000028",
+          "0x0000000000000000000000000000000000000000000000000000000000000029",
+          "0x000000000000000000000000000000000000000000000000000000000000002a",
+          "0x000000000000000000000000000000000000000000000000000000000000002b",
+          "0x000000000000000000000000000000000000000000000000000000000000002c",
+          "0x000000000000000000000000000000000000000000000000000000000000002d",
+          "0x000000000000000000000000000000000000000000000000000000000000002e",
+          "0x000000000000000000000000000000000000000000000000000000000000002f",
+          "0x0000000000000000000000000000000000000000000000000000000000000030",
+          "0x0000000000000000000000000000000000000000000000000000000000000031",
+          "0x0000000000000000000000000000000000000000000000000000000000000032",
+          "0x0000000000000000000000000000000000000000000000000000000000000033",
+          "0x0000000000000000000000000000000000000000000000000000000000000034",
+          "0x0000000000000000000000000000000000000000000000000000000000000035",
+          "0x0000000000000000000000000000000000000000000000000000000000000036",
+          "0x0000000000000000000000000000000000000000000000000000000000000037",
+          "0x0000000000000000000000000000000000000000000000000000000000000038",
+          "0x0000000000000000000000000000000000000000000000000000000000000039",
+          "0x000000000000000000000000000000000000000000000000000000000000003a",
+          "0x000000000000000000000000000000000000000000000000000000000000003b",
+          "0x000000000000000000000000000000000000000000000000000000000000003c",
+          "0x000000000000000000000000000000000000000000000000000000000000003d",
+          "0x000000000000000000000000000000000000000000000000000000000000003e",
+          "0x000000000000000000000000000000000000000000000000000000000000003f",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0xcb93bab8b038b60db11ad4e50e89a9a26db5ba6abd4833299252179db49846f3",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "592",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0x4beecf4e1fcba44409c21a62c0ff57adcab299048d3a6f683119189f475e0192"
+      ],
+      "transactionHash": "0x9f8b04148c8b0dd2c3b0b9a81d1f3ad2f19dce06ac4a36e3662cfaaffbd2f164"
+    },
+    "P64-positive-selection": {
+      "address": "0xa4899d35897033b927acfcf422bc745916139776",
+      "codeHash": "0x79083d1688a2770e397bcb6868d136abbc4d0c172ac24f9cdfea31baaa6615a0",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 10471,
+      "constructorArgs": [
+        "0x4a679253410272dd5232b3ff7cf5dbb88f295319",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000000000000000000000000002",
+          "0x0000000000000000000000000000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000000000000000000000000000004",
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000000000000000000000000000006",
+          "0x0000000000000000000000000000000000000000000000000000000000000007",
+          "0x0000000000000000000000000000000000000000000000000000000000000008",
+          "0x0000000000000000000000000000000000000000000000000000000000000009",
+          "0x000000000000000000000000000000000000000000000000000000000000000a",
+          "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "0x000000000000000000000000000000000000000000000000000000000000000c",
+          "0x000000000000000000000000000000000000000000000000000000000000000d",
+          "0x000000000000000000000000000000000000000000000000000000000000000e",
+          "0x000000000000000000000000000000000000000000000000000000000000000f",
+          "0x0000000000000000000000000000000000000000000000000000000000000010",
+          "0x0000000000000000000000000000000000000000000000000000000000000011",
+          "0x0000000000000000000000000000000000000000000000000000000000000012",
+          "0x0000000000000000000000000000000000000000000000000000000000000013",
+          "0x0000000000000000000000000000000000000000000000000000000000000014",
+          "0x0000000000000000000000000000000000000000000000000000000000000015",
+          "0x0000000000000000000000000000000000000000000000000000000000000016",
+          "0x0000000000000000000000000000000000000000000000000000000000000017",
+          "0x0000000000000000000000000000000000000000000000000000000000000018",
+          "0x0000000000000000000000000000000000000000000000000000000000000019",
+          "0x000000000000000000000000000000000000000000000000000000000000001a",
+          "0x000000000000000000000000000000000000000000000000000000000000001b",
+          "0x000000000000000000000000000000000000000000000000000000000000001c",
+          "0x000000000000000000000000000000000000000000000000000000000000001d",
+          "0x000000000000000000000000000000000000000000000000000000000000001e",
+          "0x000000000000000000000000000000000000000000000000000000000000001f",
+          "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "0x0000000000000000000000000000000000000000000000000000000000000021",
+          "0x0000000000000000000000000000000000000000000000000000000000000022",
+          "0x0000000000000000000000000000000000000000000000000000000000000023",
+          "0x0000000000000000000000000000000000000000000000000000000000000024",
+          "0x0000000000000000000000000000000000000000000000000000000000000025",
+          "0x0000000000000000000000000000000000000000000000000000000000000026",
+          "0x0000000000000000000000000000000000000000000000000000000000000027",
+          "0x0000000000000000000000000000000000000000000000000000000000000028",
+          "0x0000000000000000000000000000000000000000000000000000000000000029",
+          "0x000000000000000000000000000000000000000000000000000000000000002a",
+          "0x000000000000000000000000000000000000000000000000000000000000002b",
+          "0x000000000000000000000000000000000000000000000000000000000000002c",
+          "0x000000000000000000000000000000000000000000000000000000000000002d",
+          "0x000000000000000000000000000000000000000000000000000000000000002e",
+          "0x000000000000000000000000000000000000000000000000000000000000002f",
+          "0x0000000000000000000000000000000000000000000000000000000000000030",
+          "0x0000000000000000000000000000000000000000000000000000000000000031",
+          "0x0000000000000000000000000000000000000000000000000000000000000032",
+          "0x0000000000000000000000000000000000000000000000000000000000000033",
+          "0x0000000000000000000000000000000000000000000000000000000000000034",
+          "0x0000000000000000000000000000000000000000000000000000000000000035",
+          "0x0000000000000000000000000000000000000000000000000000000000000036",
+          "0x0000000000000000000000000000000000000000000000000000000000000037",
+          "0x0000000000000000000000000000000000000000000000000000000000000038",
+          "0x0000000000000000000000000000000000000000000000000000000000000039",
+          "0x000000000000000000000000000000000000000000000000000000000000003a",
+          "0x000000000000000000000000000000000000000000000000000000000000003b",
+          "0x000000000000000000000000000000000000000000000000000000000000003c",
+          "0x000000000000000000000000000000000000000000000000000000000000003d",
+          "0x000000000000000000000000000000000000000000000000000000000000003e",
+          "0x000000000000000000000000000000000000000000000000000000000000003f",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0xcb93bab8b038b60db11ad4e50e89a9a26db5ba6abd4833299252179db49846f3",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "592",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0xbbdf7121df4649b1618472c84c69a61f0492b62e53a2d62a18d2debaf66e3902"
+      ],
+      "transactionHash": "0xa6fe1018d6e259316299f9e36f05e766d57484ce99ca98374de6d7357a4aa868"
+    },
+    "selected-scope-refusal-raw": {
+      "address": "0xe8d2a1e88c91dcd5433208d4152cc4f399a7e91d",
+      "codeHash": "0xff727c6c1a516d5e7e3abeda599ddb8769ad9d23a387b463c656356d7f7ea7e0",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 8455,
+      "constructorArgs": [
+        "0x67d269191c92caf3cd7723f116c85e6e9bf55933",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0x84d9337e55433af28e5554e3cd186c165fa6852f59500c302581a3bc512f0be4",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "593",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0xbe9eaf23cb58a8f1a1e6a9687e392444e28566dee04d1e9431d07d13af3e9491"
+      ],
+      "transactionHash": "0xa4fc3706433ef997a9d45cabc436a08dea560334de28af9e3ff528337d98435a"
+    },
+    "selected-scope-refusal-selection": {
+      "address": "0x5067457698fd6fa1c6964e416b3f42713513b3dd",
+      "codeHash": "0x7b475cb7fa172289950ce044b801c8e919a2c18ca2e386f325a7b808ecde029f",
+      "runtimeBytes": 6165,
+      "initcodeBytes": 8455,
+      "constructorArgs": [
+        "0x4a679253410272dd5232b3ff7cf5dbb88f295319",
+        "0xf214e6b490abdda4676cf9b86ec9bdd252866c9382a0a072d2ee30ed761f09fd",
+        [
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        {
+          "concept": "0x84d9337e55433af28e5554e3cd186c165fa6852f59500c302581a3bc512f0be4",
+          "tagScope": 3,
+          "diagnosticHead": false,
+          "search": ""
+        },
+        [
+          "593",
+          "0",
+          "9",
+          "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+        ],
+        "0xcb1ecde6bf71c8dcb39abf10bbeb8fa7d1d2ea2a3606f4e1de5fbe3c2d56c4d5"
+      ],
+      "transactionHash": "0x12a67b728d8c8222666b2b0ad9078c4a5cb78ded6eb80620f68e2047fc4686ee"
+    }
+  }
+}

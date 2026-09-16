@@ -1,0 +1,193 @@
+{
+  "sourcePinsUnchanged": true,
+  "paidSourceAndFinalCompilerBytesMatch": true,
+  "receiptCount": 108,
+  "receiptHashesGasCapsAndPriceValid": true,
+  "checks": [
+    {
+      "name": "Ledger",
+      "finalArtifactSha256": "1923cb1059d4e39a116a7ba9e1b2294a82f7ea23d3004a28e8f35b729955f13e",
+      "creationSha256": "fe26c0be13570b15c0ea0dd74d67d8669c9ba83644662ad132ed143c78ae79d1",
+      "runtimeTemplateSha256": "ef525e585b1ab19de909a289a4ba3ee4e77c6f7e4612be28f951e36cb05378cd",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/Ledger.sol": "Ledger"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      }
+    },
+    {
+      "name": "LensReader",
+      "finalArtifactSha256": "0cf1cdefc26ee975e3eca586bf4f332f1d0c5cd1d06daf94aa8532591a6069fc",
+      "creationSha256": "af623e56c9a5d6e79d539a7c74dddd005eb1aa1bd44dff270d2ebe7f681ee47f",
+      "runtimeTemplateSha256": "16bf063edc9a0666ca31d025998d76e1dcec7d155d58746e1cf9fd1bb26b0534",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/LensReader.sol": "LensReader"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      }
+    },
+    {
+      "name": "FilesLiveLens",
+      "finalArtifactSha256": "72a40a3d3f1a9a6de87e5f445456ce5bcf39d0c4b8f382d682b1cef60f7779d8",
+      "creationSha256": "2a6c843e242fcf497fbf3497f83e0c5c42785bdb9c97caa273132b7438a2d2fc",
+      "runtimeTemplateSha256": "d5797aeb0edafa5110cf63adbbe0b7c92a616338200fcbfffc0c70b5580e879d",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/FilesLiveIndex.sol": "FilesLiveLens"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      }
+    },
+    {
+      "name": "RawHeadFilesLiveLens",
+      "finalArtifactSha256": "536645ae19c6e496fae008334365c249f0089a0a8c3bbb1d235577b6300e329b",
+      "creationSha256": "26dd6fb3f09975ccb1fb07d1c208591ab6993aefc8e5d6ce852a12b81de75885",
+      "runtimeTemplateSha256": "80db9fbf75b942a7af758607be7b16f77dd8733271ec2f14dec9c7a152228d8c",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/SelectionHeadControl.sol": "RawHeadFilesLiveLens"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      }
+    },
+    {
+      "name": "FilesPageReader",
+      "finalArtifactSha256": "7aa06816ff1cecb4c84f9ad14d9fd6afa2b069f25ee4ea77bf688133d4cb2bc7",
+      "creationSha256": "614709335709c0a3f9ed25e7bd8040840d2b3e97a5d3c081c24ed19d5bdc047f",
+      "runtimeTemplateSha256": "dcddf62b34030126e98bd0f2605288e9ee2f989e5035769de63bfb970e88572d",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/FilesPageReader.sol": "FilesPageReader"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      }
+    },
+    {
+      "name": "FilesQueryAccumulator",
+      "finalArtifactSha256": "034b95b1b1b1c363b9fbc11c9810d7ed9b705eb35ef41d4df68e40059318b928",
+      "creationSha256": "cfe00e3eaa2f8cdbf015fa9fa665e283db008370c81cb017ac933b17dccaab1d",
+      "runtimeTemplateSha256": "437143073b71d922fd2b1291e8477107f5d7b910bacc03bcde66b6d57cb4cc0c",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/FilesQueryAccumulator.sol": "FilesQueryAccumulator"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      }
+    },
+    {
+      "name": "ProfiledFilesIndex",
+      "finalArtifactSha256": "b22033fe33e2b9f8ddc7c00a242411ef2b62eef5eb5faf5563fc66e39d1934af",
+      "creationSha256": "080d379a4ae079deb5164e27d6f9258599e9786a5c1019f5a9a57fc9a0152fd1",
+      "runtimeTemplateSha256": "d0179eeb6a7cd33bcc8f3e7464b7dcb2be0c3258b37ac17aa39b6a2698111e20",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/ProfiledFilesIndex.sol": "ProfiledFilesIndex"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      }
+    }
+  ],
+  "tests": {
+    "test/SelectionHead.t.sol": "eb57ad44d075541d581deaa75815ad1b339e72c3f6dfc5af83fb865abca32f1e",
+    "test/SelectionHeadControl.sol": "32a288d2d6f5f8551b3b3c908d3e5d6b26e8a6afcdf9c89bee1130550137048f"
+  },
+  "paidPacketSha256": "65570efed1ba7d61110493627c990e7e868b62ce20e56f1eb5b0b11f669805fa",
+  "historyPolicy": {
+    "states": 256,
+    "transactionBlocks": 512
+  },
+  "execution": "0xb7cf314dc7843899c898c5b57fd2c1973e706a67f97dfd9d7d215818cf5a54f2"
+}

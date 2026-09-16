@@ -231,7 +231,7 @@ contract LensReader {
     }
 
     function _headAt(bytes32 principal,bytes32 position,uint64 asOf) internal view returns(uint8 state,bytes32 value,uint32 revision,uint64 at){
-        (state,revision,at,,,value)=ledger.head(Keys.binding(principal,position));
+        (state,revision,at,value)=_selectionHead(Keys.binding(principal,position));
         if(at<=asOf)return(state,value,revision,at);
         (uint8 h,bool live,bytes32 target,uint32 rev,uint64 admission)=historyPrincipal(principal,position,asOf);
         if(h==UNKNOWN)revert E_CURSOR();
@@ -263,7 +263,7 @@ contract LensReader {
                     return _finishScan(page, c, filled, PARTIAL);
                 }
                 bytes32 position = ledger.bindingPosition(_scopeAt(purpose, listKey, j++));
-                (uint8 state, uint32 rev, uint64 at,,, bytes32 target) = ledger.head(Keys.binding(principals[k], position));
+                (uint8 state, uint32 rev, uint64 at, bytes32 target) = _selectionHead(Keys.binding(principals[k], position));
                 ++page.scanned; ++page.hydrations;
                 if (at > c.basisAdmission) page.mutated = true;
                 if (state != 1) continue;
@@ -291,7 +291,7 @@ contract LensReader {
     function _masked(bytes32[] memory principals, uint256 upto, bytes32 position) private view returns (bool, uint64 probes) {
         for (uint256 i; i < upto; ++i) {
             ++probes;
-            (uint8 state,,,,,) = ledger.head(Keys.binding(principals[i], position));
+            (uint8 state,,,) = _selectionHead(Keys.binding(principals[i], position));
             if (state != 0) return (true, probes);
         }
         return (false, probes);
@@ -380,9 +380,13 @@ contract LensReader {
         for (uint256 i; i < authors.length; ++i) ids[i] = Keys.principalFor(authors[i],origin);
     }
 
+    function _selectionHead(bytes32 key) internal view virtual returns(uint8 state,uint32 revision,uint64 admissionOrdinal,bytes32 target) {
+        return ledger.selectionHead(key);
+    }
+
     function _resolve(bytes32[] memory ids, bytes32 position) private view returns (uint8 status, Selection memory selected) {
         for (uint256 i; i < ids.length; ++i) {
-            (uint8 state,uint32 revision,uint64 at,,,bytes32 target) = ledger.head(Keys.binding(ids[i],position));
+            (uint8 state,uint32 revision,uint64 at,bytes32 target) = _selectionHead(Keys.binding(ids[i],position));
             if (state != 0) return (state == 1 ? FOUND : MASKED,Selection(position,i,state == 1 ? target : bytes32(0),revision,at));
         }
     }
@@ -392,7 +396,7 @@ contract LensReader {
         uint256 live;
         bool removed;
         for (uint256 i; i < ids.length; ++i) {
-            (uint8 state,uint32 revision,uint64 at,,,bytes32 target) = ledger.head(Keys.binding(ids[i],position));
+            (uint8 state,uint32 revision,uint64 at,bytes32 target) = _selectionHead(Keys.binding(ids[i],position));
             if (state == 1) selected[live++] = Selection(position,i,target,revision,at);
             else if (state == 2) removed = true;
         }

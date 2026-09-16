@@ -1067,6 +1067,18 @@ contract Ledger {
         target = h.target;
     }
 
+    /// Selection projection only; raw head/snapshot preserve every stored field.
+    function selectionHead(bytes32 key)
+        external view returns (uint8 state, uint32 revision, uint64 admissionOrdinal, bytes32 target)
+    {
+        HeadRow storage h = _head[key];
+        uint256 m = h.meta;
+        state = uint8(m);
+        revision = uint32(m >> 8);
+        admissionOrdinal = uint64((m >> 40) & GUARD);
+        if (state == 1) target = h.target;
+    }
+
     function bindingPosition(uint64 ordinal) external view returns (bytes32) {
         return _bindingPosition[ordinal];
     }
