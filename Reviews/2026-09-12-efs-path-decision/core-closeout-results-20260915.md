@@ -4,7 +4,29 @@ September15,2026 · v2 PM · core-closeout-20260915
 
 **Status:** implementation in progress. James authorized finishing the six-packet [[core-design-audit-20260915|Core audit closeout]]. This page separates reviewed fixes from work still being implemented; no whole-prototype completion or permanent protocol claim.
 
-**Latest reviewed checkpoint: `12efe4b`.** Required ASSERT/DENY/SILENT tag validation and a principal-qualified Concept inverse inventory now pass review and ordinary-cap paid execution. Stance queries/planners are active; native proofs and final integrated economics remain queued. Typed live Files, bounded deployed-wallet authorization, independently interpreted described Types, additive read-set storage and origin-qualified queries are separately reviewed predecessors, not a claim that every combination is already measured. No whole-prototype completion, cheap arbitrary search or authenticated foreign-history claim.
+**Latest reviewed checkpoint: `a3ec1f0`.** Required ASSERT/DENY/SILENT tags now include both qualified query directions, guarded planners, attributed disagreement diagnostics and independent retained-history reconstruction. Native source proofs are active; final integrated economics and whole-branch review follow. Typed live Files, bounded deployed-wallet authorization, independently interpreted described Types, additive read-set storage and origin-qualified queries are separately reviewed predecessors, not a claim that every combination is already measured. No whole-prototype completion, cheap arbitrary search or authenticated foreign-history claim.
+
+## Qualified tag queries and diagnostics reviewed — September16
+
+**Task2 reviewed `12efe4b..a3ec1f0`, including one fix round.** Exact subject→Concept and Concept→subject inventories support a pinned ordered Lens, stable File, Directory, exact revision and selected-revision modes. ASSERT/DENY retain their selected author; SILENT/new-purpose tombstones permit lower-author fallback; unavailable history remains UNKNOWN and cannot fall through. The owning contract accumulates every page's cursor, work, result commitment and qualification. Explicit diagnostics additionally preserve each author's stance and optional HEAD evidence, including disagreement, silence, tombstones and incomplete observations; they do not change priority selection. Selected-revision planners guard both HEAD and the stance coordinate, so a changed HEAD refuses the prepared action.
+
+Two paid packets intentionally retain different source identities:
+
+| Source and workload | Whole paid gas | Supported conclusion |
+| --- | ---: | --- |
+| Initial reader `1a49b74`: matched native/signed guarded first ASSERT |1,047,493 /1,097,558|Fresh coordinates with existing Concept; all guards, validation, required indexing and evidence included.|
+| Initial reader: new Concept + signed ASSERT / selected-revision signed DENY |1,358,034 /973,738|Whole publications, not the cheaper Task1 plain-wrapper price.|
+| Initial reader: two raw candidates,1/8/64author `tagsOnSubject` |561,438 /907,674 /4,091,746|Measured ordered Lens;64case has one occupied author last, not64densely occupied authors.|
+| Initial reader: selected-revision inverse,64authors, six candidates and64relevant post-origin changes |12,953,880 across two steps; largest step10,000,170|Origin result completes; expensive finite case, not an affordable budget256 or general large-directory promise.|
+| Amended reader `a3ec1f0`: attributed stance/HEAD diagnostics |403,464–468,375|Four actual diagnostic calls, including frozen-origin results after HEAD changes.|
+| Amended reader: two occupied authors, priority query |533,091|One finite P2 query, selected Bob DENY with exact revision/admission; no refreshed P64 price claimed.|
+
+- Initial reader fit27,496runtime failed. One new-only fixed Lens/reader composition fits without changing Core, rules, index or predecessor query algorithms. Amended sizes: Lens18,971runtime/19,674actualinit; Reader15,160/19,052; P2consumer5,418/7,354. Lens+Reader setup8,327,201gas across separate transactions; consumer1,476,197. Diagnostic packet's76,119,632total includes adversarial setup and is not an operation price.
+- Independent review found two real gaps: missing attributed diagnostic output, and a reusable auditor that did not join every native action/query claim to its raw paid evidence. Both are repaired and scoped re-reviewed; the audit now joins canonical native wrappers/actions, pinned Ledger events, guarded read sets, consumer construction/steps/Rows/Progress/Work and diagnostics. Mutation controls reject altered joins. This remains retained consistency, not chain membership or independent proof that omitted histories never existed.
+- Parent fresh31/31 Forge and31/31 Node pass. Current source-off audit passes70transactions/23publications/fourdiagnostics/onequery; independent parent checks31source hashes,156compiler-source joins,70raw transaction/receipt joins,26CREATE/runtime checks and six exact artifact/constructor/runtime templates plus dependencies and calls. Initial226transaction packet retains its own source/artifact checks and passes the strengthened historical-source audit. Counts overlap; do not add them as independent feature coverage.
+- Current packet SHA256`b1e85f6df9618c842f34964a8bec775611ddacfc12900a236196a941c0d76fe6`; historical final2 SHA256`78b7dde2ec8930d7b70bcaf74b7d6bf261a184e742b6de4b4b6a997e7c45fcaf`. New verifier identity is separate from the packet's deployed-source identity. Required profile meaning is unchanged; old runtime/metadata or costs are never relabelled to the amended reader.
+
+Evidence: `lab-b/core-closeout-tags-20260915/QUERY-README.md` and retained packets on published prototype branch `codex/efs-warroom-b-run`. Exact labels are not semantic Concept equivalence; no universal all-author search, Commons normalization, path-slot tag profile, default removal UX, owner-demo integration or foreign/native source proof is implied. The [[core-closeout-authority-plan-20260915|native-proof task]] now owns the sole source/build/bounded-chain lease.
 
 ## Required tag stances reviewed — September16
 

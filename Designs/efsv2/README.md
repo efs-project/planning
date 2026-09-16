@@ -11,11 +11,12 @@ without passing the greenfield requirements and product traces.
 ## Read this on a phone
 
 **September16 — current prototype checkpoint:**
-[[../../Reviews/2026-09-12-efs-path-decision/core-closeout-results-20260915|Closeout results through reviewed12efe4b]]
+[[../../Reviews/2026-09-12-efs-path-decision/core-closeout-results-20260915|Closeout results through reviewed a3ec1f0]]
 now include ordered acceptance, full required indexing/replay, origin-qualified
 reads, described Types, bounded smart-wallet authorization, live contract-backed
-Files and required stance-tag validation/inventory. Stance queries/planners are
-active; native proofs, final integrated costs and whole-branch review remain.
+Files and required stance tags with both query directions, guarded planners and
+attributed diagnostics. Native proofs are active; final integrated costs and
+whole-branch review remain.
 Earlier dated status below is historical. The owner demo is unchanged; this is
 not permanent protocol adoption or public-deployment authority.
 
