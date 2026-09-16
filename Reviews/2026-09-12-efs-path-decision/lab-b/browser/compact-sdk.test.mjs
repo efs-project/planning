@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { gunzipSync } from 'node:zlib';
 import { pathToFileURL } from 'node:url';
 import { createCompactSdk } from './compact-sdk.mjs';
+import * as compact from './compact-sdk.mjs';
 import { createFilesCompactSdk } from './compact-files-sdk.mjs';
 
 // External boundary only: independent ABI-encoded provider observations. Task 2
@@ -240,6 +241,45 @@ test('File and selected revision tags retain their subjects and independent prov
   assert.equal(bob.value.fileTag.present,true);
   assert.equal(bob.value.revisionTag.subject,rb);
   assert.equal(bob.value.revisionTag.present,false);
+});
+test('tag assessments never infer a negative from missing or malformed discriminants', () => {
+  assert.equal(typeof compact.normalizeTagAssessment,'function');
+  for(const assessment of [undefined,null,'',false,'ABSENT','PRESENT-ish']) {
+    const tag=compact.normalizeTagAssessment({subject:file,concept,assessment,present:false,evaluated:true});
+    assert.equal(tag.assessment,'UNKNOWN');assert.equal(tag.present,null);assert.equal(tag.evaluated,false);
+  }
+});
+test('point tag assessments preserve qualified positives negatives and RPC uncertainty',async()=>{
+  const cases=[
+    {selected:[1,file,3,A,13],assessment:'PRESENT',present:true},
+    {selected:[0,Z,0,ethers.ZeroAddress,0],assessment:'NOT_PRESENT',present:false},
+    {selected:[2,Z,3,A,13],assessment:'NOT_PRESENT',present:false},
+    {selected:[1,H('wrong target'),3,A,13],assessment:'NOT_PRESENT',present:false},
+    {selected:[3,Z,3,A,13],assessment:'UNKNOWN',present:null},
+    {error:true,assessment:'UNKNOWN',present:null},
+  ];
+  for(const c of cases){
+    const {sdk}=fixture({respond:({fn,args})=>{if(fn==='resolve'&&args[1]===TAG){if(c.error)throw Error('tag RPC unavailable');return c.selected;}}});
+    const context=await sdk.pin(),point=await sdk.readTag({subject:file,target:file,concept,authors:[A],context});
+    assert.equal(point.value.assessment,c.assessment);assert.equal(point.value.present,c.present);
+    assert.equal(point.value.subject,file);assert.equal(point.value.concept,concept);assert.equal(point.basis.blockHash,blockHash);
+    assert.equal(point.knowledge,c.assessment==='UNKNOWN'?'UNKNOWN':'PRESENT','outer PRESENT means an available assessment, not tag presence');
+    if(!c.error)assert.equal(point.value.selection.status,c.selected[0]);
+    const full=await sdk.readFile({file,concept,authors:[A],context});
+    assert.equal(full.value.fileTag.assessment,c.assessment);
+  }
+});
+test('missing conflicting and unavailable revisions have unknown tag assessment, never Directory N/A',async()=>{
+  for(const kind of ['missing','conflict','unavailable']){
+    const {sdk}=fixture({respond:({fn,args})=>{
+      if(kind==='missing'&&fn==='resolve'&&args[1]===HEAD)return [0,Z,0,ethers.ZeroAddress,0];
+      if(kind==='unavailable'&&fn==='record'&&args[0]===ra)throw Error('revision RPC unavailable');
+    }});
+    const result=await sdk.readFile({file,concept,context:await sdk.pin(),policy:kind==='conflict'?'no-tiebreak':'ordered'});
+    assert.equal(result.value.revisionTag.assessment,'UNKNOWN');assert.equal(result.value.revisionTag.present,null);
+    assert.equal(result.value.revisionTag.subject,kind==='unavailable'?ra:null);
+    assert.equal(result.value.fileTag.assessment,'PRESENT');
+  }
 });
 test('no-tiebreak conflicts expose candidates without an overall selected revision', async () => {
   const {sdk} = fixture();

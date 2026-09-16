@@ -1,6 +1,6 @@
 import * as ethers from '/vendor/ethers.mjs';
-import {createCompactSdk} from './compact-sdk.mjs';
-import {folderState,filterRows,canOpen,costPresentation,renderCostTable} from './files-view.mjs';
+import {createCompactSdk,normalizeTagAssessment} from './compact-sdk.mjs';
+import {folderState,filterRows,canOpen,costPresentation,renderCostTable,tagLabel} from './files-view.mjs';
 
 const $ = id => document.getElementById(id);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -154,7 +154,7 @@ async function refresh(continuing=false) {
       const joinedPage=await state.sdk.listFolderPage({folder,authors:lens,budget:32,context,continuation,concept,policy,
         tagScope:state.filterConcept?$('filter-scope').value:'none',search:$('search').value});check();
       const fresh=joinedPage.pageRows.map(row=>({...row})),rows=continuing?[...state.rows,...fresh]:fresh;
-      page={...joinedPage,value:rows,coverage:joinedPage.queryCoverage,knowledge:joinedPage.queryKnowledge,
+      page={...joinedPage,value:rows,coverage:joinedPage.queryCoverage,knowledge:joinedPage.queryKnowledge,tagCoverageScope:'ACCUMULATED_PAGES',
         ...Object.fromEntries(['nameCoverage','kindCoverage','headerCoverage','tagCoverage'].map(key=>[key,continuing&&state.page?.[key]==='PARTIAL'?'PARTIAL':joinedPage[key]]))};
       Object.assign(state,{rows,context,page,folder,route});if(state.paths)navigation.ready=true;
       if(!selectedRow())state.selected=null;notice('');return;
@@ -171,7 +171,7 @@ async function refresh(continuing=false) {
       let point;
       if(state.paths&&row.kind!=='file'){
         const tag=hasCarriers()&&row.kind==='directory'&&state.filterConcept?await state.sdk.readTag({subject:row.file,target:row.file,concept,authors:lens,context}):null;check();
-        rows.push({...row,point:{knowledge:row.knowledge,coverage:row.knowledge==='PRESENT'?(tag?.coverage??'COMPLETE'):'PARTIAL',value:{fileTag:tag?.value,revisionTag:{evaluated:true,present:false,applicable:false}},reason:row.kind==='directory'?'Directory · no File HEAD required':'Target kind unavailable'}});continue;}
+        rows.push({...row,point:{knowledge:row.knowledge,coverage:row.knowledge==='PRESENT'?(tag?.coverage??'COMPLETE'):'PARTIAL',value:{fileTag:tag?.value??normalizeTagAssessment({subject:row.file,concept}),revisionTag:normalizeTagAssessment({concept,assessment:row.kind==='directory'?'NOT_APPLICABLE':'UNKNOWN'})},reason:row.kind==='directory'?'Directory · no File HEAD required':'Target kind unavailable'}});continue;}
       try { point=await state.sdk.readFile({file:row.file,authors:lens,concept,context,policy});check(); remember(point); }
       catch(error) { check();point={knowledge:'UNKNOWN',coverage:'PARTIAL',reason:error.message,value:{file:row.file}}; }
       rows.push({...row,point});
@@ -264,7 +264,6 @@ function tagControls(point,directory=false){
   return `<section class="file-tags"><strong>${directory?'Directory identity tag':'Tags have a subject'}</strong><div class="tag-editor"><input id="tag-concept" aria-label="Tag concept" placeholder="Label or exact Concept Record ID" value="${escape(state.filterConcept)}"><select id="tag-scope"><option value="${directory?'directory':'file'}">${directory?'Directory':'File'} identity</option>${directory?'':'<option value="revision">Selected revision</option>'}</select><button data-action="addTag" data-write>Add tag</button><button data-action="removeTag" data-write>Remove tag</button></div>
     <p>${label?.knowledge==='PRESENT'?`Verified label: “${escape(label.value.label)}”`:'Label not yet verified'} · ${tagLabel(point?.value?.fileTag)}${directory?'':` / selected revision ${tagLabel(point?.value?.revisionTag)}`}. Labels are scoped to this root namespace, not global authority.${directory?' This tag does not apply to descendants.':''}</p></section>`;
 }
-function tagLabel(tag) { return !tag?.evaluated?'not evaluated':tag.present?'present':tag.selection?.status===2?'masked':'absent'; }
 function renderActivity() {
   state.entries=journalEntries(); $('activity-count').textContent=state.entries.length?`(${state.entries.length})`:'';
   $('activity').innerHTML=(state.storageIssue?`<p class="error">${escape(state.storageIssue)}</p>`:'')+(state.entries.slice(0,20).map(entry=>`<div class="activity-item"><strong>${escape(actionLabel(entry.plan.operation))} · ${escape(entry.status)}</strong><code>${escape(short(entry.id))}</code>${entry.error?`<p>${escape(entry.error)}</p>`:''}<br><button data-action="reconcile" data-id="${escape(entry.id)}">Reconcile without re-signing</button><details><summary>Exact signed plan & read-back</summary><pre class="document">${escape(json(entry))}</pre></details></div>`).join('') || '<p>No local signed plans yet.</p>');

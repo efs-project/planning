@@ -5,6 +5,16 @@
  * Journal entries are JSON-safe and must be durably stored by put() before it
  * resolves. Reconcile works after reload from that journal, without re-signing.
  */
+// `knowledge:PRESENT` on a tag means its assessment is available, including a
+// successful negative. Presence itself is exclusively the assessment below.
+// Do not recover a missing discriminant from a legacy nullable boolean.
+export function normalizeTagAssessment(tag={}) {
+  const assessment=['PRESENT','NOT_PRESENT','UNKNOWN','NOT_APPLICABLE'].includes(tag.assessment)?tag.assessment:'UNKNOWN';
+  return {subject:null,concept:null,selection:null,...tag,assessment,
+    present:assessment==='PRESENT'?true:assessment==='NOT_PRESENT'?false:null,
+    evaluated:assessment!=='UNKNOWN',applicable:assessment!=='NOT_APPLICABLE',
+    knowledge:assessment==='NOT_PRESENT'?'PRESENT':assessment};
+}
 export function createCompactSdk(options) {
   if (options.manifest.protocol && options.manifest.protocol !== 'compact-legacy-v1') throw new Error('COMPACT_PROTOCOL');
   return createCompactEngine(options);
@@ -367,12 +377,16 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   }
   async function readConcept({concept,context}) {check(carriers,'CONTENT_PROFILE');await guard(context);return freeze(await conceptAt(concept,context));}
   async function readTag(args) {await guard(args.context);const authors=await protocol.selectors(args,args.context);
-    try {return freeze(result(basisFor(args.context,authors),'PRESENT','COMPLETE',await tagAt(authors,args.subject,args.concept,args.target,args.context)));}
-    catch(error){if(!isRpcUnavailable(error))throw error;return freeze(result(basisFor(args.context,authors),'UNKNOWN','PARTIAL',{subject:args.subject,concept:args.concept,evaluated:false,present:false}));}}
+    const tag=await tagAt(authors,args.subject,args.concept,args.target,args.context);
+    return freeze(result(basisFor(args.context,authors),tag.knowledge,tag.assessment==='UNKNOWN'?'PARTIAL':'COMPLETE',tag));}
   async function tagAt(authors,subject,concept,file,context) {
-    const s = await resolve(authors,purpose.tag,subject,concept,context);
-    return {subject,concept,evaluated:true,present:s.status === 1 && eq(s.target,file),selection:s,
-      ...(carriers&&!eq(concept,Z)?{label:await conceptAt(concept,context)}:{legacy:true})};
+    if(eq(concept,Z))return normalizeTagAssessment({subject,concept});
+    let s;
+    try{s=await resolve(authors,purpose.tag,subject,concept,context);}
+    catch(error){if(!isRpcUnavailable(error))throw error;return normalizeTagAssessment({subject,concept,reason:'TAG_UNAVAILABLE'});}
+    return normalizeTagAssessment({subject,concept,selection:s,
+      assessment:s.status===1?(eq(s.target,file)?'PRESENT':'NOT_PRESENT'):[0,2].includes(s.status)?'NOT_PRESENT':'UNKNOWN',
+      ...(carriers?{label:await conceptAt(concept,context)}:{legacy:true})});
   }
   async function fileAt({file,authors,concept=Z,context,policy='ordered'}) {
     check(policy === 'ordered' || policy === 'no-tiebreak','LENS_POLICY');
@@ -402,7 +416,8 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     }
     const value = {file,selection:s,revision,candidates,
       fileTag:await tagAt(authors,file,concept,file,context),
-      revisionTag:revision ? await tagAt(authors,revision.recordId,concept,file,context) : {subject:null,concept,evaluated:false,present:false},
+      revisionTag:revision ? await tagAt(authors,revision.recordId,concept,file,context)
+        : normalizeTagAssessment({subject:s.status===1?s.target:null,concept}),
     };
     return result(basisFor(context,authors,policy),revisionFailure?.knowledge ?? ['ABSENT','PRESENT','MASKED','CONFLICT'][s.status],
       revisionFailure || candidates.some(c=>c.knowledge!=='PRESENT') ? 'PARTIAL' : 'COMPLETE',value,revisionFailure ? {reason:revisionFailure.reason} : {});
@@ -442,7 +457,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       scanStatus:'UNKNOWN',segmentStartsAtOrigin:walk.cursor==='0x',segmentCompleteFromOrigin:false,
       scanned:null,scannedSoFar:String(walk.scanned),rawTotal:walk.rawTotal===null?null:String(walk.rawTotal),selectedSoFar:String(walk.selected),hydrations:null,
       completeFromOwnedOrigin:false,queryAbsent:false,retainedSoFar:String(walk.retained),filtered:scope!=='none'||search!=='',reason,
-      nameCoverage:'PARTIAL',kindCoverage:'PARTIAL',headerCoverage:'PARTIAL',tagCoverage:'PARTIAL'});
+      nameCoverage:'PARTIAL',kindCoverage:'PARTIAL',headerCoverage:'PARTIAL',tagCoverage:'PARTIAL',tagCoverageScope:'PAGE'});
     const canonical=await rpc('eth_getBlockByNumber',[e.toQuantity(BigInt(context.blockNumber)),false]);
     check(eq(canonical?.hash,context.blockHash),'BLOCK_REORG');
     const cache=joinedCache.get(context)??new Map();joinedCache.set(context,cache);
@@ -461,8 +476,9 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     check(placement===1?page.scanned>0n&&page.continuation!=='0x':scanned===page.rawTotal&&page.continuation==='0x','INCOMPLETE_TRAVERSAL');
     const selected=s=>({status:Number(s.status),target:s.target,revision:Number(s.revision),author:s.principalId,admission:String(s.admission)});
     const qualification=q=>({0:'UNKNOWN',1:'PRESENT',2:'NOT_APPLICABLE',3:'INVALID',4:'UNSUPPORTED'})[Number(q)];
-    const tag=t=>({subject:eq(t.subject,Z)?null:t.subject,concept,evaluated:Number(t.qualification)===1||Number(t.qualification)===2,
-      applicable:Number(t.qualification)!==2,knowledge:qualification(t.qualification),present:t.present,selection:selected(t.selection)});
+    const tag=t=>normalizeTagAssessment({subject:eq(t.subject,Z)?null:t.subject,concept,selection:selected(t.selection),
+      assessment:eq(concept,Z)?'UNKNOWN':Number(t.qualification)===2?'NOT_APPLICABLE':Number(t.qualification)===1
+        ?t.present===true?'PRESENT':t.present===false?'NOT_PRESENT':'UNKNOWN':'UNKNOWN'});
     const rows=page.rows.map(row=>{
       const entry=row.placement,n=row.name,h=row.header,kind=Number(row.kind)===1?'file':Number(row.kind)===2?'directory':'unsupported';
       check(entry.admission>0n&&entry.admission<=BigInt(context.admission)&&authors.some(a=>eq(a,entry.principalId))
@@ -484,7 +500,11 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     const extra={scanned:String(page.scanned),scannedSoFar:String(scanned),rawTotal:String(page.rawTotal),selectedSoFar:String(page.selectedSoFar),retainedSoFar:String(retained),hydrations:String(page.hydrations),
       nameCoverage:rows.every(r=>r.name.knowledge==='PRESENT')?'COMPLETE':'PARTIAL',kindCoverage:rows.every(r=>r.kind!=='unsupported')?'COMPLETE':'PARTIAL',
       headerCoverage:rows.every(r=>r.kind==='directory'||r.point.value.revision?.knowledge==='PRESENT')?'COMPLETE':'PARTIAL',
-      tagCoverage:rows.every(r=>r.match!=='UNKNOWN')?'COMPLETE':'PARTIAL',filtered:scope!=='none'||search!=='',
+      // Both tag joins are requested whenever concept != 0, even without a tag
+      // filter. Match status is independent (notably positive OR + unknown).
+      // This covers returned page rows only, never earlier continuation pages.
+      tagCoverage:eq(concept,Z)||rows.every(r=>[r.point.value.fileTag,r.point.value.revisionTag].every(t=>t.assessment!=='UNKNOWN'))?'COMPLETE':'PARTIAL',
+      tagCoverageScope:'PAGE',filtered:scope!=='none'||search!=='',
       scanStatus:['UNKNOWN','PARTIAL','EXHAUSTED'][placement],segmentStartsAtOrigin:page.startsAtOrigin,segmentCompleteFromOrigin:page.completeFromOrigin,
       completeFromOwnedOrigin,queryAbsent:completeFromOwnedOrigin&&retained===0n};
     if(placement===1){const token=Object.freeze({kind:'compact-joined-page-continuation'});

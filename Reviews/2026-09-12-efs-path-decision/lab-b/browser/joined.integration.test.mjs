@@ -3,6 +3,54 @@ import assert from 'node:assert/strict';
 import {createEnvironment} from '../script/compact-environment.mjs';
 import {createFilesCompactSdk} from './compact-files-sdk.mjs';
 const profile={protocol:'compact-guarded-v2',filesProfile:'typed-directory-v1',contentProfile:'raw-sha256-aesgcm-v2'};
+test('requested tag joins stay partial independently of either and none matches',{timeout:120000},async t=>{
+  const env=await createEnvironment(profile);t.after(()=>env.close());
+  const {ethers:e,manifest,rpc,wallets}=env,authors=Object.values(manifest.authors);
+  const sdk=createFilesCompactSdk({ethers:e,manifest,rpc,journal:await env.createJournal('tag-assessment')});
+  const run=async(operation,args)=>{
+    const plan=await sdk.prepare({operation,author:wallets.alice.address,authors,...args});
+    await sdk.submit(await sdk.authorize(plan,d=>wallets.alice.signingKey.sign(d).serialized),tx=>env.send(operation,tx,'alice'));return plan;
+  };
+  const file=await run('create',{name:'a.txt',salt:e.id('assessment-file'),document:'tagged'});
+  const directory=await run('createDirectory',{name:'b-dir',salt:e.id('assessment-directory')});
+  const tag=await run('addTag',{file:file.file,scope:'file',conceptLabel:'known'});
+  await env.transact('ledger','unbind',[e.id('efs2/purpose/head/1'),file.file,e.ZeroHash,1],'missing-head','alice');
+  const context=await sdk.pin();
+  for(const tagScope of ['either','none']){
+    const args={authors,context,concept:tag.concept,tagScope,budget:1};
+    const page=await sdk.listFolderPage(args),row=page.pageRows[0];
+    assert.equal(row.match,'MATCH');assert.equal(page.queryKnowledge,'PRESENT');
+    assert.equal(page.tagCoverage,'PARTIAL','a known match does not establish every requested join');
+    assert.equal(page.tagCoverageScope,'PAGE');
+    assert.equal(row.point.value.fileTag.assessment,'PRESENT');assert.equal(row.point.value.fileTag.present,true);
+    assert.equal(row.point.value.revisionTag.assessment,'UNKNOWN');assert.equal(row.point.value.revisionTag.present,null);
+    const point=await sdk.readFile({file:file.file,authors,context,concept:tag.concept});
+    for(const key of ['assessment','present','subject','concept'])assert.equal(row.point.value.revisionTag[key],point.value.revisionTag[key]);
+    const suffix=await sdk.listFolderPage({...args,continuation:page.continuation});
+    assert.equal(suffix.queryCoverage,'COMPLETE');assert.equal(suffix.tagCoverage,'COMPLETE');assert.equal(suffix.tagCoverageScope,'PAGE','suffix completeness covers only this page');
+    if(tagScope==='none'){
+      assert.equal(suffix.pageRows[0].file,directory.file);
+      assert.equal(suffix.pageRows[0].point.value.revisionTag.assessment,'NOT_APPLICABLE');assert.equal(suffix.pageRows[0].point.value.revisionTag.present,null);
+    }
+  }
+  const noJoins=await sdk.listFolderPage({authors,context,budget:1});
+  assert.equal(noJoins.tagCoverage,'COMPLETE');assert.equal(noJoins.tagCoverageScope,'PAGE');
+  assert.equal(noJoins.pageRows[0].point.value.fileTag.assessment,'UNKNOWN');assert.equal(noJoins.pageRows[0].point.value.fileTag.evaluated,false);
+  const ledger=new e.Interface(manifest.contracts.ledger.abi);
+  const broken=createFilesCompactSdk({ethers:e,manifest,rpc:(method,params)=>{
+    if(method==='eth_call'&&params[0].to.toLowerCase()===manifest.contracts.ledger.address.toLowerCase()){
+      const call=ledger.parseTransaction({data:params[0].data});
+      if(call.name==='record'&&call.args[0]===tag.concept)throw Error('label-only RPC failure');
+    }
+    return rpc(method,params);
+  }});
+  const labelFailure=await broken.readTag({subject:file.file,target:file.file,concept:tag.concept,authors,context:await broken.pin()});
+  assert.equal(labelFailure.value.assessment,'PRESENT');assert.equal(labelFailure.value.present,true);assert.equal(labelFailure.value.label.knowledge,'UNKNOWN');
+  const missingLabel=e.id('legacy-key-with-no-Concept');
+  await env.transact('ledger','bind',[e.id('efs2/purpose/tag/1'),file.file,missingLabel,file.file,0],'missing-label','alice');
+  const missing=await sdk.readTag({subject:file.file,target:file.file,concept:missingLabel,authors,context:await sdk.pin()});
+  assert.equal(missing.value.assessment,'PRESENT');assert.equal(missing.value.label.reason,'CONCEPT_MISSING');
+});
 test('joined pages qualify headers and own exact context Lens query continuations',{timeout:120000},async t=>{
   const env=await createEnvironment(profile);t.after(()=>env.close());
   const {ethers:e,manifest,rpc,wallets}=env,authors=Object.values(manifest.authors);
@@ -51,6 +99,7 @@ test('joined pages qualify headers and own exact context Lens query continuation
   const unavailable=createFilesCompactSdk({ethers:e,manifest,rpc:(method,params)=>{if(failPage&&method==='eth_call'&&params[0].data.startsWith(pageSelector))throw Error('joined read unavailable');return rpc(method,params);}});
   const failureContext=await unavailable.pin(),unknown=await unavailable.listFolderPage({authors,context:failureContext});
   assert.equal(unknown.kind,'files-joined-page');assert.equal(unknown.queryCoverage,'UNKNOWN');assert.equal(unknown.queryAbsent,false);
+  assert.equal(unknown.tagCoverage,'PARTIAL');assert.equal(unknown.tagCoverageScope,'PAGE');
   assert.equal(unknown.segmentStartsAtOrigin,true);assert.equal(unknown.segmentCompleteFromOrigin,false);
   assert.equal(unknown.scanned,null);assert.equal(unknown.hydrations,null);assert.equal(unknown.rawTotal,null);
   assert.equal(unknown.scannedSoFar,'0');assert.equal(unknown.selectedSoFar,'0');
@@ -118,7 +167,7 @@ test('joined rows match independent placement Name File and tag observations acr
   await env.transact('ledger','bind',[F,manifest.folder,e.id('c.txt'),masked.file,0],'lower-placement','bob');
   await run('remove',{file:masked.file,name:'c.txt'});
   const compareTag=(joined,point)=>{
-    for(const key of ['subject','concept','evaluated','present'])assert.equal(joined[key],point[key],key);
+    for(const key of ['subject','concept','assessment','evaluated','present'])assert.equal(joined[key],point[key],key);
     if(point.selection)assert.deepEqual(joined.selection,point.selection);
   };
   const checkCase=async({label,expected,policy='ordered',tagScope='none',search='',reverse=false,knowledge='PRESENT'})=>t.test(label,async()=>{

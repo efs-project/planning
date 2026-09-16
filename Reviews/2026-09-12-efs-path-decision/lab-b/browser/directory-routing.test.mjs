@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import {loadEthers} from '../script/compact-environment.mjs';
 import * as paths from './compact-paths.mjs';
 import * as view from './files-view.mjs';
+import {normalizeTagAssessment} from './compact-sdk.mjs';
 
 // Execute the actual app body/event wiring in a small browser-boundary host.
 // Only native module import lines are replaced by injected module bindings.
@@ -60,8 +61,8 @@ async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedR
     addEventListener(type,fn){events.set(type,[...(events.get(type)??[]),fn]);},
     efsCompactDirectoryEntry:{...paths,createSdk:()=>sdk,content:{verifyPng:async()=>{if(image)return {blob:new Blob(['test']),width:1,height:1};throw Error('not PNG');},
       describe:async(bytes,{carrier})=>({carrier,length:bytes.length}),storeRawBytes:async bytes=>{stats.uploads.push(bytes);}}}});
-  const execute=vm.compileFunction(`return (async()=>{${source}\n})();`,['ethers','createCompactSdk','folderState','filterRows','canOpen','costPresentation','renderCostTable'],{parsingContext:scope});
-  await execute(ethers,()=>sdk,...['folderState','filterRows','canOpen','costPresentation','renderCostTable'].map(k=>view[k]));
+  const execute=vm.compileFunction(`return (async()=>{${source}\n})();`,['ethers','createCompactSdk','normalizeTagAssessment','folderState','filterRows','canOpen','costPresentation','renderCostTable','tagLabel'],{parsingContext:scope});
+  await execute(ethers,()=>sdk,normalizeTagAssessment,page=>{stats.renderedPage=page;return view.folderState(page);},...['filterRows','canOpen','costPresentation','renderCostTable','tagLabel'].map(k=>view[k]));
   const click=async(action,data={})=>{listeners.get('document:click')({target:{closest:()=>({disabled:false,dataset:{action,...data}})}});await tick();};
   return {element,stats,location,history,async hash(value,event='hashchange'){history.pushState(null,'',value);dispatch(event);await tick();},
     dispatch,click,async submit(values={}){element('editor-form').values={name:'new.txt',document:'contents',...values};element('editor-form').listeners.get('submit')({preventDefault(){},target:element('editor-form')});await tick();}};
@@ -76,6 +77,17 @@ test('joined app retains query-qualified uncertain rows without a second local f
   const a=await app({carriers:true,joined:true});a.element('search').value='no-match';
   a.element('search').listeners.get('input')();await tick();
   assert.match(a.element('rows').innerHTML,/root\.txt/,'server-retained uncertain row must not be filtered again');
+});
+test('joined app retains earlier partial tags after a complete empty final page',async()=>{
+  const a=await app({carriers:true,joined:true,joinedRead:async(args,result)=>({...result,
+    tagCoverage:args.continuation?'COMPLETE':'PARTIAL',tagCoverageScope:'PAGE',
+    queryCoverage:args.continuation?'COMPLETE':'PARTIAL',continuation:args.continuation?undefined:{owned:true},
+    pageRows:args.continuation?[]:result.pageRows})});
+  await a.click('continue');
+  assert.equal(a.stats.renderedPage.coverage,'COMPLETE');
+  assert.equal(a.stats.renderedPage.tagCoverage,'PARTIAL');
+  assert.equal(a.stats.renderedPage.tagCoverageScope,'ACCUMULATED_PAGES');
+  assert.match(a.element('rows').innerHTML,/root\.txt/);
 });
 test('joined query changes during a busy read coalesce and never install an obsolete continuation',async()=>{
   const first=deferred(),latest=deferred(),queries=[];

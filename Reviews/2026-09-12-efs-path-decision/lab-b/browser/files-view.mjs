@@ -11,6 +11,9 @@ export function folderState(result) {
   return {kind:'complete',label:'Complete folder traversal'};
 }
 
+// Fallback filtering uses valid AND inference: a known nonmatch can exclude a
+// row despite another unknown predicate. The joined matcher conservatively
+// retains some such rows for diagnostics; this is not a false-absence repair.
 export function filterRows(rows, {search='',tag=false,scope='either'}={}) {
   let uncertain = 0;
   const visible = rows.filter(row => {
@@ -23,13 +26,24 @@ export function filterRows(rows, {search='',tag=false,scope='either'}={}) {
       const point = row.point;
       const tags = scope === 'file' ? [point?.value?.fileTag] : scope === 'revision'
         ? [point?.value?.revisionTag] : [point?.value?.fileTag,point?.value?.revisionTag];
-      if (point?.coverage !== 'COMPLETE' || point?.knowledge !== 'PRESENT' || tags.some(t => !t?.evaluated)) unknown = true;
-      else if (!tags.some(t => t.present)) return false;
+      if (point?.coverage !== 'COMPLETE' || point?.knowledge !== 'PRESENT') unknown = true;
+      else if (tags.some(t => t?.assessment === 'PRESENT')) { /* A known-positive OR is sufficient. */ }
+      else if (tags.every(t => ['NOT_PRESENT','NOT_APPLICABLE'].includes(t?.assessment))) return false;
+      else unknown = true;
     }
     if (unknown) uncertain++;
     return true;
   });
   return {rows:visible,uncertain};
+}
+
+export function tagLabel(tag) {
+  switch(tag?.assessment){
+    case 'PRESENT':return 'present';
+    case 'NOT_PRESENT':return tag.selection?.status===2?'masked':'absent';
+    case 'NOT_APPLICABLE':return 'not applicable';
+    default:return 'unknown';
+  }
 }
 
 export function canOpen(point) {

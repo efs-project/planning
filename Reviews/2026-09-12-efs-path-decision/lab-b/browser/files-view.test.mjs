@@ -107,14 +107,27 @@ test('known members survive unavailable or invalid names', () => {
 
 test('tag filter distinguishes File from revision and retains unevaluated subjects', () => {
   const rows = [
-    {file:'a',point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{fileTag:{evaluated:true,present:true},revisionTag:{evaluated:true,present:false}}}},
-    {file:'b',point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{fileTag:{evaluated:true,present:false},revisionTag:{evaluated:true,present:true}}}},
+    {file:'a',point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{fileTag:{assessment:'PRESENT'},revisionTag:{assessment:'NOT_PRESENT'}}}},
+    {file:'b',point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{fileTag:{assessment:'NOT_PRESENT'},revisionTag:{assessment:'PRESENT'}}}},
     {file:'c',point:{knowledge:'UNKNOWN',coverage:'PARTIAL',value:{}}},
   ];
   assert.deepEqual(filterRows(rows,{tag:true,scope:'file'}).rows.map(r=>r.file), ['a','c']);
   assert.deepEqual(filterRows(rows,{tag:true,scope:'revision'}).rows.map(r=>r.file), ['b','c']);
   assert.deepEqual(filterRows(rows,{tag:true,scope:'either'}).rows.map(r=>r.file), ['a','b','c']);
   assert.equal(filterRows(rows,{tag:true,scope:'file'}).uncertain, 1);
+});
+test('tag presentation and fallback filters keep unknown masked and N/A distinct',()=>{
+  assert.equal(typeof view.tagLabel,'function');
+  for(const [tag,label] of [[{},'unknown'],[{present:false,evaluated:true},'unknown'],[{assessment:'UNKNOWN'},'unknown'],
+    [{assessment:'NOT_APPLICABLE'},'not applicable'],[{assessment:'NOT_PRESENT'},'absent'],
+    [{assessment:'NOT_PRESENT',selection:{status:2}},'masked'],[{assessment:'PRESENT'},'present']])assert.equal(view.tagLabel(tag),label);
+  const row=(file,fileTag,revisionTag,name={knowledge:'PRESENT',value:'notes'})=>({file,name,point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{fileTag,revisionTag}}});
+  const rows=[row('positive',{assessment:'PRESENT'},{assessment:'UNKNOWN'}),row('unknown',{present:false,evaluated:true},{assessment:'NOT_APPLICABLE'}),
+    row('negative',{assessment:'NOT_PRESENT'},{assessment:'NOT_APPLICABLE'})];
+  assert.deepEqual(filterRows(rows,{tag:true}).rows.map(r=>r.file),['positive','unknown']);
+  assert.equal(filterRows(rows,{tag:true}).uncertain,1,'known-positive OR stays a known match');
+  assert.equal(filterRows([row('name-no',{assessment:'UNKNOWN'},null,{knowledge:'PRESENT',value:'other'})],{search:'notes',tag:true}).rows.length,0);
+  assert.equal(filterRows([row('tag-no',{assessment:'NOT_PRESENT'},{assessment:'NOT_APPLICABLE'},{knowledge:'UNKNOWN'})],{search:'notes',tag:true}).rows.length,0,'a known false AND operand excludes even when the other operand is unknown');
 });
 
 test('only qualified selected bytes can be opened or downloaded', () => {
