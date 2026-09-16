@@ -39,3 +39,14 @@ For Base, retain the final local recipe's full unsigned serialized transaction, 
 ZKsync's EVM interpreter maintains virtual EVM gas while transaction limits and payment use native EraVM ergs. Its documented current limit conversion is5:1, not a general five-times-cost formula; native exhaustion can revert the entire interpreted call stack. **Anvil gas × Era gas price is not a valid all-in estimate.** An actual Era execution/fee-estimation profile is needed, including pubdata and native overhead. Until exercised, show Era costs and deployment feasibility as unmeasured; do not borrow Base assumptions. This also requires checking bounded-call failure behavior on that venue. [EVM gas interpretation](https://docs.zksync.io/zksync-protocol/era-vm/evm-interpreter/evm-gas-interpretation), [Era fee model](https://docs.zksync.io/zksync-protocol/era-vm/transactions/fee-model), [interpreter differences](https://docs.zksync.io/zksync-protocol/era-vm/evm-interpreter/evm-differences).
 
 No new public deployment or emulator installation is authorized by this preflight. These are explicit execution-profile boundaries for the final report, not a silent portability requirement waiver.
+
+### Small Base cost-model preflight
+
+Observed2026-09-16T01:19:15.948Z, Base8453 block`0x30fc8d8`, hash`0xc7684bb525953eb098e5f6cd0c06d2dc2b20906f16d63299469198c41c4b66b9`. Two HTTP batches/seven logical reads: chain/latest header/gas price, then exact-hash `getL1Fee` and `getOperatorFee` for two retained Task1 receipts from prototype`af0190a`. Both fee methods returned canonical uint256 values. Execution price observed6,000,000wei/gas; fee calls used the recorded hash with`requireCanonical:true`.
+
+| Local whole-Record receipt, not File/tag | Gas | Unsigned transaction bytes | Model execution wei | Oracle L1 estimate wei | Oracle operator wei | Model total ETH |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Native8refs+4scalar+digest | 1,298,784 | 591 | 7,792,704,000,000 | 1,587,300,470 | 0 | 0.000007794291300470 |
+| Guarded equivalent | 1,329,254 | 1,263 | 7,975,524,000,000 | 2,091,036,165 | 0 | 0.000007977615036165 |
+
+Serialization uses type2, Base chain ID and observed gas price, zero priority fee, retained fixture target/nonce/value/calldata and15M limit, without a transaction signature. It is a hypothetical same-shaped Base transaction; local addresses, intent domains and calldata are **not** asserted executable on Base. The model combines local receipt gas with that public fee snapshot, not a Base receipt or promised future price. At an illustrative$2,400/ETH, totals would be about$0.0187 and$0.0191. No public write occurred, no USD market price is frozen, and whole Files/tag comparisons still require the final integrated recipe.
