@@ -70,14 +70,14 @@ contract TagStanceLens is LensReader {
         (uint8 cov,uint64 from,uint64 through)=index.coverage(direction==PURPOSE?index.FAMILY_SCOPE():FAMILY,0);
         if(cov!=COMPLETE||from!=1||through!=current)revert E_CURSOR();
         uint64[] memory counts=new uint64[](principals.length);
-        for(uint256 k;k<principals.length;k++){
-            bytes32 key=_listKey(principals[k],direction,exact);(uint64 hi,,,)=index.postingHead(key);uint64 lo;
+        for(uint256 principalIndex;principalIndex<principals.length;principalIndex++){
+            bytes32 key=_listKey(principals[principalIndex],direction,exact);(uint64 hi,,,)=index.postingHead(key);uint64 lo;
             while(lo<hi){
                 uint64 mid=lo+(hi-lo)/2;bytes32 position=ledger.bindingPosition(index.postingAt(key,mid));
-                uint64 first=_first(principals[k],position);if(first==0)revert E_CURSOR();++page.prefixProbes;
+                uint64 first=_first(principals[principalIndex],position);if(first==0)revert E_CURSOR();++page.prefixProbes;
                 if(first<=cursor.basisAdmission)lo=mid+1;else hi=mid;
             }
-            counts[k]=lo;page.rawTotal+=lo;
+            counts[principalIndex]=lo;page.rawTotal+=lo;
         }
         page.inventoryPin=keccak256(abi.encode("efs.tag-retained-prefix/1",profileHash,cursor.basisAdmission,principals,direction,exact,counts));
         page.items=new Selection[](budget);uint256 filled;uint256 k=cursor.lensIndex;uint64 j=cursor.rawIndex;
@@ -112,6 +112,11 @@ contract TagStanceReader {
     struct Query {uint8 direction;uint8 mode;bytes32 exact;bool diagnosticHead;}
     // assessment0 UNKNOWN,1 PRESENT,2 NOT_PRESENT,3 NOT_APPLICABLE.
     struct Row {bytes32 subject;bytes32 concept;bytes32 intrinsicFile;bytes32 author;bytes32 token;uint8 stance;uint8 assessment;uint32 revision;uint64 admission;uint8 headStatus;}
+    // kind0 UNKNOWN,1 untouched,2 ASSERT,3 DENY,4 SILENT,5 stance tombstone,
+    // 6 live HEAD,7 HEAD tombstone. Ordering is the supplied closed Lens.
+    struct Observation {bytes32 author;bytes32 target;uint32 revision;uint64 admission;uint8 kind;}
+    struct Diagnostic {Basis basis;bytes32 subject;bytes32 concept;bytes32 intrinsicFile;Observation[] stances;Observation[] heads;bool complete;bool stanceDisagreement;bool headDisagreement;}
+    event DiagnosticRecorded(bytes encodedDiagnostic);
     struct TagPage {Row[] rows;uint8 scanStatus;bool startsAtOrigin;uint64 scanned;uint64 rawTotal;uint64 selectedSoFar;bytes continuation;bytes32 inventoryPin;uint64 prefixProbes;uint64 historyProbes;uint64 joins;uint64 observedCurrent;uint64 unknowns;uint8 headStatus;uint8 queryAssessment;}
     bytes32 private constant PURPOSE=keccak256("efs.lab/tag-stance/1");
     bytes32 private constant FAMILY=keccak256("efs.lab/tag-role-inventory/1");
@@ -169,6 +174,48 @@ contract TagStanceReader {
         try lens.checkHistory(b.admission,b.execution){(r,,)=_assess(principals,subject,concept,b.admission);}
         catch{r.subject=subject;r.concept=concept;}
         r.intrinsicFile=file;
+    }
+    function _diagnosticObservation(bytes32 author,bytes32 position,uint64 origin,bool head) private view returns(Observation memory o){
+        o.author=author;
+        try lens.observation(author,position,origin) returns(uint8 state,bytes32 target,uint32 revision,uint64 at,uint64){
+            o.target=target;o.revision=revision;o.admission=at;
+            if(state==0)o.kind=1;
+            else if(head)o.kind=state==1?6:7;
+            else if(state==2)o.kind=5;
+            else for(uint8 j=1;j<=3;j++)if(target==TagStanceProfile.token(_config.tokenType,j))o.kind=j+1;
+        }catch{} // UNKNOWN remains attributed, never silently skipped.
+    }
+    /// Bounded exact-coordinate diagnostics, not a new inventory scan or winner.
+    /// All ordered observations survive. Silence/untouched are not votes;
+    /// complete=false qualifies any disagreement flag when history is unknown.
+    function diagnose(bytes32[] memory principals,bytes32 subject,bytes32 concept,Basis memory b,bool includeHead)
+        public view returns(Diagnostic memory d)
+    {
+        _basis(principals,b);d.basis=b;d.subject=subject;d.concept=concept;
+        (uint8 kind,bytes32 file)=classify(subject,b.admission);d.intrinsicFile=file;
+        if(kind==0||!_concept(concept,b.admission)||(includeHead&&file==0))revert E_QUERY();
+        d.stances=new Observation[](principals.length);d.heads=new Observation[](includeHead?principals.length:0);
+        bool available;try lens.checkHistory(b.admission,b.execution){available=true;}catch{}
+        d.complete=available;bool asserted;bool denied;bool touchedHead;uint8 firstKind;bytes32 firstTarget;
+        for(uint256 i;i<principals.length;i++){
+            Observation memory o;
+            if(available)o=_diagnosticObservation(principals[i],Keys.position(PURPOSE,subject,concept),b.admission,false);
+            else o.author=principals[i];
+            d.stances[i]=o;if(o.kind==0)d.complete=false;else if(o.kind==2)asserted=true;else if(o.kind==3)denied=true;
+            if(includeHead){
+                if(available)o=_diagnosticObservation(principals[i],Keys.position(HEAD,file,0),b.admission,true);
+                else o=Observation(principals[i],0,0,0,0);
+                d.heads[i]=o;if(o.kind==0)d.complete=false;
+                else if(o.kind==6||o.kind==7){
+                    if(touchedHead&&(o.kind!=firstKind||o.target!=firstTarget))d.headDisagreement=true;
+                    if(!touchedHead){touchedHead=true;firstKind=o.kind;firstTarget=o.target;}
+                }
+            }
+        }
+        d.stanceDisagreement=asserted&&denied;
+    }
+    function recordDiagnostic(bytes32[] calldata principals,bytes32 subject,bytes32 concept,Basis calldata b,bool includeHead) external {
+        emit DiagnosticRecorded(abi.encode(diagnose(principals,subject,concept,b,includeHead)));
     }
     function classify(bytes32 subject,uint64 origin) public view returns(uint8 kind,bytes32 file){
         uint64 created=ledger.subjectCreatedAt(subject);if(created!=0&&created<=origin)return(1,subject);

@@ -84,5 +84,21 @@ export function rebuildArchive(a,e){
     const pin=hash(['string','bytes32','uint64','bytes32[]','bytes32','bytes32','uint64[]'],['efs.tag-retained-prefix/1',a.profileHash,origin,principals,q.direction===1?purpose:family,exact,counts]);
     return {rows,rawTotal,counts,pin};
   }
-  return {status:'COMPLETE',mapping,statements,query,authority:'retained source observations only; no destination or original-author replay authorization'};
+  function diagnose(principals,subject,concept,basis,includeHead){
+    const origin=BigInt(basis[0]),identity=classify(subject,origin),c=a.records[concept];
+    assert(origin<=BigInt(a.counts[0])&&basis[4]===a.realm&&basis[5]===a.profileHash);
+    assert(identity.kind!==0&&c?.type===cfg.conceptType&&BigInt(c.first)<=origin&&(!includeHead||identity.file!==Z));
+    const at=(author,pos,head)=>{
+      const f=facts.findLast(f=>f.author===author&&f.position===pos&&f.at<=origin);
+      if(!f)return {author,target:Z,revision:0,admission:0,kind:1};
+      const kind=head?(f.kind===3?6:7):f.kind===4?5:({ASSERT:2,DENY:3,SILENT:4}[observation(f)]??0);
+      return kind===0?{author,target:Z,revision:0,admission:0,kind:0}:{author,target:f.kind===4?Z:f.target,revision:String(f.revision),admission:String(f.at),kind};
+    };
+    const stances=principals.map(p=>at(p,position(purpose,subject,concept),false));
+    const heads=includeHead?principals.map(p=>at(p,position(e.id('efs2/purpose/head/1'),identity.file,Z),true)):[];
+    const touched=heads.filter(o=>o.kind===6||o.kind===7);
+    return {basis,subject,concept,intrinsicFile:identity.file,stances,heads,complete:[...stances,...heads].every(o=>o.kind!==0),
+      stanceDisagreement:stances.some(o=>o.kind===2)&&stances.some(o=>o.kind===3),headDisagreement:touched.some(o=>o.kind!==touched[0].kind||o.target!==touched[0].target)};
+  }
+  return {status:'COMPLETE',mapping,statements,query,diagnose,authority:'retained source observations only; no destination or original-author replay authorization'};
 }

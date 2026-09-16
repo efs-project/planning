@@ -1,0 +1,34 @@
+{
+  "complete": true,
+  "actions": [],
+  "queries": [
+    {
+      "label": "query/fix1-P2-priority",
+      "steps": 1,
+      "total": 2,
+      "gas": [
+        "533091"
+      ]
+    }
+  ],
+  "diagnostics": [
+    {
+      "label": "diagnostic/assert-deny-and-head-conflict",
+      "gas": "440399"
+    },
+    {
+      "label": "diagnostic/frozen-origin-after-HEAD-change",
+      "gas": "468375"
+    },
+    {
+      "label": "diagnostic/silence-not-disagreement",
+      "gas": "440351"
+    },
+    {
+      "label": "diagnostic/tombstone-not-disagreement",
+      "gas": "403464"
+    }
+  ],
+  "refusals": [],
+  "closed": true
+}

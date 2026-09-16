@@ -9,7 +9,8 @@ import {createTagEnvironment} from '../core-closeout-tags-20260915/fixture.mjs';
 import {createTagStancePlanner} from '../browser/tag-stance-profile.mjs';
 import {rebuildArchive} from '../core-closeout-tags-20260915/query-archive.mjs';
 
-const report={base:'12efe4b52c9ebbb637407c02cb25b633d576fb65',limits:{runtime:24576,initcode:49152,gas:15000000,hardGas:16777216},sources:{},artifacts:{},queries:[],actions:[],refusals:[]};
+const diagnosticOnly=process.env.EFS_TAG_DIAGNOSTIC_ONLY==='1';
+const report={base:'1a49b74dbbc9f01506cab8f3c63db49a0000adce',campaign:diagnosticOnly?'bounded-diagnostic-fix1':'whole-campaign',limits:{runtime:24576,initcode:49152,gas:15000000,hardGas:16777216},sources:{},artifacts:{},queries:[],actions:[],refusals:[],diagnostics:[]};
 let env,error;
 async function captureGraph(en){
   for(const c of Object.values(en.contracts)){c.runtimeCode=await en.rpc('eth_getCode',[c.address,'latest']);assert.equal(en.ethers.keccak256(c.runtimeCode),c.codeHash);}
@@ -75,6 +76,7 @@ try{
   }
   // Two independent identical genesis fixtures, not an evm_revert receipt that
   // disappeared from the final branch. Native/signature differ only in ingress.
+  if(!diagnosticOnly){
   await action('action/matched-native-first','assertStance',args());
   let twin;
   try{
@@ -85,6 +87,7 @@ try{
     assert.equal(tx.status,'SUCCESS');report.actions.push({label:tx.label,gas:tx.gasUsed,hash:tx.transactionHash,profileHash:report.profileHash,plan:p});
     report.matchedSigned={archive:await archive(twin),dependencies:await captureGraph(twin),contracts:twin.contracts,transactions:twin.transactions,rawTransactions:await readFile(join(twin.dir,'transactions.jsonl'),'utf8'),chain:{port:twin.port,pid:twin.anvilPid,history:twin.historyPolicy}};
   }finally{if(twin){await twin.close();if(report.matchedSigned)report.matchedSigned.chain.closed=true;}}
+  }
   await env.deploy('tagLens','TagStanceReader.sol','TagStanceLens',[env.contracts.ledger.address,env.contracts.tagIndex.address]);
   await env.deploy('tagReader','TagStanceReader.sol','TagStanceReader',[env.contracts.ledger.address,env.contracts.tagIndex.address,env.contracts.tagLens.address,env.contracts.tagLens.codeHash]);
   const readerIface=new e.Interface(env.contracts.tagReader.abi),rowArray=readerIface.getFunction('readPage').outputs[0].components.find(v=>v.name==='rows'),rowType=rowArray.arrayChildren;
@@ -114,6 +117,29 @@ try{
   }
   async function finish(run,budget){for(let i=0;i<16&&!run.complete;i++)await step(run,budget);assert(run.complete,'finite page bound');}
   const q=(direction=2,mode=1,exact=s.conceptC)=>({direction,mode,exact,diagnosticHead:false});
+  if(diagnosticOnly){
+    const principals=[s.principals.alice,s.principals.bob];
+    const diagnosticType=readerIface.getFunction('diagnose').outputs[0];report.diagnosticAbi=diagnosticType.format('full');
+    async function diagnostic(label,basis){
+      const args=[principals,s.fileF,s.conceptC,basis,true],oracle=rebuildArchive(await archive(env),e).diagnose(...args);
+      const data=readerIface.encodeFunctionData('recordDiagnostic',args),tx=await env.observe(await env.enqueue(label,{to:env.contracts.tagReader.address,data}));assert.equal(tx.status,'SUCCESS');
+      const logs=tx.receipt.logs.filter(l=>l.address.toLowerCase()===env.contracts.tagReader.address.toLowerCase()).map(l=>readerIface.parseLog(l));
+      assert.equal(logs.length,1);assert.equal(logs[0].name,'DiagnosticRecorded');assert.equal(logs[0].args.encodedDiagnostic,abi.encode([diagnosticType],[oracle]));
+      report.diagnostics.push({label,hash:tx.transactionHash,gas:tx.gasUsed,args,encoded:logs[0].args.encodedDiagnostic,profileHash:report.profileHash,readerHash:env.contracts.tagReader.codeHash,lensHash:env.contracts.tagLens.codeHash});
+    }
+    await env.transact('ledger','bind',[s.purpose,s.fileF,s.conceptC,s.tokens[0],0],'diagnostic/setup/A-ASSERT','alice');
+    await env.transact('ledger','bind',[s.purpose,s.fileF,s.conceptC,s.tokens[1],0],'diagnostic/setup/B-DENY','bob');
+    await env.transact('ledger','bind',[e.id('efs2/purpose/head/1'),s.fileF,Z,s.revision1,0],'diagnostic/setup/A-HEAD1','alice');
+    await env.transact('ledger','bind',[e.id('efs2/purpose/head/1'),s.fileF,Z,s.revision2,0],'diagnostic/setup/B-HEAD2','bob');
+    const origin=await b();await diagnostic('diagnostic/assert-deny-and-head-conflict',origin);
+    await env.transact('ledger','bind',[e.id('efs2/purpose/head/1'),s.fileF,Z,s.revision2,1],'diagnostic/setup/A-HEAD2','alice');
+    await diagnostic('diagnostic/frozen-origin-after-HEAD-change',origin);
+    await env.transact('ledger','bind',[s.purpose,s.fileF,s.conceptC,s.tokens[2],1],'diagnostic/setup/A-SILENT','alice');
+    await diagnostic('diagnostic/silence-not-disagreement',await b());
+    await env.transact('ledger','unbind',[s.purpose,s.fileF,s.conceptC,2],'diagnostic/setup/A-tombstone','alice');
+    await diagnostic('diagnostic/tombstone-not-disagreement',await b());
+    await finish(await start('query/fix1-P2-priority',principals,q()),2);
+  }else{
   await finish(await start('query/inverse-count1',[s.principals.alice],q()),8);
   await action('action/DENY','denyStance',args());await action('action/SILENT','retractToSilent',args());await action('action/ASSERT-again','assertStance',args());
   await env.transact('ledger','unbind',[s.purpose,s.fileF,s.conceptC,4],'action/UNBIND','alice');
@@ -149,14 +175,15 @@ try{
     }
     await finish(run,6);
   }
+  }
   report.archive=await archive(env);report.dependencies=await captureGraph(env);
   report.coverage={};for(const [key,family] of [['scope',(await env.call('tagIndex','FAMILY_SCOPE'))[0]],['history',(await env.call('tagIndex','FAMILY_HISTORY'))[0]],['inverse',s.family]])report.coverage[key]=Array.from(await env.call('tagIndex','coverage',[family,Z]));
   report.complete=true;
 }catch(e){error=e;report.error=String(e.stack??e);}
 finally{
   if(env){report.contracts=env.contracts;report.transactions=env.transactions;report.rawTransactions=await readFile(join(env.dir,'transactions.jsonl'),'utf8');report.chain={port:env.port,pid:env.anvilPid,dir:env.dir,history:env.historyPolicy};await env.close();report.chain.closed=true;}
-  const label=process.env.EFS_TAG_QUERY_EVIDENCE??'query-paid-final2';assert(/^[a-z0-9-]+$/.test(label));
+  const label=process.env.EFS_TAG_QUERY_EVIDENCE??(diagnosticOnly?'query-fix1-diagnostic':'query-paid-fix1');assert(/^[a-z0-9-]+$/.test(label));
   await writeFile(new URL(`../core-closeout-tags-20260915/${label}.json.gz`,import.meta.url),gzipSync(JSON.stringify(report,(_,v)=>typeof v==='bigint'?String(v):v,2)));
 }
 if(error)throw error;
-console.log(JSON.stringify({complete:report.complete,actions:report.actions.map(a=>({label:a.label,gas:a.gas})),queries:report.queries.map(q=>({label:q.label,steps:q.steps.length,total:q.oracle.rawTotal,gas:q.steps.map(s=>s.gas)})),refusals:report.refusals.map(r=>({label:r.label,gas:r.gas})),closed:report.chain.closed},null,2));
+console.log(JSON.stringify({complete:report.complete,actions:report.actions.map(a=>({label:a.label,gas:a.gas})),queries:report.queries.map(q=>({label:q.label,steps:q.steps.length,total:q.oracle.rawTotal,gas:q.steps.map(s=>s.gas)})),diagnostics:report.diagnostics.map(d=>({label:d.label,gas:d.gas})),refusals:report.refusals.map(r=>({label:r.label,gas:r.gas})),closed:report.chain.closed},null,2));

@@ -1,0 +1,115 @@
+{
+  "pass": true,
+  "sourceOff": true,
+  "networkDisabled": true,
+  "transactions": 70,
+  "publications": 23,
+  "sourcePins": 31,
+  "profileHash": "0x76867b2c20cc4142c0173fa6b3adef0415a27cf9618b3ff6ce45997ae4f7c773",
+  "meaning": {
+    "1": "ASSERT",
+    "2": "DENY",
+    "3": "SILENT"
+  },
+  "statements": [
+    {
+      "author": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+      "concept": "0xf73bf134c8b6d745b96d2d301a734b437d45221be7622d474010277773ebba54",
+      "subject": "0xdd584f8a0d51eb53d03eff53f1584b6bd4f1133456040343bb0f8c6a6c564df9",
+      "intrinsicFile": "0xdd584f8a0d51eb53d03eff53f1584b6bd4f1133456040343bb0f8c6a6c564df9",
+      "stance": "ASSERT",
+      "basis": "17",
+      "position": "0x0b35008f145ca4b7700bd5381ea59ec69f02c374b7fbdd935a7e096f47441ff1",
+      "revision": "1"
+    },
+    {
+      "author": "0x0000000000000000000000003c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+      "concept": "0xf73bf134c8b6d745b96d2d301a734b437d45221be7622d474010277773ebba54",
+      "subject": "0xdd584f8a0d51eb53d03eff53f1584b6bd4f1133456040343bb0f8c6a6c564df9",
+      "intrinsicFile": "0xdd584f8a0d51eb53d03eff53f1584b6bd4f1133456040343bb0f8c6a6c564df9",
+      "stance": "DENY",
+      "basis": "18",
+      "position": "0x0b35008f145ca4b7700bd5381ea59ec69f02c374b7fbdd935a7e096f47441ff1",
+      "revision": "1"
+    },
+    {
+      "author": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+      "concept": "0xf73bf134c8b6d745b96d2d301a734b437d45221be7622d474010277773ebba54",
+      "subject": "0xdd584f8a0d51eb53d03eff53f1584b6bd4f1133456040343bb0f8c6a6c564df9",
+      "intrinsicFile": "0xdd584f8a0d51eb53d03eff53f1584b6bd4f1133456040343bb0f8c6a6c564df9",
+      "stance": "SILENT",
+      "basis": "22",
+      "position": "0x0b35008f145ca4b7700bd5381ea59ec69f02c374b7fbdd935a7e096f47441ff1",
+      "revision": "2"
+    },
+    {
+      "author": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+      "concept": "0xf73bf134c8b6d745b96d2d301a734b437d45221be7622d474010277773ebba54",
+      "subject": "0xdd584f8a0d51eb53d03eff53f1584b6bd4f1133456040343bb0f8c6a6c564df9",
+      "intrinsicFile": "0xdd584f8a0d51eb53d03eff53f1584b6bd4f1133456040343bb0f8c6a6c564df9",
+      "stance": "SILENT",
+      "basis": "23",
+      "position": "0x0b35008f145ca4b7700bd5381ea59ec69f02c374b7fbdd935a7e096f47441ff1",
+      "revision": "3"
+    }
+  ],
+  "queries": 1,
+  "diagnostics": 4,
+  "sizes": {
+    "finalValidator": {
+      "runtime": 5417,
+      "actualInitcode": 7297,
+      "gas": "1289407",
+      "codeHash": "0xccf2ebd9dd4bce9e80d37457b884ae28978ca16468b2edbd769dbb8e91969957"
+    },
+    "stanceValidator": {
+      "runtime": 4873,
+      "actualInitcode": 11752,
+      "gas": "3061807",
+      "codeHash": "0x0dd356058b00eb83c40bad6e0153be0483c6fb187cab3d3a2d5cac2956e6d24b"
+    },
+    "tagIndex": {
+      "runtime": 21723,
+      "actualInitcode": 45843,
+      "gas": "8049934",
+      "codeHash": "0xfc83c1ed239315805940ed0d5057646ed3815b63b2edea2baff3dd9b14b1cec0"
+    },
+    "tagLens": {
+      "runtime": 18971,
+      "actualInitcode": 19674,
+      "gas": "4159280",
+      "codeHash": "0x8c72af1ee939048293e1e5fd4935c55ec943314bc7ade22ebe89055cd16b3286"
+    },
+    "tagReader": {
+      "runtime": 15160,
+      "actualInitcode": 19052,
+      "gas": "4167921",
+      "codeHash": "0xe4b2c6a47a87801ff11c8831d7b2dc12c429205c40c5114b6015c6e6b3b500e5"
+    },
+    "query1": {
+      "runtime": 5418,
+      "actualInitcode": 7354,
+      "gas": "1476197",
+      "codeHash": "0x8527f473969c7476be3fce96c9373d661727753e436475198d3423788c503eb2"
+    }
+  },
+  "gas": {
+    "main": "76119632",
+    "matchedSignedFixture": "0"
+  },
+  "authority": "Local RPC-observed admission plus retained direct native/ECDSA evidence, not a remote state proof or original-author destination permission",
+  "controls": {
+    "missingProfile": "PARTIAL opaque",
+    "missingType": "PARTIAL",
+    "allRuntimeCaptures": true,
+    "exactQueriesAndCommitments": true,
+    "nativeCalldataAdmissionJoin": true,
+    "ledgerEmitterContextJoin": true,
+    "consumerReceiptCalldataJoin": true
+  },
+  "sourceVerification": "current-files",
+  "verifier": {
+    "auditSHA256": "cfee42a5654669d8ba574fb11ffe4c2d0433c34f746ae8e3060019a48b073e5b",
+    "archiveSHA256": "378bcb45acff5741b994e6d9e9df063702232ddc84d3c0002b70699caeabb5dd"
+  }
+}

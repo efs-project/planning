@@ -1,0 +1,39 @@
+✔ explicit operations construct exact stance targets and ordinary CAS (919.128416ms)
+✔ new Concept is published before its first ASSERT in the same guarded action (31.324125ms)
+✔ supplied revision is explicit and claimed File mismatch refuses before signing (69.420458ms)
+✔ selected revision guards HEAD and coordinate; changed HEAD rejects before signature (79.645583ms)
+✔ wrong exact Concept and missing profile never plan a publication (21.883125ms)
+✔ the signed whole publication is admitted and read back semantically (66.016541ms)
+✔ silent falls through (1.270791ms)
+✔ deny wins (0.054375ms)
+✔ unknown blocks (0.037458ms)
+✔ untouched is not denial (0.039875ms)
+✔ new tombstone silent (0.041041ms)
+✔ legacy tombstone masks (0.118291ms)
+✔ missing discriminant unknown (0.044041ms)
+✔ unqualified tombstone unknown (0.0335ms)
+✔ an open Lens never proves absence (0.075125ms)
+✔ independent diagnostics retain literal competing authors and origin admissions (14.326125ms)
+✔ independent diagnostics do not treat silence or unavailable token meaning as a vote (10.088667ms)
+✔ paid diagnostic archive preserves both HEAD authors at the old origin after HEAD changes (15.496833ms)
+✔ original finite packet passes semantic audit (3024.058875ms)
+✔ native leaf and evidence hash cannot disagree with raw native calldata (1871.110292ms)
+✔ Published emitter is the pinned Ledger (655.494416ms)
+✔ publication receipt destination agrees with raw Ledger destination (255.799042ms)
+✔ Published event context cannot name a different author (632.035125ms)
+✔ paid Rows event cannot be replaced by a different attributed row (2248.627792ms)
+✔ paid commitment event must match reconstructed prefix (2256.671209ms)
+✔ paid progress event must match reconstructed prefix (2262.657209ms)
+✔ paid completion event must match reconstructed prefix (2252.299125ms)
+✔ paid Work event must match retained step metrics (2299.833917ms)
+✔ query step budget is joined to calldata (2284.159084ms)
+✔ refused step cannot be relabeled successful (2837.688584ms)
+✔ amended reader diagnostic packet passes and a changed paid diagnostic is rejected (1153.293166ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 24216.048834

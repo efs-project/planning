@@ -1,0 +1,19 @@
+✔ original finite packet passes semantic audit (2515.853625ms)
+✔ native leaf and evidence hash cannot disagree with raw native calldata (1644.212417ms)
+✔ Published emitter is the pinned Ledger (529.321459ms)
+✔ publication receipt destination agrees with raw Ledger destination (149.397ms)
+✔ paid Rows event cannot be replaced by a different attributed row (2002.173ms)
+✔ paid commitment event must match reconstructed prefix (2026.734625ms)
+✔ paid progress event must match reconstructed prefix (2029.73825ms)
+✔ paid completion event must match reconstructed prefix (2028.272083ms)
+✔ paid Work event must match retained step metrics (2021.150042ms)
+✔ query step budget is joined to calldata (2066.176542ms)
+✔ refused step cannot be relabeled successful (2540.358708ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 19709.727667

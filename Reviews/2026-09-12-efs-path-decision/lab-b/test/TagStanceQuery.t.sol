@@ -111,4 +111,33 @@ contract TagStanceQueryTest is TagStanceProfileTest {
         p=reader.readPage(principals(),TagStanceReader.Query(1,3,fileF,true),basis(),"",1);
         require(p.scanStatus==0&&p.unknowns==1&&p.headStatus==3&&p.queryAssessment==0,"selected HEAD conflict not explicit");
     }
+    function test_query_diagnostic_attributes_assert_deny_without_changing_priority() public {
+        setupQuery();alice.bind(PURPOSE,fileF,conceptC,tokens[0],0);uint64 a=admissions();bob.bind(PURPOSE,fileF,conceptC,tokens[1],0);uint64 b=admissions();
+        TagStanceReader.Diagnostic memory d=reader.diagnose(principals(),fileF,conceptC,basis(),false);
+        require(d.stances.length==2,"diagnostic observations missing");
+        require(d.complete&&d.stanceDisagreement&&d.basis.admission==b&&d.intrinsicFile==fileF,"diagnostic basis/disagreement lost");
+        require(d.stances[0].author==pid(address(alice))&&d.stances[0].kind==2&&d.stances[0].admission==a&&d.stances[0].revision==1,"ASSERT attribution lost");
+        require(d.stances[1].author==pid(address(bob))&&d.stances[1].kind==3&&d.stances[1].admission==b&&d.stances[1].target==tokens[1],"DENY attribution lost");
+        require(reader.assess(principals(),fileF,conceptC,basis()).author==pid(address(alice)),"priority changed");
+    }
+    function test_query_diagnostic_attributes_conflicting_heads_at_origin() public {
+        setupQuery();alice.bind(HEAD,fileF,0,revision1,0);uint64 a=admissions();bob.bind(HEAD,fileF,0,revision2,0);uint64 b=admissions();
+        TagStanceReader.Basis memory origin=basis();alice.bind(HEAD,fileF,0,revision2,1);
+        TagStanceReader.Diagnostic memory d=reader.diagnose(principals(),revision1,conceptC,origin,true);
+        require(d.heads.length==2,"HEAD observations missing");
+        require(d.complete&&d.headDisagreement&&d.basis.admission==b,"HEAD disagreement lost");
+        require(d.heads[0].author==pid(address(alice))&&d.heads[0].target==revision1&&d.heads[0].admission==a&&d.heads[0].revision==1,"origin HEAD A lost");
+        require(d.heads[1].author==pid(address(bob))&&d.heads[1].target==revision2&&d.heads[1].admission==b,"origin HEAD B lost");
+    }
+    function test_query_diagnostic_silence_tombstone_and_unknown_are_not_votes() public {
+        setupQuery();alice.bind(PURPOSE,fileF,conceptC,tokens[2],0);bob.bind(PURPOSE,fileF,conceptC,tokens[1],0);
+        TagStanceReader.Diagnostic memory d=reader.diagnose(principals(),fileF,conceptC,basis(),false);
+        require(d.stances.length==2,"silence observations missing");require(d.complete&&!d.stanceDisagreement&&d.stances[0].kind==4,"SILENT counted as disagreement");
+        alice.unbind(PURPOSE,fileF,conceptC,1);d=reader.diagnose(principals(),fileF,conceptC,basis(),false);
+        require(d.stances[0].kind==5&&d.stances[0].revision==2&&!d.stanceDisagreement,"tombstone evidence lost");
+        bytes32 key=Keys.binding(pid(address(bob)),Keys.position(PURPOSE,fileF,conceptC));
+        fault.store(address(ledger),bytes32(uint256(keccak256(abi.encode(key,uint256(8))))+1),bytes32(uint256(444)));
+        d=reader.diagnose(principals(),fileF,conceptC,basis(),false);
+        require(!d.complete&&d.stances[1].kind==0&&d.stances[1].author==pid(address(bob)),"unavailable testimony became silence");
+    }
 }

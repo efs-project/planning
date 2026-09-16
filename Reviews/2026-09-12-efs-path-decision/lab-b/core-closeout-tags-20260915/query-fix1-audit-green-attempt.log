@@ -1,0 +1,44 @@
+✖ original finite packet passes semantic audit (689.618792ms)
+✔ native leaf and evidence hash cannot disagree with raw native calldata (667.487042ms)
+✔ Published emitter is the pinned Ledger (515.558875ms)
+✔ publication receipt destination agrees with raw Ledger destination (144.258875ms)
+✔ paid Rows event cannot be replaced by a different attributed row (656.757583ms)
+✔ paid commitment event must match reconstructed prefix (648.687417ms)
+✔ paid progress event must match reconstructed prefix (706.9105ms)
+✔ paid completion event must match reconstructed prefix (664.178583ms)
+✔ paid Work event must match retained step metrics (653.547667ms)
+✔ query step budget is joined to calldata (646.63375ms)
+✔ refused step cannot be relabeled successful (652.2555ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 10
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6805.879541
+
+✖ failing tests:
+
+test at core-closeout-tags-20260915/query-audit.test.mjs:9:1
+✖ original finite packet passes semantic audit (689.618792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '0xa41f83280a65f0b7080b2a9e613187dcd1d990dcaa43bfb281781bb734769710'
+  - '0xc5283d1a4a94af89b81e6ed8397d40518e833a915600fe12cccf90759c101260'
+  
+      at authority (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/core-closeout-tags-20260915/query-audit.mjs:103:69)
+      at auditPacket (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/core-closeout-tags-20260915/query-audit.mjs:118:22)
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/core-closeout-tags-20260915/query-audit.test.mjs:9:70)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.start (node:internal/test_runner/test:1096:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '0xa41f83280a65f0b7080b2a9e613187dcd1d990dcaa43bfb281781bb734769710',
+    expected: '0xc5283d1a4a94af89b81e6ed8397d40518e833a915600fe12cccf90759c101260',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

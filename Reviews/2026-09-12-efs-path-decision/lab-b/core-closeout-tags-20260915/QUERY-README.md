@@ -1,10 +1,71 @@
 # Tags Task 2 — origin-qualified queries and explicit planners
 
-Status: implementation and finite local paid evidence, awaiting independent review. Disposable experiment; not production adoption, owner removal UX, or a new cross-chain proof profile. Task 1's [profile and evidence](README.md) remain unchanged at base `12efe4b52c9ebbb637407c02cb25b633d576fb65`.
+Status: fix round 1 implements attributed diagnostics and repairs reusable raw-evidence joins; awaiting independent re-review. Disposable experiment; not production adoption, owner removal UX, or a new cross-chain proof profile. Task 1's [profile and evidence](README.md) remain unchanged at base `12efe4b52c9ebbb637407c02cb25b633d576fb65`.
 
-## Exact evidence to reuse
+## Fix round 1 — amended reader and verifier
 
-The authoritative final packet is `query-paid-final2.json.gz` (SHA-256 `78b7dde2ec8930d7b70bcaf74b7d6bf261a184e742b6de4b4b6a997e7c45fcaf`), with `query-paid-final2-audit.json` and `query-release-audit.log`. It contains 226 actual locally signed transactions: main 170 (168 successful, 2 expected reversions), matched signed fixture 56 successful. All use the ordinary 15,000,000 gas limit, below the 16,777,216 hard limit. Both disposable chains closed; history 256 / transaction cache 512. No public chain, owner UI/RPC, or dependency installation was involved.
+Independent review identified two real gaps in the original implementation: priority reduction did not expose competing stance/HEAD attribution, and the reusable audit did not attach all native/query semantics to raw calldata and receipt events. This section supersedes any implication below that the original reader supplied attributed diagnostics or that the old audit alone proved those joins. Historical source/paid artifacts and failure logs are retained unchanged.
+
+### Exact-coordinate diagnostics
+
+`diagnose(principals,subject,concept,basis,includeHead)` returns the exact basis, subject, Concept, intrinsic File, ordered stance observations, optional ordered intrinsic-File HEAD observations, `complete`, `stanceDisagreement`, and `headDisagreement`. It validates the same fixed profile and 1–64 closed ordered Lens. There is no inventory scan or default UI change. Existing priority queries, cursor/consumer behavior and the old `diagnosticHead` switch are unchanged.
+
+Each observation includes author, target, revision, admission and kind: 0 UNKNOWN, 1 proven untouched, 2 ASSERT, 3 DENY, 4 validated SILENT, 5 retained stance tombstone, 6 live HEAD, 7 HEAD tombstone. ASSERT and DENY both survive with attribution; SILENT, new-purpose tombstones and untouched coordinates are reported but are not stance votes. UNKNOWN is retained under its author, with `complete=false`; a false disagreement flag then does not certify agreement. Stance disagreement means qualified ASSERT and DENY are both observed. HEAD disagreement means differing live/tombstone states or targets among touched qualified HEADs; agreeing targets are retained without disagreement. This is an explicit diagnostic assessment, not an objective truth reducer. In contrast, the preserved legacy `diagnosticHead` query option still flags multiple touched HEADs as ambiguous regardless of equal target values.
+
+The optional HEAD vector applies to a stable File or the intrinsic File of a supported revision; requesting it for a Directory refuses. `recordDiagnostic` emits the full encoded diagnostic in one actual paid transaction without mutating Ledger or reader state. It is an evidence probe, not publication or destination authority. The independent archive interpreter implements the diagnostic from raw admitted histories, not SDK labels or original index postings.
+
+### Strengthened source-off gate
+
+`query-audit.mjs` now expands supported native `publish`, `create`, `bind`, `unbind`, `execute` and `executeGuarded` calldata into exact actions/bodies; other native selectors fail closed. It compares those actions byte-for-byte to reconstructed admissions. It checks raw destination/receipt destination, status/gas, log transaction/block context, pinned Ledger emitters, Published author/proof/first/leaf count/publication ID, each Admitted author/scope/target/admission, and guarded ReadSetChecked/context/signature joins. This is still the existing direct-EOA/native and exact guarded-ECDSA fixture profile, not a new generic wallet or cross-chain verifier.
+
+For every owned query call it joins exact constructor/query arguments, owner destination, ordered complete step list, session/budget calldata, receipt status, and pinned consumer Rows/Progress/Work events. It reconstructs prefix scanned totals, row/present/unknown counts, result commitment and completion from the paid events, checks their rows against the independent oracle, and checks observed-current admission against preceding Ledger publication events. Failed query calls must retain reverted receipts/no logs, match the supported out-of-domain budget refusal, and leave the successful prefix unchanged. The stale publication refusal joins its retained plan calldata and Ledger destination. Diagnostic calldata and pinned-reader events are separately checked against independently reconstructed attributed diagnostics.
+
+Ten focused mutations demonstrated the original gaps before repair: native leaf plus evidence hash; Published emitter; publication receipt destination; consumer row; commitment; progress; completion; work; budget; and refused-step status. All ten were wrongly accepted by the old semantic audit, then rejected after repair while the original packet passed. Additional final controls reject a changed Published author and changed paid diagnostic. `query-fix1-audit-green-attempt.log` preserves an intermediate verifier error: an incorrect scope-domain literal rejected the valid baseline; it was corrected against unchanged `Keys.DOM_SCOPE`. No failed log was replaced by a green claim.
+
+### Source/evidence compatibility map
+
+| Packet | Source checked | Paid scope | Reuse boundary |
+|---|---|---|---|
+| `query-paid-final2.json.gz` | exact historical commit `1a49b74dbbc9f01506cab8f3c63db49a0000adce` | original 226 tx, 114 publications (111 native + 3 signed), 115 leaves, 11 query chains | old reader/Lens bytes and old wide-P64 prices only |
+| `query-fix1-diagnostic.json.gz` | amended current source pins below | 70 successful tx, 23 native publications/leaves, four diagnostics, one P2 owned query | amended reader deployment and these finite P2 rows only |
+
+The fresh verifier writes new `*-fix1-audit.json` outputs, never overwrites the old audit results, and records separate verifier identities. Historical source checks use `git show` at the exact full commit. Both current and historical source-off gates pass with audit SHA-256 `cfee42a5654669d8ba574fb11ffe4c2d0433c34f746ae8e3060019a48b073e5b` and interpreter SHA-256 `378bcb45acff5741b994e6d9e9df063702232ddc84d3c0002b70699caeabb5dd`. The old receipt prices are **not amended-reader prices**; representative resource refresh belongs to the separate resource task. No broad campaign was rerun.
+
+New packet SHA-256: `b1e85f6df9618c842f34964a8bec775611ddacfc12900a236196a941c0d76fe6`. Its 31 source pins include reader SHA-256 `4b2e829204efcc5d03166db058287d66586c9bf8cef837be267bd167f6fac896`, runner `092ef80915d8d37b2f987a43fd32792ea54040b77f2d74a9c312e69582e1725d`, and interpreter as above. Planner, owned consumer, all Task 1 rules/profile/index/Core and the semantic profile remain unchanged. Reader deployed hash `0xe4b2c6a47a87801ff11c8831d7b2dc12c429205c40c5114b6015c6e6b3b500e5`; Lens `0x8c72af1ee939048293e1e5fd4935c55ec943314bc7ade22ebe89055cd16b3286`. The local shadow rename removes M1 and changes metadata pins; all historical compiler logs remain.
+
+| Amended deployment | Runtime / actual initcode bytes | Setup gas |
+|---|---:|---:|
+| Lens | 18,971 / 19,674 | 4,159,280 |
+| Reader | 15,160 / 19,052 | 4,167,921 |
+| P2 owned consumer | 5,418 / 7,354 | 1,476,197 |
+
+| Whole paid call | Origin | Gas | Result |
+|---|---:|---:|---|
+| ASSERT/DENY plus different HEADs | 20 | 440,399 | Alice ASSERT admission17; Bob DENY18; Alice HEAD revision1/admission19; Bob HEAD revision2/admission20 |
+| same origin after Alice HEAD changes | 20 | 468,375 | identical attributed diagnostic, historical selection charged |
+| Alice SILENT / Bob DENY | 22 | 440,351 | no stance disagreement; both HEAD targets now agree |
+| Alice stance tombstone / Bob DENY | 23 | 403,464 | retained tombstone revision3; no stance disagreement |
+| P2 owned priority query, both authors occupied | 23 | 533,091 | raw2/scanned2, one attributed Bob DENY; 2 prefix / 0 history / 3 joins; complete |
+
+The P2 query commitment is `0x67d177e7df17a6c5fe31e7e3d6cdb849c7e09a6243ca5ea818397356db8910bc`; its complete `originAbsent=true` is qualified NOT_PRESENT with Bob's DENY, not no-statement. Setup remains separate: reusable fixture 58,733,386; Lens+reader 8,327,201 over two transactions; consumer 1,476,197; seven scenario publications 5,297,168; four diagnostics 1,752,589; query 533,091; total 76,119,632. All 70 receipts succeed at the ordinary 15M limit. No P64 diagnostic, dense-author maximum, or new gas ceiling is claimed. UNKNOWN behavior uses fault-injected Solidity and controlled interpreter tests, not a manufactured paid-corruption claim.
+
+Fresh verification: `query-fix1-release-forge.log` 31/31 (13 query/diagnostic + 18 inherited), `query-fix1-release-node.log` 31/31 (15 planner/reducer + 3 independent oracle + 13 audit controls). Diagnostic RED is three assertion failures; oracle RED is two literal missing-observation failures. The original 78-test covering run remains historical; fix coverage is explicitly the amended query suite plus focused planner/oracle/audit suites. The new Forge harness initcode warning is 294,887; ordinary deployables fit separately. Existing Keys warnings remain, but the new reader shadow warning is removed.
+
+From the lab with assigned runtime environment:
+
+```sh
+forge test --match-contract '^TagStanceQueryTest$' -vv
+node --test browser/tag-stance-profile.test.mjs browser/tag-stance-planner.integration.test.mjs core-closeout-tags-20260915/query-audit.test.mjs core-closeout-tags-20260915/query-archive.test.mjs
+EFS_TAG_DIAGNOSTIC_ONLY=1 EFS_TAG_QUERY_EVIDENCE=query-fix1-diagnostic node script/core-tag-stance.mjs
+node core-closeout-tags-20260915/query-audit.mjs query-fix1-diagnostic
+node core-closeout-tags-20260915/query-audit.mjs query-paid-final2 1a49b74dbbc9f01506cab8f3c63db49a0000adce
+```
+
+All source-observation/proof qualifications in the source-off section below still apply. The stronger joins do not turn JSON receipts into consensus/trie proofs, add arbitrary source coverage, or authorize original-author/destination replay. The diagnostic chain closed in `finally`, with history256/cache512; no owner host, public write or installation was touched.
+
+## Original Task 2 evidence (historical reader at 1a49b74)
+
+The original implementation's final packet is `query-paid-final2.json.gz` (SHA-256 `78b7dde2ec8930d7b70bcaf74b7d6bf261a184e742b6de4b4b6a997e7c45fcaf`), with historical `query-paid-final2-audit.json` and `query-release-audit.log`; use the fresh `query-paid-final2-fix1-audit.json` for the repaired audit joins. It contains 226 actual locally signed transactions: main 170 (168 successful, 2 expected reversions), matched signed fixture 56 successful. All use the ordinary 15,000,000 gas limit, below the 16,777,216 hard limit. Both disposable chains closed; history 256 / transaction cache 512. No public chain, owner UI/RPC, or dependency installation was involved.
 
 Every action row retains transaction hash, full calldata/raw transaction/receipt, profile, and where applicable the planner/readset and canonical readback. Every query step retains transaction hash, profile, reader/Lens runtime hashes, actual scanned range, prefix/history probes, joins and observed-current admission. Its parent query retains exact principals, query, origin/Realm/execution/profile basis, raw oracle, returned attributed rows and final commitment. Contract entries retain constructor arguments, actual transaction initcode length, deployed runtime and code hash; required nested helpers and readset carrier runtime/bytes are also retained. Artifacts include compiler metadata and 31 exact source SHA-256/Keccak pins. Do not substitute either older campaign packet for this one.
 
