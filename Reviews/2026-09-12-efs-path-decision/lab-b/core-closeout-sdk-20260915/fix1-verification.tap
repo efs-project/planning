@@ -1,0 +1,17 @@
+✔ exact-hash caches refresh unchanged-admission blocks, epoch, account code, index and reorgs (506.604583ms)
+✔ failed pin is retryable and final reconciliation canonicality failure cannot persist success (343.22925ms)
+✔ mutation after enqueue cannot alter admitted calldata nested options selector or diagnostics (23.363458ms)
+✔ mutation during unsupported batch cannot change the owned fallback request identity (0.451584ms)
+✔ read batching correlates shuffled IDs, preserves options, and separates writes/preflight (0.610041ms)
+✔ missing duplicate unknown or malformed batch IDs reject whole batch; item errors remain item-local (1.027834ms)
+✔ explicit unsupported batch falls back with identical request IDs and parameters (0.243417ms)
+✔ finite batch chunks, byte caps, queue caps and timeouts cannot return partial success (6.078042ms)
+✔ HTTP concurrency remains bounded while queued independent read groups drain (24.194833ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4073.064708

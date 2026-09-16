@@ -1,0 +1,55 @@
+✖ mutation after enqueue cannot alter admitted calldata nested options selector or diagnostics (23.381291ms)
+✖ mutation during unsupported batch cannot change the owned fallback request identity (1.386708ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 98.378375
+
+✖ failing tests:
+
+test at script/compact-transport.test.mjs:25:1
+✖ mutation after enqueue cannot alter admitted calldata nested options selector or diagnostics (23.381291ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + '0xdeadbeef'
+  - '0x12345678'
+       ^
+
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/compact-transport.test.mjs:29:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '0xdeadbeef',
+    expected: '0x12345678',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at script/compact-transport.test.mjs:34:1
+✖ mutation during unsupported batch cannot change the owned fallback request identity (1.386708ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+    [
+  +   '0xdeadbeef',
+  +   '0xdeadbeef'
+  -   '0x12345678',
+  -   '0x87654321'
+    ]
+
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/compact-transport.test.mjs:44:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ '0xdeadbeef', '0xdeadbeef' ],
+    expected: [ '0x12345678', '0x87654321' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

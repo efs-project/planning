@@ -2,7 +2,7 @@
 
 **Standing:** local prototype evidence, 2026-09-16, not production SDK or protocol adoption.
 Reviewed starting point `f2d7b01241ad39a0421ccc456d9112bd9fc7a849`;
-measured source `89d7de173276af3eda7ba3fad7654e659d520580`.
+review-amended measured source `63cb36bc5dca7cc3b4ff7b4f634af1642109697e`.
 
 The matched controls preserve byte-identical signed calldata and identical
 receipt gas across all four modes. Cache reuse reduces repeated logical RPC
@@ -32,6 +32,9 @@ The exact-hash cache itself is browser-compatible and enabled by default.
 - [Measurement transcript](measurement-run.log).
 - [Covering test transcript](verification.tap); [first covering failure](verification-initial.tap)
   is retained rather than concealed. See the fix explanation below.
+- Review fix1: [mutation RED](fix1-red.tap), [transport GREEN](fix1-transport-green.tap),
+  [narrow9-test covering GREEN](fix1-verification.tap), and the
+  [failed initial refresh](fix1-measurement-failed.log) are retained.
 
 Both profiles create a41-byte revision under `transport.txt` with salt
 `id(transport-matched-primary)`, Alice/Bob ordered Lens, fixed signed deadline
@@ -53,7 +56,7 @@ independent grouping: this is **not** a historical serial-latency comparison.
 | Inline first cold create lifecycle |286/286|164/164|286/128|164/87|
 | Inline first same-block read |69/69|8/8|69/27|8/7|
 | Inline repeated same-block read |69/69|5/5|69/27|5/5|
-| Inline edit/new-block lifecycle |280/280|96/96|280/122|96/58|
+| Inline edit/new-block lifecycle |279/279|96/96|280/122|96/58|
 | Inline post-write read |70/70|10/10|70/28|10/9|
 | Inline cold-instance new-block read |70/70|66/66|70/28|66/27|
 | Directory/carrier first cold create lifecycle |431/431|241/241|431/153|241/104|
@@ -68,6 +71,13 @@ reconciliation. The separately labelled cold-instance rows cannot. The carrier
 read recipe also opens/verifies content, accounting for its additional public
 canonicality boundaries. No zero-network current-read claim is made.
 
+All totals above are actual, not normalized. The amended packet records every
+operation's method counts before comparison. Its one observed matched-mode
+variance is inline edit: uncached has two `eth_getTransactionReceipt` calls,
+batch-only has three (279 versus280 total calls). All non-receipt method counts
+are strictly equal across matched modes. Only observed receipt polling may be
+excluded from fixed-work equality, never from the reported traffic totals.
+
 ## Cold create bytes and observed latency
 
 Byte counts are actual JSON payload bytes, excluding HTTP headers. Latency is
@@ -76,14 +86,14 @@ All remaining operation and read-set byte/latency rows are in the bundle.
 
 | Profile / mode | Request B | Response B | ms |
 | --- | ---: | ---: | ---: |
-| Inline uncached |84,981|963,301|141.2|
-| Inline cache only |52,715|510,828|81.9|
-| Inline batch only |85,227|963,547|103.8|
-| Inline combined |52,834|510,947|75.6|
-| Directory/carrier uncached |131,536|1,197,503|144.9|
-| Directory/carrier cache only |79,588|633,793|97.0|
-| Directory/carrier batch only |131,934|1,197,901|126.6|
-| Directory/carrier combined |79,783|633,988|92.2|
+| Inline uncached |84,981|963,301|140.1|
+| Inline cache only |52,715|510,828|81.3|
+| Inline batch only |85,227|963,547|103.4|
+| Inline combined |52,834|510,947|81.5|
+| Directory/carrier uncached |131,536|1,197,503|148.2|
+| Directory/carrier cache only |79,588|633,793|100.9|
+| Directory/carrier batch only |131,934|1,197,901|132.4|
+| Directory/carrier combined |79,783|633,988|90.4|
 
 Inline combined cold create has151 raw-read attempts,16 hits,135 misses,
 two verified-context reuses and two context misses. Rich combined has228 raw
@@ -134,7 +144,11 @@ misattributing those differences to transport optimization.
 
 ## Safety results and qualifications
 
-Final covering run: **122 tests passed, zero failures/skips/cancellations**.
+Original covering run: **122 tests passed, zero failures/skips/cancellations**.
+After review fix1, **nine focused transport/integration tests passed**; the
+122-test suite was not repeated and no Forge rebuild was required. The prior
+successful build had existing shadowing/naming warnings and unsafe-typecast
+lints; it is not claimed warning-free.
 
 The focused controls cover successful duplicate/in-flight reuse, distinct call
 options, cold-instance isolation, entry and byte eviction, rejected/malformed
@@ -155,6 +169,16 @@ every pin. A separate regression catches concurrent same-hash context
 double-accounting. A final canonicality failure clears tentative effect
 evidence and persists UNKNOWN. Historical constant-hash mutable mock fixtures
 explicitly disable caching; real block transitions test the cached path.
+
+Independent review then found admitted requests still aliased caller parameters.
+Fix1 snapshots one owned JSON graph before validation/accounting, preserving
+queued and fallback calldata, target, from, nested access-list/state options and
+the exact selector despite later caller mutation. Both mutation controls were
+RED before the fix and GREEN afterward. The first refresh's total-call equality
+failure is retained; the amended runner retains method counts before assertions
+and strictly checks every non-receipt method. It does not infer or hide the cause
+of that older failure; the fresh packet independently observes the receipt-only
+variance stated above. Prior packet provenance remains in commit6a3b57d.
 
 Limitations: same-hash provider observations remain RPC trust, not a state
 proof; malicious equivocation under an unchanged hash is not detected by a
