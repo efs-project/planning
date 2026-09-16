@@ -1,0 +1,18 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+295 !== 291
+
+    at file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/core-closeout-tags-20260915/audit.mjs:38:8 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 295,
+  expected: 291,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v26.0.0

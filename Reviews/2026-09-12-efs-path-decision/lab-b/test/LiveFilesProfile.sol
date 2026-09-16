@@ -101,7 +101,7 @@ contract LiveFilesIndex is ProfiledFilesIndex {
             ||helper.directoryType()!=legacy[6]||helper.directoryHash()!=legacy[7])revert E_LIVE_PROFILE();
         finalValidator=helper;finalValidatorHash=expectedHelperHash;
     }
-    function _manifestExtension() internal view override returns(bytes32){
+    function _manifestExtension() internal view virtual override returns(bytes32){
         return keccak256(abi.encode(super._manifestExtension(),"LiveFiles/1:quote-uint128-bool:shape-only:directed-parent-matrix",liveTypes,liveRuleHashes));
     }
     // The existing generic checked-reference fold indexes live parent/descriptor

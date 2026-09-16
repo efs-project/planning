@@ -1,0 +1,70 @@
+Compiling 2 files with Solc 0.8.30
+Solc 0.8.30 finished in 10.80s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:92:21:
+   |
+92 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:97:29:
+   |
+97 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:22:
+    |
+117 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:121:25:
+    |
+121 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 213096 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/TagStanceProfile.t.sol:28:1:
+   |
+28 | contract TagStanceProfileTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 12 tests for test/TagStanceProfile.t.sol:TagStanceProfileTest
+[PASS] test_tag_baseline_gap_controls() (gas: 12304672)
+[PASS] test_tag_corrupt_intrinsic_file_parent_mismatch_rejected() (gas: 10270336)
+[PASS] test_tag_dependency_before_bind_exposes_validated_prefix_to_rule() (gas: 10746513)
+[PASS] test_tag_fresh_inverse_is_exact_author_concept_coordinate() (gas: 12072191)
+[PASS] test_tag_future_concept_prefix_rejected_before_later_rule() (gas: 10284669)
+[PASS] test_tag_future_directory_and_create_subject_rejected() (gas: 11362773)
+[PASS] test_tag_invalid_then_valid_overwrite_rejects_whole_publication() (gas: 10812098)
+[PASS] test_tag_malformed_unbind_coordinate_rejected() (gas: 10712307)
+[PASS] test_tag_missing_wrong_concept_and_unsupported_subject_rejected() (gas: 12864384)
+[PASS] test_tag_transitions_keep_one_coordinate_and_real_history() (gas: 11926320)
+[PASS] test_tag_withdrawal_keeps_stance_and_name_after_bind_still_works() (gas: 11461977)
+[PASS] test_tag_wrong_token_matching_type_rejected() (gas: 10615359)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 13.71ms (83.45ms CPU time)
+
+Ran 1 test suite in 14.29ms (13.71ms CPU time): 12 tests passed, 0 failed, 0 skipped (12 total tests)

@@ -1,0 +1,44 @@
+{
+  "pass": true,
+  "transactions": 96,
+  "successful": 95,
+  "intentionalReverts": 1,
+  "totalGas": "84188897",
+  "sizes": {
+    "tagIndex": {
+      "runtime": 21723,
+      "actualInitcode": 45843,
+      "gas": "8049934",
+      "codeHash": "0xfc83c1ed239315805940ed0d5057646ed3815b63b2edea2baff3dd9b14b1cec0",
+      "rawRuntimeRetained": true
+    },
+    "replayIndex": {
+      "runtime": 21723,
+      "actualInitcode": 45843,
+      "gas": "8049934",
+      "codeHash": "0xe34497efef50cc0f2252097a2c60ea5b0aad505b67bb6be1e0a8e88805f1594d",
+      "rawRuntimeRetained": false
+    },
+    "stanceValidator": {
+      "runtime": 4873,
+      "actualInitcode": 11752,
+      "gas": "3061807",
+      "codeHash": "0x0dd356058b00eb83c40bad6e0153be0483c6fb187cab3d3a2d5cac2956e6d24b",
+      "rawRuntimeRetained": true
+    },
+    "finalValidator": {
+      "runtime": 5417,
+      "actualInitcode": 7297,
+      "gas": "1289407",
+      "codeHash": "0xccf2ebd9dd4bce9e80d37457b884ae28978ca16468b2edbd769dbb8e91969957",
+      "rawRuntimeRetained": true
+    }
+  },
+  "sourcePins": 26,
+  "profileBytes": 1856,
+  "profileHash": "0x76867b2c20cc4142c0173fa6b3adef0415a27cf9618b3ff6ce45997ae4f7c773",
+  "manifest": "0xd580f2b7a9edec73bafdaa266c24b86befce76c424f10b4a41e578776ec9bc5c",
+  "descriptorBytes": 295,
+  "helperPlusIndexGas": "11111741",
+  "allRequiredHelpersPlusIndexGas": "12401148"
+}

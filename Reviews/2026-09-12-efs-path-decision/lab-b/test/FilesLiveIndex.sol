@@ -17,7 +17,7 @@ contract FilesLiveNamesIndex is FilesNamesIndex {
     bytes32 public constant FAMILY_LIVE_SCOPE = keccak256("lab/family/live-files-scope/1");
     FilesScopeState private immutable _scopeState;
     bytes32 public immutable scopeStateCodehash;
-    function _extensionEntry(bytes32 f) internal view override returns(ManifestEntry memory){
+    function _extensionEntry(bytes32 f) internal view virtual override returns(ManifestEntry memory){
         if(f==FAMILY_LIVE_SCOPE)return ManifestEntry(f,0,3,3,keccak256("live-positive-folder-binding-ordinals:dense-swap:scopeList:last-mutation-every-bind-unbind"),true);
         return super._extensionEntry(f);
     }

@@ -1,0 +1,19 @@
+file:///Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/utils/errors.js:125
+            error = new TypeError(message);
+                    ^
+
+TypeError: invalid BytesLike value (argument="data", value=null, code=INVALID_ARGUMENT, version=6.15.0)
+    at makeError (file:///Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/utils/errors.js:125:21)
+    at assert (file:///Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/utils/errors.js:151:15)
+    at assertArgument (file:///Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/utils/errors.js:162:5)
+    at _getBytes (file:///Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/utils/data.js:24:5)
+    at getBytes (file:///Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/utils/data.js:34:12)
+    at Module.keccak256 (file:///Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/crypto/keccak.js:36:18)
+    at file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/core-closeout-tags-20260915/audit.mjs:16:18 {
+  code: 'INVALID_ARGUMENT',
+  argument: 'data',
+  value: undefined,
+  shortMessage: 'invalid BytesLike value'
+}
+
+Node.js v26.0.0

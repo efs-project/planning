@@ -1,0 +1,29 @@
+{
+  "complete": true,
+  "costs": {
+    "deploy/finalValidator": "1289407",
+    "deploy/stanceValidator": "3061807",
+    "deploy/tagIndex": "8049934",
+    "stance/ASSERT-fresh": "882911",
+    "stance/ASSERT-second": "876039",
+    "stance/same-label-distinct": "853992",
+    "stance/other-author": "810818",
+    "stance/revision": "874464",
+    "stance/directory": "875839",
+    "stance/DENY": "715363",
+    "stance/SILENT": "698430",
+    "stance/ASSERT-again": "686611",
+    "stance/UNBIND-silent": "638937",
+    "replay/checked-cutover": "195951"
+  },
+  "chain": {
+    "dir": "/var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-compact-demo-0qgqpb",
+    "port": 49528,
+    "pid": 19168,
+    "history": {
+      "states": 256,
+      "transactionBlocks": 512
+    },
+    "closed": true
+  }
+}

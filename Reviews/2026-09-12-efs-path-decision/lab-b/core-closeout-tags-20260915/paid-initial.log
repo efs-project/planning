@@ -1,0 +1,24 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Values have same structure but are not reference-equal:
+
+Proxy(Result(4) [
+  27n,
+  11n,
+  8n,
+  27n
+])
+
+    at file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/core-closeout-tags-20260915/measure.mjs:42:51
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: Proxy(Result(4) [ 27n, 11n, 8n, 27n ]),
+  expected: Proxy(Result(4) [ 27n, 11n, 8n, 27n ]),
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v26.0.0

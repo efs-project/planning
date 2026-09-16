@@ -1,0 +1,8 @@
+Compiler run failed:
+Error (2314): Expected ';' but got ','
+   --> test/TagStanceProfile.t.sol:161:115:
+    |
+161 |         fault.store(address(ledger),keccak256(abi.encode(uint256(1),keccak256(abi.encode(revision2,uint256(3)))))),fileG);
+    |                                                                                                                   ^
+
+Error: Compilation failed

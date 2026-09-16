@@ -1,0 +1,20 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ '0xf5059a5D33d5853360D16C683c16e67980206f36'
+- '0xf5059a5d33d5853360d16c683c16e67980206f36'
+
+    at file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/core-closeout-tags-20260915/audit.mjs:15:10 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '0xf5059a5D33d5853360D16C683c16e67980206f36',
+  expected: '0xf5059a5d33d5853360d16c683c16e67980206f36',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v26.0.0
