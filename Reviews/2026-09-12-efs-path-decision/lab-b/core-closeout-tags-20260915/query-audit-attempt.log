@@ -1,0 +1,125 @@
+{
+  "pass": true,
+  "sourceOff": true,
+  "networkDisabled": true,
+  "transactions": 226,
+  "publications": 114,
+  "sourcePins": 31,
+  "profileHash": "0x76867b2c20cc4142c0173fa6b3adef0415a27cf9618b3ff6ce45997ae4f7c773",
+  "meaning": {
+    "1": "ASSERT",
+    "2": "DENY",
+    "3": "SILENT"
+  },
+  "statements": 79,
+  "queries": 11,
+  "sizes": {
+    "finalValidator": {
+      "runtime": 5417,
+      "actualInitcode": 7297,
+      "gas": "1289407",
+      "codeHash": "0xccf2ebd9dd4bce9e80d37457b884ae28978ca16468b2edbd769dbb8e91969957"
+    },
+    "stanceValidator": {
+      "runtime": 4873,
+      "actualInitcode": 11752,
+      "gas": "3061807",
+      "codeHash": "0x0dd356058b00eb83c40bad6e0153be0483c6fb187cab3d3a2d5cac2956e6d24b"
+    },
+    "tagIndex": {
+      "runtime": 21723,
+      "actualInitcode": 45843,
+      "gas": "8049934",
+      "codeHash": "0xfc83c1ed239315805940ed0d5057646ed3815b63b2edea2baff3dd9b14b1cec0"
+    },
+    "tagLens": {
+      "runtime": 18971,
+      "actualInitcode": 19674,
+      "gas": "4159280",
+      "codeHash": "0x2556c9f382e440887453858235bf7069ddf6eb57a3b77232759877eb41335e37"
+    },
+    "tagReader": {
+      "runtime": 12192,
+      "actualInitcode": 16056,
+      "gas": "3527150",
+      "codeHash": "0x5543abc88260efc0b015335a5f3a4ecaebb90ea1e45bd60a48575c5d2c00d8d8"
+    },
+    "query1": {
+      "runtime": 5354,
+      "actualInitcode": 7258,
+      "gas": "1439664",
+      "codeHash": "0xf960b4c565bd1607b3e1995c7027e9767e85da1e35e6c635c01f1785b2ff9926"
+    },
+    "query2": {
+      "runtime": 5354,
+      "actualInitcode": 7258,
+      "gas": "1439664",
+      "codeHash": "0xa818b237abb57583c0e385f52e15cba2726d757e1802d5882fb72623148b4f1b"
+    },
+    "query3": {
+      "runtime": 5354,
+      "actualInitcode": 7258,
+      "gas": "1439664",
+      "codeHash": "0x58b7cdb0edc45b9fccc11de82287b37ef25d0fd6e9a2a51c166498e74785dbd8"
+    },
+    "query4": {
+      "runtime": 5354,
+      "actualInitcode": 7258,
+      "gas": "1439664",
+      "codeHash": "0x525ecea025b21a7e2142e3a1d17485dde7c28ac752992f157809eec6fe6e613a"
+    },
+    "query5": {
+      "runtime": 5354,
+      "actualInitcode": 7258,
+      "gas": "1439664",
+      "codeHash": "0xd4a0fae22794d529c4a357439aab9a614aa6a30afda8aef9862456bfe99b6797"
+    },
+    "query6": {
+      "runtime": 5354,
+      "actualInitcode": 7258,
+      "gas": "1439664",
+      "codeHash": "0x5c57447088177ea7d755d70a7a1b9941c90e9e1f0e8af3c70e727db05e935112"
+    },
+    "query7": {
+      "runtime": 5354,
+      "actualInitcode": 7258,
+      "gas": "1439664",
+      "codeHash": "0x40bd530de6f07845f80891fc8e67704fee13dab54c0fc3ed43885449c2754747"
+    },
+    "query8": {
+      "runtime": 5354,
+      "actualInitcode": 7482,
+      "gas": "1597072",
+      "codeHash": "0x970c69c2fdacaf7ee31a97f9f13bf2e7c441ce056ee7d1a44844d8a8928fa237"
+    },
+    "query9": {
+      "runtime": 5354,
+      "actualInitcode": 7482,
+      "gas": "1597072",
+      "codeHash": "0xe20fdf9f8b962be87f8677e2694dd77e3cf3d4037c29820f112019ea5fa88095"
+    },
+    "query10": {
+      "runtime": 5354,
+      "actualInitcode": 9274,
+      "gas": "2856394",
+      "codeHash": "0xd3cf2c8025e92ac8a348442c7f0ec33a7f56a57136855c1f22226e279f2cd2a1"
+    },
+    "query11": {
+      "runtime": 5354,
+      "actualInitcode": 9274,
+      "gas": "2856394",
+      "codeHash": "0xccb1adc02c7c8288cd3f370a7c9a3af0f7e0f97757d927f7dff9f46e27dd941b"
+    }
+  },
+  "gas": {
+    "main": "177908978",
+    "matchedSignedFixture": "59830969"
+  },
+  "authority": "Local RPC-observed admission plus retained direct native/ECDSA evidence, not a remote state proof or original-author destination permission",
+  "controls": {
+    "missingProfile": "PARTIAL opaque",
+    "missingType": "PARTIAL",
+    "allRuntimeCaptures": true,
+    "exactQueriesAndCommitments": true
+  }
+}

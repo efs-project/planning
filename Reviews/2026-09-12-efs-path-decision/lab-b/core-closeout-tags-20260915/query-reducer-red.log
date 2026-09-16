@@ -1,0 +1,236 @@
+✖ silent falls through (2.013917ms)
+✔ deny wins (0.073792ms)
+✖ unknown blocks (0.11125ms)
+✖ untouched is not denial (0.083625ms)
+✖ new tombstone silent (0.074875ms)
+✖ legacy tombstone masks (0.079667ms)
+✖ missing discriminant unknown (0.056917ms)
+✖ unqualified tombstone unknown (0.058125ms)
+✖ an open Lens never proves absence (0.114209ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 1
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 67.026375
+
+✖ failing tests:
+
+test at browser/tag-stance-profile.test.mjs:16:3
+✖ silent falls through (2.013917ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   'NOT_PRESENT',
+  +   'A',
+  +   'SILENT'
+  -   'PRESENT',
+  -   'B',
+  -   'ASSERT'
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-profile.test.mjs:16:61)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.start (node:internal/test_runner/test:1096:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'NOT_PRESENT', 'A', 'SILENT' ],
+    expected: [ 'PRESENT', 'B', 'ASSERT' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at browser/tag-stance-profile.test.mjs:16:3
+✖ unknown blocks (0.11125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   'NOT_PRESENT',
+  +   'A',
+      'UNKNOWN',
+  -   'A',
+  -   null
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-profile.test.mjs:16:61)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'NOT_PRESENT', 'A', 'UNKNOWN' ],
+    expected: [ 'UNKNOWN', 'A', null ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at browser/tag-stance-profile.test.mjs:16:3
+✖ untouched is not denial (0.083625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'NOT_PRESENT',
+  +   'A',
+  +   'UNTOUCHED'
+  -   null,
+  -   null
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-profile.test.mjs:16:61)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'NOT_PRESENT', 'A', 'UNTOUCHED' ],
+    expected: [ 'NOT_PRESENT', null, null ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at browser/tag-stance-profile.test.mjs:16:3
+✖ new tombstone silent (0.074875ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   'NOT_PRESENT',
+  +   'A',
+  +   'TOMBSTONE'
+  -   'PRESENT',
+  -   'B',
+  -   'ASSERT'
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-profile.test.mjs:16:61)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'NOT_PRESENT', 'A', 'TOMBSTONE' ],
+    expected: [ 'PRESENT', 'B', 'ASSERT' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at browser/tag-stance-profile.test.mjs:16:3
+✖ legacy tombstone masks (0.079667ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'NOT_PRESENT',
+      'A',
+  +   'TOMBSTONE'
+  -   'MASK'
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-profile.test.mjs:16:61)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'NOT_PRESENT', 'A', 'TOMBSTONE' ],
+    expected: [ 'NOT_PRESENT', 'A', 'MASK' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at browser/tag-stance-profile.test.mjs:16:3
+✖ missing discriminant unknown (0.056917ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   'NOT_PRESENT',
+  -   'UNKNOWN',
+      'A',
+      null
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-profile.test.mjs:16:61)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'NOT_PRESENT', 'A', null ],
+    expected: [ 'UNKNOWN', 'A', null ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at browser/tag-stance-profile.test.mjs:16:3
+✖ unqualified tombstone unknown (0.058125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   'NOT_PRESENT',
+  -   'UNKNOWN',
+      'A',
+  +   'TOMBSTONE'
+  -   null
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-profile.test.mjs:16:61)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'NOT_PRESENT', 'A', 'TOMBSTONE' ],
+    expected: [ 'UNKNOWN', 'A', null ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at browser/tag-stance-profile.test.mjs:18:1
+✖ an open Lens never proves absence (0.114209ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'NOT_PRESENT'
+  - 'UNKNOWN'
+  
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-profile.test.mjs:18:53)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'NOT_PRESENT',
+    expected: 'UNKNOWN',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

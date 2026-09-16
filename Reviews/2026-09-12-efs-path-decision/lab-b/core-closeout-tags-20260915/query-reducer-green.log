@@ -1,0 +1,17 @@
+✔ silent falls through (1.023ms)
+✔ deny wins (0.043084ms)
+✔ unknown blocks (0.032542ms)
+✔ untouched is not denial (0.033667ms)
+✔ new tombstone silent (0.0365ms)
+✔ legacy tombstone masks (0.035916ms)
+✔ missing discriminant unknown (0.036ms)
+✔ unqualified tombstone unknown (0.029916ms)
+✔ an open Lens never proves absence (0.06275ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 64.917

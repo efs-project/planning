@@ -1,0 +1,78 @@
+Compiling 1 files with Solc 0.8.30
+Solc 0.8.30 finished in 14.09s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:92:21:
+   |
+92 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:97:29:
+   |
+97 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:117:22:
+    |
+117 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+    |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:121:25:
+    |
+121 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:88:5:
+   |
+88 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> test/TagStanceReader.sol:73:13:
+   |
+73 |         for(uint256 k;k<principals.length;k++){
+   |             ^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> test/TagStanceReader.sol:83:59:
+   |
+83 |         page.items=new Selection[](budget);uint256 filled;uint256 k=cursor.lensIndex;uint64 j=cursor.rawIndex;
+   |                                                           ^^^^^^^^^
+
+Warning (3860): Contract initcode size is 284917 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+ --> test/TagStanceQuery.t.sol:9:1:
+  |
+9 | contract TagStanceQueryTest is TagStanceProfileTest {
+  | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 1 test for test/TagStanceQuery.t.sol:TagStanceQueryTest
+[FAIL: wrong Concept returned complete empty] test_query_missing_query_meaning_cannot_certify_empty() (gas: 16954424)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 18.07ms (4.36ms CPU time)
+
+Ran 1 test suite in 28.49ms (18.07ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/TagStanceQuery.t.sol:TagStanceQueryTest
+[FAIL: wrong Concept returned complete empty] test_query_missing_query_meaning_cannot_certify_empty() (gas: 16954424)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test

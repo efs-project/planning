@@ -1,0 +1,13 @@
+✔ explicit operations construct exact stance targets and ordinary CAS (974.269333ms)
+✔ new Concept is published before its first ASSERT in the same guarded action (28.638958ms)
+✔ supplied revision is explicit and claimed File mismatch refuses before signing (59.943084ms)
+✔ selected revision guards HEAD and coordinate; changed HEAD rejects before signature (89.068208ms)
+✔ wrong exact Concept and missing profile never plan a publication (17.91175ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4310.937042

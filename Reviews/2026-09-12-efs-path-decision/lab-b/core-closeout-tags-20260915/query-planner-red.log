@@ -1,0 +1,89 @@
+✖ explicit operations construct exact stance targets and ordinary CAS (867.320333ms)
+✖ new Concept is published before its first ASSERT in the same guarded action (1.036ms)
+✖ supplied revision is explicit and claimed File mismatch refuses before signing (1.654916ms)
+✖ selected revision guards HEAD and coordinate; changed HEAD rejects before signature (31.154375ms)
+✖ wrong exact Concept and missing profile never plan a publication (0.53425ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 0
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4058.396916
+
+✖ failing tests:
+
+test at browser/tag-stance-planner.integration.test.mjs:12:1
+✖ explicit operations construct exact stance targets and ordinary CAS (867.320333ms)
+  Error: NOT_IMPLEMENTED
+      at Object.missing (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-profile.mjs:13:33)
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-planner.integration.test.mjs:14:30)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)
+
+test at browser/tag-stance-planner.integration.test.mjs:18:1
+✖ new Concept is published before its first ASSERT in the same guarded action (1.036ms)
+  Error: NOT_IMPLEMENTED
+      at Object.missing (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-profile.mjs:13:33)
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-planner.integration.test.mjs:19:25)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7)
+
+test at browser/tag-stance-planner.integration.test.mjs:22:1
+✖ supplied revision is explicit and claimed File mismatch refuses before signing (1.654916ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /FILE_MISMATCH/. Input:
+  
+  'Error: NOT_IMPLEMENTED'
+  
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-planner.integration.test.mjs:23:3)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: NOT_IMPLEMENTED
+        at Object.missing (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-profile.mjs:13:33)
+        at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-planner.integration.test.mjs:23:32)
+        at Test.runInAsyncScope (node:async_hooks:226:14)
+        at Test.run (node:internal/test_runner/test:1201:25)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:831:7),
+    expected: /FILE_MISMATCH/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at browser/tag-stance-planner.integration.test.mjs:28:1
+✖ selected revision guards HEAD and coordinate; changed HEAD rejects before signature (31.154375ms)
+  Error: NOT_IMPLEMENTED
+      at Object.missing (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-profile.mjs:13:33)
+      at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-planner.integration.test.mjs:30:25)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7)
+
+test at browser/tag-stance-planner.integration.test.mjs:34:1
+✖ wrong exact Concept and missing profile never plan a publication (0.53425ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /CONCEPT/. Input:
+  
+  'Error: NOT_IMPLEMENTED'
+  
+      at async TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-planner.integration.test.mjs:35:3)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: NOT_IMPLEMENTED
+        at Object.missing (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-profile.mjs:13:33)
+        at TestContext.<anonymous> (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/browser/tag-stance-planner.integration.test.mjs:35:32)
+        at Test.runInAsyncScope (node:async_hooks:226:14)
+        at Test.run (node:internal/test_runner/test:1201:25)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:831:7),
+    expected: /CONCEPT/,
+    operator: 'rejects',
+    diff: 'simple'
+  }

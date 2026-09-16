@@ -1,0 +1,25 @@
+✔ explicit operations construct exact stance targets and ordinary CAS (1032.914083ms)
+✔ new Concept is published before its first ASSERT in the same guarded action (28.716625ms)
+✔ supplied revision is explicit and claimed File mismatch refuses before signing (58.607167ms)
+✔ selected revision guards HEAD and coordinate; changed HEAD rejects before signature (68.865292ms)
+✔ wrong exact Concept and missing profile never plan a publication (17.838875ms)
+✖ the signed whole publication is admitted and read back semantically (62.390584ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4424.923625
+
+✖ failing tests:
+
+test at browser/tag-stance-planner.integration.test.mjs:39:1
+✖ the signed whole publication is admitted and read back semantically (62.390584ms)
+  Error: RPC eth_call failed (3)
+      at settle (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/compact-read-transport.mjs:40:51)
+      at execute (file:///Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/compact-read-transport.mjs:58:31)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    rpcError: { code: 3, message: 'execution reverted: custom error 0xeb030880', data: '0xeb030880' }
+  }

@@ -1,0 +1,171 @@
+{
+  "complete": true,
+  "actions": [
+    {
+      "label": "action/matched-native-first",
+      "gas": "1047493"
+    },
+    {
+      "label": "action/matched-signed-first",
+      "gas": "1097570"
+    },
+    {
+      "label": "action/DENY",
+      "gas": "879957"
+    },
+    {
+      "label": "action/SILENT",
+      "gas": "863024"
+    },
+    {
+      "label": "action/ASSERT-again",
+      "gas": "868138"
+    },
+    {
+      "label": "action/ASSERT-after-UNBIND",
+      "gas": "879710"
+    },
+    {
+      "label": "action/inverse-count2",
+      "gas": "1023712"
+    },
+    {
+      "label": "action/orphan-H",
+      "gas": "1006779"
+    },
+    {
+      "label": "action/older-revision",
+      "gas": "1040179"
+    },
+    {
+      "label": "action/inverse-count5-directory",
+      "gas": "1023333"
+    },
+    {
+      "label": "action/inverse-count6",
+      "gas": "1056170"
+    },
+    {
+      "label": "action/same-label-C2",
+      "gas": "1023712"
+    },
+    {
+      "label": "action/new-Concept-plus-ASSERT",
+      "gas": "1358021"
+    },
+    {
+      "label": "action/guarded-selected-revision",
+      "gas": "973701"
+    }
+  ],
+  "queries": [
+    {
+      "label": "query/inverse-count1",
+      "steps": 1,
+      "total": 1,
+      "gas": [
+        "460023"
+      ]
+    },
+    {
+      "label": "query/inverse-count2",
+      "steps": 1,
+      "total": 2,
+      "gas": [
+        "561369"
+      ]
+    },
+    {
+      "label": "query/inverse-count5",
+      "steps": 1,
+      "total": 5,
+      "gas": [
+        "918208"
+      ]
+    },
+    {
+      "label": "query/inverse-count6",
+      "steps": 1,
+      "total": 6,
+      "gas": [
+        "1053835"
+      ]
+    },
+    {
+      "label": "query/selected-origin",
+      "steps": 6,
+      "total": 6,
+      "gas": [
+        "705026",
+        "444740",
+        "444740",
+        "549595",
+        "469862",
+        "538384"
+      ]
+    },
+    {
+      "label": "query/tags-P1",
+      "steps": 1,
+      "total": 2,
+      "gas": [
+        "560962"
+      ]
+    },
+    {
+      "label": "query/subjects-P1",
+      "steps": 2,
+      "total": 6,
+      "gas": [
+        "705026",
+        "972080"
+      ]
+    },
+    {
+      "label": "query/tags-P8",
+      "steps": 1,
+      "total": 2,
+      "gas": [
+        "907196"
+      ]
+    },
+    {
+      "label": "query/subjects-P8",
+      "steps": 2,
+      "total": 6,
+      "gas": [
+        "928366",
+        "1918227"
+      ]
+    },
+    {
+      "label": "query/tags-P64",
+      "steps": 1,
+      "total": 2,
+      "gas": [
+        "4091251"
+      ]
+    },
+    {
+      "label": "query/subjects-P64",
+      "steps": 3,
+      "total": 6,
+      "gas": [
+        "2953223",
+        "708287",
+        "9999627"
+      ]
+    }
+  ],
+  "refusals": [
+    {
+      "label": "refusal/stale-selected-HEAD",
+      "gas": "178204"
+    },
+    {
+      "label": "refusal/budget257/step2",
+      "gas": "708287"
+    }
+  ],
+  "closed": true
+}

@@ -1,0 +1,23 @@
+✔ explicit operations construct exact stance targets and ordinary CAS (1002.728584ms)
+✔ new Concept is published before its first ASSERT in the same guarded action (31.322208ms)
+✔ supplied revision is explicit and claimed File mismatch refuses before signing (57.46525ms)
+✔ selected revision guards HEAD and coordinate; changed HEAD rejects before signature (67.331125ms)
+✔ wrong exact Concept and missing profile never plan a publication (18.078291ms)
+✔ the signed whole publication is admitted and read back semantically (59.664375ms)
+✔ silent falls through (1.092834ms)
+✔ deny wins (0.045791ms)
+✔ unknown blocks (0.031917ms)
+✔ untouched is not denial (0.043333ms)
+✔ new tombstone silent (0.042ms)
+✔ legacy tombstone masks (0.031542ms)
+✔ missing discriminant unknown (0.041458ms)
+✔ unqualified tombstone unknown (0.030709ms)
+✔ an open Lens never proves absence (0.064959ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4397.632416
