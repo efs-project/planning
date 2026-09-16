@@ -56,6 +56,8 @@ DENY is a qualified negative statement, distinct from no qualifying statement. A
 
 ## Task 1: Required tag profile and reproducible index
 
+**Execution status September16:** active from independently reviewed live-Files checkpoint `6cffa37`; sole Astra Extra High source/build/bounded-chain worker. Parent owns canonical documents and publication. Consumes the explicit live revision matrix and separately pinned final Files validator; old semantic profiles and owner demo remain unchanged. No stance implementation or cost claim until the task's measurement/review gate.
+
 **Files:** create focused `lab-b/test/TagStanceProfile.sol` and `TagStanceProfile.t.sol`; narrow virtual/composition seam in the final reviewed Files index; fixture support and evidence under `lab-b/core-closeout-tags-20260915/`. Reuse described Types; do not add another descriptor language.
 
 **Interfaces:** consumes retained canonical coordinate getters, `Effect.freshBinding`, shared `_foldEffect`/`_validatePublication`, exact Files descriptor configurations and reviewed described-Type registration. Produces a constructor-pinned required profile, exact family-key recipe and replayable retained inventory consumed by Task2. Keep token/Concept/revision validation in one bounded unit shared by live/replay paths.

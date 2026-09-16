@@ -17,7 +17,7 @@
 
 ## Task 1: Mounted provider, paid consumption and immutable snapshot
 
-**Execution status September16:** active from independently reviewed wallet checkpoint `7e2b5bf`; sole Astra Extra High prototype source/build/bounded-chain worker. Parent owns main documentation and publication. No live implementation/fit/economics claim until measured and independently reviewed; conditional helper boundary below remains the only pre-authorized fit candidate.
+**Execution status September16:** complete and independently reviewed `7e2b5bf..6cffa37`; source/build/owned-chain lease released. Parent31Forge+1SDK checks and retained source/transaction/artifact audit pass. Finite selected provider, shape-only observations, separately admitted snapshot, packaging correction and actual whole costs are recorded in [[core-closeout-results-20260915#Typed live Files reviewed — September16|results]]. No universal provider/history/foreign-proof claim or permanent profile adoption. Original task checklist below is the specification; the completion evidence is the linked gate.
 
 **Files:** focused `LiveFilesProfile`/reader/provider/consumer contracts and tests, narrow existing Files index/reader/SDK profile extension, bounded actual Node measurement. Evidence in `core-closeout-live-files-20260915/`.
 
