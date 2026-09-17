@@ -3,6 +3,7 @@ test('typed directory unknown kind qualifies membership without claiming an empt
   assert.equal(folderState({knowledge:'PRESENT',coverage:'COMPLETE',nameCoverage:'COMPLETE',kindCoverage:'PARTIAL',value:[{kind:'unknown'}]}).kind,'partial');
 });
 import assert from 'node:assert/strict';
+import * as ethers from 'ethers';
 import {folderState, filterRows, canOpen, estimateUsd, receiptTotals} from './files-view.mjs';
 import * as view from './files-view.mjs';
 test('exhaustive filtered empty query is not described as an empty folder',()=>{
@@ -26,12 +27,13 @@ test('cost projection leads with Base and maps old config by ID without changing
   assert.equal(typeof view.costPresentation,'function');
   const edited=structuredClone(costSnapshot); edited.networks[2].gasGwei=0.02;
   const actual=view.costPresentation([costEntry('1','100000')],edited);
-  assert.deepEqual(actual.columns,['Action','Gas','Ethereum L1','Base','ZKsync']);
-  assert.equal(actual.headline,'Base ≈ $0.0060 estimated');
-  assert.ok(Math.abs(actual.total.base-0.006)<1e-12);
+  assert.deepEqual(actual.columns,['Action','Gas','Ethereum L1','Base','Arbitrum','ZKsync']);
+  assert.match(actual.headline,/unavailable/);
+  assert.equal(actual.total.base,null,'missing calldata is not a complete Base fee');
+  assert.ok(Math.abs(actual.total.models.base.executionUsd-0.006)<1e-12);
   assert.equal(actual.total.ethereum,0.6);
   assert.equal(actual.total.zksync,null);
-  assert.deepEqual(actual.networks.map(n=>[n.id,n.index]),[['ethereum',0],['base',2]]);
+  assert.deepEqual(actual.networks.map(n=>[n.id,n.index]),[['ethereum',0],['base',1],['arbitrum',2]]);
   assert.equal(edited.networks.length,5);
   assert.equal(edited.networks[2].gasGwei,0.02);
 });
@@ -45,7 +47,7 @@ test('recent action table includes unknown and reverted receipts, deduplicates h
   assert.equal(actual.rows[2].base,null);
   assert.equal(actual.total.gas,121000n);
   assert.equal(actual.total.label,'Known subtotal');
-  assert.equal(actual.headline,'Base ≈ $0.0036 known subtotal · 1 unknown');
+  assert.match(actual.headline,/unavailable.*1 unknown/);
   assert.equal(typeof view.renderCostTable,'function');
   const html=view.renderCostTable(actual);
   assert.match(html,/<th scope="col">Action<\/th>/);
@@ -59,7 +61,7 @@ test('recent action table includes unknown and reverted receipts, deduplicates h
 test('no receipts or missing assumptions never imply measured zero spending', () => {
   assert.equal(typeof view.costPresentation,'function');
   assert.equal(view.costPresentation([],costSnapshot).headline,'Base estimate unavailable · no receipts');
-  assert.equal(view.costPresentation([costEntry('1','100000')],null).total.base,null);
+  assert.equal(view.costPresentation([costEntry('1','100000')],null).total.base,null,'calldata missing even with new defaults');
   assert.equal(view.costPresentation([costEntry('1','100000')],{...costSnapshot,ethUsd:null}).total.base,null);
   assert.equal(estimateUsd('100000',{id:'zksync',gasGwei:1,extraUsd:0},3000),null);
   assert.equal(estimateUsd('100000',{gasGwei:null,extraUsd:0},3000),null);
@@ -81,10 +83,24 @@ test('recent rows are bounded but totals cover every unique recorded action', ()
   const actual=view.costPresentation(entries,costSnapshot);
   assert.equal(actual.rows.length,5);
   assert.equal(actual.total.gas,700000n);
-  assert.ok(Math.abs(actual.total.base-0.021)<1e-12);
+  assert.ok(Math.abs(actual.total.models.base.executionUsd-0.021)<1e-12);
   const tiny=view.costPresentation([costEntry('1','1')],costSnapshot);
   assert.match(view.renderCostTable(tiny),/&lt; \$0.0001/);
   assert.doesNotMatch(tiny.headline,/\$0\.0000/);
+});
+
+test('full fee rows and totals disclose components and mixed receipt or calldata gaps',()=>{
+  const good={...costEntry('1','100000'),receiptAttribution:'RPC_MATCHED_DIRECT_PLAN',transaction:{to:'0x'+'12'.repeat(20),data:'0x'+'ab'.repeat(175),value:'0'}};
+  const complete=view.costPresentation([good],undefined,ethers);
+  assert.ok(complete.total.base>0);
+  assert.match(complete.headline,/practical/);
+  assert.match(view.renderCostTable(complete),/operator/);
+  assert.match(view.renderCostTable(complete),/scenario/);
+  const incomplete=view.costPresentation([good,costEntry('2','100000')],undefined,ethers);
+  assert.equal(incomplete.total.base,null,'one unavailable posting cost cannot be a complete total');
+  assert.ok(incomplete.total.models.base.knownScenarioUsd>0);
+  assert.equal(view.receiptTotals([{...good,receiptAttribution:'MISMATCH'}]).gas,null);
+  assert.equal(view.costPresentation([good,{...good,transaction:{...good.transaction,data:'0x00'}}],undefined,ethers).total.base,null,'contradictory calldata for one hash is not a fee estimate');
 });
 
 test('overflowing edited assumptions remain unknown instead of displaying infinite dollars', () => {

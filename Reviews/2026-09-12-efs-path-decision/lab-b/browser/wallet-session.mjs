@@ -1,5 +1,32 @@
 /** Local workbench wallet helpers. No key import, mainnet faucet or relayer. */
 const local=hostname=>['127.0.0.1','localhost','[::1]'].includes(hostname);
+export function journalPrefix(manifest,genesisHash){
+  if(!/^0x[0-9a-f]{64}$/i.test(genesisHash??''))throw Error('Cannot qualify journal without a valid genesis hash.');
+  return `efs-compact:${manifest.chainId}:${manifest.contracts.ledger.address.toLowerCase()}:${genesisHash.toLowerCase()}:`;
+}
+/** No keys or production relayer: one bounded zero-value call to this local Ledger. */
+export async function sendLocalSponsoredTransaction({development,config,pageUrl,rpc,keccak256,ethers,genesisHash,transaction,beforeSend=()=>{}}){
+  if(development!==true||config.localSponsor===false)throw Error('Local sponsor is development-only.');
+  assertLocalConfig(config,pageUrl);
+  const ledger=config.manifest.contracts.ledger;
+  if(transaction.to?.toLowerCase()!==ledger.address.toLowerCase()||BigInt(transaction.value??0)!==0n
+    ||!/^0x(?:[0-9a-f]{2}){4,}$/i.test(transaction.data??''))throw Error('Sponsor only pays zero-value Ledger calls.');
+  if(transaction.data.slice(0,10).toLowerCase()!==new ethers.Interface(ledger.abi).getFunction('executeGuardedSigned').selector)
+    throw Error('Sponsor only submits guarded signed intents, never direct author calls or Ledger administration.');
+  const [chain,client,genesis,code,accounts]=await Promise.all([
+    rpc('eth_chainId'),rpc('web3_clientVersion'),rpc('eth_getBlockByNumber',['0x0',false]),
+    rpc('eth_getCode',[ledger.address,'latest']),rpc('eth_accounts')]);
+  if(BigInt(chain)!==BigInt(config.manifest.chainId)||!/anvil/i.test(client)
+    ||!genesisHash||genesis?.hash?.toLowerCase()!==genesisHash.toLowerCase()
+    ||code==='0x'||keccak256(code).toLowerCase()!==ledger.codeHash.toLowerCase())throw Error('Local sponsor chain or deployment changed.');
+  const from=accounts?.[0];if(!/^0x[0-9a-f]{40}$/i.test(from??''))throw Error('Local Anvil has no unlocked payer.');
+  const tx={to:transaction.to,data:transaction.data,value:'0x0',from};
+  const gas=BigInt(await rpc('eth_estimateGas',[tx])),cap=16777216n;
+  if(gas<=0n||gas>cap)throw Error('Local sponsor gas cap exceeded.');
+  const padded=(gas*120n+99n)/100n;
+  await beforeSend(); // Route/wallet changes still abort before the one broadcast.
+  return rpc('eth_sendTransaction',[{...tx,gas:'0x'+(padded>cap?cap:padded).toString(16)}]);
+}
 export function assertLocalConfig(config,pageUrl){
   const page=new URL(pageUrl),rpc=new URL(config.rpcUrl);
   if(!local(page.hostname)||!local(rpc.hostname)||page.protocol!=='http:'||rpc.protocol!=='http:'

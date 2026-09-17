@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {requestLocalNetwork,verifyWalletEnvironment,fundLocalWallet} from './wallet-session.mjs';
+import * as wallet from './wallet-session.mjs';
+import * as ethers from 'ethers';
 
 const config={rpcUrl:'http://127.0.0.1:57204',manifest:{workbench:true,chainId:31337,contracts:{ledger:{address:'0x'+'12'.repeat(20),codeHash:'runtime'}}}};
 const address='0x'+'34'.repeat(20),pageUrl='http://127.0.0.1:57215/';
@@ -49,4 +51,31 @@ test('local faucet tops up to one ETH, verifies it, and never reduces a larger b
 });
 test('local faucet does not claim success when the balance was not updated',async()=>{
   await assert.rejects(fundLocalWallet({config,pageUrl,address,rpc:async m=>expected[m]}),/balance/);
+});
+test('journal namespace separates deterministic redeployments and refuses missing genesis',()=>{
+  assert.equal(typeof wallet.journalPrefix,'function');
+  const prefix=wallet.journalPrefix(config.manifest,'0x'+'aa'.repeat(32));
+  assert.notEqual(prefix,wallet.journalPrefix(config.manifest,'0x'+'bb'.repeat(32)));
+  assert.throws(()=>wallet.journalPrefix(config.manifest,null),/genesis/);
+  assert.match(prefix,/31337/);
+});
+test('local subsidy checks identity and deployment, caps gas, and broadcasts once from payer not author',async()=>{
+  assert.equal(typeof wallet.sendLocalSponsoredTransaction,'function');
+  const calls=[],genesis='0x'+'ab'.repeat(32),payer='0x'+'56'.repeat(20),hash='0x'+'78'.repeat(32);
+  const tx={to:config.manifest.contracts.ledger.address,data:'0x929549ee',value:'0'};
+  const sponsorConfig={...config,manifest:{...config.manifest,contracts:{ledger:{...config.manifest.contracts.ledger,abi:['function executeGuardedSigned(bytes)']}}}};
+  const rpc=async(method,params)=>{calls.push([method,params]);return ({...expected,eth_getBlockByNumber:{hash:genesis},eth_accounts:[payer],eth_estimateGas:'0x186a0',eth_sendTransaction:hash})[method];};
+  const args={development:true,config:sponsorConfig,pageUrl,rpc,keccak256,ethers,genesisHash:genesis,transaction:tx};
+  const result=await wallet.sendLocalSponsoredTransaction(args);
+  assert.equal(result,hash);
+  const sent=calls.filter(([m])=>m==='eth_sendTransaction');assert.equal(sent.length,1);
+  assert.deepEqual(sent[0][1],[{...tx,value:'0x0',from:payer,gas:'0x1d4c0'}]);
+  for(const override of [{development:false},{config:{...config,localSponsor:false}},{pageUrl:'https://example.com'},
+    {genesisHash:'0x'+'cd'.repeat(32)},{transaction:{...tx,to:address}},{transaction:{...tx,value:'1'}},{transaction:{...tx,data:'0x12345678'}},
+    {rpc:async(m,p)=>m==='web3_clientVersion'?'geth':rpc(m,p)},
+    {rpc:async(m,p)=>m==='eth_estimateGas'?'0x1000001':rpc(m,p)},
+    {keccak256:()=> 'wrong'}]){
+    calls.length=0;await assert.rejects(wallet.sendLocalSponsoredTransaction({...args,...override}));
+    assert.equal(calls.filter(([m])=>m==='eth_sendTransaction').length,0);
+  }
 });

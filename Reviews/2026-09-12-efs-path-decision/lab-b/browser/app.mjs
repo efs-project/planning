@@ -1,6 +1,8 @@
 import * as ethers from '/vendor/ethers.mjs';
 import {createCompactSdk,normalizeTagAssessment} from './compact-sdk.mjs';
 import {folderState,filterRows,canOpen,costPresentation,renderCostTable,tagLabel} from './files-view.mjs';
+import {resolveEconomics} from './fee-model.mjs';
+import {journalPrefix} from './wallet-session.mjs';
 
 const $ = id => document.getElementById(id);
 $('filter-scope').insertAdjacentHTML('beforebegin','<select id="filter-mode" aria-label="Tag filter mode"><option value="include">With tag</option><option value="exclude">Without tag</option></select>');
@@ -333,7 +335,7 @@ function renderActivity() {
 }
 function renderCosts() {
   const economics=state.economics;
-  const view=costPresentation(state.entries,economics), {totals,networks}=view;
+  const view=costPresentation(state.entries,economics,ethers), {totals,networks}=view;
   $('cost-summary').textContent=view.headline;
   $('cost-receipts').textContent=view.receiptSummary;
   const assumptionsOpen=$('cost-body').querySelector('.assumptions')?.open??false;
@@ -341,7 +343,8 @@ function renderCosts() {
   const sourceUrl=typeof source==='string'&&/^https?:\/\//.test(source)?`<a href="${escape(source)}" target="_blank" rel="noreferrer">snapshot source</a>`:escape(typeof source==='object'?json(source):source??'Not provided');
   $('cost-body').innerHTML=`<div class="gas-number">${totals.gas!==null?pretty(totals.gas):'—'} <small>recorded local receipt gas${totals.unknown?' · known subtotal':''}</small></div><p class="cost-caption">${totals.transactions.length} unique recorded receipts${totals.unknown?` · ${totals.unknown} costs unknown`:''}. This browser's journal only; deployments and other users' actions are excluded.<br>Reverted included transactions still cost gas; only EFFECTS_VERIFIED means effect success.</p>
     ${renderCostTable(view)}
-    <p class="cost-caption">Execution-only estimates, not live quotes or deployed-chain benchmarks. Local EVM gas × snapshot gwei × ETH/USD + any manually entered extra USD. L2 data/operator fees are excluded unless manually entered; zero extra does not mean zero real fees.<br><strong>ZKsync: Not measured.</strong> EraVM pricing is not local EVM gas multiplied by a fee.${economics?`<br>Snapshot: ${escape(economics.asOf??'undated')} · ${sourceUrl}${state.editedEconomics?' · locally edited assumptions (this page session)':''}`:''}</p>
+    <p class="cost-caption">Dated counterfactual network costs, not live quotes or deployed-chain benchmarks. Assumes the same contract state, VM rules and execution path as local receipt gas. No public calldata requests. Storage payments, wallet/provider charges and other users' actions are excluded; local subsidy is not free mainnet execution.<br>Ethereum intrinsic calldata gas is already included. Base adds a Fjord size-only practical data bound (not a guarantee) and the captured zero operator fee. Arbitrum adds an uncompressed calldata + 140-byte posting scenario, not an upper bound. Unknown components keep totals unknown.<br><strong>ZKsync: Not measured.</strong> EraVM pricing is not local EVM gas multiplied by a fee.<br>Fee snapshot: ${escape(economics.asOf)} · FX: ${escape(economics.fxAsOf)} · ${sourceUrl}${state.editedEconomics?' · locally edited assumptions (this page session)':''}</p>
+    <details><summary>Model inputs and source bounds</summary><p>Gas prices are nearby RPC recommendations, not historically pinned quotes. Base unsigned type-2 envelope: nonce 0, chain 8453, local gas used as gas limit, assumed 0.001 gwei tip, empty access list; signature overhead is modeled by the formula. Compression depends on actual bytes; this offline bound is a practical model. Base operator evidence: getOperatorFee(3126115)=0 at the captured Jovian snapshot. Arbitrum L1 estimate: 2,240,062 wei × 16 per byte; compression, envelope and fee changes may differ.</p><p><a href="https://docs.base.org/specifications/transactions/network-fees" target="_blank" rel="noreferrer">Base fees</a> · <a href="https://github.com/ethereum-optimism/optimism/blob/develop/packages/contracts-bedrock/src/L2/GasPriceOracle.sol" target="_blank" rel="noreferrer">Fjord formula</a> · <a href="https://docs.arbitrum.io/arbitrum-essentials/how-to-estimate-gas" target="_blank" rel="noreferrer">Arbitrum estimation</a></p><pre class="document">${escape(json({base:economics.baseInputs,arbitrum:economics.arbitrumInputs,networks:economics.networks}))}</pre></details>
     ${economics?`<details class="assumptions"${assumptionsOpen?' open':''}><summary>Advanced assumptions</summary><label>ETH / USD <input type="number" min="0" step="any" data-economic="ethUsd" value="${escape(economics.ethUsd)}"></label>${networks.map(network=>`<label>${escape(network.label)} · gas gwei <input type="number" min="0" step="any" data-network="${network.index}" data-economic="gasGwei" value="${escape(network.gasGwei)}"></label><label>${escape(network.label)} · extra USD / tx <input type="number" min="0" step="any" data-network="${network.index}" data-economic="extraUsd" value="${escape(network.extraUsd)}"></label>`).join('')}<p class="cost-caption">ZKsync has no editable numeric model in this EVM experiment.</p></details>`:''}
     <div class="rpc-line">RPC work, not gas · ${pretty(state.rpc.calls)} logical calls · ${pretty(readTransport?.metrics.httpRequests??0)} HTTP requests (${pretty(readTransport?.metrics.httpBatches??0)} batches) · ${(state.rpc.bytes/1024).toFixed(1)} KiB responses · ${state.rpc.errors} errors<br>Page session only. Reads do not spend transaction gas.</div>`;
 }
@@ -401,7 +404,7 @@ async function connectWallet(){
   }
   applyCustomLens([address,...Object.values(state.config.manifest.authors).filter(a=>a.toLowerCase()!==address.toLowerCase())]);
   await refresh();if($('wallet-setup'))$('wallet-setup').open=true;
-  notice(`Wallet connected. ${autoFund?'At least 1 local test ETH is ready for gas.':state.config.localFaucet===false?'Use local test ETH from your development chain.':'Click Get local test ETH, then create files.'} Each write currently asks for a data signature and a transaction. No real funds needed.`);
+  notice(`Wallet connected. ${autoFund?'At least 1 local test ETH is ready for gas.':'Use local test ETH for unsponsored transactions.'} ${localSponsorEnabled()?'Local development subsidy enabled: sign the authored intent; unlocked Anvil pays its transaction.':'Each write asks for an author signature and a payer transaction.'} No real funds needed.`);
 }
 async function checkWallet(wallet){
   if(wallet!==state.wallet)throw Error('Writer changed; no further signature or transaction requested.');
@@ -428,6 +431,9 @@ async function sendTransaction(transaction,navigation,wallet=state.wallet) {
   checkRoute(navigation);
   await checkWallet(wallet);
   if(wallet.external){
+    if(localSponsorEnabled())return state.walletTools.sendLocalSponsoredTransaction({development:import.meta.env?.DEV===true,
+      config:state.config,pageUrl:location.href,rpc,ethers,keccak256:ethers.keccak256,genesisHash:state.genesisHash,transaction,
+      beforeSend:async()=>{checkRoute(navigation);await checkWallet(wallet);checkRoute(navigation);}});
     const estimate=BigInt(await rpc('eth_estimateGas',[{...transaction,from:wallet.address}]));
     if(estimate>16777216n)throw Error('Transaction exceeds this prototype’s gas cap.');
     checkRoute(navigation);await checkWallet(wallet);
@@ -444,6 +450,7 @@ async function sendTransaction(transaction,navigation,wallet=state.wallet) {
   checkRoute(navigation);
   return rpc('eth_sendRawTransaction',[raw]);
 }
+function localSponsorEnabled(){return import.meta.env?.DEV===true&&state.config?.localSponsor!==false&&$('local-sponsor')?.checked===true;}
 async function write(operation,args,navigation=state.navigation) {
   checkRoute(navigation);
   if(!state.wallet||$('lens').value==='conflict') throw new Error('Connect your wallet or enable a demo signer, and choose an ordered Lens first.');
@@ -733,6 +740,7 @@ await run(async()=>{
   const response=await fetch(new URL('./config.json',document.baseURI),{cache:'no-store'});
   if(!response.ok) throw new Error(`Configuration unavailable (${response.status}).`);
   state.config=await response.json(); state.folder=state.config.manifest.folder;
+  if(import.meta.env?.PROD===true){state.config.demoSigners=false;state.config.localFaucet=false;state.config.localSponsor=false;delete state.config.carrierOrigin;}
   if(state.config.manifest.externalContentProfile==='ar-ipfs-locator-v2')state.externalContent=await import('./external-content.mjs');
   if(state.config.localWallet){
     state.walletTools=await import('./wallet-session.mjs');
@@ -740,6 +748,7 @@ await run(async()=>{
     $('add-network').hidden=false;
     $('wallet-rpc').value=state.config.rpcUrl;
     $('wallet-network').textContent=`RPC: ${state.config.rpcUrl} · chain ID ${state.config.manifest.chainId}. If you already have another Anvil network, update its RPC to this one.`;
+    if(import.meta.env?.DEV===true&&state.config.localSponsor!==false)$('wallet-setup').insertAdjacentHTML('beforeend','<label><input id="local-sponsor" type="checkbox" checked> Development subsidy: unlocked local Anvil pays Ledger transactions</label><p>One portable author-signature prompt per write; the payer is separate and uses no wallet transaction approval. Checked against loopback, chain genesis, Anvil identity and Ledger bytecode, capped at 16,777,216 gas with zero ETH value. Uncheck for normal wallet payment. Never available in a static/public build.</p>');
     state.walletTools.discoverWallets(window,options=>{
       state.walletOptions=options;const select=$('wallet-provider'),previous=select.value;
       select.replaceChildren(...options.map(w=>new Option(w.name,w.id)));
@@ -758,8 +767,11 @@ await run(async()=>{
     document.querySelector('.about').innerHTML='<summary>About this experiment</summary><p>Private local-test typed Directory graph, not a globally acyclic tree. Exact lowercase ASCII paths are Lens-relative routes; aliases and mixed-author cycles are possible. Breadcrumbs are not universal parent ownership. Source/destination guards freeze known positions, not unseen names. Required profile administration remains trusted.</p><p>Inline file bytes only: new files up to 8160 bytes, edits up to 8128. Downloads are inert and exact. No carrier, encryption, production wallet, portable state proof, public deployment, or all-in chain-fee claim.</p>';
     if(hasCarriers())document.querySelector('.about').innerHTML='<summary>About this experiment</summary><p>Guarded Directory graph with exact byte carriers and retained Concept labels. New inline carriers: 8160 stored bytes, with a checked digest header. External raw SHA-256: up to 1 MiB, explicit origin permission per open, no credentials or redirects. Only decoded bounded static PNG previews. Existing legacy inline revisions keep their original meanings.</p><p>Encryption uses AES-GCM; public names, metadata and plaintext commitments still leak information. No private directory enumeration, key distribution/recovery, production wallet, global tree, portable source-state proof, public deployment or all-in fee guarantee.</p>';
   }
-  state.prefix=`efs-compact:${state.config.manifest.chainId}:${state.config.manifest.contracts.ledger.address}:`;
-  state.economics=state.config.economics ? structuredClone(state.config.economics):null;
+  state.genesisHash=(await rpc('eth_getBlockByNumber',['0x0',false]))?.hash;
+  state.prefix=journalPrefix(state.config.manifest,state.genesisHash);
+  state.economics=resolveEconomics(state.config.economics);
+  // Unqualified legacy namespaces are preserved, never imported as current costs.
+  $('activity').previousElementSibling.textContent='Signed plans are saved before broadcast. Reconcile checks canonical effects without signing again. Journal and history are scoped to this genesis + chain ID + Ledger. Older unqualified storage is retained, not counted here.';
   try {state.history=readStored('witnessed',{})??{};state.removed=readStored('removed',null);}
   catch {state.storageIssue='Local navigation hints could not be read. They are not used as file evidence.';}
   const journal={get:async id=>readStored(`journal:${id}`,null),put:async entry=>{
@@ -773,6 +785,6 @@ await run(async()=>{
     document.querySelector('h1').textContent='Files, folders, and shared views.';
     document.querySelector('.below-workspace .about').innerHTML='<summary>About this prototype</summary><p>This is v2 end to end: typed records, the required index, ordered Lenses and guarded atomic writes. No v1 code or contracts. All metadata reads go directly to the local chain; the web server only serves static files and configuration.</p><p>Try docs/meeting.txt with either Lens order, photos/red.png, and create/upload/edit/rename/move/link/copy/hide/restore. Chain history follows selected revision ancestry at one pinned basis. Recursive release previews only your reachable placements and masks, then sends separate guarded transactions; it never erases Records, tags, other authors or outside aliases. Small files fit onchain; larger uploads use a temporary byte store (1 MiB demo cap). Encrypted sample key: 11 repeated 32 times.</p><p>Rough edges: lowercase ASCII names, generic tags rather than exact ASSERT / DENY / SILENT stances, no persistent IPFS/Arweave upload driver. Live providers can be linked, not implicitly copied. Wallet mode needs local test ETH and currently uses two approvals. This is not a production deployment.</p>';
   }
-  if(state.externalContent)document.querySelector('.below-workspace .about').lastElementChild.textContent='Arweave/IPFS links and copies retain the exact address and fingerprint. Public gateways retrieve bytes only with open permission. New paid Arweave uploads and IPFS pinning are not wired. Recursive release affects only your previewed placements, never global deletion. Generic tags are not ASSERT / DENY / SILENT stances. Local wallet writes use two approvals. Not a production deployment.';
+  if(state.externalContent)document.querySelector('.below-workspace .about').lastElementChild.textContent='Arweave/IPFS links and copies retain the exact address and fingerprint. Public gateways retrieve bytes only with open permission. New paid Arweave uploads and IPFS pinning are not wired. For a paid Arweave upload: explicitly choose a funded Base-mainnet wallet and a maximum Turbo credit top-up, consent to public irreversible storage, upload through the user-operated Turbo service, then register its ar:// ID here after independent byte verification. Funding, upload acceptance, retrieval and Arweave settlement are separate evidence. No paid upload was tested; temporary local bytes are not durable. Recursive release affects only your previewed placements, never global deletion. Generic tags are not ASSERT / DENY / SILENT stances. Development subsidy uses one author-signature prompt; otherwise wallet writes require two approvals. Not a production deployment.';
   await refresh();
 });

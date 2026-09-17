@@ -8,18 +8,11 @@ import {join,resolve} from 'node:path';
 import assert from 'node:assert/strict';
 import {createEnvironment} from './compact-environment.mjs';
 import {createCompactSdk} from '../browser/compact-sdk.mjs';
+import {economicsSnapshot} from '../browser/fee-model.mjs';
 
 const root=fileURLToPath(new URL('../browser/',import.meta.url));
 const json=value=>JSON.stringify(value,(_,v)=>typeof v==='bigint'?String(v):v,2);
-export const economics={ethUsd:2544.385,asOf:'2026-09-14T19:45:15Z',
-  source:'https://api.coinbase.com/v2/prices/ETH-USD/spot',
-  note:'Local EVM gas multiplied by an observed gas-price snapshot. L2 L1-data/operator costs excluded; not a live transaction quote.',
-  networks:[
-    {id:'ethereum',label:'Ethereum',gasGwei:0.0953168,extraUsd:0,kind:'execution-only estimate',source:'https://ethereum-rpc.publicnode.com'},
-    {id:'optimism',label:'Optimism',gasGwei:0.001000442,extraUsd:0,kind:'execution-only estimate; excludes L1 data/operator fees',source:'https://mainnet.optimism.io'},
-    {id:'base',label:'Base',gasGwei:0.006,extraUsd:0,kind:'execution-only estimate; excludes L1 data/operator fees',source:'https://mainnet.base.org'},
-    {id:'arbitrum',label:'Arbitrum',gasGwei:0.020146,extraUsd:0,kind:'execution-only estimate; excludes L1 data fees',source:'https://arb1.arbitrum.io/rpc'},
-  ]};
+export const economics=economicsSnapshot;
 export function browserConfig(env,{directory=false,carrierFixture}={}){
   const config={manifest:env.manifest,rpcUrl:env.rpcUrl,
     mounts:[{id:env.manifest.folder,label:'Files'},...(directory?[]:[{id:env.manifest.folders[1],label:'Archive'}])],economics};
@@ -54,7 +47,7 @@ export async function startBrowser(env,{seed=true,directory=false,carrierFixture
   }
   const config=browserConfig(env,{directory,carrierFixture});
   const mime={'.html':'text/html','.mjs':'text/javascript','.css':'text/css'};
-  const allowed=new Set(['index.html','app.mjs','files.css','compact-sdk.mjs','files-view.mjs']);
+  const allowed=new Set(['index.html','app.mjs','files.css','compact-sdk.mjs','files-view.mjs','fee-model.mjs','wallet-session.mjs']);
   if(directory)for(const asset of ['directory-entry.mjs','compact-sdk-v2.mjs','compact-paths.mjs','guarded-archive.mjs','compact-content.mjs','files-workflows.mjs'])allowed.add(asset);
   const carriers=!!env.manifest.contentProfile;assert(!carriers||directory,'carrier profile requires guarded entrypoint');
   if(carriers)for(const asset of ['carrier-entry.mjs','compact-files-sdk.mjs','compact-content.mjs','compact-carrier-host.mjs'])allowed.add(asset);

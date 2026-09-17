@@ -1,3 +1,4 @@
+import {resolveEconomics,modelAction,toUsd} from './fee-model.mjs';
 // Presentation qualification is independent of the DOM and never upgrades evidence.
 export function folderState(result) {
   if (!result) return {kind:'unknown',label:'Folder not yet read'};
@@ -75,10 +76,11 @@ export function receiptTotals(entries) {
       if(typeof raw==='string' && /^(?:0x[0-9a-f]+|[0-9]+)$/i.test(raw)) gas=BigInt(raw);
       const receiptHash=entry.receipt?.transactionHash;
       if(receiptHash!==undefined && (typeof receiptHash!=='string' || receiptHash.toLowerCase()!==hash)) gas=null;
+      if(entry.receiptAttribution!==undefined&&entry.receiptAttribution!=='RPC_MATCHED_DIRECT_PLAN')gas=null;
     } catch {gas=null;}
     const prior=byHash.get(hash);
     if(byHash.has(hash)) {
-      if(gas===null || prior.gas!==gas) prior.gas=null;
+      if(gas===null || prior.gas!==gas || ['to','data','value'].some(key=>entry.transaction?.[key]!==prior.entry.transaction?.[key])) prior.gas=null;
     } else {const row={entry,gas};byHash.set(hash,row);observations.push(row);}
   }
   const known=observations.filter(row=>row.gas!==null);
@@ -89,32 +91,40 @@ export function receiptTotals(entries) {
 const costEscape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = value => value === null ? 'Unknown' : value > 0 && value < 0.0001 ? '< $0.0001' : `$${value.toFixed(4)}`;
 
-// Browser-only projection of the existing timestamped config. Preserve source
-// indices so edits affect the intended network even with the old four-chain config.
-export function costPresentation(entries, economics) {
+export function costPresentation(entries, config, ethers) {
+  const economics=resolveEconomics(config);
   const totals=receiptTotals(entries);
-  const configured=Array.isArray(economics?.networks)?economics.networks:[];
-  const networks=['ethereum','base'].flatMap(id=>{
-    const index=configured.findIndex(network=>network.id===id);
-    return index<0?[]:[{...configured[index],index,label:id==='ethereum'?'Ethereum L1':'Base'}];
+  const networks=economics.networks.map((n,index)=>({...n,index}));
+  const qualify=(model,network,count=1)=>({...model,
+    usd:toUsd(model.scenarioWei,economics,network,count),
+    executionUsd:toUsd(model.executionWei,economics,{...network,extraUsd:0}),
+    dataUsd:toUsd(model.dataWei,economics,{...network,extraUsd:0}),
+    operatorUsd:toUsd(model.operatorWei,economics,{...network,extraUsd:0})});
+  const all=totals.observations.map(({entry,gas})=>{
+    const models=modelAction(entry,gas,economics,ethers);
+    for(const network of networks)models[network.id]=qualify(models[network.id],network);
+    return {label:entry.plan?.operation??'Unknown action',status:entry.status??'Unknown status',gas,models,
+      ...Object.fromEntries(networks.map(n=>[n.id,models[n.id].usd])),zksync:null};
   });
-  const costs=(gas,transactions=1)=>Object.fromEntries(['ethereum','base'].map(id=>[
-    id,estimateUsd(gas,networks.find(network=>network.id===id),economics?.ethUsd,transactions),
-  ]));
-  const rows=totals.observations.slice(0,5).map(({entry,gas})=>({
-    label:entry.plan?.operation??'Unknown action',status:entry.status??'Unknown status',
-    gas,...costs(gas),zksync:null,
-  }));
-  const total={label:totals.unknown?'Known subtotal':'Recorded total',gas:totals.gas,
-    ...costs(totals.gas,totals.transactions.length),zksync:null};
+  const total={label:totals.unknown?'Known subtotal':'Recorded total',gas:totals.gas,models:{},zksync:null};
+  for(const network of networks){
+    const models=all.map(row=>row.models[network.id]);
+    const sum=key=>{const values=models.map(m=>m[key]).filter(v=>v!==null);return values.length?values.reduce((a,b)=>a+b,0n):null;};
+    const incomplete=models.some(m=>m.scenarioWei===null);
+    const model=qualify({executionWei:sum('executionWei'),dataWei:sum('dataWei'),operatorWei:sum('operatorWei'),scenarioWei:incomplete?null:sum('scenarioWei')},network,all.length);
+    model.knownScenarioUsd=toUsd(sum('scenarioWei'),economics,network,models.filter(m=>m.scenarioWei!==null).length);
+    model.incomplete=incomplete;total.models[network.id]=model;total[network.id]=model.usd;
+    if(incomplete)total.label='Known subtotal';
+  }
   const headline=total.base===null
     ? `Base estimate unavailable${entries.length?'':' · no receipts'}${totals.unknown?` · ${totals.unknown} unknown`:''}`
-    : `Base ≈ ${money(total.base)} ${totals.unknown?`known subtotal · ${totals.unknown} unknown`:'estimated'}`;
+    : `Base ≲ ${money(total.base)} practical data-bound scenario`;
   const receiptSummary=`${totals.gas===null?'No recorded':totals.gas.toLocaleString('en-US')} local gas · ${totals.transactions.length} receipts${totals.unknown?` · ${totals.unknown} unknown`:''}`;
-  return {columns:['Action','Gas','Ethereum L1','Base','ZKsync'],networks,rows,total,headline,receiptSummary,totals};
+  return {columns:['Action','Gas','Ethereum L1','Base','Arbitrum','ZKsync'],networks,rows:all.slice(0,5),total,headline,receiptSummary,totals};
 }
 
 export function renderCostTable(view) {
-  const cells=row=>`<th scope="row">${costEscape(row.label)}${row.status?`<small>${costEscape(row.status)}</small>`:''}</th><td>${row.gas===null?'Unknown':row.gas.toLocaleString('en-US')}</td><td>${costEscape(money(row.ethereum))}</td><td class="base-estimate">${costEscape(money(row.base))}</td><td>Not measured</td>`;
-  return `<div class="cost-table-scroll" role="region" aria-label="Recent action costs" tabindex="0"><table class="cost-grid"><caption>Recent actions (up to 5); total includes all journal receipts</caption><thead><tr>${view.columns.map(label=>`<th scope="col">${costEscape(label)}</th>`).join('')}</tr></thead><tbody>${view.rows.map(row=>`<tr>${cells(row)}</tr>`).join('')||'<tr><td colspan="5">No local actions recorded yet.</td></tr>'}</tbody><tfoot><tr>${cells(view.total)}</tr></tfoot></table></div>`;
+  const fee=(row,id)=>{const m=row.models[id];return `<td${id==='base'?' class="base-estimate"':''}>${costEscape(money(row[id]))}<small>${id==='ethereum'?'execution model':id==='base'?'practical bound, not guarantee':'uncompressed-data scenario'}</small><small>execution ${costEscape(money(m.executionUsd))}${id!=='ethereum'?` · data ${costEscape(money(m.dataUsd))} · operator ${costEscape(money(m.operatorUsd))}`:''}${m.unsignedBytes?` · ${m.unsignedBytes} unsigned bytes`:''}${m.incomplete?' · known components only':''}</small>${m.incomplete&&m.knownScenarioUsd!==null?`<small>complete-action subtotal ${costEscape(money(m.knownScenarioUsd))}; remaining unknown</small>`:''}</td>`;};
+  const cells=row=>`<th scope="row">${costEscape(row.label)}${row.status?`<small>${costEscape(row.status)}</small>`:''}</th><td>${row.gas===null?'Unknown':row.gas.toLocaleString('en-US')}</td>${['ethereum','base','arbitrum'].map(id=>fee(row,id)).join('')}<td>Not measured</td>`;
+  return `<div class="cost-table-scroll" role="region" aria-label="Recent action costs" tabindex="0"><table class="cost-grid"><caption>Recent actions (up to 5); total includes all journal receipts</caption><thead><tr>${view.columns.map(label=>`<th scope="col">${costEscape(label)}</th>`).join('')}</tr></thead><tbody>${view.rows.map(row=>`<tr>${cells(row)}</tr>`).join('')||'<tr><td colspan="6">No local actions recorded yet.</td></tr>'}</tbody><tfoot><tr>${cells(view.total)}</tr></tfoot></table></div>`;
 }

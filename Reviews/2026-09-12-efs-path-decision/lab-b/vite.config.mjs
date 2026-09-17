@@ -37,7 +37,7 @@ export default ()=>({
     async generateBundle(){
       const config=await readConfig();
       // Test keys, faucet and temporary raw storage are not a production dependency.
-      delete config.carrierOrigin;config.demoSigners=false;config.localFaucet=false;
+      delete config.carrierOrigin;config.demoSigners=false;config.localFaucet=false;config.localSponsor=false;
       this.emitFile({type:'asset',fileName:'config.json',source:JSON.stringify(config,null,2)});
     }
   }]
