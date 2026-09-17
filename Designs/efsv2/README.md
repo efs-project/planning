@@ -10,6 +10,11 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**September17 — bounded account compatibility review:**
+[[../../Reviews/2026-09-17-native-aa-compatibility|Ethereum/Base support matrix and owners]]
+routes SDK, wallet UX and authority continuity review without pausing prototype
+delivery or adopting either native-AA draft. It does not revive the old KEL topology.
+
 **September16 — bounded core prototype closeout complete:**
 [[../../Reviews/2026-09-12-efs-path-decision/core-closeout-results-20260915|Final results through reviewed c9cc15b]]
 include ordered acceptance, required indexing/replay, qualified reads, described
