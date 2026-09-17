@@ -40,6 +40,15 @@ test('exact stances use the normal journal, ordered Lens and selected HEAD guard
   await assert.rejects(sdk.submit(signed,()=>assert.fail('must not send stale stance')),/DRIFT/);
   await send(await prepare('assertStance',{concept,scope:'selectedRevision'}));
   assert.equal((await point(authors,{scope:'selectedRevision'})).value.assessment,'PRESENT');
+  const stanceContext=await sdk.pin(),file=seed.meeting.file;
+  for(const [order,policy,want] of [[authors,'no-tiebreak','UNKNOWN'],[authors,'ordered','PRESENT'],[[...authors].reverse(),'ordered','NOT_PRESENT']]){
+    const displayed=await sdk.readFile({file,authors:order,policy,context:stanceContext});
+    const hydrated=await hydrateExactStances({sdk,row:{file,kind:'file',point:displayed},concept,authors:order,context:stanceContext});
+    assert.equal(hydrated.point.value.revisionTag.assessment,want);
+    assert.equal(hydrated.point.value.revisionTag.subject,policy==='no-tiebreak'?null:displayed.value.revision.recordId);
+    assert.equal(hydrated.point.knowledge,displayed.knowledge);assert.equal(hydrated.point.basis.lens.policy,policy);
+    assert.equal(hydrated.point.value.fileTag.assessment,'NOT_PRESENT','stable File stance remains independently qualified');
+  }
   assert.equal((await point(authors,{concept:env.tags.tokens[0]})).value.assessment,'UNKNOWN');
   assert.equal((await point(authors,{subject:env.tags.revision1,scope:'file'})).value.assessment,'UNKNOWN');
   const old=await sdk.readTag({subject:seed.meeting.file,target:seed.meeting.file,concept:sdk.conceptId({namespace:env.manifest.folder,label:'efs'}),authors,context:await sdk.pin()});

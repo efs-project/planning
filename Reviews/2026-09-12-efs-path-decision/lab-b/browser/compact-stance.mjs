@@ -50,6 +50,17 @@ export async function createCompactStance({e,call,code,invoke,ledgerAbi,ledgerAd
 export async function hydrateExactStances({sdk,row,concept,authors,context}){
   const read=scope=>sdk.readStance({subject:row.file,scope,concept,authors,context});
   const stable=await read(row.kind==='directory'?'directory':'file');
-  const revision=row.kind==='directory'?{value:{assessment:'NOT_APPLICABLE'}}:await read('selectedRevision');
+  const point=row.point,selection=point?.value?.selection,record=point?.value?.revision;
+  const unknown=reason=>({value:{subject:null,concept,assessment:'UNKNOWN',knowledge:'UNKNOWN',exactStance:true,
+    selection,reason,observations:[]}});
+  let revision=row.kind==='directory'?{value:{assessment:'NOT_APPLICABLE'}}:unknown('NO_QUALIFIED_SELECTED_REVISION');
+  // The displayed point owns HEAD policy. A conflict, mask or unverified
+  // header must not become an ordered selection just to read its tags.
+  if(row.kind==='file'&&point?.knowledge==='PRESENT'&&selection?.status===1&&record?.recordId
+    &&selection.target?.toLowerCase()===record.recordId.toLowerCase()
+    &&(record.knowledge===undefined||record.knowledge==='PRESENT')){
+    revision=await read('selectedRevision');
+    if(revision.value.subject?.toLowerCase()!==record.recordId.toLowerCase())revision=unknown('SELECTED_REVISION_MISMATCH');
+  }
   return {...row,point:{...row.point,value:{...row.point?.value,fileTag:stable.value,revisionTag:revision.value}}};
 }

@@ -18,7 +18,7 @@ const source=(await readFile(new URL('./app.mjs',import.meta.url),'utf8')).repla
 const ethers=await loadEthers(),key='0x'+'11'.repeat(32),wallet=new ethers.Wallet(key);
 const tick=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};
 const deferred=()=>{let resolve,reject;const promise=new Promise((r,j)=>{resolve=r;reject=j;});return {promise,resolve,reject};};
-async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedRead,placementRead,stanceRead,initial='#/',typed=true,carriers=false,image=false,encrypted=false,joined=false}={}){
+async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedRead,placementRead,stanceRead,fileRead,initial='#/',typed=true,carriers=false,image=false,encrypted=false,joined=false}={}){
   const listeners=new Map(),elements=new Map();
   const element=id=>{
     if(!elements.has(id))elements.set(id,{id,value:'',textContent:'',innerHTML:'',dataset:{},disabled:false,hidden:false,open:false,
@@ -46,7 +46,7 @@ async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedR
     async readDirectory(){return {knowledge:'PRESENT',coverage:'COMPLETE'};},
     async readPlacement({folder,name}){if(placementRead){const value=placementRead({folder,name});if(value)return value;}const target=child(folder,name);return target?{knowledge:'PRESENT',coverage:'COMPLETE',value:{target,kind:'directory',selection:{author:wallet.address,revision:1,admission:'9'}}}:{knowledge:'ABSENT',coverage:'COMPLETE',value:{}};},
     async listFolder({folder,authors,context}){if(holdList&&folder==='slow'&&authors[0]===wallet.address)await holdList.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',basis:context,value:[row(folder,authors[0]!==wallet.address?'bob.txt':folder==='root'?'root.txt':folder==='renamed'?'child.txt':'slow.txt'),...(carriers?[row(folder,'second.txt')]:[])]};},
-    async readFile({file}){stats.point++;if(holdRead&&file.startsWith('slow-'))await holdRead.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',value:{file,selection:{author:wallet.address},revision:{file,recordId:'record',document:carriers?null:'0x61',profile:carriers?'carrier-v1':'legacy-inline',content:carriers?{length:4,media:0,encryption:encrypted?1:0}:undefined,firstAdmission:'9'},fileTag:{evaluated:true},revisionTag:{evaluated:true}}};},
+    async readFile(args){const {file}=args;stats.point++;if(holdRead&&file.startsWith('slow-'))await holdRead.promise;if(fileRead)return fileRead(args);return {knowledge:'PRESENT',coverage:'COMPLETE',value:{file,selection:{status:1,target:'record',author:wallet.address},revision:{file,recordId:'record',document:carriers?null:'0x61',profile:carriers?'carrier-v1':'legacy-inline',content:carriers?{length:4,media:0,encryption:encrypted?1:0}:undefined,firstAdmission:'9'},fileTag:{evaluated:true},revisionTag:{evaluated:true}}};},
     async readContent({file}){stats.content++;if(holdContent)await holdContent.promise;return {state:'AVAILABLE_VERIFIED',bytes:encrypted?new TextEncoder().encode('private note'):Uint8Array.of(0,255,128,65),file,recordId:'record'};},
     async prepare(args){stats.prepare++;stats.prepared.push(args);if(holdPrepare)await holdPrepare.promise;return {id:'plan',digest:ethers.id('intent')};},
     async authorize(plan,sign){stats.authorize++;await sign(plan.digest);return {id:'plan',transaction:{}};},
@@ -55,7 +55,7 @@ async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedR
   const config={rpcUrl:'http://127.0.0.1:12346',manifest:{chainId:'31337',folder:'root',filesProfile:'typed-directory-v1',authors:{alice:wallet.address,bob:'0x00000000000000000000000000000000000000b2'},contracts:{ledger:{address:wallet.address}}},mounts:[{id:'root',label:'Files'}]};
   if(!typed)delete config.manifest.filesProfile;
   if(carriers){config.manifest.contentProfile='raw-sha256-aesgcm-v2';config.carrierOrigin='http://127.0.0.1:12347';}
-  if(joined){config.manifest.contracts.joined={address:wallet.address};sdk.listFolderPage=async args=>{stats.joined++;const {value,coverage,knowledge,...page}=await sdk.listFolder(args);const result={...page,kind:'files-joined-page',queryKnowledge:knowledge,queryCoverage:coverage,selectedSoFar:'6',scannedSoFar:'6',rawTotal:'6',pageRows:value.map(r=>Object.freeze({...r,match:args.search?'UNKNOWN':'MATCH',point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{selection:{author:wallet.address},revision:{recordId:'record',firstAdmission:'9',profile:'carrier-v1',bodyLength:64,assurance:'HEADER_VERIFIED_BODY_NOT_FETCHED'}}}}))};return joinedRead?joinedRead(args,result):result;};}
+  if(joined){config.manifest.contracts.joined={address:wallet.address};sdk.listFolderPage=async args=>{stats.joined++;const {value,coverage,knowledge,...page}=await sdk.listFolder(args);const result={...page,kind:'files-joined-page',queryKnowledge:knowledge,queryCoverage:coverage,selectedSoFar:'6',scannedSoFar:'6',rawTotal:'6',pageRows:value.map(r=>Object.freeze({...r,match:args.search?'UNKNOWN':'MATCH',point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{selection:{status:1,target:'record',author:wallet.address},revision:{recordId:'record',firstAdmission:'9',profile:'carrier-v1',bodyLength:64,assurance:'HEADER_VERIFIED_BODY_NOT_FETCHED'}}}}))};return joinedRead?joinedRead(args,result):result;};}
   const stored=new Map();const localStorage={getItem:k=>stored.get(k)??null,setItem:(k,v)=>stored.set(k,v)};
   const fetch=async(url,options)=>({ok:true,async json(){return String(url).endsWith('/config.json')?config:{alice:key};},async text(){const req=JSON.parse(options.body);
     if(req.method==='eth_sendRawTransaction')stats.broadcast++;
@@ -88,13 +88,41 @@ test('replacement waits for in-page consent and renewed consent after destinatio
 test('exact UI filtering bypasses legacy predicate and retains UNKNOWN at the page basis',async()=>{
   const queries=[],reads=[];
   const a=await app({carriers:true,joined:true,joinedRead:(args,page)=>{queries.push(args);return {...page,queryCoverage:'PARTIAL'};},
-    stanceRead:async args=>{reads.push(args);return {value:{assessment:args.subject.includes('second')?'UNKNOWN':'NOT_PRESENT',exactStance:true,observations:[]}};}});
+    stanceRead:async args=>{reads.push(args);return {value:{subject:args.scope==='selectedRevision'?'record':args.subject,assessment:args.subject.includes('second')?'UNKNOWN':'NOT_PRESENT',exactStance:true,observations:[]}};}});
   a.element('filter-concept').value=ethers.id('exact');await a.click('filter');
   assert.equal(queries.at(-1).concept,ethers.ZeroHash);assert.equal(queries.at(-1).tagScope,'none');
   assert.ok(reads.every(r=>r.context===queries.at(-1).context));
   assert.match(a.element('rows').innerHTML,/second\.txt/);assert.doesNotMatch(a.element('rows').innerHTML,/root\.txt/);
   assert.match(a.element('coverage').textContent,/uncertain matches retained/);assert.equal(a.stats.renderedPage.coverage,'PARTIAL');
   await a.click('select',{position:'root/second.txt'});assert.match(a.element('detail').innerHTML,/Retract to silence/);
+});
+
+test('exact revision stance follows displayed HEAD qualification in conflict and both ordered views',async()=>{
+  const reads=[],aliceRevision=ethers.id('alice-head'),bobRevision=ethers.id('bob-head');
+  const revision=args=>args.authors[0]===wallet.address?aliceRevision:bobRevision;
+  const filePoint=args=>args.policy==='no-tiebreak'
+    ?{knowledge:'CONFLICT',coverage:'COMPLETE',value:{file:'shared-file',selection:{status:3},revision:null,candidates:[]}}
+    :{knowledge:'PRESENT',coverage:'COMPLETE',value:{file:'shared-file',selection:{status:1,target:revision(args),author:args.authors[0]},
+      revision:{file:'shared-file',recordId:revision(args),profile:'legacy-inline',document:'0x61',firstAdmission:'9'}}};
+  const a=await app({joined:true,fileRead:filePoint,
+    placementRead:({name})=>name.endsWith('.txt')?{knowledge:'PRESENT',coverage:'COMPLETE',value:{target:'shared-file',kind:'file',selection:{status:1,target:'shared-file',author:wallet.address,revision:1,admission:'9'}}}:null,
+    joinedRead:(args,page)=>({...page,pageRows:[{...page.pageRows[0],file:'shared-file',position:'shared-position',point:filePoint(args)}]}),
+    stanceRead:async args=>{reads.push(args);return {value:{subject:args.scope==='file'?'shared-file':revision(args),exactStance:true,
+      assessment:args.scope==='file'||revision(args)===aliceRevision?'PRESENT':'NOT_PRESENT',observations:[]}};}});
+  a.element('filter-concept').value=ethers.id('revision-only');await a.click('filter');
+  await a.click('select',{position:'shared-position'});assert.match(a.element('detail').innerHTML,/selected revision PRESENT/);
+  a.element('lens').value='conflict';reads.length=0;a.element('lens').listeners.get('change')();await tick();
+  await a.click('select',{position:'shared-position'});
+  assert.match(a.element('detail').innerHTML,/CONFLICT/,a.element('notice').textContent);assert.match(a.element('detail').innerHTML,/selected revision UNKNOWN/);
+  assert.equal(reads.some(r=>r.scope==='selectedRevision'),false,'conflict must not silently read an ordered selected HEAD');
+  assert.equal(a.stats.renderedPage.value[0].point.value.fileTag.assessment,'PRESENT','stable File stance remains independently available');
+  assert.equal(a.stats.renderedPage.value[0].point.value.revisionTag.subject,null);
+  for(const [lens,want,subject] of [['bob','NOT_PRESENT',bobRevision],['alice','PRESENT',aliceRevision]]){
+    a.element('lens').value=lens;a.element('lens').listeners.get('change')();await tick();
+    await a.click('select',{position:'shared-position'});
+    assert.match(a.element('detail').innerHTML,new RegExp('selected revision '+want));
+    assert.equal(a.stats.renderedPage.value[0].point.value.revisionTag.subject,subject);
+  }
 });
 
 test('joined app lists headers without point bodies and hydrates only the selected file',async()=>{
