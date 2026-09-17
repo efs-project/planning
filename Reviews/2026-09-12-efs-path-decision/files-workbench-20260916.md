@@ -2,14 +2,16 @@
 
 September 16, 2026 · v2 PM · disposable integration prototype, not production or complete v1 parity.
 
-> September 17 status: the [[placement-release-plan-20260917|placement-release pass]] extends the prototype's contracts and SDK. It requires a fresh matched deployment; it was not patched into the saved demo. No workbench services were running when that pass began, and it did not restart them. The established defaults remain UI **60627**, RPC **8545**, chain **31337**. September 16 runtime observations and earlier ports below are historical, not a current service-health claim.
+> September17 update: the [[prototype-finish-results-20260917|Files completion pass]] deployed matched current contracts and exercised the browser, including own-placement release, copy/link, cold history, exact stances, external retrieval and static packaging. It supersedes this page's earlier missing-work/runtime list. The running handoff uses UI **60627**, RPC **8545**, chain **31337**. September16 measurements and earlier ports below are historical, not current service-health claims. Actual wallet-extension/public payment checks remain explicitly separate.
 
 James asked for a quick working browser before a clean-slate engineering pass.
 V1 was inspected for behavior only. No v1 code, components or contracts were copied.
 
 ## What to try
 
-Current local run: **http://127.0.0.1:57215/**. The older demo at port 60608 remains running.
+Current handoff: **http://127.0.0.1:60627/**. Older57215/60608 demos were retired;
+see the September17 report for current controls and limits. The walkthrough
+below records the September16 baseline.
 
 - Browse as a guest. Open `docs/meeting.txt`; switch Alice → Bob to Bob → Alice.
 - Open `docs/alice-only.txt` under Bob → Alice to see fallback.

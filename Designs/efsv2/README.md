@@ -10,6 +10,18 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**September17 — the Files journey now runs on the compact v2 core:**
+[[../../Reviews/2026-09-12-efs-path-decision/prototype-finish-results-20260917|Working browser, measured costs and clean-slate handoff]]
+covers create/edit/rename/move, link versus copy, cold history/restore,
+own-placement release, exact tag stances and ordered Lens fallback. AR/IPFS
+retrieval and the built static SPA were exercised; required indexes stayed on.
+The local demo uses UI60627/RPC8545. A small text create used about2.04M gas,
+modeled at $0.49 L1 / $0.030 Base / $0.101 Arbitrum at the dated snapshot.
+Actual MetaMask/public-chain costs and paid permanent-storage uploading remain
+separate gates. No Core feature or permanent protocol decision changed in this
+pass; use its limits matrix rather than treating a working browser as universal
+parity or permission to freeze the design.
+
 **September17 — bounded account compatibility review:**
 [[../../Reviews/2026-09-17-native-aa-compatibility|Ethereum/Base support matrix and owners]]
 routes SDK, wallet UX and authority continuity review without pausing prototype

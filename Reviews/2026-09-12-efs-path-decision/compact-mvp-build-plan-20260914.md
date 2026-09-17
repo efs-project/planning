@@ -2,6 +2,15 @@
 
 September 14, 2026 · v2 PM recommendation · no repository/deployment authority implied.
 
+**September17 Files handoff:** the [[prototype-finish-results-20260917|current working/limited/unproven matrix]]
+now supersedes the earlier UI-gap list. Copy/link,
+selected ancestry/restore, bounded own-placement release, exact stance controls,
+fee components and static AR/IPFS retrieval are integrated. The popup/focus
+defect found during browser testing is removed. The current Ledger was measured
+at24,524runtime bytes (52spare); package/decompose it before production growth.
+The real-code sequence below remains the recommendation. Do not restart the
+architecture tournament or mistake prototype completion for a permanent freeze.
+
 **September 16 follow-through:** James chose one more quick, usable prototype
 before the clean-slate engineering handoff, not production repositories yet.
 [[files-workbench-20260916|The integrated Files workbench]] connects the final v2
