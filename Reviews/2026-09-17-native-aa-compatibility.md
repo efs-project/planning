@@ -1,6 +1,6 @@
 # Ethereum and Base account compatibility — bounded EFS review
 
-**Status:** SDK review integrated; client/OS reply pending. Proposed support posture,
+**Status:** SDK and client/OS reviews integrated. Proposed support posture,
 not an adopted wallet policy or verified Ethereum/Base deployment matrix.
 **Coordinator:** @v2-pm · September 17, 2026.
 **Scope:** planning only. No new prototype work, wallet selection, deployment,
@@ -63,6 +63,7 @@ required for every support claim.
 | EOA and local contract-account author validation | Needed now | Needed now | Core + SDK: distinguish signer, account, Principal, submitter and payer; pin verifier/account realization and historical basis. Do not infer authority from code presence under 7702. |
 | Key rotation, recovery, compromised old key | Needed now: define truthful limits; adapter boundary for managed identity | Same; do not assume synchronized policy | Core: old authorship must survive without treating today's account policy as past authorization. Lost-key recovery and compromise cannot be claimed from a stable address alone. |
 | EFS nonce/domain/expiry and stale-plan protection | Needed now | Needed now | SDK + Core: EFS authorization versus transaction/UserOp/delegation authorization remain separate; test cross-Realm replay and policy changes before execution. |
+| Provider drift, delegation awareness and approval accounting | Needed now | Needed now | Client: fence provider/account/chain changes; recognize7702 code without silently upgrading or assuming1271 authority; count setup, routine and revocation ceremonies separately. Unsupported profiles stay explicit. |
 | 4337 account submission / 7562 bundler rules | Adapter boundary | Adapter boundary | SDK: pin account, EntryPoint version/address/code and bundler-policy compatibility separately. The reviewed Base Account source uses EntryPoint0.6; that is not interchangeable with the reviewed v0.8 reference. |
 | 5792 wallet calls / sponsorship | Adapter boundary | Adapter boundary | SDK + client: negotiate actual wallet RPC versions and capability results separately from4337/paymaster support. Batch status is not EFS effect success; partial batches need per-effect read-back. |
 | 7702, 6492, 7913, modular/session permissions | Adapter boundary, enable only tested profiles | Same; verify actual chain/wallet support | SDK + client: bounded validation, exact delegation code, scope/budget/expiry/revocation and no hidden persistent setup during signature verification. No implement-all mandate. |
@@ -94,12 +95,57 @@ Source pins reported by SDK PM (not deployed-chain verification):
 | Ethereum ERC corpus | `5fc191d6d4da12ee224813871f94ff16e541e3f7`;1271/4337/6492/7913 Final,7562 Review | PM independently rechecked [7562 Review](https://eips.ethereum.org/EIPS/eip-7562); current SDK/client census wording corrected. Status is not implementation support. |
 | Ethereum EIP corpus | `2c2da76671d77e7d2f5060b23f8a92cb5d62897e`;5792/7702 Final,8130/8141 Draft | Account, wallet and chain activation need their own evidence. |
 | [Account abstraction v0.8.0](https://github.com/eth-infinitism/account-abstraction/tree/4cbc06072cdc19fd60f285c5997f4f7f57a588de) | EntryPoint implementation commit `4cbc06072cdc19fd60f285c5997f4f7f57a588de`; Ethereum metadata names `0x4337084D9E255Ff0702461CF8895CE9E3b5Ff108` | Metadata not a current RPC codehash check, Base deployment or wallet result. |
+| [Account abstraction v0.9.0](https://github.com/eth-infinitism/account-abstraction/releases/tag/v0.9.0) | Client review pin `b36a1ed52ae00da6f8a4c8d50181e2877e4fa410`; release also checked by PM | v0.8 above is a comparison pin, not a latest-release claim. Upstream reports ABI compatibility with0.7/0.8, but new bundler behavior and exact deployment/code still require verification. |
 | [Base Account constructor](https://github.com/base/account-sdk/blob/97ca29c7302d223baa428262d460ae5448839f95/packages/account-sdk/src/sign/base-account/utils/createSmartAccount.ts) | `97ca29c7302d223baa428262d460ae5448839f95`, [package](https://github.com/base/account-sdk/blob/97ca29c7302d223baa428262d460ae5448839f95/packages/account-sdk/package.json) `@base-org/account`2.5.10; smart-account constructor selects EntryPoint0.6;5792 methods exposed | PM independently read pinned package and constructor. Source capability only: exact deployed account/EntryPoint, wallet methods, independent submission, sponsorship and Base7702 remain unverified. |
 
 The important result is not “Base incompatible.” It is **pin the account/wallet
 and EntryPoint independently**, and test the combination rather than advertising
 generic4337 or smart-wallet support. No new SDK enum, adapter or Core code is
 introduced by this review.
+
+## Client/OS review — September 17
+
+Guest reads and export stay wallet-free. Explicit connection fences the selected
+provider, account and chain; drift invalidates the plan rather than editing a
+signed request in place.5792 capability discovery is relevant only on a selected
+wallet path, not guest boot and not a requirement that every wallet implement it.
+
+**Approval truth:** one `wallet_sendCalls` request is not necessarily one human
+approval. A wallet advertising `atomic: ready` can still require an account-upgrade
+ceremony. Measure first setup, routine writes, revocation and full first use
+separately.8141's `APPROVE` instruction is not a human ceremony. Primary references:
+[5792](https://eips.ethereum.org/EIPS/eip-5792),
+[7702](https://eips.ethereum.org/EIPS/eip-7702), and the
+[Isthmus7702 execution profile](https://specs.optimism.io/protocol/isthmus/overview.html).
+The client review identifies existing Ethereum/Base7702 activation; this does not
+establish a chosen wallet's support or authorize EFS to initiate delegation.
+
+**Recovery copy:** “Base: controller B at basis X. Ethereum: controller A at basis
+Y [or UNKNOWN]. This change is not synchronized; this action uses Base policy.”
+Offer continuing on Base, inspecting Ethereum, or updating Ethereum separately.
+Never say “recovered everywhere” from one chain's result. Retained historical
+authorization evidence keeps its actual source/proof grade, not an unconditional
+cryptographic guarantee for arbitrary account dependency state.
+
+**Failure copy:** “Delegation changed; file write failed/unknown” is a valid7702
+outcome. A wallet, UserOperation or sponsor receipt does not mark EFS effects
+committed. Read back each expected effect; a lost/partial batch remains qualified.
+Independent self-funded submission may require a new paymaster-empty UserOperation,
+deposit/funding and re-signing, not blindly rebroadcasting a sponsor-bound payload.
+Do not change the EFS author or bypass quorum/recovery policy to manufacture an
+escape. If the exact profile has no tested route, show “submission unavailable”
+and retain/export the plan while guest reads remain usable.
+
+Client-supplied Base8453 observations found nonempty code at the canonical0.7/0.8/0.9
+EntryPoint addresses. For0.9 (`0x433709009B8330FDa32311DF1C2AFA402eD8D009`), the
+reported runtime is22,425bytes with locally computed keccak
+`0x826b7ec542db9f3345234a25c2a6330a61f99483dedb6e6709928cc97e4e4d5d`.
+No block number/hash or independent audit-pinned runtime comparison was retained;
+0.7/0.8 runtime hashes were not retained. These remain attributed RPC observations,
+not verified deployment versions/support. Its8130 experimental-source pin is
+[`812317be00d6829e217e0cc92f75be362fde0711`](https://github.com/base/eip-8130/commit/812317be00d6829e217e0cc92f75be362fde0711);
+reported future fork gates, WIP code and an isolated development network do not
+prove Base mainnet/Sepolia activation. Ethereum PM retains activation/audit watch.
 
 ## Minimum useful test — proposed, not newly authorized implementation
 
@@ -161,7 +207,7 @@ matrix and the cheapest meaningful continuity test. Return an owner question onl
 if a concrete tradeoff affects MVP scope, authority/exit guarantees, recovery
 dependencies or approval UX; include a plain example and recommendation.
 
-**Proposed support-label decision from SDK PM — not adopted, not an urgent blocker:**
+**Proposed support-label policy from SDK PM — not adopted, no immediate owner ask:**
 reserve “durably supported” for an account profile with a demonstrated user-funded,
 vendor-independent write path retaining the same EFS author. Other adapters could
 remain explicitly experimental/convenience-only. Example: Base Account's popup,
@@ -170,6 +216,11 @@ becoming a different EFS author? A fallback must preserve the account's actual
 security policy, not bypass recovery, quorum or scope checks. Decide the product
 label when selecting a concrete profile; current standalone Core/guest-access
 requirements are already in force and are not reopened here.
+
+Client PM recommends escalating only when a measured candidate lacks an independent
+exit **and** the product wants it as the default. Coordinator agrees: first test the
+concrete profile, then ask James whether a vendor-dependent convenience default is
+acceptable. Do not turn a hypothetical label distinction into a new blocking gate.
 
 For Devcon, compare predictable bounded validation/tooling versus permissionless
 custom policy and where each design places complexity. Change the assessment on
@@ -182,6 +233,9 @@ independent funding, then a pinned transport. Distinct role fields may resolve t
 the same entity. Neither correction reduces the required evidence for a claimed
 multi-role/multi-transport profile.
 
-**Next check:** integrate the client/OS reply and send the consolidated
-link and the proposed support-label decision to Ethereum PM. Ethereum PM owns ongoing monitoring;
-EFS delivery does not wait for either unactivated draft.
+**Next check:** Ethereum PM owns source/activation monitoring; the next selected
+wallet implementation task starts with the small continuity/escape test above and
+pins its exact profile. Both specialist reviews are complete. No code, public-chain
+test or new implementation commitment was made; EFS delivery does not wait for
+either unactivated draft. Surface an owner choice only if the concrete default
+profile fails the required escape/authority behavior.
