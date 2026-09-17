@@ -205,6 +205,8 @@ export async function createEnvironment({artifactDirectory=process.env.FOUNDRY_O
       // is never retried as legacy, including on historical-artifact controls.
       for(const [i,key] of (deployment==='proxy'?['implementationV1','implementationV2']:['ledger']).entries()){
         const implementation=manifest.executionFamily.implementations[i];
+        if(new e.Interface(contracts[key].abi).getFunction('bindingLifecycleProfile'))
+          implementation.bindingLifecycleProfile=(await call(key,'bindingLifecycleProfile'))[0];
         if(new e.Interface(contracts[key].abi).getFunction('readSetStorageProfile')){
           const [profile,namespace]=await call(key,'readSetStorageProfile');
           const [address,codeHash]=await call(key,'publicationSupportIdentity');

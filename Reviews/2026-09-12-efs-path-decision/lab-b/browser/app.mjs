@@ -31,7 +31,7 @@ function legacyReadTransport(url){
   };
   rpc.read=rpc;rpc.metrics=metrics;return rpc;
 }
-const actionLabel=operation=>({createDirectory:'create directory',restorePlacement:'restore placement',restoreContents:'restore contents',addTag:'add tag',removeTag:'remove tag'}[operation]??operation);
+const actionLabel=operation=>({createDirectory:'create directory',remove:'hide placement',releasePlacement:'release my placement',restorePlacement:'restore placement',restoreContents:'restore contents',addTag:'add tag',removeTag:'remove tag'}[operation]??operation);
 function clearContent(){state.contentRequest?.abort.abort();state.contentRequest=null;state.contentResult=null;state.previewSize=null;if(state.previewUrl)URL.revokeObjectURL(state.previewUrl);state.previewUrl=null;}
 function conceptFor(label){return /^0x[0-9a-f]{64}$/i.test(label)?label:hasCarriers()?state.sdk.conceptId({namespace:state.config.manifest.folder,label}):ethers.id(label);}
 function verifiedBytes(row=selectedRow()){
@@ -128,6 +128,10 @@ function refreshJoinedQuery(){
 function controls() {
   document.querySelectorAll('[data-action]').forEach(button=>{ button.disabled=state.busy || state.routeLoading || !state.sdk || button.dataset.blocked==='true'; });
   $('create').disabled=!writesAllowed(); $('restore').disabled=!writesAllowed() || !state.removed;
+  if($('release-placement')){
+    $('release-placement').hidden=!state.context?.bindingLifecycleProfile;
+    $('release-placement').disabled=!writesAllowed()||!state.context?.bindingLifecycleProfile;
+  }
   $('signer').disabled=!state.keys || state.busy; $('lens').disabled=state.busy || !state.sdk;
   $('connect').hidden=!!state.wallet||state.config?.demoSigners===false; $('disconnect').hidden=!state.wallet;
   $('signer').hidden=state.config?.demoSigners===false;
@@ -271,7 +275,7 @@ function renderDetail() {
   const name=row.name?.knowledge==='PRESENT'?row.name.value:'Name unavailable';
   const preview=open&&revision?.profile!=='carrier-v1'&&revision?.profile!=='live-quote-v1'?textPreview(revision.document):null;
   const knownName=row.name?.knowledge==='PRESENT';
-  const action=(id,label,blocked=false,extra='')=>`<button data-action="${id}" data-write data-blocked="${blocked}" ${blocked?'disabled':''} ${extra}>${label}</button>`;
+  const action=(id,label,blocked=false,extra='')=>`<button data-action="${id}" data-write data-blocked="${blocked}" ${blocked?'disabled':''} ${extra}>${id==='remove'?'Hide placement':label}</button>`;
   if(state.paths&&row.kind!=='file'){
     $('detail').innerHTML=`<h2>${escape(name)}</h2><p>${row.kind==='directory'?'Typed Directory · stable descriptor identity. No File HEAD is required.':'Target kind is unavailable or invalid. Membership has not been discarded.'}</p>
       <div class="file-actions">${row.kind==='directory'&&knownName?'<button data-action="enter">Open directory →</button>':''}${action('rename','Rename',!knownName||row.kind!=='directory')}${action('move','Move',!knownName||row.kind!=='directory')}${action('remove','Remove placement',!knownName||row.kind!=='directory')}</div>
@@ -479,11 +483,11 @@ function openEditor(operation,record) {
   const row=selectedRow(), name=row?.name?.value??'';
   if(operation==='edit'&&row?.point?.value?.revision?.content?.encryption===1){notice('Encrypted files are read-only in this text editor.','warning');return;}
   state.operation={operation,row,record,navigation:state.navigation,folder:state.folder}; $('editor-error').textContent='';
-  const titles={create:'New file',createDirectory:'New directory',edit:'Edit contents',rename:'Rename placement',move:state.paths?'Move to a verified directory':'Move to another mount',remove:'Remove this placement',restorePlacement:'Restore last placement',restoreContents:'Restore historical contents'};
+  const titles={create:'New file',createDirectory:'New directory',edit:'Edit contents',rename:'Rename placement',move:state.paths?'Move to a verified directory':'Move to another mount',remove:'Hide placement',releasePlacement:'Release my placement',restorePlacement:'Restore last placement',restoreContents:'Restore historical contents'};
   $('editor-title').textContent=titles[operation];
   $('editor-help').textContent=`Signed by ${state.wallet?.external?short(state.wallet.address):$('signer').value}, using ${$('lens').selectedOptions[0].textContent}. Local test chain; no real funds.`;
   let fields='';
-  if(['create','createDirectory','rename','move'].includes(operation)) fields+=field('Exact name · lowercase ASCII','name',['create','createDirectory'].includes(operation)?'':name);
+  if(['create','createDirectory','rename','move','releasePlacement'].includes(operation)) fields+=field('Exact name · lowercase ASCII','name',['create','createDirectory','releasePlacement'].includes(operation)?'':name);
   const previous=operation==='edit'&&verifiedBytes(row)?textPreview(verifiedBytes(row)):null;
   state.operation.replacementRequired=operation==='edit'&&!previous?.utf8;
   if(state.operation.replacementRequired)fields+='<p class="warning">The current contents are not loaded as text. Choose a replacement file, or deliberately type replacement text before saving.</p>';
@@ -492,7 +496,8 @@ function openEditor(operation,record) {
   if(hasCarriers()&&['create','edit'].includes(operation))fields+=`<label>Byte storage<select name="carriage"><option value="inline">Onchain · small files</option>${state.config.carrierOrigin?`<option value="external">Local byte store · up to 1 MiB</option>`:''}</select></label><p>The local byte store is temporary. Metadata and content hashes stay onchain; its bytes disappear when this demo stops.</p><label>Optional encryption key (64 hexadecimal digits; not saved)<input type="password" name="encryptionKey" autocomplete="off"></label>`;
   if(state.externalContent&&['create','edit'].includes(operation))fields+=`<label>Arweave / IPFS file address<input name="externalUri" placeholder="ar://transaction-id or ipfs://CID/path" autocomplete="off"></label><p>If supplied, this links an existing public file instead of uploading the text or chosen file above. It downloads up to 16 MiB and saves its fingerprint onchain. No pinning account or storage payment; this does not upload new files to Arweave. Do not paste private links.</p>`;
   if(operation==='move') fields+=state.paths?field('Destination directory path · verified before signing','destinationPath','/')+'<button type="button" data-action="destination">Browse / verify this path</button><div id="destination-children"></div>':`<label class="field-label" for="field-folder">Destination explicit mount</label><select name="toFolder" id="field-folder">${state.config.mounts.filter(mount=>mount.id!==state.folder).map(mount=>`<option value="${escape(mount.id)}">${escape(mount.label)}</option>`).join('')}</select>`;
-  if(operation==='remove') fields+=`<p>Remove <strong>${escape(name)}</strong> from this Lens? This adds a placement mask; retained records and other authors' views are not erased.</p>`;
+  if(operation==='remove') fields+=`<p>Hide <strong>${escape(name)}</strong> from this Lens? This adds a placement mask; retained records and other authors' views are not erased.</p>`;
+  if(operation==='releasePlacement') fields+='<p>Release your live placement or mask at this exact name in the current folder. Another author’s entry may become visible. Contents and directory children are retained. No selected row is needed.</p>';
   if(operation==='restorePlacement') fields+=`<p>Restore the locally remembered placement <strong>${escape(state.removed.name)}</strong> in ${escape(state.config.mounts.find(m=>m.id===state.removed.folder)?.label??short(state.removed.folder))}? The SDK will revalidate the retained File and Name.</p>`;
   if(operation==='restoreContents') fields+=field('Historical Record ID · verified against this File before signing','record',record??'');
   $('editor-fields').innerHTML=fields; $('editor-submit').textContent=state.wallet?.external?'Continue in MetaMask / wallet':`Sign ${actionLabel(operation)} locally`;
@@ -559,7 +564,7 @@ document.addEventListener('click',event=>{
   }
   if(action==='openSelected'){openSelected();return;}
   if(action==='openContent'){openContent().catch(error=>notice(error.message,'error'));return;}
-  if(['create','createDirectory','edit','rename','move','remove','restorePlacement','restoreContents'].includes(action)) {openEditor(action,button.dataset.record);return;}
+  if(['create','createDirectory','edit','rename','move','remove','releasePlacement','restorePlacement','restoreContents'].includes(action)) {openEditor(action,button.dataset.record);return;}
   run(async navigation=>{
     if(action==='connect') await connect();
     if(action==='connectWallet')await connectWallet();
@@ -643,6 +648,7 @@ $('editor-form').addEventListener('submit',event=>{
       if(state.paths&&operation==='move'){const {route}=await destinationRoute(values.destinationPath,undefined,navigation);args.toFolder=route.target;}
       if(operation==='rename'||operation==='move') args={...args,fromName:row.name.value,fromFolder:row.folder};
       if(operation==='remove') args.name=row.name.value;
+      if(operation==='releasePlacement')delete args.file;
       if(operation==='restorePlacement') args={...state.removed};
       const outcome=await write(operation,args,navigation);checkRoute(navigation);
       if(state.operation!==job)return;

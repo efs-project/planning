@@ -5,7 +5,7 @@ import {Script} from 'node:vm';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {gzipSync} from 'node:zlib';
-import {createEnvironment} from '../script/compact-environment.mjs';
+import {createEnvironment,createReadTransport} from '../script/compact-environment.mjs';
 import {createGuardedCompactSdk} from './compact-sdk-v2.mjs';
 import {verifyGuardedClaim} from './guarded-archive.mjs';
 
@@ -24,15 +24,16 @@ async function browserRpc(rpcUrl,fetcher=fetch){
   const app=await readFile(new URL('./app.mjs',import.meta.url),'utf8');
   const body=app.slice(app.indexOf('async function rpc('),app.indexOf('\nasync function run('));
   return new Script(`${body}\nrpc`).runInNewContext({fetch:fetcher,performance,TextEncoder,AbortSignal,
+    readTransport:createReadTransport({url:rpcUrl,fetchImpl:fetcher}),
     state:{config:{rpcUrl},rpc:{calls:0,bytes:0,ms:0,errors:0}}});
 }
 
 test('browser transport preserves typed EVM errors without manufacturing metadata for HTTP failures',async()=>{
-  const rpc=await browserRpc('http://127.0.0.1:1',async(_url,request)=>({ok:true,text:async()=>JSON.stringify({
-    jsonrpc:'2.0',id:JSON.parse(request.body).id,error:{code:3,message:'execution reverted',data:'0x'}})}));
-  await assert.rejects(rpc('eth_call',[]),error=>error.message==='execution reverted'&&error.rpcError?.code===3&&error.rpcError?.data==='0x');
-  const http=await browserRpc('http://127.0.0.1:1',async()=>({ok:false,status:503,text:async()=>''}));
-  await assert.rejects(http('eth_call',[]),error=>error.message==='RPC HTTP 503'&&!error.rpcError);
+  const rpc=await browserRpc('http://127.0.0.1:1',async(_url,request)=>new Response(JSON.stringify({
+    jsonrpc:'2.0',id:JSON.parse(request.body).id,error:{code:3,message:'execution reverted',data:'0x'}})));
+  await assert.rejects(rpc('eth_call',[]),error=>error.rpcError?.message==='execution reverted'&&error.rpcError?.code===3&&error.rpcError?.data==='0x');
+  const http=await browserRpc('http://127.0.0.1:1',async()=>new Response('',{status:503}));
+  await assert.rejects(http('eth_call',[]),error=>/HTTP_503/.test(error.message)&&!error.rpcError);
 });
 
 test('recognized legacy relabel cannot bypass an actual carrier implementation declaration',{timeout:120000},async t=>{

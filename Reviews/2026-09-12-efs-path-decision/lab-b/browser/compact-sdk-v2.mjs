@@ -32,7 +32,9 @@ export function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fai
   const legacyReads=e.id('efs.lab.read-set-storage/1:root15-bytes');
   const carrierReads=e.id('efs.lab.read-set-storage/2:root15-legacy-first:namespaced-stop-code:all-new');
   const carrierRoot=e.id('efs.lab.ledger.read-set-carriers/1');
-  const profileAbi=new e.Interface(['function readSetStorageProfile() view returns(bytes32,bytes32)',
+  const lifecycle=e.id('efs.lab.binding-lifecycle/2:bind-mask-release');
+  const profileAbi=new e.Interface(['function bindingLifecycleProfile() view returns(bytes32)',
+    'function readSetStorageProfile() view returns(bytes32,bytes32)',
     'function publicationSupportIdentity() view returns(address,bytes32)']);
   for(const implementation of family.implementations){
     const p=implementation.readSetStorage;
@@ -79,7 +81,7 @@ export function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fai
     check(p.actions.length>0&&p.actions.length<=64&&p.bodies.length===p.actions.length,'JOURNAL_BODIES');
     for(let i=0;i<p.actions.length;i++) {
       const a=p.actions[i],body=p.bodies[i];
-      check([1,3,4,5].includes(a.kind),'JOURNAL_ACTION');
+      check([1,3,4,5,7].includes(a.kind),'JOURNAL_ACTION');
       check(a.kind===1?e.getBytes(body).length<=8192&&eq(e.keccak256(body),a.bodyHashOrRecordId):body==='0x','JOURNAL_BODIES');
     }
     check(eq(validateReads(p.readSet),p.intent.readSetHash),'JOURNAL_READSET');
@@ -131,6 +133,19 @@ export function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fai
       // manifest says legacy. A shared proxy ABI is not per-implementation proof.
       const rawProbe=fn=>rpc('eth_call',[{to:execution.implementation,data:profileAbi.encodeFunctionData(fn)},
         {blockHash:context.blockHash,requireCanonical:true}]);
+      let lifecycleRaw,lifecycleAbsent=false;
+      try{lifecycleRaw=await rawProbe('bindingLifecycleProfile');}
+      catch(error){
+        if(supported.bindingLifecycleProfile!==undefined||!isRpcUnavailable(error)
+          ||error.rpcError?.code!==3||error.rpcError?.data!=='0x')throw error;
+        lifecycleAbsent=true;
+      }
+      if(!lifecycleAbsent){
+        const actual=profileAbi.decodeFunctionResult('bindingLifecycleProfile',lifecycleRaw)[0];
+        check(eq(actual,lifecycle)&&eq(supported.bindingLifecycleProfile,lifecycle),'BINDING_LIFECYCLE_UNSUPPORTED');
+        check(eq(await scalar('lens','bindingLifecycleProfile',[],context),actual),'BINDING_LIFECYCLE_UNSUPPORTED');
+        context.bindingLifecycleProfile=actual;
+      }
       let declared,legacyRefusal=false;
       try{declared=await rawProbe('readSetStorageProfile');}
       catch(error){
@@ -210,8 +225,9 @@ export function guardedProtocol({e,rpc,isRpcUnavailable,config,hash,eq,check,fai
         &&eq(e.recoverAddress(commitment,signature),retained[0])&&eq(publicationId(pub.principalId,commitment),plan.publicationId);
     },
     async history(plan,expected,asOf,context) {
-      const result=await call('lens','historyPrincipalAt',[keyPrincipal(plan.intent.author),expected.position,asOf,context.executionSet],context);
-      check(Number(result[0])!==0,'HISTORY_UNAVAILABLE');return result;
+      const stateful=eq(context.bindingLifecycleProfile,lifecycle);
+      const result=await call('lens',stateful?'historyStatePrincipalAt':'historyPrincipalAt',[keyPrincipal(plan.intent.author),expected.position,asOf,context.executionSet],context);
+      check(Number(result[0])!==0,'HISTORY_UNAVAILABLE');return stateful?result:[result[0],result[1]?1:2,...result.slice(2)];
     },
     recoveryError(error) {
       const message=String(error?.message??error);

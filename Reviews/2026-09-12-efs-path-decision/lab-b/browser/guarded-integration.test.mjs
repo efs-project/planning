@@ -253,11 +253,11 @@ test('guarded Files engine binds complete positions and independently verifies u
   metadata.plan.operation='not-authority';await journal.put(metadata);
   assert.equal((await foreign.reconcile(edit.id)).status,'EFFECTS_VERIFIED','effects come only from signed actions');
   await journal.put(original);
-  for(const unavailable of ['readSetBytes','historyPrincipalAt']) {
+  for(const unavailable of ['readSetBytes','historyStatePrincipalAt']) {
     const missing=client(env,journal,{rpc:async(method,params)=>{
       if(method==='eth_call'&&params[0].to.toLowerCase()===(unavailable==='readSetBytes'?manifest.contracts.ledger.address:manifest.contracts.lens.address).toLowerCase()) {
         const api=new e.Interface(manifest.contracts[unavailable==='readSetBytes'?'ledger':'lens'].abi);
-        if(api.parseTransaction(params[0])?.name===unavailable)return api.encodeFunctionResult(unavailable,unavailable==='readSetBytes'?['0x']:[0,false,Z,0,0]);
+        if(api.parseTransaction(params[0])?.name===unavailable)return api.encodeFunctionResult(unavailable,unavailable==='readSetBytes'?['0x']:[0,0,Z,0,0]);
       }
       return rpc(method,params);
     }}).sdk;

@@ -156,7 +156,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       check(eq(pub,p.publicationId)&&eq(id,hash(['uint256','address','bytes32'],[p.basis.chainId,addresses.ledger,pub])),'JOURNAL_INTEGRITY');
     },
     verifyRetained:async(plan,publication,retained,c)=>eq(await scalar('ledger','intentDigest',[plan.intent,plan.actionsHash],c),plan.digest),
-    history:(plan,expected,asOf,c)=>call('lens','history',[plan.intent.author,expected.position,asOf],c),
+    history:async(plan,expected,asOf,c)=>{const h=await call('lens','history',[plan.intent.author,expected.position,asOf],c);return [h[0],h[1]?1:2,...h.slice(2)];},
     principal:plan=>e.zeroPadValue(plan.intent.author,32),
     recoveryError:null,capabilities:{protocol:'compact-legacy-v1',guardedWrites:false},
   };
@@ -822,6 +822,19 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       const folder=await folderFor(args.folder,context);await destination(folder,role);
       if(operation==='create')await binding(purpose.head,file,Z,newRevision);
       await binding(purpose.folder,folder,role,file);
+    } else if (operation === 'releasePlacement') {
+      check(context.bindingLifecycleProfile===e.id('efs.lab.binding-lifecycle/2:bind-mask-release'),'BINDING_LIFECYCLE_UNSUPPORTED');
+      const folder=await folderFor(args.folder,context),bytes=bytesOf(args.name);validName(bytes);
+      const role=e.keccak256(bytes),id=recordOf(config.types.name,role);
+      const [type,first,,stored]=await call('ledger','record',[id],context);
+      check(eq(type,config.types.name)&&first>0n&&first<=BigInt(context.admission)&&eq(stored,e.hexlify(bytes)),'NAME_INTEGRITY');
+      const own=await ownHead(purpose.folder,folder,role);
+      check(own.state===1||own.state===2,'PLACEMENT_NOT_RELEASABLE');
+      const selection=await resolve(authors,purpose.folder,folder,role,context);
+      selectionDependencies.push({purpose:purpose.folder,subject:folder,role,selection});
+      await watch(purpose.folder,folder,role,'release-placement',selection);
+      push({kind:7,purpose:purpose.folder,subject:folder,role,expectedRevision:own.revision});
+      own.state=3;own.target=Z;own.revision++;
     } else {
       check(file && !eq(file,Z),'FILE_ID');
       const placementOperation=['move','rename','remove','restorePlacement'].includes(operation);
@@ -1006,7 +1019,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
           matches &&= eq(row[6],a.bodyHashOrRecordId) && eq(row[7],a.typeId) && eq(e.keccak256(plan.bodies[i]),a.bodyHashOrRecordId);
           const r = await call('ledger','record',[recordOf(a.typeId,a.bodyHashOrRecordId)],context);
           matches &&= eq(r[0],a.typeId) && r[1] > 0n && r[1] <= ordinal && eq(e.keccak256(r[3]),a.bodyHashOrRecordId);
-        } else if (a.kind === 3 || a.kind === 4) {
+        } else if (a.kind === 3 || a.kind === 4 || a.kind === 7) {
           matches &&= eq(await scalar('ledger','bindingPosition',[row[3]],context),positionOf(a.purpose,a.subject,a.role));
           matches &&= eq(row[6],a.target);
         } else if (a.kind === 5) {
@@ -1017,14 +1030,14 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       // Rebuild effect obligations from the signed actions, never unsigned journal
       // hints (which could otherwise drop a head check after a browser reload).
       const finalHeads = new Map();
-      for (const a of plan.actions) if (a.kind === 3 || a.kind === 4) {
+      for (const a of plan.actions) if (a.kind === 3 || a.kind === 4 || a.kind === 7) {
         const position = positionOf(a.purpose,a.subject,a.role), key = bindingOf(protocol.principal(plan),position);
-        finalHeads.set(key,{key,position,state:Number(a.kind) === 3 ? 1 : 2,revision:Number(a.expectedRevision)+1,target:a.target});
+        finalHeads.set(key,{key,position,state:Number(a.kind) === 3 ? 1 : Number(a.kind)===7 ? 3 : 2,revision:Number(a.expectedRevision)+1,target:a.target});
       }
       let supersededAtPublicationBlock=false;
       for (const expected of finalHeads.values()) {
         const historical=await protocol.history(plan,expected,first+BigInt(plan.actions.length)-1n,context);
-        matches &&= Number(historical[0])===2 && historical[1]===(expected.state===1)
+        matches &&= Number(historical[0])===2 && Number(historical[1])===expected.state
           && eq(historical[2],expected.target) && Number(historical[3])===expected.revision
           && historical[4]>=first && historical[4]<first+BigInt(plan.actions.length);
         const h = await call('ledger','head',[expected.key],context);

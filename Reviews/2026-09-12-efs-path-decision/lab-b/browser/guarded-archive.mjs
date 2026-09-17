@@ -211,7 +211,7 @@ export function createGuardedArchiveReader({ethers:e,rpc,manifest,described}){
       const a={kind:Number(row[0]),typeId:e.ZeroHash,bodyHashOrRecordId:e.ZeroHash,purpose:e.ZeroHash,subject:e.ZeroHash,role:e.ZeroHash,target:e.ZeroHash,expectedRevision:0,salt:e.ZeroHash};
       if(a.kind===1){a.typeId=row[7];a.bodyHashOrRecordId=row[6];}
       else if(a.kind===2){a.typeId=(await lc('record',[row[6]],basis))[0];a.bodyHashOrRecordId=row[6];}
-      else if(a.kind===3||a.kind===4){
+      else if(a.kind===3||a.kind===4||a.kind===7){
         const position=(await lc('bindingPosition',[row[3]],basis))[0],fields=await lc('positionCell',[position],basis);
         [a.purpose,a.subject,a.role]=Array.from(fields);a.expectedRevision=Number(row[4]);if(a.kind===3)a.target=row[6];
       }else if(a.kind===5)a.salt=row[6];else if(a.kind===6)a.target=row[6];else fail('SOURCE_ACTION_UNSUPPORTED');

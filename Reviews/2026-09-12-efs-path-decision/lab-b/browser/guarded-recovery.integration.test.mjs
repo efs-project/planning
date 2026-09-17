@@ -54,6 +54,10 @@ test('cold signed Files prefix reconstructs with fresh EOA authority and native 
   }
   const file=await sourceRun('create',{name:'recover.txt',salt:e.id('recovery/file'),content:{bytes:e.toUtf8Bytes('original bytes')}});
   const edited=await sourceRun('edit',{file:file.file,content:{bytes:e.toUtf8Bytes('cold recovered bytes')}});
+  const aliasBind=await sourceRun('restorePlacement',{file:file.file,name:'alias.txt'});
+  const aliasRelease=await sourceRun('releasePlacement',{name:'alias.txt'});
+  const aliasRebind=await sourceRun('restorePlacement',{file:file.file,name:'alias.txt'});
+  assert.deepEqual(aliasRelease.actions.map(a=>a.kind),[7]);
   const fileTag=await sourceRun('addTag',{file:file.file,scope:'file',conceptLabel:'portable-file'});
   const revisionTag=await sourceRun('addTag',{file:file.file,scope:'revision',conceptLabel:'portable-revision'});
   const bob=await sourceRun('create',{name:'shared.txt',salt:e.id('recovery/bob-file'),content:{bytes:e.toUtf8Bytes('Bob fallback')}},'bob');
@@ -103,9 +107,11 @@ test('cold signed Files prefix reconstructs with fresh EOA authority and native 
   const coldArchive=createFilesCompactSdk({ethers:e,manifest:dest.manifest,rpc:dest.rpc}),recovered=[],coldBundles=[];
   for(const x of bundles){
     const cold=await coldArchive.exportArchivedClaim({address:archive,claimId:x.claimId,closure:x.closure});
-    assert.deepEqual(cold.actions,x.actions);assert.equal((await verifyGuardedClaim(e,cold)).closureCoverage,'COMPLETE');coldBundles.push(cold);
+    assert.deepEqual(cold.actions,x.actions);assert.equal(cold.intent.author,x.intent.author);assert.equal(cold.signature,x.signature);
+    assert.equal((await verifyGuardedClaim(e,cold)).closureCoverage,'COMPLETE');coldBundles.push(cold);
   }
   assert(processBoundary('verify',coldBundles).every(x=>x.closureCoverage==='COMPLETE'));
+  const aliasHeads=[];
   for(let n=0;n<coldBundles.length;n++){
     const x=coldBundles[n],who=x.intent.author.toLowerCase()===authors[0].toLowerCase()?'alice':'bob';
     const statement=coder.encode(['bytes32','address','address','bytes32','bytes32','bytes32','bytes32'],
@@ -129,6 +135,15 @@ test('cold signed Files prefix reconstructs with fresh EOA authority and native 
     const published=await coldArchive.exportPublication({publication:String(pub)});
     assert.deepEqual(published.actions.slice(0,-1),x.actions,'independent cold destination export preserves exact source action prefix');
     assert.equal(published.actions.length,x.actions.length+1);assert.equal(published.intent.author,x.intent.author);
+    const aliasAction=x.actions.find(a=>[3,7].includes(Number(a.kind))&&a.role===e.keccak256(e.toUtf8Bytes('alias.txt')));
+    if(aliasAction){
+      const position=hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/position/1'),aliasAction.purpose,aliasAction.subject,aliasAction.role]);
+      const binding=hash(['bytes32','bytes32','bytes32'],[e.id('efs2/binding/1'),e.zeroPadValue(authors[0],32),position]);
+      const head=await dest.call('ledger','head',[binding]);
+      const expected=[[1,1,file.file],[3,2,e.ZeroHash],[1,3,file.file]][aliasHeads.length];
+      assert.deepEqual([Number(head[0]),Number(head[1]),head[5]],expected,'exact recovered alias lifecycle head');
+      aliasHeads.push(plain(head));
+    }
     const snapshot=await state();await dest.transact('recovery','recover',args,'recovery/duplicate/'+n,'bob');assert.deepEqual(await state(),snapshot);
     recovered.push({claimId:x.claimId,sourcePublication:publications[n],destinationPublication:String(pub),publicationId:linkedId,
       sourceNonce:x.intent.nonce,sourceActions:x.actions.length,sourceFirstAdmission:sourceFirst,args:plain(args),destinationEvidence:plain(evidence)});
@@ -137,9 +152,10 @@ test('cold signed Files prefix reconstructs with fresh EOA authority and native 
   const reader=createFilesCompactSdk({ethers:e,manifest:destinationManifest,rpc:dest.rpc});
   const readBefore=structuredClone(dest.metrics),context=await reader.pin();
   const list=await reader.listFolder({context,authors,folder:root});
-  assert.equal(list.coverage,'COMPLETE');assert.equal(list.nameCoverage,'COMPLETE');assert.equal(list.value.length,1);assert.equal(list.value[0].file,file.file);
-  assert.equal(list.value[0].name.value,'renamed.txt');
-  const opposite=await reader.listFolder({context,authors:[authors[1],authors[0]],folder:root});assert.equal(opposite.value.length,2,'Bob-first unmasks own shared entry');
+  assert.equal(aliasHeads.length,3);
+  assert.equal(list.coverage,'COMPLETE');assert.equal(list.nameCoverage,'COMPLETE');assert.equal(list.value.length,2);
+  assert.deepEqual(list.value.map(r=>r.name.value).sort(),['alias.txt','renamed.txt']);assert(list.value.every(r=>r.file===file.file));
+  const opposite=await reader.listFolder({context,authors:[authors[1],authors[0]],folder:root});assert.equal(opposite.value.length,3,'Bob-first unmasks own shared entry');
   const current=await reader.readContent({context,authors,file:file.file});assert.equal(current.state,'AVAILABLE_VERIFIED');assert.equal(e.toUtf8String(current.bytes),'cold recovered bytes');
   const old=await reader.readContent({context,authors,file:file.file,record:file.newRevision});assert.equal(e.toUtf8String(old.bytes),'original bytes');
   const ft=await reader.readTag({context,authors,subject:file.file,concept:fileTag.concept,target:file.file});assert.equal(ft.value.present,true);
@@ -179,7 +195,7 @@ test('cold signed Files prefix reconstructs with fresh EOA authority and native 
   const result={source:{dir:sourceDir,origin:sourceOrigin,chainId:manifest.chainId,stopped:true},destination:{dir:dest.dir,origin:dest.manifest.executionFamily.origin,chainId:dest.manifest.chainId},
     root,file:file.file,oldRevision:file.newRevision,recoveredRevision:edited.newRevision,continuedRevision:continued.newRevision,appRevision:appPoint.recordId,
     closureBytes:Buffer.byteLength(JSON.stringify(bundles.map(x=>x.closure))),offline,missingResult,before,after:await state(),recovered,coldRead,
-    names:plain(list),reverseLens:plain(opposite),sourceTransactions:source.transactions,destinationTransactions:dest.transactions,
+    aliasHeads,aliasPlans:[aliasBind.id,aliasRelease.id,aliasRebind.id],names:plain(list),reverseLens:plain(opposite),sourceTransactions:source.transactions,destinationTransactions:dest.transactions,
     control:{dir:control.dir,transactions:control.transactions,method:'Isolated local control, same original actions/author/body bytes/order and profile; no provenance statement/helper. Later rows include cumulative extra-statement state differences in recovery.'},
     authorizationCount:{sourceClaims:bundles.length,freshDestinationSignatures:recovered.length,ownerContinuation:1,nativeOperatorTransactions:1,wholeMigrationSingleSignature:false},
     limitations:['Source admission and source guard truth NOT_PROVEN','Contiguous source EOA nonce prefix only; no interleaved same-author destination writes',
