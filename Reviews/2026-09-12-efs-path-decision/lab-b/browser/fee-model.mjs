@@ -41,9 +41,28 @@ export function baseDataFee(unsignedBytes,inputs=economicsSnapshot.baseInputs){
   return {floorWei:100000000n*fee/1000000000000n,scenarioWei:size*fee/1000000000000n};
 }
 function gasPrice(network){
-  if(network?.gasGwei===null||network?.gasGwei===undefined||network?.gasGwei==='')return null;
-  const n=Number(network.gasGwei)*1e9;
-  return Number.isSafeInteger(n)&&n>=0?BigInt(n):null;
+  // Scale decimal digits, not binary floats; cap input/exponent and uint256 size.
+  const input=network?.gasGwei;
+  if(!['string','number'].includes(typeof input))return null;
+  const text=String(input);
+  if(text.length>128)return null;
+  const match=/^\+?(\d+(?:\.\d*)?|\.\d+)(?:e([+-]?\d{1,3}))?$/i.exec(text);
+  if(!match)return null;
+  const exponent=Number(match[2]??0);if(Math.abs(exponent)>128)return null;
+  const [whole,fraction='']=match[1].split('.');
+  let digits=(whole+fraction).replace(/^0+/,'')||'0';
+  const shift=9+exponent-fraction.length;
+  if(digits==='0')return 0n;
+  if(shift<0){
+    const discard=-shift;
+    if(discard>=digits.length||!/^[0]*$/.test(digits.slice(-discard)))return null;
+    digits=digits.slice(0,-discard);
+  }else{
+    if(digits.length+shift>78)return null;
+    digits+='0'.repeat(shift);
+  }
+  if(digits.length>78)return null;
+  const wei=BigInt(digits);return wei<(1n<<256n)?wei:null;
 }
 export function modelAction(entry,gas,economics,ethers){
   const result={};

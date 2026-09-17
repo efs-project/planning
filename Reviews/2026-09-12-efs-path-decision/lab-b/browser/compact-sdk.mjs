@@ -417,15 +417,18 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   }
   const revisionWalks=new WeakMap();
   async function readRevisionHistory(args) {
-    const {file,context,continuation,budget=16}=args;
+    const {file,context,continuation,budget=16,policy='ordered'}=args;
     await guard(context);check(Number.isInteger(budget)&&budget>=1&&budget<=64,'BUDGET');
-    const authors=await protocol.selectors(args,context),basis=basisFor(context,authors);
+    check(policy==='ordered'||policy==='no-tiebreak','LENS_POLICY');
+    const authors=await protocol.selectors(args,context),basis=basisFor(context,authors,policy);
     let walk;
-    if(continuation){walk=revisionWalks.get(continuation);check(walk&&walk.context===context&&eq(walk.file,file)&&eq(walk.lensHash,basis.lens.hash),'CONTINUATION');}
+    if(continuation){walk=revisionWalks.get(continuation);check(walk&&walk.context===context&&eq(walk.file,file)&&eq(walk.lensHash,basis.lens.hash)&&walk.policy===policy,'CONTINUATION');}
     else {
-      const point=await fileAt({file,authors,context});
+      let point;
+      try {point=await fileAt({file,authors,context,policy});}
+      catch(error){if(!isRpcUnavailable(error))throw error;return freeze(result(basis,'UNKNOWN','PARTIAL',[],{reason:'HISTORY_UNAVAILABLE'}));}
       if(point.knowledge!=='PRESENT')return freeze(result(basis,point.knowledge,point.coverage,[],{reason:point.reason}));
-      walk={context,file,lensHash:basis.lens.hash,next:point.value.revision.recordId,rows:[]};
+      walk={context,file,lensHash:basis.lens.hash,policy,next:point.value.revision.recordId,rows:[]};
     }
     const rows=[...walk.rows];let next=walk.next;
     try {

@@ -18,7 +18,7 @@ const source=(await readFile(new URL('./app.mjs',import.meta.url),'utf8')).repla
 const ethers=await loadEthers(),key='0x'+'11'.repeat(32),wallet=new ethers.Wallet(key);
 const tick=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};
 const deferred=()=>{let resolve,reject;const promise=new Promise((r,j)=>{resolve=r;reject=j;});return {promise,resolve,reject};};
-async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedRead,placementRead,stanceRead,fileRead,externalGateways,initial='#/',typed=true,carriers=false,image=false,encrypted=false,joined=false}={}){
+async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,historyRead,joinedRead,placementRead,stanceRead,fileRead,externalGateways,initial='#/',typed=true,carriers=false,image=false,encrypted=false,joined=false}={}){
   const listeners=new Map(),elements=new Map();
   const element=id=>{
     if(!elements.has(id))elements.set(id,{id,value:'',textContent:'',innerHTML:'',dataset:{},disabled:false,hidden:false,open:false,
@@ -42,7 +42,7 @@ async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedR
   const child=(folder,name)=>folder==='root'&&name==='archive'?'archive':folder==='archive'&&name==='qa-renamed'?'renamed':folder==='root'&&name==='slow'?'slow':null;
   const row=(folder,name,kind='file')=>({file:`${folder}-${name}`,folder,kind,knowledge:'PRESENT',name:{knowledge:'PRESENT',value:name},position:`${folder}/${name}`,selection:{author:wallet.address,revision:1,admission:'9'}});
   const sdk={async pin(){stats.pin++;return {...context,blockNumber:String(6+stats.pin),admission:String(8+stats.pin)};},
-    exactStances:!!stanceRead,readStance:stanceRead,
+    exactStances:!!stanceRead,readStance:stanceRead,readRevisionHistory:historyRead,
     async readDirectory(){return {knowledge:'PRESENT',coverage:'COMPLETE'};},
     async readPlacement({folder,name}){if(placementRead){const value=placementRead({folder,name});if(value)return value;}const target=child(folder,name);return target?{knowledge:'PRESENT',coverage:'COMPLETE',value:{target,kind:'directory',selection:{author:wallet.address,revision:1,admission:'9'}}}:{knowledge:'ABSENT',coverage:'COMPLETE',value:{}};},
     async listFolder({folder,authors,context}){if(holdList&&folder==='slow'&&authors[0]===wallet.address)await holdList.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',basis:context,value:[row(folder,authors[0]!==wallet.address?'bob.txt':folder==='root'?'root.txt':folder==='renamed'?'child.txt':'slow.txt'),...(carriers?[row(folder,'second.txt')]:[])]};},
@@ -84,6 +84,39 @@ test('replacement waits for in-page consent and renewed consent after destinatio
   await a.submit({name:'occupied'});assert.equal(a.stats.prepare,0);assert.equal(a.element('replacement-consent').checked,false);
   a.element('replacement-consent').checked=true;
   await a.submit({name:'occupied'});assert.equal(a.stats.prepare,1);assert.equal(a.stats.prepared[0].replace,true);
+});
+
+test('fee editor preserves decimal gas strings and invalid input rather than reusing old assumptions',async()=>{
+  const a=await app();
+  for(const raw of ['0.000000015','1.5e-8','0.0000000150000000001','-1','']){
+    a.element('cost-body').listeners.get('change')({target:{value:raw,dataset:{economic:'gasGwei',network:'0'}}});
+    assert.ok(a.element('cost-body').innerHTML.includes(`data-economic="gasGwei" value="${raw}"`),raw);
+  }
+});
+
+test('history UI labels and clears its Lens basis, carries policy and keeps continuation pinned',async()=>{
+  const reads=[],token={};
+  const a=await app({placementRead:({name})=>name.endsWith('.txt')?{knowledge:'PRESENT',coverage:'COMPLETE',value:{target:'root-'+name,kind:'file',selection:{author:wallet.address,revision:1,admission:'9'}}}:null,
+    historyRead:async args=>{reads.push(args);return {knowledge:args.policy==='no-tiebreak'?'CONFLICT':'PRESENT',coverage:'PARTIAL',value:[],basis:{...args.context,lens:{policy:args.policy}},continuation:token};}});
+  await a.click('select',{position:'root/root.txt'});await a.click('chainHistory');
+  assert.equal(reads[0].policy,'ordered');assert.match(a.element('detail').innerHTML,/ordered.*alice.*bob/i);
+  assert.match(a.element('detail').innerHTML,new RegExp('pinned block '+reads[0].context.blockNumber));
+  await a.click('continueHistory');assert.equal(reads[1].context,reads[0].context);assert.equal(reads[1].continuation,token);
+  for(const lens of ['bob','conflict']){
+    a.element('lens').value=lens;a.element('lens').listeners.get('change')();await tick();
+    await a.click('select',{position:'root/'+(lens==='bob'?'bob.txt':'root.txt')});
+    assert.doesNotMatch(a.element('detail').innerHTML,/pinned block/);
+    await a.click('chainHistory');assert.equal(reads.at(-1).policy,lens==='conflict'?'no-tiebreak':'ordered');
+    assert.equal(reads.at(-1).authors[0],lens==='bob'?'0x00000000000000000000000000000000000000b2':wallet.address);
+  }
+});
+
+test('in-flight history cannot reattach after same-route Lens change',async()=>{
+  const hold=deferred(),a=await app({historyRead:async args=>{await hold.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',value:[],basis:{...args.context,lens:{policy:args.policy}}};}});
+  await a.click('select',{position:'root/root.txt'});await a.click('chainHistory');
+  a.element('lens').value='bob';a.element('lens').listeners.get('change')();await tick();
+  hold.resolve();await tick();
+  assert.doesNotMatch(a.element('detail').innerHTML,/pinned block/);
 });
 
 test('external open names only its configured providers and requires per-open in-page consent',async()=>{

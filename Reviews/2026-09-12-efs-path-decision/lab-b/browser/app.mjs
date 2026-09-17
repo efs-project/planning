@@ -88,6 +88,9 @@ function authorName(address) {
 }
 function selectedRow() { return state.rows.find(row=>row.position===state.selected)??(state.detachedRow?.position===state.selected?state.detachedRow:null); }
 function routeCurrent(navigation) { return !state.paths || (navigation===state.navigation && navigation?.hash===location.hash); }
+const lensPolicy=()=>$('lens').value==='conflict'?'no-tiebreak':'ordered';
+const historyLensKey=()=>JSON.stringify([authors(),lensPolicy()]);
+function invalidateHistory(){state.chainHistory=null;++state.readGeneration;}
 function checkRoute(navigation) {
   if(!routeCurrent(navigation)) throw Object.assign(new Error('Route changed; obsolete work cancelled.'),{code:'ROUTE_CHANGED'});
 }
@@ -319,9 +322,9 @@ function renderDetail(){
   renderDetailBase();const row=selectedRow();if(!state.paths||!row||!['file','directory'].includes(row.kind))return;
   const tagSection=$('detail').querySelector('.file-tags');
   if(tagSection)tagSection.insertAdjacentHTML('beforeend',hasStances()?'<p>Exact stance filtering covers observed folder rows only. Legacy seeded labels are separate, not migrated.</p>':'<p class="warning">Legacy generic tag bindings only. This deployment does not authenticate an exact stance profile.</p>');
-  const revision=row.point?.value?.revision,history=state.chainHistory?.file===row.file?state.chainHistory:null;
+  const revision=row.point?.value?.revision,history=state.chainHistory?.file===row.file&&state.chainHistory.lensKey===historyLensKey()?state.chainHistory:null;
   $('detail').insertAdjacentHTML('beforeend',`<section class="file-actions"><button data-action="linkPlacement" data-write>Link another name</button>${row.kind==='file'&&revision?.profile!=='live-quote-v1'?'<button data-action="copyFile" data-write>Copy to new File</button>':''}${row.kind==='directory'?'<button data-action="previewRelease" data-write>Preview recursive release of my placements</button>':''}</section>
-    ${row.kind==='file'?`<section class="revision-history"><h3>Chain-derived selected ancestry</h3><button data-action="chainHistory">Read history at a fresh basis</button>${history?`<p>${escape(history.result.knowledge)} / ${escape(history.result.coverage)} · pinned block ${escape(history.context.blockNumber)}. Selected parent chain only, not all branches. Restore creates a new successor.</p>${history.result.value.map(r=>`<p><code>${escape(short(r.recordId))}</code> · admission ${escape(r.firstAdmission)} <button data-action="restoreContents" data-record="${escape(r.recordId)}" data-write>Restore as new revision</button></p>`).join('')}${history.result.continuation?'<button data-action="continueHistory">Continue pinned history</button>':''}`:''}</section>`:''}`);
+    ${row.kind==='file'?`<section class="revision-history"><h3>Chain-derived selected ancestry</h3><button data-action="chainHistory">Read history at a fresh basis</button>${history?`<p>${escape(history.result.knowledge)} / ${escape(history.result.coverage)} · ${escape(history.policy)} Lens: ${escape(history.authors.map(authorName).join(' → '))} · pinned block ${escape(history.context.blockNumber)}. Selected parent chain only, not all branches. Restore creates a new successor.</p>${history.result.value.map(r=>`<p><code>${escape(short(r.recordId))}</code> · admission ${escape(r.firstAdmission)} <button data-action="restoreContents" data-record="${escape(r.recordId)}" data-write>Restore as new revision</button></p>`).join('')}${history.result.continuation?'<button data-action="continueHistory">Continue pinned history</button>':''}`:''}</section>`:''}`);
 }
 function renderRelease(){
   const box=$('workflow-release'),preview=state.releasePreview,result=state.releaseResult;
@@ -608,11 +611,13 @@ document.addEventListener('click',event=>{
   if(['create','createDirectory','edit','rename','move','remove','releasePlacement','restorePlacement','restoreContents','linkPlacement','copyFile'].includes(action)) {openEditor(action,button.dataset.record);return;}
   run(async navigation=>{
     if(action==='chainHistory'||action==='continueHistory'){
-      const row=selectedRow(),saved=state.chainHistory,continuing=action==='continueHistory';
-      if(continuing&&(!saved||saved.file!==row.file))throw Error('Read this File history first.');
-      const context=continuing?saved.context:await state.sdk.pin(),lens=continuing?saved.authors:authors();
-      const result=await state.sdk.readRevisionHistory({file:row.file,authors:lens,context,budget:8,...(continuing?{continuation:saved.result.continuation}:{})});checkRoute(navigation);
-      state.chainHistory={file:row.file,context,authors:lens,result};renderDetail();
+      const row=selectedRow(),saved=state.chainHistory,continuing=action==='continueHistory',generation=state.readGeneration,lensKey=historyLensKey();
+      if(continuing&&(!saved||saved.file!==row.file||saved.lensKey!==lensKey))throw Error('Read this File history first.');
+      const lens=continuing?saved.authors:authors(),policy=continuing?saved.policy:lensPolicy();
+      const current=()=>{checkRoute(navigation);if(generation!==state.readGeneration||lensKey!==historyLensKey()||selectedRow()?.file!==row.file)throw Object.assign(Error('History observation superseded.'),{code:'ROUTE_CHANGED'});};
+      const context=continuing?saved.context:await state.sdk.pin();current();
+      const result=await state.sdk.readRevisionHistory({file:row.file,authors:lens,policy,context,budget:8,...(continuing?{continuation:saved.result.continuation}:{})});current();
+      state.chainHistory={file:row.file,context,authors:lens,policy,lensKey,result};renderDetail();
     }
     if(action==='previewRelease'){
       if(!state.wallet)throw Error('Connect a signer first.');
@@ -727,6 +732,7 @@ function applyCustomLens(addresses){
   const parsed=addresses.map(a=>ethers.getAddress(a.trim()));
   if(new Set(parsed.map(a=>a.toLowerCase())).size!==parsed.length)throw Error('Each Lens address should appear once.');
   state.customAuthors=parsed;
+  invalidateHistory();
   if(!$('lens').querySelector('[value="custom"]'))$('lens').add(new Option('Custom ordered Lens','custom'));
   $('lens').value='custom';$('lens-addresses').value=parsed.join(', ');
   const url=new URL(location.href);url.searchParams.set('lens',parsed.join(','));history.replaceState(null,'',url);
@@ -739,7 +745,7 @@ document.addEventListener('dblclick',event=>{
 });
 addEventListener('hashchange',handleRoute);
 addEventListener('popstate',handleRoute);
-$('lens').addEventListener('change',()=>run(()=>{const url=new URL(location.href);url.searchParams.set('lens',$('lens').value==='custom'?state.customAuthors.join(','):$('lens').value);history.replaceState(null,'',url);return refresh();}));
+$('lens').addEventListener('change',()=>{invalidateHistory();return run(()=>{const url=new URL(location.href);url.searchParams.set('lens',$('lens').value==='custom'?state.customAuthors.join(','):$('lens').value);history.replaceState(null,'',url);return refresh();});});
 $('filter-scope').addEventListener('change',()=>{if(hasJoined())refreshJoinedQuery();else{renderRows();controls();}});
 $('filter-mode').addEventListener('change',()=>{if(hasJoined())refreshJoinedQuery();else{renderRows();controls();}});
 $('signer').addEventListener('change',()=>run(async()=>{
@@ -749,7 +755,8 @@ $('signer').addEventListener('change',()=>run(async()=>{
 }));
 $('cost-body').addEventListener('change',event=>{
   const {economic,network}=event.target.dataset; if(!economic)return;
-  const value=Number(event.target.value); if(event.target.value===''||!Number.isFinite(value)||value<0) {renderCosts();return;}
+  const value=economic==='gasGwei'?event.target.value:Number(event.target.value);
+  if(economic!=='gasGwei'&&(event.target.value===''||!Number.isFinite(value)||value<0)) {renderCosts();return;}
   if(network===undefined) state.economics[economic]=value;
   else state.economics.networks[Number(network)][economic]=value;
   state.editedEconomics=true;renderCosts();

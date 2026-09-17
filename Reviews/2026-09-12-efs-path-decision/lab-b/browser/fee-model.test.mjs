@@ -4,6 +4,13 @@ import * as ethers from 'ethers';
 import * as fees from './fee-model.mjs';
 
 const entry={transaction:{to:'0x'+'12'.repeat(20),data:'0x'+'ab'.repeat(175),value:'0'}};
+test('decimal gas input is exact at wei precision, bounded and fails closed',()=>{
+  const economics=fees.resolveEconomics();
+  for(const [input,want] of [['0.000000015',15n],['1.5e-8',15n],[0.000000015,15n],['0',0n],['.006',6000000n],['1.0000000000',1000000000n],['9007199.254740993',9007199254740993n],['0.0000000001',null],['-1',null],['NaN',null],['Infinity',null],['',null],['1x',null],['0x10',null],['1e999999',null],['1'.repeat(300),null]]){
+    economics.networks[0].gasGwei=input;
+    assert.equal(fees.modelAction(entry,1n,economics,ethers).ethereum.executionWei,want,String(input));
+  }
+});
 test('Fjord offline practical data bound matches captured oracle, including the floor',()=>{
   assert.deepEqual(fees.baseDataFee(219),{floorWei:1208961210n,scenarioWei:2559496613n});
   assert.equal(fees.baseDataFee(1000).scenarioWei,10488057663n);

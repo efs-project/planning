@@ -30,6 +30,10 @@ test('Files links, independent copies and cold successor history preserve identi
   const context=await cold.pin();
   let history=await cold.readRevisionHistory({file:file.file,authors,context,budget:1});
   assert.equal(history.coverage,'PARTIAL');assert.equal(history.value.length,1);
+  const fresh=await cold.pin();
+  for(const change of [{policy:'no-tiebreak'},{authors:[...authors].reverse()},{context:fresh}]){
+    await assert.rejects(cold.readRevisionHistory({file:file.file,authors,context,budget:1,continuation:history.continuation,...change}),/CONTINUATION/);
+  }
   history=await cold.readRevisionHistory({file:file.file,authors,context,budget:1,continuation:history.continuation});
   assert.equal(history.coverage,'COMPLETE');assert.deepEqual(history.value.map(r=>e.toUtf8String(r.document)),['two','one']);
   const restored=await run('restoreContents',{file:file.file,record:file.newRevision});

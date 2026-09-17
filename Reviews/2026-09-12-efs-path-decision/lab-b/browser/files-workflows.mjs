@@ -53,7 +53,7 @@ export async function executeOwnPlacementRelease({sdk,preview,signDigest,sendTra
       currentPlan=await sdk.prepare({operation:'releasePlacement',author:preview.author,authors:[preview.author],folder:row.folder,name:row.name,context});
       const signed=await sdk.authorize(currentPlan,signDigest);
       const submission=await sdk.submit(signed,sendTransaction),outcome=await sdk.reconcile(submission.id);
-      if(outcome.status!=='EFFECTS_VERIFIED')return {status:'PARTIAL',reason:outcome.status,completed,pending,currentPlan:currentPlan.id,outcome};
+      if(outcome.status!=='EFFECTS_VERIFIED')return {status:'PARTIAL',reason:outcome.status,completed,pending,currentPlan:currentPlan.id,outcome,atomic:false,retained:preview.retained};
       completed.push({row,id:currentPlan.id,outcome});pending.shift();currentPlan=null;
       await onProgress({completed:[...completed],pending:[...pending]});
     }

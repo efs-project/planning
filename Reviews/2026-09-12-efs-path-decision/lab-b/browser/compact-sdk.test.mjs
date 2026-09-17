@@ -346,6 +346,18 @@ test('no-tiebreak conflicts expose candidates without an overall selected revisi
   assert.deepEqual(result.value.candidates.map(c => c.revision.recordId),[ra,rb]);
   assert.equal(result.value.revisionTag.evaluated,false);
 });
+test('revision history respects both author orders and diagnostic conflict policy',async()=>{
+  const {sdk}=fixture(),context=await sdk.pin();
+  for(const [authors,want] of [[[A,B],ra],[[B,A],rb]]){
+    const result=await sdk.readRevisionHistory({file,authors,context,policy:'ordered'});
+    assert.equal(result.value[0].recordId,want);assert.equal(result.basis.lens.policy,'ordered');
+  }
+  const conflict=await sdk.readRevisionHistory({file,authors:[A,B],context,policy:'no-tiebreak'});
+  assert.equal(conflict.knowledge,'CONFLICT');assert.deepEqual(conflict.value,[]);assert.equal(conflict.basis.lens.policy,'no-tiebreak');
+  const unavailable=fixture({respond:({fn})=>{if(fn==='resolveNoTiebreak')throw Error('provider unavailable');}});
+  const unknown=await unavailable.sdk.readRevisionHistory({file,context:await unavailable.sdk.pin(),policy:'no-tiebreak'});
+  assert.equal(unknown.knowledge,'UNKNOWN');assert.equal(unknown.coverage,'PARTIAL');assert.deepEqual(unknown.value,[]);
+});
 test('oversized bodies are rejected before authorization', async () => {
   const {sdk} = fixture();
   await assert.rejects(sdk.prepare({operation:'create',author:A,name,salt:H('salt'),document:new Uint8Array(8161)}),/BODY_LIMIT/);
