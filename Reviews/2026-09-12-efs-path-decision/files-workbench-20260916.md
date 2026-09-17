@@ -2,7 +2,7 @@
 
 September 16, 2026 · v2 PM · disposable integration prototype, not production or complete v1 parity.
 
-> Latest September 16 checkpoint: **http://127.0.0.1:60627/** now runs Vite; RPC is **http://127.0.0.1:8545**, chain **31337**. The three older demo chains were retired with James's disposable-state authorization. See the final continuation for static-build and actual v1 comparison evidence; earlier ports below are historical.
+> September 17 status: the [[placement-release-plan-20260917|placement-release pass]] extends the prototype's contracts and SDK. It requires a fresh matched deployment; it was not patched into the saved demo. No workbench services were running when that pass began, and it did not restart them. The established defaults remain UI **60627**, RPC **8545**, chain **31337**. September 16 runtime observations and earlier ports below are historical, not a current service-health claim.
 
 James asked for a quick working browser before a clean-slate engineering pass.
 V1 was inspected for behavior only. No v1 code, components or contracts were copied.

@@ -276,6 +276,17 @@ A Withdrawal targets an authored Occurrence and means its issuer no longer
 maintains it. It does not delete the Record, retract another issuer's
 Occurrence, or rewind a Binding.
 
+**September 17 compact implementation clarification:** absence of a current
+claim and an explicit mask are different. The Files design already requires
+both. Its [[../../Reviews/2026-09-12-efs-path-decision/placement-release-plan-20260917|release experiment]]
+retains an author's revision/history while letting lower Lens authors answer;
+a mask continues to block them. Neither operation erases data or revives an old
+head from the same author. The compact prototype's separate release action is
+an implementation candidate, not a frozen opcode or a reinterpretation of
+occurrence Withdrawal. Historical readers, mandatory index replay and SDK
+reconciliation must preserve this distinction instead of reducing every
+non-live state to a boolean.
+
 ### Principal
 
 All semantic authorship, author indexes, and Lens entries use `PrincipalId` at

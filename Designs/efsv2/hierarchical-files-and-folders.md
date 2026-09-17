@@ -1224,6 +1224,23 @@ certified writable Route.
 
 ### 8.1 Operation shapes
 
+**September 17 compact-prototype reconciliation:** the table's distinction
+between **Unlink/mask** and **Stop claiming** remains intentional. Compact B
+implemented `UNBIND=4` as a mask and `WITHDRAW=6` as occurrence withdrawal; neither
+provided the latter operation. The authorized
+[[../../Reviews/2026-09-12-efs-path-decision/placement-release-plan-20260917|placement-release experiment]]
+adds a separate retained release state so an author can stop claiming a position
+without reviving their older value. Lower Lens authors may then win. Its opcode,
+state number and profile are disposable implementation choices, not adopted
+wire constants. Index replay, historical selection and SDK reconciliation must
+understand the distinction together; changing a button alone is insufficient.
+
+For a nonempty Directory, either hide or release affects the named placement,
+not its retained descriptor or child placements. Other links can still reach
+those children. A future recursive tool must describe the bounded set of the
+caller's placements it changes; it cannot promise graph-wide erasure or deletion
+of other authors' data.
+
 All application Records precede Binding leaves that target them in selected
 leaf order.
 
