@@ -268,7 +268,7 @@ function textPreview(documentBytes) {
   try { return {text:ethers.toUtf8String(documentBytes),utf8:true}; }
   catch { return {text:'These verified bytes are not valid UTF-8. Download preserves the exact bytes; no media type is asserted.',utf8:false}; }
 }
-function renderDetail() {
+function renderDetailBase() {
   const row=selectedRow();
   if(!row) { $('detail').innerHTML='<div class="welcome"><span class="empty-icon">▤</span><h2>Open a file</h2><p>Choose a row to inspect its selected contents, revisions, and exact tag subjects.</p></div>'; return; }
   const point=row.point, revision=point?.value?.revision, open=canOpen(point);
@@ -307,6 +307,20 @@ function renderDetail() {
     <section class="file-tags"><strong>Tags have a subject</strong><div class="tag-editor"><input id="tag-concept" aria-label="Tag concept" placeholder="Concept, e.g. important" value="${escape(state.filterConcept)}"><select id="tag-scope" aria-label="Tag subject"><option value="file">File identity</option><option value="revision">Selected revision</option></select>${action('addTag','Add',false)}${action('removeTag','Remove',false)}</div><p class="tag-state">${state.filterConcept?`Observed “${escape(state.filterConcept)}”: File ${tagLabel(point?.value?.fileTag)} · selected revision ${tagLabel(point?.value?.revisionTag)}`:'Enter a concept to add or remove. Apply the same concept above to inspect its presence.'}</p></section>
     <details class="revision-history"><summary>Locally witnessed revisions (${history.length})</summary><p>Not a complete history. Restoring contents publishes a fresh child revision; it does not rewind HEAD.</p>${history.map(item=>`<div class="history-row"><code title="${escape(item.recordId)}">${escape(short(item.recordId))} · admission ${escape(item.firstAdmission)}</code>${action('restoreContents','Restore these contents',!open,`data-record="${escape(item.recordId)}"`)}</div>`).join('')}${action('restoreContents','Use a historical Record ID…',!open)}</details>
     <details class="technical"><summary>Record & observation details</summary><pre>${escape(json({file:row.file,placement:{folder:row.folder,position:row.position,role:row.role,name:row.name},point}))}</pre></details>`;
+}
+function renderDetail(){
+  renderDetailBase();const row=selectedRow();if(!state.paths||!row||!['file','directory'].includes(row.kind))return;
+  const tagSection=$('detail').querySelector('.file-tags');
+  if(tagSection)tagSection.insertAdjacentHTML('beforeend','<p class="warning">Legacy generic tag bindings only. These controls do not implement ASSERT / DENY / SILENT stance semantics; exact stance planner integration is pending.</p>');
+  const revision=row.point?.value?.revision,history=state.chainHistory?.file===row.file?state.chainHistory:null;
+  $('detail').insertAdjacentHTML('beforeend',`<section class="file-actions"><button data-action="linkPlacement" data-write>Link another name</button>${row.kind==='file'&&revision?.profile!=='live-quote-v1'?'<button data-action="copyFile" data-write>Copy to new File</button>':''}${row.kind==='directory'?'<button data-action="previewRelease" data-write>Preview recursive release of my placements</button>':''}</section>
+    ${row.kind==='file'?`<section class="revision-history"><h3>Chain-derived selected ancestry</h3><button data-action="chainHistory">Read history at a fresh basis</button>${history?`<p>${escape(history.result.knowledge)} / ${escape(history.result.coverage)} · pinned block ${escape(history.context.blockNumber)}. Selected parent chain only, not all branches. Restore creates a new successor.</p>${history.result.value.map(r=>`<p><code>${escape(short(r.recordId))}</code> · admission ${escape(r.firstAdmission)} <button data-action="restoreContents" data-record="${escape(r.recordId)}" data-write>Restore as new revision</button></p>`).join('')}${history.result.continuation?'<button data-action="continueHistory">Continue pinned history</button>':''}`:''}</section>`:''}`);
+}
+function renderRelease(){
+  const box=$('workflow-release'),preview=state.releasePreview,result=state.releaseResult;
+  if(!preview){box.hidden=true;return;}box.hidden=false;
+  const pending=result?.pending??preview.rows;
+  box.innerHTML=`<h3>Release my reachable placements · ${escape(result?.status??preview.coverage)}</h3><p>${escape(preview.retained)}</p><p>Sequential guarded transactions, not one atomic deletion. Root placement is last. ${escape(result?.reason??preview.reason??'')}</p><p>${result?.completed.length??0} completed · ${pending.length} pending</p><ol>${pending.map(r=>`<li>${escape(r.name)} · ${escape(r.kind)} · folder ${escape(short(r.folder))}</li>`).join('')}</ol>${!result&&preview.coverage==='COMPLETE'?'<button data-action="executeRelease" data-write>Confirm and release these placements</button>':''}${result?`<details><summary>Per-transaction results and unprocessed rows</summary><pre>${escape(json(result))}</pre></details>`:''}`;
 }
 function tagControls(point,directory=false){
   const label=point?.value?.fileTag?.label??point?.value?.revisionTag?.label;
@@ -438,8 +452,8 @@ async function write(operation,args,navigation=state.navigation) {
   notice(`Preparing exact ${actionLabel(operation)} action…`);
   if(state.paths){
     const context=await state.sdk.pin();checkRoute(navigation);args={...args,context};
-    if(operation==='move'&&args.destinationPath){const {route}=await destinationRoute(args.destinationPath,context,navigation);args.toFolder=route.target;}
-    if(['create','createDirectory','rename','move','restorePlacement'].includes(operation)){
+    if(['move','linkPlacement','copyFile'].includes(operation)&&args.destinationPath){const {route}=await destinationRoute(args.destinationPath,context,navigation);if(operation==='move')args.toFolder=route.target;else args.folder=route.target;}
+    if(['create','createDirectory','rename','move','restorePlacement','linkPlacement','copyFile'].includes(operation)){
       const destination=await state.sdk.readPlacement({folder:args.toFolder??args.folder,name:args.name,authors:lens,context});checkRoute(navigation);
       if(!['PRESENT','MASKED','ABSENT'].includes(destination.knowledge))throw Error(`Destination is ${destination.knowledge}; refusing to sign.`);
       if(destination.knowledge!=='ABSENT'){
@@ -483,11 +497,12 @@ function openEditor(operation,record) {
   const row=selectedRow(), name=row?.name?.value??'';
   if(operation==='edit'&&row?.point?.value?.revision?.content?.encryption===1){notice('Encrypted files are read-only in this text editor.','warning');return;}
   state.operation={operation,row,record,navigation:state.navigation,folder:state.folder}; $('editor-error').textContent='';
-  const titles={create:'New file',createDirectory:'New directory',edit:'Edit contents',rename:'Rename placement',move:state.paths?'Move to a verified directory':'Move to another mount',remove:'Hide placement',releasePlacement:'Release my placement',restorePlacement:'Restore last placement',restoreContents:'Restore historical contents'};
+  const titles={create:'New file',createDirectory:'New directory',edit:'Edit contents',rename:'Rename placement',move:state.paths?'Move to a verified directory':'Move to another mount',remove:'Hide placement',releasePlacement:'Release my placement',restorePlacement:'Restore last placement',restoreContents:'Restore historical contents',linkPlacement:'Link another name to this identity',copyFile:'Copy selected contents to a new File'};
   $('editor-title').textContent=titles[operation];
   $('editor-help').textContent=`Signed by ${state.wallet?.external?short(state.wallet.address):$('signer').value}, using ${$('lens').selectedOptions[0].textContent}. Local test chain; no real funds.`;
   let fields='';
-  if(['create','createDirectory','rename','move','releasePlacement'].includes(operation)) fields+=field('Exact name · lowercase ASCII','name',['create','createDirectory','releasePlacement'].includes(operation)?'':name);
+  if(['create','createDirectory','rename','move','releasePlacement','linkPlacement','copyFile'].includes(operation)) fields+=field('Exact name · lowercase ASCII','name',['create','createDirectory','releasePlacement','linkPlacement','copyFile'].includes(operation)?'':name);
+  if(['linkPlacement','copyFile'].includes(operation))fields+=field('Destination directory path','destinationPath',state.paths.encodePath(state.segments))+'<p>Link shares the same identity. Copy creates a new identity with selected immutable contents, without tags or old history. External locators and ciphertext stay unchanged; no gateway fetch or decryption. Occupied names require explicit replacement confirmation.</p>';
   const previous=operation==='edit'&&verifiedBytes(row)?textPreview(verifiedBytes(row)):null;
   state.operation.replacementRequired=operation==='edit'&&!previous?.utf8;
   if(state.operation.replacementRequired)fields+='<p class="warning">The current contents are not loaded as text. Choose a replacement file, or deliberately type replacement text before saving.</p>';
@@ -564,8 +579,29 @@ document.addEventListener('click',event=>{
   }
   if(action==='openSelected'){openSelected();return;}
   if(action==='openContent'){openContent().catch(error=>notice(error.message,'error'));return;}
-  if(['create','createDirectory','edit','rename','move','remove','releasePlacement','restorePlacement','restoreContents'].includes(action)) {openEditor(action,button.dataset.record);return;}
+  if(['create','createDirectory','edit','rename','move','remove','releasePlacement','restorePlacement','restoreContents','linkPlacement','copyFile'].includes(action)) {openEditor(action,button.dataset.record);return;}
   run(async navigation=>{
+    if(action==='chainHistory'||action==='continueHistory'){
+      const row=selectedRow(),saved=state.chainHistory,continuing=action==='continueHistory';
+      if(continuing&&(!saved||saved.file!==row.file))throw Error('Read this File history first.');
+      const context=continuing?saved.context:await state.sdk.pin(),lens=continuing?saved.authors:authors();
+      const result=await state.sdk.readRevisionHistory({file:row.file,authors:lens,context,budget:8,...(continuing?{continuation:saved.result.continuation}:{})});checkRoute(navigation);
+      state.chainHistory={file:row.file,context,authors:lens,result};renderDetail();
+    }
+    if(action==='previewRelease'){
+      if(!state.wallet)throw Error('Connect a signer first.');
+      const {previewOwnPlacementRelease}=await import('./files-workflows.mjs'),row=selectedRow();
+      const preview=await previewOwnPlacementRelease({sdk:state.sdk,author:state.wallet.address,folder:row.folder,name:row.name.value});checkRoute(navigation);
+      state.releasePreview=preview;state.releaseResult=null;renderRelease();
+    }
+    if(action==='executeRelease'){
+      const preview=state.releasePreview,wallet=state.wallet;
+      if(!wallet||wallet.address.toLowerCase()!==preview?.author.toLowerCase())throw Error('Preview again for the current signer.');
+      const {executeOwnPlacementRelease}=await import('./files-workflows.mjs');
+      state.releaseResult={status:'RUNNING',completed:[],pending:preview.rows};renderRelease();
+      state.releaseResult=await executeOwnPlacementRelease({sdk:state.sdk,preview,signDigest:(d,p)=>{checkRoute(navigation);if(state.wallet!==wallet)throw Error('Signer changed');return signIntent(wallet,d,p);},sendTransaction:tx=>sendTransaction(tx,navigation,wallet),onProgress:progress=>{state.releaseResult={status:'RUNNING',...progress};renderRelease();}});
+      renderRelease();await refresh();notice(`Recursive own-placement release: ${state.releaseResult.status}. See completed transactions and pending rows below.`,state.releaseResult.status==='COMPLETE'?'':'warning');
+    }
     if(action==='connect') await connect();
     if(action==='connectWallet')await connectWallet();
     if(action==='addNetwork'){
@@ -618,7 +654,7 @@ $('editor-form').addEventListener('submit',event=>{
   run(async()=>{
     try {
       checkRoute(navigation);let args={...values,file:row?.file,folder:job.folder};
-      if(operation==='create'||operation==='createDirectory') args.salt=ethers.hexlify(ethers.randomBytes(32));
+      if(operation==='create'||operation==='createDirectory'||operation==='copyFile') args.salt=ethers.hexlify(ethers.randomBytes(32));
       if(state.paths&&['create','edit'].includes(operation)){
         const externalUri=values.externalUri?.trim();
         if(externalUri){
@@ -735,8 +771,8 @@ await run(async()=>{
   if(state.config.manifest.workbench){
     document.title='EFS v2 · Files workbench';document.querySelector('.lab-pill').textContent='V2 WORKBENCH · LOCAL';
     document.querySelector('h1').textContent='Files, folders, and shared views.';
-    document.querySelector('.below-workspace .about').innerHTML='<summary>About this prototype</summary><p>This is v2 end to end: typed records, the required index, ordered Lenses and guarded atomic writes. No v1 code or contracts. All metadata reads go directly to the local chain; the web server only serves static files and configuration.</p><p>Try docs/meeting.txt with either Lens order, photos/red.png, and create/upload/edit/rename/move/remove/restore. Small files fit onchain; larger uploads use a temporary byte store (1 MiB demo cap). Encrypted sample key: 11 repeated 32 times. Ordinary images are inert PNG/JPEG previews.</p><p>Rough edges: lowercase ASCII names, locally witnessed revision history, generic File/revision tags, no persistent IPFS/Arweave driver or recursive delete yet. Wallet mode needs local test ETH and currently uses two approvals. This is not a production deployment.</p>';
+    document.querySelector('.below-workspace .about').innerHTML='<summary>About this prototype</summary><p>This is v2 end to end: typed records, the required index, ordered Lenses and guarded atomic writes. No v1 code or contracts. All metadata reads go directly to the local chain; the web server only serves static files and configuration.</p><p>Try docs/meeting.txt with either Lens order, photos/red.png, and create/upload/edit/rename/move/link/copy/hide/restore. Chain history follows selected revision ancestry at one pinned basis. Recursive release previews only your reachable placements and masks, then sends separate guarded transactions; it never erases Records, tags, other authors or outside aliases. Small files fit onchain; larger uploads use a temporary byte store (1 MiB demo cap). Encrypted sample key: 11 repeated 32 times.</p><p>Rough edges: lowercase ASCII names, generic tags rather than exact ASSERT / DENY / SILENT stances, no persistent IPFS/Arweave upload driver. Live providers can be linked, not implicitly copied. Wallet mode needs local test ETH and currently uses two approvals. This is not a production deployment.</p>';
   }
-  if(state.externalContent)document.querySelector('.below-workspace .about').lastElementChild.textContent='Arweave/IPFS file links retain their address and fingerprint onchain. Public gateways retrieve the bytes; the browser verifies the saved fingerprint. New paid Arweave uploads, IPFS pinning and recursive deletion are not wired yet. Local test wallet writes currently use two approvals. This is not a production deployment.';
+  if(state.externalContent)document.querySelector('.below-workspace .about').lastElementChild.textContent='Arweave/IPFS links and copies retain the exact address and fingerprint. Public gateways retrieve bytes only with open permission. New paid Arweave uploads and IPFS pinning are not wired. Recursive release affects only your previewed placements, never global deletion. Generic tags are not ASSERT / DENY / SILENT stances. Local wallet writes use two approvals. Not a production deployment.';
   await refresh();
 });

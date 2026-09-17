@@ -405,6 +405,29 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     check(Number(a[0])===1&&eq(a[6],e.keccak256(body))&&eq(a[7],type),'CONTENT_INTEGRITY');
     return {body,firstAdmission:String(first)};
   }
+  const revisionWalks=new WeakMap();
+  async function readRevisionHistory(args) {
+    const {file,context,continuation,budget=16}=args;
+    await guard(context);check(Number.isInteger(budget)&&budget>=1&&budget<=64,'BUDGET');
+    const authors=await protocol.selectors(args,context),basis=basisFor(context,authors);
+    let walk;
+    if(continuation){walk=revisionWalks.get(continuation);check(walk&&walk.context===context&&eq(walk.file,file)&&eq(walk.lensHash,basis.lens.hash),'CONTINUATION');}
+    else {
+      const point=await fileAt({file,authors,context});
+      if(point.knowledge!=='PRESENT')return freeze(result(basis,point.knowledge,point.coverage,[],{reason:point.reason}));
+      walk={context,file,lensHash:basis.lens.hash,next:point.value.revision.recordId,rows:[]};
+    }
+    const rows=[...walk.rows];let next=walk.next;
+    try {
+      for(let i=0;i<budget&&!eq(next,Z);i++){
+        check(!rows.some(r=>eq(r.recordId,next)),'HISTORY_CYCLE');
+        const revision=await revisionAt(next,file,context);rows.push(revision);next=revision.parent;
+      }
+    }catch(error){if(!isRpcUnavailable(error))throw error;return freeze(result(basis,'UNKNOWN','PARTIAL',rows,{reason:'HISTORY_UNAVAILABLE'}));}
+    const extra={scope:'SELECTED_REVISION_ANCESTRY_NOT_ALL_BRANCHES'};
+    if(!eq(next,Z)){const token=Object.freeze({kind:'compact-revision-continuation'});revisionWalks.set(token,{...walk,next,rows});extra.continuation=token;}
+    return freeze(result(basis,'PRESENT',eq(next,Z)?'COMPLETE':'PARTIAL',rows,extra));
+  }
   // Raw exact-Record evidence, NOT a Files revision and NOT application validity.
   // No Lens selection: callers supply the exact immutable Record. The envelope
   // retains the pinned basis, original bytes and historical admission provenance.
@@ -727,6 +750,30 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   }
 
   const action = fields => ({kind:0,typeId:Z,bodyHashOrRecordId:Z,purpose:Z,subject:Z,role:Z,target:Z,expectedRevision:0,salt:Z,...fields});
+  // Audit scope, not positive-only Lens enumeration: includes the author's masks.
+  async function readOwnPlacements({author,folder,context,budget=64}) {
+    await guard(context);check(Number.isInteger(budget)&&budget>=1&&budget<=256,'BUDGET');
+    folder=await folderFor(folder,context);author=e.getAddress(author);
+    const principal=await protocol.signedPrincipal(author,context),authors=await protocol.selectors({authors:[author]},context);
+    const scope=hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/vk/binding-scope/1'),principal,purpose.folder,folder]);
+    const family=await scalar('index','FAMILY_SCOPE',[],context),coverage=await call('index','coverage',[family,scope],context);
+    const basis=basisFor(context,authors),rows=[];
+    if(Number(coverage[0])!==2||coverage[1]!==1n||String(coverage[2])!==context.admission)return freeze(result(basis,'UNKNOWN','PARTIAL',rows,{reason:'INDEX_COVERAGE'}));
+    const key=hash(['bytes32','bytes32','uint256','uint256','bytes32'],[e.id('efs2/pk/1'),Z,10,0,scope]);
+    const total=(await call('index','postingHead',[key],context))[0];
+    for(let i=0n;i<total&&i<BigInt(budget);i++){
+      const ordinal=await scalar('index','postingAt',[key,i],context),position=await scalar('ledger','bindingPosition',[ordinal],context);
+      const cell=await call('ledger','positionCell',[position],context);
+      check(eq(cell[0],purpose.folder)&&eq(cell[1],folder)&&eq(position,positionOf(...cell)),'POSITION');
+      const selected=await resolve(authors,purpose.folder,folder,cell[2],context);
+      if(selected.status===0)continue;
+      check(selected.status===1||selected.status===2,'SELECTION');
+      const name=await nameAt({position,folder,role:cell[2],context});
+      rows.push({folder,position,role:cell[2],selection:selected,name,
+        ...(selected.status===1?{file:selected.target,...await targetAt(selected.target,context)}:{kind:'mask',knowledge:'MASKED'})});
+    }
+    return freeze(result(basis,rows.length?'PRESENT':'ABSENT',total<=BigInt(budget)?'COMPLETE':'PARTIAL',rows,{scanned:String(total<BigInt(budget)?total:BigInt(budget)),rawTotal:String(total)}));
+  }
   const bytesOf = input => typeof input === 'string' ? e.toUtf8Bytes(input) : e.getBytes(input);
   async function prepare(args) {
     onPhase('prepare');
@@ -809,7 +856,9 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       check(selected.status===0||args.replace===true,'DESTINATION_OCCUPIED');
       await watch(purpose.folder,folder,role,'destination',selected);
     };
-    if (operation === 'create' || (directories&&operation==='createDirectory')) {
+    if (operation === 'create' || operation === 'copyFile' || (directories&&operation==='createDirectory')) {
+      const source=operation==='copyFile'?await selected():null;
+      check(source?.profile!=='live-quote-v1','LIVE_COPY_REQUIRES_EXPLICIT_SNAPSHOT');
       check(args.salt && !eq(args.salt,Z),'SALT');
       file = hash(['bytes32','bytes32','bytes32'],[e.id('efs2/subject/1'),e.zeroPadValue(author,32),args.salt]);
       check(await scalar('ledger','subjectCreatedAt',[file],context) === 0n,'SUBJECT_EXISTS');
@@ -817,10 +866,15 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       if(operation==='createDirectory'){
         const body=coder.encode(['bytes32'],[file]);file=recordOf(config.types.directory,e.keccak256(body));
         push({kind:1,typeId:config.types.directory,bodyHashOrRecordId:e.keccak256(body)},body);
-      }else await publishRevision(args.content?null:bytesOf(args.document),null,args.content);
+      }else if(source?.profile==='carrier-v1'){
+        // Reuse the exact immutable descriptor (including locator/ciphertext).
+        // No retrieval, decryption, tags or original ancestry is copied.
+        const body=e.concat([source.descriptorRecord,file]),type=config.types.carrierRoot;
+        newRevision=recordOf(type,e.keccak256(body));push({kind:1,typeId:type,bodyHashOrRecordId:e.keccak256(body)},body);
+      }else await publishRevision(source?e.getBytes(source.document):args.content?null:bytesOf(args.document),null,source?undefined:args.content);
       const role = await retainName(args.name);
       const folder=await folderFor(args.folder,context);await destination(folder,role);
-      if(operation==='create')await binding(purpose.head,file,Z,newRevision);
+      if(operation!=='createDirectory')await binding(purpose.head,file,Z,newRevision);
       await binding(purpose.folder,folder,role,file);
     } else if (operation === 'releasePlacement') {
       check(context.bindingLifecycleProfile===e.id('efs.lab.binding-lifecycle/2:bind-mask-release'),'BINDING_LIFECYCLE_UNSUPPORTED');
@@ -837,7 +891,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       own.state=3;own.target=Z;own.revision++;
     } else {
       check(file && !eq(file,Z),'FILE_ID');
-      const placementOperation=['move','rename','remove','restorePlacement'].includes(operation);
+      const placementOperation=['move','rename','remove','restorePlacement','linkPlacement'].includes(operation);
       if(directories&&(placementOperation||(carriers&&['addTag','removeTag'].includes(operation)&&args.scope==='directory')))check((await targetAt(file,context)).knowledge==='PRESENT','TARGET_UNAVAILABLE');
       else {const created = await scalar('ledger','subjectCreatedAt',[file],context);
         check(created > 0n && created <= BigInt(context.admission),'FILE_SUBJECT');}
@@ -868,7 +922,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
         await destination(to,toRole);
         await binding(purpose.folder,from,fromRole,file,true);
         await binding(purpose.folder,to,toRole,file);
-      } else if (operation === 'remove' || operation === 'restorePlacement') {
+      } else if (operation === 'remove' || operation === 'restorePlacement' || operation === 'linkPlacement') {
         const folder = await folderFor(args.folder,context), role = await retainName(args.name);
         if(directories)check(!eq(folder,file),'DIRECTORY_SELF_LINK');
         if (operation === 'remove') {
@@ -1057,7 +1111,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     await journal.put(plain(outcome)); return outcome;
   }
   const publicRead=fn=>async args=>{const value=await fn(args);await canonical(args.context);return value;};
-  return Object.freeze({pin,...Object.fromEntries(Object.entries({listFolder,listFolderPage,readFile,readName,readDirectory,readPlacement,readContent,readTypedRecord,readTypeDescriptor,readConcept,readTag}).map(([name,fn])=>[name,publicRead(fn)])),conceptId,prepare,authorize,submit,reconcile,
+  return Object.freeze({pin,...Object.fromEntries(Object.entries({listFolder,listFolderPage,readOwnPlacements,readFile,readRevisionHistory,readName,readDirectory,readPlacement,readContent,readTypedRecord,readTypeDescriptor,readConcept,readTag}).map(([name,fn])=>[name,publicRead(fn)])),conceptId,prepare,authorize,submit,reconcile,
     readMetrics:()=>({...cache.stats(),contexts:verifiedContexts.size,contextHits,contextMisses,contextBytes,contextLimits:{...contextLimits},groupWidth:16}),
     capabilities:()=>freeze(plain({...protocol.capabilities,typedDirectories:directories,globalTree:false}))});
 }
