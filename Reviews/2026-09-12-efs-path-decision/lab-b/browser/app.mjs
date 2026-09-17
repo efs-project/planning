@@ -3,6 +3,7 @@ import {createCompactSdk,normalizeTagAssessment} from './compact-sdk.mjs';
 import {folderState,filterRows,canOpen,costPresentation,renderCostTable,tagLabel} from './files-view.mjs';
 import {resolveEconomics} from './fee-model.mjs';
 import {journalPrefix} from './wallet-session.mjs';
+import {hydrateExactStances} from './compact-stance.mjs';
 
 const $ = id => document.getElementById(id);
 $('filter-scope').insertAdjacentHTML('beforebegin','<select id="filter-mode" aria-label="Tag filter mode"><option value="include">With tag</option><option value="exclude">Without tag</option></select>');
@@ -16,6 +17,7 @@ const state = {config:null,sdk:null,folder:null,context:null,page:null,rows:[],s
   navigation:null,readGeneration:0,routeLoading:false,contentRequest:null,contentResult:null,previewUrl:null};
 const hasCarriers=()=>!!state.config?.manifest.contentProfile;
 const hasJoined=()=>!!state.config?.manifest.contracts.joined;
+const hasStances=()=>state.sdk?.exactStances===true;
 let readTransport;
 // The already-running older demo only serves its original asset allowlist.
 // Keep it usable without restarting its chain when this shared UI is refreshed.
@@ -33,7 +35,7 @@ function legacyReadTransport(url){
   };
   rpc.read=rpc;rpc.metrics=metrics;return rpc;
 }
-const actionLabel=operation=>({createDirectory:'create directory',remove:'hide placement',releasePlacement:'release my placement',restorePlacement:'restore placement',restoreContents:'restore contents',addTag:'add tag',removeTag:'remove tag'}[operation]??operation);
+const actionLabel=operation=>({createDirectory:'create directory',remove:'hide placement',releasePlacement:'release my placement',restorePlacement:'restore placement',restoreContents:'restore contents',addTag:'add legacy tag',removeTag:'remove legacy tag',assertStance:'assert tag',denyStance:'deny tag',retractToSilent:'retract to silence'}[operation]??operation);
 function clearContent(){state.contentRequest?.abort.abort();state.contentRequest=null;state.contentResult=null;state.previewSize=null;if(state.previewUrl)URL.revokeObjectURL(state.previewUrl);state.previewUrl=null;}
 function conceptFor(label){return /^0x[0-9a-f]{64}$/i.test(label)?label:hasCarriers()?state.sdk.conceptId({namespace:state.config.manifest.folder,label}):ethers.id(label);}
 function verifiedBytes(row=selectedRow()){
@@ -187,11 +189,14 @@ async function refresh(continuing=false) {
     let continuation=continuing ? page?.continuation : undefined;
     if(hasJoined()){
       const concept=state.filterConcept?conceptFor(state.filterConcept):ethers.ZeroHash;
-      const joinedPage=await state.sdk.listFolderPage({folder,authors:lens,budget:32,context,continuation,concept,policy,
-        tagScope:state.filterConcept&&$('filter-mode').value!=='exclude'?$('filter-scope').value:'none',search:$('search').value});check();
-      const fresh=joinedPage.pageRows.map(row=>({...row})),rows=continuing?[...state.rows,...fresh]:fresh;
+      const joinedPage=await state.sdk.listFolderPage({folder,authors:lens,budget:32,context,continuation,concept:hasStances()?ethers.ZeroHash:concept,policy,
+        tagScope:!hasStances()&&state.filterConcept&&$('filter-mode').value!=='exclude'?$('filter-scope').value:'none',search:$('search').value});check();
+      const fresh=[];
+      for(const row of joinedPage.pageRows){fresh.push(hasStances()&&state.filterConcept?await hydrateExactStances({sdk:state.sdk,row,concept,authors:lens,context}):{...row});check();}
+      const rows=continuing?[...state.rows,...fresh]:fresh;
       page={...joinedPage,value:rows,coverage:joinedPage.queryCoverage,knowledge:joinedPage.queryKnowledge,tagCoverageScope:'ACCUMULATED_PAGES',
         ...Object.fromEntries(['nameCoverage','kindCoverage','headerCoverage','tagCoverage'].map(key=>[key,continuing&&state.page?.[key]==='PARTIAL'?'PARTIAL':joinedPage[key]]))};
+      if(hasStances()&&state.filterConcept){page.tagCoverage=rows.every(r=>[r.point?.value?.fileTag,r.point?.value?.revisionTag].every(t=>t?.assessment&&t.assessment!=='UNKNOWN'))?'COMPLETE':'PARTIAL';page.exactStanceScope='ENUMERATED_FOLDER_ROWS_ONLY';}
       Object.assign(state,{rows,context,page,folder,route});if(state.paths)navigation.ready=true;
       if(state.fileRoute){
         const edge=state.fileRoute.edge;
@@ -213,11 +218,11 @@ async function refresh(continuing=false) {
     for(const row of page.value) {
       let point;
       if(state.paths&&row.kind!=='file'){
-        const tag=hasCarriers()&&row.kind==='directory'&&state.filterConcept?await state.sdk.readTag({subject:row.file,target:row.file,concept,authors:lens,context}):null;check();
+      const tag=hasCarriers()&&row.kind==='directory'&&state.filterConcept?await state.sdk[hasStances()?'readStance':'readTag']({subject:row.file,scope:'directory',target:row.file,concept,authors:lens,context}):null;check();
         rows.push({...row,point:{knowledge:row.knowledge,coverage:row.knowledge==='PRESENT'?(tag?.coverage??'COMPLETE'):'PARTIAL',value:{fileTag:tag?.value??normalizeTagAssessment({subject:row.file,concept}),revisionTag:normalizeTagAssessment({concept,assessment:row.kind==='directory'?'NOT_APPLICABLE':'UNKNOWN'})},reason:row.kind==='directory'?'Directory · no File HEAD required':'Target kind unavailable'}});continue;}
-      try { point=await state.sdk.readFile({file:row.file,authors:lens,concept,context,policy});check(); remember(point); }
+      try { point=await state.sdk.readFile({file:row.file,authors:lens,concept:hasStances()?ethers.ZeroHash:concept,context,policy});check(); remember(point); }
       catch(error) { check();point={knowledge:'UNKNOWN',coverage:'PARTIAL',reason:error.message,value:{file:row.file}}; }
-      rows.push({...row,point});
+      rows.push(hasStances()&&state.filterConcept?await hydrateExactStances({sdk:state.sdk,row:{...row,point},concept,authors:lens,context}):{...row,point});check();
     }
     check();Object.assign(state,{rows,context,page,folder,route});
     if(state.paths)navigation.ready=true;
@@ -252,7 +257,7 @@ function handleRoute() {
 function renderRows() {
   const view=folderState(state.page);
   const exclude=$('filter-mode').value==='exclude';
-  const filtered=hasJoined()&&!exclude?{rows:state.rows,uncertain:state.rows.filter(row=>row.match==='UNKNOWN').length}
+  const filtered=hasJoined()&&!hasStances()&&!exclude?{rows:state.rows,uncertain:state.rows.filter(row=>row.match==='UNKNOWN').length}
     :filterRows(state.rows,{search:$('search').value,tag:!!state.filterConcept,scope:$('filter-scope').value,exclude});
   $('coverage').className=`coverage ${view.kind!=='complete' && view.kind!=='empty' ? 'warning':''}`;
   $('coverage').textContent=state.busy && !state.page ? 'Reading qualified folder membership…'
@@ -306,14 +311,14 @@ function renderDetailBase() {
   $('detail').innerHTML=`<h2 class="file-title">${escape(name)}</h2><div class="meta-line"><span class="badge ${open?'':'warning'}">${escape(point?.knowledge??'UNKNOWN')}</span><span>${open?`${escape(authorName(point.value.selection.author))} selected · revision ${escape(short(revision.recordId))}`:escape(point?.reason??'No single selected revision')}</span></div>
     <div class="file-actions">${action('edit','Edit contents',!open||!preview.utf8)}${action('rename','Rename',!knownName)}${action('move','Move',!knownName)}<button data-action="download" data-blocked="${!open}" ${open?'':'disabled'}>↓ Download bytes</button>${action('remove','Remove placement',!knownName,'class="danger"')}</div>
     ${open?`<div class="content-label"><span>${preview.utf8?'Plain-text preview · UTF-8 interpretation':'Verified bytes · no MIME asserted'}</span><span>${pretty(ethers.getBytes(revision.document).length)} bytes</span></div><pre class="document">${escape(preview.text)}</pre>`:`<p class="conflict-note">${point?.knowledge==='CONFLICT'?'Multiple authors have live HEADs. Choose an ordered Lens to select one before editing.':'Membership is retained here. Unavailable or invalid selected bytes are not opened or downloaded.'}</p>${candidates}`}
-    <section class="file-tags"><strong>Tags have a subject</strong><div class="tag-editor"><input id="tag-concept" aria-label="Tag concept" placeholder="Concept, e.g. important" value="${escape(state.filterConcept)}"><select id="tag-scope" aria-label="Tag subject"><option value="file">File identity</option><option value="revision">Selected revision</option></select>${action('addTag','Add',false)}${action('removeTag','Remove',false)}</div><p class="tag-state">${state.filterConcept?`Observed “${escape(state.filterConcept)}”: File ${tagLabel(point?.value?.fileTag)} · selected revision ${tagLabel(point?.value?.revisionTag)}`:'Enter a concept to add or remove. Apply the same concept above to inspect its presence.'}</p></section>
+    ${hasStances()?tagControls(point):`<section class="file-tags"><strong>Legacy tags have a subject</strong><div class="tag-editor"><input id="tag-concept" aria-label="Tag concept" placeholder="Concept, e.g. important" value="${escape(state.filterConcept)}"><select id="tag-scope" aria-label="Tag subject"><option value="file">File identity</option><option value="revision">Selected revision</option></select>${action('addTag','Add',false)}${action('removeTag','Remove',false)}</div><p class="tag-state">${state.filterConcept?`Observed “${escape(state.filterConcept)}”: File ${tagLabel(point?.value?.fileTag)} · selected revision ${tagLabel(point?.value?.revisionTag)}`:'Enter a legacy concept to add or remove. Apply the same concept above to inspect its presence.'}</p></section>`}
     <details class="revision-history"><summary>Locally witnessed revisions (${history.length})</summary><p>Not a complete history. Restoring contents publishes a fresh child revision; it does not rewind HEAD.</p>${history.map(item=>`<div class="history-row"><code title="${escape(item.recordId)}">${escape(short(item.recordId))} · admission ${escape(item.firstAdmission)}</code>${action('restoreContents','Restore these contents',!open,`data-record="${escape(item.recordId)}"`)}</div>`).join('')}${action('restoreContents','Use a historical Record ID…',!open)}</details>
     <details class="technical"><summary>Record & observation details</summary><pre>${escape(json({file:row.file,placement:{folder:row.folder,position:row.position,role:row.role,name:row.name},point}))}</pre></details>`;
 }
 function renderDetail(){
   renderDetailBase();const row=selectedRow();if(!state.paths||!row||!['file','directory'].includes(row.kind))return;
   const tagSection=$('detail').querySelector('.file-tags');
-  if(tagSection)tagSection.insertAdjacentHTML('beforeend','<p class="warning">Legacy generic tag bindings only. These controls do not implement ASSERT / DENY / SILENT stance semantics; exact stance planner integration is pending.</p>');
+  if(tagSection)tagSection.insertAdjacentHTML('beforeend',hasStances()?'<p>Exact stance filtering covers observed folder rows only. Legacy seeded labels are separate, not migrated.</p>':'<p class="warning">Legacy generic tag bindings only. This deployment does not authenticate an exact stance profile.</p>');
   const revision=row.point?.value?.revision,history=state.chainHistory?.file===row.file?state.chainHistory:null;
   $('detail').insertAdjacentHTML('beforeend',`<section class="file-actions"><button data-action="linkPlacement" data-write>Link another name</button>${row.kind==='file'&&revision?.profile!=='live-quote-v1'?'<button data-action="copyFile" data-write>Copy to new File</button>':''}${row.kind==='directory'?'<button data-action="previewRelease" data-write>Preview recursive release of my placements</button>':''}</section>
     ${row.kind==='file'?`<section class="revision-history"><h3>Chain-derived selected ancestry</h3><button data-action="chainHistory">Read history at a fresh basis</button>${history?`<p>${escape(history.result.knowledge)} / ${escape(history.result.coverage)} · pinned block ${escape(history.context.blockNumber)}. Selected parent chain only, not all branches. Restore creates a new successor.</p>${history.result.value.map(r=>`<p><code>${escape(short(r.recordId))}</code> · admission ${escape(r.firstAdmission)} <button data-action="restoreContents" data-record="${escape(r.recordId)}" data-write>Restore as new revision</button></p>`).join('')}${history.result.continuation?'<button data-action="continueHistory">Continue pinned history</button>':''}`:''}</section>`:''}`);
@@ -326,8 +331,9 @@ function renderRelease(){
 }
 function tagControls(point,directory=false){
   const label=point?.value?.fileTag?.label??point?.value?.revisionTag?.label;
-  return `<section class="file-tags"><strong>${directory?'Directory identity tag':'Tags have a subject'}</strong><div class="tag-editor"><input id="tag-concept" aria-label="Tag concept" placeholder="Label or exact Concept Record ID" value="${escape(state.filterConcept)}"><select id="tag-scope"><option value="${directory?'directory':'file'}">${directory?'Directory':'File'} identity</option>${directory?'':'<option value="revision">Selected revision</option>'}</select><button data-action="addTag" data-write>Add tag</button><button data-action="removeTag" data-write>Remove tag</button></div>
-    <p>${label?.knowledge==='PRESENT'?`Verified label: “${escape(label.value.label)}”`:'Label not yet verified'} · ${tagLabel(point?.value?.fileTag)}${directory?'':` / selected revision ${tagLabel(point?.value?.revisionTag)}`}. Labels are scoped to this root namespace, not global authority.${directory?' This tag does not apply to descendants.':''}</p></section>`;
+  const exact=hasStances(),describe=tag=>tag?.exactStance?`${tag.assessment} · ${tag.stance??'no winning stance'}${tag.author?` by ${authorName(tag.author)}`:''}; ${tag.observations?.map(o=>`${authorName(o.author)}: ${o.kind}`).join(' → ')??tag.reason??''}`:tagLabel(tag);
+  return `<section class="file-tags"><strong>${exact?'Exact tag stances':directory?'Legacy Directory identity tag':'Legacy tags have a subject'}</strong><div class="tag-editor"><input id="tag-concept" aria-label="Tag concept" placeholder="Label or exact Concept Record ID" value="${escape(state.filterConcept)}"><select id="tag-scope"><option value="${directory?'directory':'file'}">${directory?'Directory':'File'} identity</option>${directory?'':`<option value="${exact?'selectedRevision':'revision'}">Selected revision</option>`}</select>${exact?'<button data-action="assertStance" data-write>Assert</button><button data-action="denyStance" data-write>Deny</button><button data-action="retractToSilent" data-write>Retract to silence</button>':'<button data-action="addTag" data-write>Add legacy tag</button><button data-action="removeTag" data-write>Remove legacy tag</button>'}</div>
+    <p>${label?.knowledge==='PRESENT'?`Verified label: “${escape(label.value.label)}”`:'Label not yet verified'} · ${escape(describe(point?.value?.fileTag))}${directory?'':` / selected revision ${escape(describe(point?.value?.revisionTag))}`}. Labels are scoped to this root namespace, not global authority.${directory?' This tag does not apply to descendants.':''}</p>${exact?'<p>First ASSERT or DENY in Lens order wins; silence falls through. Legacy seed labels (efs, photos) are not exact stances. Filtering is bounded to enumerated folder rows, not global inventory.</p>':''}</section>`;
 }
 function renderActivity() {
   state.entries=journalEntries(); $('activity-count').textContent=state.entries.length?`(${state.entries.length})`:'';
@@ -465,11 +471,21 @@ async function write(operation,args,navigation=state.navigation) {
       if(!['PRESENT','MASKED','ABSENT'].includes(destination.knowledge))throw Error(`Destination is ${destination.knowledge}; refusing to sign.`);
       if(destination.knowledge!=='ABSENT'){
         const s=destination.value.selection;
+        const updating=operation==='create'&&destination.knowledge==='PRESENT'&&destination.value.kind==='file';
+        const message=updating?`Update the existing file “${args.name}”? This keeps its identity and adds a new revision.`:`Destination “${args.name}” is ${destination.knowledge} (${authorName(s.author)}, revision ${s.revision}, target ${s.target}). Replace this selected placement or mask? Retained data is not erased.`;
+        const inspected=JSON.stringify({operation,folder:args.toFolder??args.folder,name:args.name,knowledge:destination.knowledge,target:destination.value.target,selection:s});
+        if(!state.operation||state.operation.replacementInspection!==inspected||$('replacement-consent')?.checked!==true){
+          if(state.operation)state.operation.replacementInspection=inspected;
+          const box=$('replacement-consent');if(box)box.checked=false;
+          const prior=$('replacement-choice');if(prior)prior.remove();
+          $('editor-fields').insertAdjacentHTML('beforeend',`<section id="replacement-choice" class="warning"><p>${escape(message)}</p><label><input type="checkbox" id="replacement-consent"> I approve this inspected destination. Submit again to continue.</label></section>`);
+          throw Error('Explicit in-page replacement confirmation required. Nothing signed.');
+        }
+        state.operation.replacementInspection=null;$('replacement-consent').checked=false;
         if(operation==='create'&&destination.knowledge==='PRESENT'&&destination.value.kind==='file'){
-          if(!confirm(`Update the existing file “${args.name}”? This keeps its identity and adds a new revision.`))throw Error('Update cancelled. Nothing signed.');
+          args.replacementPlacement={folder:args.toFolder??args.folder,name:args.name,target:destination.value.target};
           operation='edit';args.file=destination.value.target;
         }else{
-        if(!confirm(`Destination “${args.name}” is ${destination.knowledge} (${authorName(s.author)}, revision ${s.revision}, target ${s.target}). Replace this selected placement or mask? Retained data is not erased.`))throw Error('Replacement cancelled. Nothing signed.');
         args.replace=true;
         }
       }
@@ -529,7 +545,8 @@ function openEditor(operation,record) {
     if(file.size>8160&&state.config.carrierOrigin)$('editor-fields').querySelector('[name="carriage"]').value='external';
   });
   controls(); // A completed prior dialog must not leave the new operation disabled.
-  $('editor').showModal(); $('editor-fields').querySelector('input,textarea,select')?.focus();
+  // An in-page nonmodal editor must not grab focus from another application.
+  $('editor').setAttribute('open','');
 }
 function download() {
   const row=selectedRow(),bytes=verifiedBytes(row); if(!bytes) throw new Error('No qualified selected bytes to download.');
@@ -541,10 +558,12 @@ async function navigate(segments){history.pushState(null,'','#'+state.paths.enco
 async function openSelected(){
   const row=selectedRow(),navigation=state.navigation,generation=state.readGeneration,context=state.context,position=state.selected;
   if(!row||row.kind!=='file')return;
-  try{const point=await state.sdk.readFile({file:row.file,authors:authors(),context,concept:state.filterConcept?conceptFor(state.filterConcept):ethers.ZeroHash,
+  try{const point=await state.sdk.readFile({file:row.file,authors:authors(),context,concept:!hasStances()&&state.filterConcept?conceptFor(state.filterConcept):ethers.ZeroHash,
     policy:$('lens').value==='conflict'?'no-tiebreak':'ordered'});
     if(!routeCurrent(navigation)||generation!==state.readGeneration||position!==state.selected)return;
-    row.point=point;remember(point);renderDetail();renderRows();controls();
+    row.point=hasStances()&&state.filterConcept?(await hydrateExactStances({sdk:state.sdk,row:{...row,point},concept:conceptFor(state.filterConcept),authors:authors(),context})).point:point;
+    if(!routeCurrent(navigation)||generation!==state.readGeneration||position!==state.selected)return;
+    remember(row.point);renderDetail();renderRows();controls();
     if(['carrier-v1','live-quote-v1'].includes(point?.value?.revision?.profile)&&point.value.revision.content?.carrier!==1)await openContent();
   }catch(error){if(routeCurrent(navigation)&&generation===state.readGeneration&&position===state.selected)notice(error.message,'error');}
 }
@@ -621,7 +640,7 @@ document.addEventListener('click',event=>{
     }
     if(action==='copyRpc'){
       try{await navigator.clipboard.writeText(state.config.rpcUrl);notice('Local RPC URL copied.');}
-      catch{$('wallet-rpc').focus();$('wallet-rpc').select();notice('RPC URL selected — copy it with your keyboard.');}
+      catch{notice('Clipboard unavailable. Select the visible RPC URL and copy it manually.');}
     }
     if(action==='testFunds'){
       if(state.config.localFaucet===false)throw Error('Local test faucet is development-only.');
@@ -642,7 +661,7 @@ document.addEventListener('click',event=>{
     if(action==='filter') {state.filterConcept=$('filter-concept').value.trim();await refresh();}
     if(action==='download') download();
     if(action==='reconcile') {const outcome=await state.sdk.reconcile(button.dataset.id);checkRoute(navigation);await refresh();checkRoute(navigation);notice(`Saved plan: ${outcome.status}. ${outcome.status==='EFFECTS_VERIFIED'?'Canonical effects matched.':'No success claimed; no replacement signature was made.'}`,outcome.status==='EFFECTS_VERIFIED'?'':'warning');}
-    if(action==='addTag'||action==='removeTag') {
+    if(['addTag','removeTag','assertStance','denyStance','retractToSilent'].includes(action)) {
       const concept=$('tag-concept').value.trim(),scope=$('tag-scope').value;
       if(!concept) throw new Error('Enter the exact tag concept text first.');
       const tag=hasCarriers()?(/^0x[0-9a-f]{64}$/i.test(concept)?{concept}:{conceptLabel:concept,conceptNamespace:state.config.manifest.folder}):{concept:ethers.id(concept)};
@@ -783,8 +802,8 @@ await run(async()=>{
   if(state.config.manifest.workbench){
     document.title='EFS v2 · Files workbench';document.querySelector('.lab-pill').textContent='V2 WORKBENCH · LOCAL';
     document.querySelector('h1').textContent='Files, folders, and shared views.';
-    document.querySelector('.below-workspace .about').innerHTML='<summary>About this prototype</summary><p>This is v2 end to end: typed records, the required index, ordered Lenses and guarded atomic writes. No v1 code or contracts. All metadata reads go directly to the local chain; the web server only serves static files and configuration.</p><p>Try docs/meeting.txt with either Lens order, photos/red.png, and create/upload/edit/rename/move/link/copy/hide/restore. Chain history follows selected revision ancestry at one pinned basis. Recursive release previews only your reachable placements and masks, then sends separate guarded transactions; it never erases Records, tags, other authors or outside aliases. Small files fit onchain; larger uploads use a temporary byte store (1 MiB demo cap). Encrypted sample key: 11 repeated 32 times.</p><p>Rough edges: lowercase ASCII names, generic tags rather than exact ASSERT / DENY / SILENT stances, no persistent IPFS/Arweave upload driver. Live providers can be linked, not implicitly copied. Wallet mode needs local test ETH and currently uses two approvals. This is not a production deployment.</p>';
+    document.querySelector('.below-workspace .about').innerHTML='<summary>About this prototype</summary><p>This is v2 end to end: typed records, the required index, ordered Lenses and guarded atomic writes. No v1 code or contracts. All metadata reads go directly to the local chain; the web server only serves static files and configuration.</p><p>Try docs/meeting.txt with either Lens order, photos/red.png, and create/upload/edit/rename/move/link/copy/hide/restore. Chain history follows selected revision ancestry at one pinned basis. Recursive release previews only your reachable placements and masks, then sends separate guarded transactions; it never erases Records, tags, other authors or outside aliases. Small files fit onchain; larger uploads use a temporary byte store (1 MiB demo cap). Encrypted sample key: 11 repeated 32 times.</p><p>Exact ASSERT / DENY / SILENT controls use the authenticated stance profile. Legacy seeded labels are separate. Tag filtering covers enumerated folder rows, not global inventory/history. Rough edges: lowercase ASCII names and no persistent IPFS/Arweave upload driver. Live providers can be linked, not implicitly copied. Wallet mode needs local test ETH. This is not a production deployment.</p>';
   }
-  if(state.externalContent)document.querySelector('.below-workspace .about').lastElementChild.textContent='Arweave/IPFS links and copies retain the exact address and fingerprint. Public gateways retrieve bytes only with open permission. New paid Arweave uploads and IPFS pinning are not wired. For a paid Arweave upload: explicitly choose a funded Base-mainnet wallet and a maximum Turbo credit top-up, consent to public irreversible storage, upload through the user-operated Turbo service, then register its ar:// ID here after independent byte verification. Funding, upload acceptance, retrieval and Arweave settlement are separate evidence. No paid upload was tested; temporary local bytes are not durable. Recursive release affects only your previewed placements, never global deletion. Generic tags are not ASSERT / DENY / SILENT stances. Development subsidy uses one author-signature prompt; otherwise wallet writes require two approvals. Not a production deployment.';
+  if(state.externalContent)document.querySelector('.below-workspace .about').lastElementChild.textContent='Arweave/IPFS links and copies retain the exact address and fingerprint. Public gateways retrieve bytes only with open permission. New paid Arweave uploads and IPFS pinning are not wired. For a paid Arweave upload: explicitly choose a funded Base-mainnet wallet and a maximum Turbo credit top-up, consent to public irreversible storage, upload through the user-operated Turbo service, then register its ar:// ID here after independent byte verification. Funding, upload acceptance, retrieval and Arweave settlement are separate evidence. No paid upload was tested; temporary local bytes are not durable. Recursive release affects only your previewed placements, never global deletion. Exact stance controls and bounded folder filtering do not migrate legacy seeded labels or provide global inventory/history. Development subsidy uses one author-signature prompt; otherwise wallet writes require two approvals. Not a production deployment.';
   await refresh();
 });

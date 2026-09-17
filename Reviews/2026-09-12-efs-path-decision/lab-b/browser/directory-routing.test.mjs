@@ -6,31 +6,35 @@ import {loadEthers} from '../script/compact-environment.mjs';
 import * as paths from './compact-paths.mjs';
 import * as view from './files-view.mjs';
 import {normalizeTagAssessment} from './compact-sdk.mjs';
+import {journalPrefix} from './wallet-session.mjs';
+import {hydrateExactStances} from './compact-stance.mjs';
+import {resolveEconomics} from './fee-model.mjs';
 
 // Execute the actual app body/event wiring in a small browser-boundary host.
 // Only native module import lines are replaced by injected module bindings.
 // DOM layout is parent CUA's gate; these assertions observe app-rendered output,
 // location/history events and signer/broadcast boundaries, not source strings.
-const source=(await readFile(new URL('./app.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'');
+const source=(await readFile(new URL('./app.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replaceAll('import.meta.env?.DEV','false').replaceAll('import.meta.env?.PROD','false');
 const ethers=await loadEthers(),key='0x'+'11'.repeat(32),wallet=new ethers.Wallet(key);
 const tick=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};
 const deferred=()=>{let resolve,reject;const promise=new Promise((r,j)=>{resolve=r;reject=j;});return {promise,resolve,reject};};
-async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedRead,initial='#/',typed=true,carriers=false,image=false,encrypted=false,joined=false}={}){
+async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedRead,placementRead,stanceRead,initial='#/',typed=true,carriers=false,image=false,encrypted=false,joined=false}={}){
   const listeners=new Map(),elements=new Map();
   const element=id=>{
     if(!elements.has(id))elements.set(id,{id,value:'',textContent:'',innerHTML:'',dataset:{},disabled:false,hidden:false,open:false,
-      selectedOptions:[{textContent:'Alice first'}],listeners:new Map(),className:'',
+      selectedOptions:[{textContent:'Alice first'}],listeners:new Map(),className:'',previousElementSibling:{},
       addEventListener(type,fn){this.listeners.set(type,fn);},querySelector(){return null;},focus(){},
-      insertAdjacentHTML(){},showModal(){this.open=true;},close(){this.open=false;}});
+      insertAdjacentHTML(_where,html){this.innerHTML+=html;},remove(){},setAttribute(name){if(name==='open')this.open=true;},showModal(){throw Error('NATIVE_MODAL');},close(){this.open=false;}});
     return elements.get(id);
   };
   for(const [id,value] of Object.entries({lens:'alice',signer:'alice','filter-scope':'either'}))element(id).value=value;
-  const document={getElementById:element,querySelector:element,querySelectorAll:()=>[],createElement:()=>({click(){},remove(){}}),body:{append(){}},
+  const document={baseURI:'http://127.0.0.1:12345/',getElementById:element,querySelector:element,querySelectorAll:()=>[],createElement:()=>({click(){},remove(){}}),body:{append(){}},
     addEventListener(type,fn){listeners.set('document:'+type,fn);}};
-  const location={hostname:'127.0.0.1',href:'http://127.0.0.1:12345/',hash:initial};
+  let currentUrl=new URL('http://127.0.0.1:12345/'+initial);
+  const location={hostname:'127.0.0.1',get href(){return currentUrl.href;},get hash(){return currentUrl.hash;},set hash(value){currentUrl.hash=value;}};
   const events=new Map(),dispatch=type=>{for(const fn of events.get(type)??[])fn({type});};
   const hashes=[initial];let index=0;
-  const history={replaceState(_a,_b,url){location.hash=url;hashes[index]=url;},
+  const history={replaceState(_a,_b,url){currentUrl=new URL(url,location.href);hashes[index]=currentUrl.hash;},
     pushState(_a,_b,url){location.hash=url;hashes.splice(++index);hashes.push(url);},
     back(){if(index>0){location.hash=hashes[--index];dispatch('popstate');dispatch('hashchange');}},
     forward(){if(index+1<hashes.length){location.hash=hashes[++index];dispatch('popstate');dispatch('hashchange');}}};
@@ -38,8 +42,9 @@ async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedR
   const child=(folder,name)=>folder==='root'&&name==='archive'?'archive':folder==='archive'&&name==='qa-renamed'?'renamed':folder==='root'&&name==='slow'?'slow':null;
   const row=(folder,name,kind='file')=>({file:`${folder}-${name}`,folder,kind,knowledge:'PRESENT',name:{knowledge:'PRESENT',value:name},position:`${folder}/${name}`,selection:{author:wallet.address,revision:1,admission:'9'}});
   const sdk={async pin(){stats.pin++;return {...context,blockNumber:String(6+stats.pin),admission:String(8+stats.pin)};},
+    exactStances:!!stanceRead,readStance:stanceRead,
     async readDirectory(){return {knowledge:'PRESENT',coverage:'COMPLETE'};},
-    async readPlacement({folder,name}){const target=child(folder,name);return target?{knowledge:'PRESENT',coverage:'COMPLETE',value:{target,kind:'directory',selection:{author:wallet.address,revision:1,admission:'9'}}}:{knowledge:'ABSENT',coverage:'COMPLETE',value:{}};},
+    async readPlacement({folder,name}){if(placementRead){const value=placementRead({folder,name});if(value)return value;}const target=child(folder,name);return target?{knowledge:'PRESENT',coverage:'COMPLETE',value:{target,kind:'directory',selection:{author:wallet.address,revision:1,admission:'9'}}}:{knowledge:'ABSENT',coverage:'COMPLETE',value:{}};},
     async listFolder({folder,authors,context}){if(holdList&&folder==='slow'&&authors[0]===wallet.address)await holdList.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',basis:context,value:[row(folder,authors[0]!==wallet.address?'bob.txt':folder==='root'?'root.txt':folder==='renamed'?'child.txt':'slow.txt'),...(carriers?[row(folder,'second.txt')]:[])]};},
     async readFile({file}){stats.point++;if(holdRead&&file.startsWith('slow-'))await holdRead.promise;return {knowledge:'PRESENT',coverage:'COMPLETE',value:{file,selection:{author:wallet.address},revision:{file,recordId:'record',document:carriers?null:'0x61',profile:carriers?'carrier-v1':'legacy-inline',content:carriers?{length:4,media:0,encryption:encrypted?1:0}:undefined,firstAdmission:'9'},fileTag:{evaluated:true},revisionTag:{evaluated:true}}};},
     async readContent({file}){stats.content++;if(holdContent)await holdContent.promise;return {state:'AVAILABLE_VERIFIED',bytes:encrypted?new TextEncoder().encode('private note'):Uint8Array.of(0,255,128,65),file,recordId:'record'};},
@@ -52,26 +57,50 @@ async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedR
   if(carriers){config.manifest.contentProfile='raw-sha256-aesgcm-v2';config.carrierOrigin='http://127.0.0.1:12347';}
   if(joined){config.manifest.contracts.joined={address:wallet.address};sdk.listFolderPage=async args=>{stats.joined++;const {value,coverage,knowledge,...page}=await sdk.listFolder(args);const result={...page,kind:'files-joined-page',queryKnowledge:knowledge,queryCoverage:coverage,selectedSoFar:'6',scannedSoFar:'6',rawTotal:'6',pageRows:value.map(r=>Object.freeze({...r,match:args.search?'UNKNOWN':'MATCH',point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{selection:{author:wallet.address},revision:{recordId:'record',firstAdmission:'9',profile:'carrier-v1',bodyLength:64,assurance:'HEADER_VERIFIED_BODY_NOT_FETCHED'}}}}))};return joinedRead?joinedRead(args,result):result;};}
   const stored=new Map();const localStorage={getItem:k=>stored.get(k)??null,setItem:(k,v)=>stored.set(k,v)};
-  const fetch=async(url,options)=>({ok:true,async json(){return url==='/config.json'?config:{alice:key};},async text(){const req=JSON.parse(options.body);
+  const fetch=async(url,options)=>({ok:true,async json(){return String(url).endsWith('/config.json')?config:{alice:key};},async text(){const req=JSON.parse(options.body);
     if(req.method==='eth_sendRawTransaction')stats.broadcast++;
-    return JSON.stringify({id:req.id,result:req.method==='eth_chainId'?'0x7a69':req.method==='eth_estimateGas'?'0x5208':'0x1'});}});
+    return JSON.stringify({id:req.id,result:req.method==='eth_chainId'?'0x7a69':req.method==='eth_getBlockByNumber'?{hash:ethers.id('genesis')}:req.method==='eth_estimateGas'?'0x5208':'0x1'});}});
   class TestURL extends URL {static createObjectURL(blob){stats.blobs.push(blob);return 'blob:test';}static revokeObjectURL(url){stats.revoked.push(url);}}
   const scope=vm.createContext({document,location,history,localStorage,fetch,performance,AbortSignal,AbortController,TextEncoder,Uint8Array,URL:TestURL,Blob,structuredClone,setTimeout,
-    confirm:()=>true,FormData:class{constructor(form){return Object.entries(form.values??{});}},
+    confirm:()=>{throw Error('NATIVE_CONFIRM');},FormData:class{constructor(form){return Object.entries(form.values??{});}},
     addEventListener(type,fn){events.set(type,[...(events.get(type)??[]),fn]);},
-    efsCompactDirectoryEntry:{...paths,createSdk:()=>sdk,content:{verifyPng:async()=>{if(image)return {blob:new Blob(['test']),width:1,height:1};throw Error('not PNG');},
+    efsCompactDirectoryEntry:{...paths,createSdk:()=>sdk,content:{verifyRaster:async()=>{if(image)return {blob:new Blob(['test']),width:1,height:1};throw Error('not raster');},
       describe:async(bytes,{carrier})=>({carrier,length:bytes.length}),storeRawBytes:async bytes=>{stats.uploads.push(bytes);}}}});
-  const execute=vm.compileFunction(`return (async()=>{${source}\n})();`,['ethers','createCompactSdk','normalizeTagAssessment','folderState','filterRows','canOpen','costPresentation','renderCostTable','tagLabel'],{parsingContext:scope});
-  await execute(ethers,()=>sdk,normalizeTagAssessment,page=>{stats.renderedPage=page;return view.folderState(page);},...['filterRows','canOpen','costPresentation','renderCostTable','tagLabel'].map(k=>view[k]));
+  const execute=vm.compileFunction(`return (async()=>{${source}\n})();`,['ethers','createCompactSdk','normalizeTagAssessment','folderState','filterRows','canOpen','costPresentation','renderCostTable','tagLabel','journalPrefix','resolveEconomics','hydrateExactStances'],{parsingContext:scope});
+  await execute(ethers,()=>sdk,normalizeTagAssessment,page=>{stats.renderedPage=page;return view.folderState(page);},...['filterRows','canOpen','costPresentation','renderCostTable','tagLabel'].map(k=>view[k]),journalPrefix,resolveEconomics,hydrateExactStances);
   const click=async(action,data={})=>{listeners.get('document:click')({target:{closest:()=>({disabled:false,dataset:{action,...data}})}});await tick();};
   return {element,stats,location,history,async hash(value,event='hashchange'){history.pushState(null,'',value);dispatch(event);await tick();},
     dispatch,click,async submit(values={}){element('editor-form').values={name:'new.txt',document:'contents',...values};element('editor-form').listeners.get('submit')({preventDefault(){},target:element('editor-form')});await tick();}};
 }
 
+test('replacement waits for in-page consent and renewed consent after destination drift',async()=>{
+  let revision=1;
+  const a=await app({placementRead:({name})=>name==='occupied'?{knowledge:'PRESENT',coverage:'COMPLETE',value:{kind:'directory',target:'existing',selection:{author:wallet.address,revision,admission:String(revision)}}}:null});
+  await a.click('connect');await a.click('createDirectory');
+  assert.equal(a.element('editor').open,true,'editor opens without native modal/focus');
+  await a.submit({name:'occupied'});assert.equal(a.stats.prepare,0);assert.match(a.element('editor-error').textContent,/confirmation/i);
+  a.element('replacement-consent').checked=true;revision=2;
+  await a.submit({name:'occupied'});assert.equal(a.stats.prepare,0);assert.equal(a.element('replacement-consent').checked,false);
+  a.element('replacement-consent').checked=true;
+  await a.submit({name:'occupied'});assert.equal(a.stats.prepare,1);assert.equal(a.stats.prepared[0].replace,true);
+});
+
+test('exact UI filtering bypasses legacy predicate and retains UNKNOWN at the page basis',async()=>{
+  const queries=[],reads=[];
+  const a=await app({carriers:true,joined:true,joinedRead:(args,page)=>{queries.push(args);return {...page,queryCoverage:'PARTIAL'};},
+    stanceRead:async args=>{reads.push(args);return {value:{assessment:args.subject.includes('second')?'UNKNOWN':'NOT_PRESENT',exactStance:true,observations:[]}};}});
+  a.element('filter-concept').value=ethers.id('exact');await a.click('filter');
+  assert.equal(queries.at(-1).concept,ethers.ZeroHash);assert.equal(queries.at(-1).tagScope,'none');
+  assert.ok(reads.every(r=>r.context===queries.at(-1).context));
+  assert.match(a.element('rows').innerHTML,/second\.txt/);assert.doesNotMatch(a.element('rows').innerHTML,/root\.txt/);
+  assert.match(a.element('coverage').textContent,/uncertain matches retained/);assert.equal(a.stats.renderedPage.coverage,'PARTIAL');
+  await a.click('select',{position:'root/second.txt'});assert.match(a.element('detail').innerHTML,/Retract to silence/);
+});
+
 test('joined app lists headers without point bodies and hydrates only the selected file',async()=>{
   const a=await app({carriers:true,joined:true});assert.equal(a.stats.joined,1);assert.equal(a.stats.point,0);assert.equal(a.stats.content,0);
   assert.match(a.element('rows').innerHTML,/root\.txt/);await a.click('select',{position:'root/root.txt'});
-  assert.equal(a.stats.point,1);assert.equal(a.stats.content,0);assert.match(a.element('detail').innerHTML,/Open verified bytes/);
+  assert.equal(a.stats.point,1);assert.equal(a.stats.content,1);assert.match(a.element('detail').innerHTML,/Open verified bytes/);
 });
 test('joined app retains query-qualified uncertain rows without a second local filter',async()=>{
   const a=await app({carriers:true,joined:true});a.element('search').value='no-match';
@@ -109,9 +138,9 @@ test('joined query changes during a busy read coalesce and never install an obso
   assert.equal(queries.at(-1).scope,'revision');
   assert.equal(queries.at(-1).continuation.scope,queries.at(-1).scope);
 });
-test('joined counts identify retained rows and selected placements separately',async()=>{
-  const a=await app({carriers:true,joined:true});assert.match(a.element('coverage').textContent,/retained query rows/);
-  assert.match(a.element('coverage').textContent,/6 selected placements/);assert.doesNotMatch(a.element('coverage').textContent,/2 observed placements/);
+test('joined counts identify displayed rows without presenting them as all selected placements',async()=>{
+  const a=await app({carriers:true,joined:true});assert.match(a.element('coverage').textContent,/2 shown \/ 2 observed rows/);
+  assert.doesNotMatch(a.element('coverage').textContent,/2 selected placements/);
 });
 test('header-only inspector keeps qualification visible and technical payload collapsed',async()=>{
   const hold=deferred(),a=await app({carriers:true,joined:true,holdRead:hold,initial:'#/slow'});
@@ -170,7 +199,7 @@ test('the exact hash guard cancels authorization before the browser delivers has
 });
 test('current-route writes still authorize, broadcast and reconcile normally',async()=>{
   const a=await app();await a.click('connect');await a.click('create');await a.submit();
-  assert.equal(a.stats.authorize,1);assert.equal(a.stats.broadcast,1);assert.equal(a.element('editor').open,false);assert.match(a.element('notice').textContent,/EFFECTS_VERIFIED/);
+  assert.equal(a.stats.authorize,1);assert.equal(a.stats.broadcast,1);assert.equal(a.element('editor').open,false);assert.match(a.element('notice').textContent,/saved and checked onchain/);
 });
 test('legacy explicit-mount app ignores Directory URL routing without new dependencies',async()=>{
   const a=await app({typed:false}),pins=a.stats.pin;await a.hash('#/archive/qa-renamed');
@@ -231,7 +260,7 @@ test('late carrier success or rejection cannot overwrite a new route or selectio
 });
 test('explicit external upload carries more than Core inline limit without lossy text conversion',async()=>{
   const a=await app({carriers:true});await a.click('connect');await a.click('create');
-  const bytes=new Uint8Array(9000);bytes[8193]=255;a.element('field-upload').files=[{size:bytes.length,arrayBuffer:async()=>bytes.buffer}];
+  const bytes=new Uint8Array(9000);bytes[8193]=255;a.element('field-upload').files=[{size:bytes.length,type:'application/octet-stream',arrayBuffer:async()=>bytes.buffer}];
   await a.submit({carriage:'external'});assert.equal(a.stats.uploads.length,1);assert.deepEqual(a.stats.uploads[0],bytes);
   assert.equal(a.stats.prepared[0].content.descriptor.carrier,1);assert.equal(a.stats.prepared[0].content.descriptor.length,9000);assert.equal(a.stats.broadcast,1);
 });

@@ -1,3 +1,4 @@
+import {createCompactStance} from './compact-stance.mjs';
 /** Disposable compact Files adapter. No wallet, private keys, Node APIs, name
  * catalog, RPC URL, or document fixtures live here. Inject ethers v6 and raw RPC.
  * All evidence is RPC_OBSERVED, not a portable source-state proof.
@@ -62,8 +63,8 @@ export function createExactReadCache({identity,enabled=true,maxEntries=512,maxBy
   });
 }
 
-// Additive seam: guarded fixtures import this engine. Live-served legacy assets
-// never import a new module (the existing server has a closed asset allowlist).
+// Shared engine for guarded and legacy fixtures. Static serving must include
+// its inert helper modules; exact stance calls still require the pinned profile.
 export function createCompactEngine({ethers: e, rpc: transport, manifest, journal,contentCodec,readCache={},onPhase=()=>{}}, protocolFactory) {
   const Z = e.ZeroHash, coder = e.AbiCoder.defaultAbiCoder();
   // Track transport failures by provenance, not message spelling. Local ABI,
@@ -161,6 +162,15 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     recoveryError:null,capabilities:{protocol:'compact-legacy-v1',guardedWrites:false},
   };
   const protocol = {...legacy,...protocolFactory?.({e,rpc,isRpcUnavailable,config,hash,eq,check,fail,plain,freeze,call,scalar,code,readGroup,addresses,interfaces,blockArg,positionOf,recordOf,bindingOf})};
+  const stanceContexts=new WeakMap();
+  const exactStances=protocol.watchPositions&&['tagProfileHash','stanceValidator','stanceValidatorHash'].every(fn=>interfaces.index.hasFunction(fn));
+  const stanceAt=context=>{
+    check(exactStances,'STANCE_PROFILE_UNSUPPORTED');
+    if(!stanceContexts.has(context))stanceContexts.set(context,createCompactStance({e,context,ledgerAbi:config.contracts.ledger.abi,ledgerAddress:addresses.ledger,
+      call:(k,f,a=[])=>call(k,f,a,context),code:address=>code(address,context),
+      invoke:async(address,iface,fn,args)=>decode(iface,fn,await rawRead('eth_call',[{to:address,data:iface.encodeFunctionData(fn,args)},blockArg(context)],raw=>decode(iface,fn,raw)))}));
+    return stanceContexts.get(context);
+  };
   const basisFor = (context,authors,policy='ordered') => ({...context,
     lens:{address:addresses.lens,codeHash:config.contracts.lens.codeHash,policy,
       ...protocol.lensFields(authors ?? []), hash:authors ? protocol.lensHash(authors) : null},
@@ -559,6 +569,12 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   async function readTag(args) {await guard(args.context);const authors=await protocol.selectors(args,args.context);
     const tag=await tagAt(authors,args.subject,args.concept,args.target,args.context);
     return freeze(result(basisFor(args.context,authors),tag.knowledge,tag.assessment==='UNKNOWN'?'PARTIAL':'COMPLETE',tag));}
+  async function readStance(args){
+    await guard(args.context);const principals=await protocol.selectors(args,args.context);let tag;
+    try{tag=normalizeTagAssessment({...await (await stanceAt(args.context)).read({...args,principals}),exactStance:true});}
+    catch(error){tag=normalizeTagAssessment({subject:args.subject,concept:args.concept,exactStance:true,reason:error.message,observations:[]});}
+    return freeze(result(basisFor(args.context,principals),tag.knowledge,tag.assessment==='UNKNOWN'?'PARTIAL':'COMPLETE',tag));
+  }
   async function tagAt(authors,subject,concept,file,context) {
     if(eq(concept,Z))return normalizeTagAssessment({subject,concept});
     let s;
@@ -850,13 +866,31 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       return point.value.revision;
     };
     const operation = args.operation;
+    if(args.replacementPlacement){
+      check(operation==='edit','REPLACEMENT_OPERATION');
+      const replacement=args.replacementPlacement,folder=await folderFor(replacement.folder,context),role=e.keccak256(bytesOf(replacement.name));
+      const selection=await resolve(authors,purpose.folder,folder,role,context);
+      check(selection.status===1&&eq(selection.target,replacement.target)&&eq(selection.target,file),'REPLACEMENT_CHANGED');
+      selectionDependencies.push({purpose:purpose.folder,subject:folder,role,selection});
+      await watch(purpose.folder,folder,role,'confirmed-replacement',selection);
+    }
     const destination=async(folder,role)=>{
       if(!directories){await watch(purpose.folder,folder,role,'destination');return;}
       const selected=await resolve(authors,purpose.folder,folder,role,context);
       check(selected.status===0||args.replace===true,'DESTINATION_OCCUPIED');
       await watch(purpose.folder,folder,role,'destination',selected);
     };
-    if (operation === 'create' || operation === 'copyFile' || (directories&&operation==='createDirectory')) {
+    if (['assertStance','denyStance','retractToSilent'].includes(operation)) {
+      const exact=await (await stanceAt(context)).planner[operation]({...args,author,principals:authors,subject:args.file,
+        deadline:args.deadline??BigInt(context.timestamp)+3600n});
+      concept=exact.concept;
+      for(let i=0;i<exact.actions.length;i++){
+        const a=exact.actions[i];
+        if(a.kind===1)await retain(a.typeId,exact.bodies[i]);
+        else {check(a.kind===3,'STANCE_ACTION');await binding(a.purpose,a.subject,a.role,a.target);await watch(a.purpose,a.subject,a.role,'exact-stance');}
+      }
+      if(args.scope==='selectedRevision')await selected();
+    } else if (operation === 'create' || operation === 'copyFile' || (directories&&operation==='createDirectory')) {
       const source=operation==='copyFile'?await selected():null;
       check(source?.profile!=='live-quote-v1','LIVE_COPY_REQUIRES_EXPLICIT_SNAPSHOT');
       check(args.salt && !eq(args.salt,Z),'SALT');
@@ -959,6 +993,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     onPhase('authorize');
     check(plans.has(plan),'PLAN');
     await canonical(plan.basis);
+    if(['assertStance','denyStance','retractToSilent'].includes(plan.operation))await protocol.preflight(plan,await pin());
     const signature = e.Signature.from(await signDigest(plan.digest,plan)).serialized;
     check(eq(e.recoverAddress(plan.digest,signature),plan.intent.author),'SIGNER');
     const transaction = {to:addresses.ledger,data:protocol.encode(plan,signature),value:'0x0'};
@@ -1111,7 +1146,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     await journal.put(plain(outcome)); return outcome;
   }
   const publicRead=fn=>async args=>{const value=await fn(args);await canonical(args.context);return value;};
-  return Object.freeze({pin,...Object.fromEntries(Object.entries({listFolder,listFolderPage,readOwnPlacements,readFile,readRevisionHistory,readName,readDirectory,readPlacement,readContent,readTypedRecord,readTypeDescriptor,readConcept,readTag}).map(([name,fn])=>[name,publicRead(fn)])),conceptId,prepare,authorize,submit,reconcile,
+  return Object.freeze({pin,exactStances,...Object.fromEntries(Object.entries({listFolder,listFolderPage,readOwnPlacements,readFile,readRevisionHistory,readName,readDirectory,readPlacement,readContent,readTypedRecord,readTypeDescriptor,readConcept,readTag,readStance}).map(([name,fn])=>[name,publicRead(fn)])),conceptId,prepare,authorize,submit,reconcile,
     readMetrics:()=>({...cache.stats(),contexts:verifiedContexts.size,contextHits,contextMisses,contextBytes,contextLimits:{...contextLimits},groupWidth:16}),
     capabilities:()=>freeze(plain({...protocol.capabilities,typedDirectories:directories,globalTree:false}))});
 }

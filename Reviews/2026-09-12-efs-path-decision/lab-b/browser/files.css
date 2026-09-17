@@ -721,6 +721,11 @@ summary {
   line-height:1.6
 }
 dialog {
+  position:fixed;
+  top:12vh;
+  max-height:76vh;
+  overflow:auto;
+  z-index:10;
   width:550px;
   max-width:calc(100vw - 28px);
   border:1px solid var(--line);
