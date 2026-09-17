@@ -2,8 +2,37 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as external from './external-content.mjs';
 import * as content from './compact-content.mjs';
+import {externalGateways} from '../script/external-content-fixtures.mjs';
 const raw=new TextEncoder().encode('hello');
 const ar='ar://'+'A'.repeat(43),ipfs='ipfs://QmYwAPJzv5CZsnAzt8auVZRnGi2C2ZWfQ7eFMbB7xq4GoH/hello.txt';
+test('fixture transport can retrieve through the replacement gateway without credentials or redirects',async()=>{
+  const d=await external.describeExternal(raw,{locator:ipfs});
+  const loader=external.createExternalLoader({gateways:externalGateways,fetch:async(url,options)=>{
+    assert.equal(options.credentials,'omit');assert.equal(options.referrerPolicy,'no-referrer');
+    assert.equal(options.redirect,'error');assert.equal(options.cache,'no-store');
+    assert.ok(options.signal instanceof AbortSignal);
+    return new Response(url==='https://gateway.pinata.cloud/ipfs/QmYwAPJzv5CZsnAzt8auVZRnGi2C2ZWfQ7eFMbB7xq4GoH/hello.txt'?raw:null,{status:url.startsWith('https://gateway.pinata.cloud/')?200:429});
+  }});
+  const result=await content.openContent(d,{loadCarrier:loader});
+  assert.equal(result.state,'AVAILABLE_VERIFIED');assert.deepEqual(result.bytes,raw);
+});
+
+test('stream overflow, deadline and caller abort retain unavailable bytes and stop fallback',async()=>{
+  const d=await external.describeExternal(raw,{locator:ipfs}),gateways={ipfs:['https://first.example/ipfs/']};
+  let cancelled=false;
+  const overflow=external.createExternalLoader({gateways,fetch:async()=>new Response(new ReadableStream({
+    start(controller){controller.enqueue(new Uint8Array(6));},cancel(){cancelled=true;}
+  }))});
+  assert.equal((await content.openContent(d,{loadCarrier:overflow,maxBytes:5})).state,'UNAVAILABLE');assert.equal(cancelled,true);
+  const stalled=({signal})=>new Promise((resolve,reject)=>signal.addEventListener('abort',()=>reject(signal.reason),{once:true}));
+  const timeout=external.createExternalLoader({gateways,timeoutMs:10,fetch:async(_url,options)=>stalled(options)});
+  assert.equal((await content.openContent(d,{loadCarrier:timeout})).state,'UNAVAILABLE');
+  const controller=new AbortController();let requests=0;
+  const abort=external.createExternalLoader({gateways:{ipfs:[...gateways.ipfs,'https://second.example/ipfs/']},fetch:async(_url,options)=>{
+    requests++;const pending=stalled(options);controller.abort(Error('user cancelled'));return pending;
+  }});
+  await assert.rejects(()=>abort(d,{signal:controller.signal}),/user cancelled/);assert.equal(requests,1);
+});
 test('portable external locators survive compact encoding with a separate payload fingerprint',async()=>{
   for(const locator of [ar,ipfs]){
     const d=await external.describeExternal(raw,{locator,media:1});

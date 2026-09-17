@@ -18,7 +18,7 @@ const source=(await readFile(new URL('./app.mjs',import.meta.url),'utf8')).repla
 const ethers=await loadEthers(),key='0x'+'11'.repeat(32),wallet=new ethers.Wallet(key);
 const tick=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};
 const deferred=()=>{let resolve,reject;const promise=new Promise((r,j)=>{resolve=r;reject=j;});return {promise,resolve,reject};};
-async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedRead,placementRead,stanceRead,fileRead,initial='#/',typed=true,carriers=false,image=false,encrypted=false,joined=false}={}){
+async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedRead,placementRead,stanceRead,fileRead,externalGateways,initial='#/',typed=true,carriers=false,image=false,encrypted=false,joined=false}={}){
   const listeners=new Map(),elements=new Map();
   const element=id=>{
     if(!elements.has(id))elements.set(id,{id,value:'',textContent:'',innerHTML:'',dataset:{},disabled:false,hidden:false,open:false,
@@ -54,6 +54,7 @@ async function app({holdList,holdRead,holdPrepare,holdSubmit,holdContent,joinedR
     async reconcile(){return {status:'EFFECTS_VERIFIED'};}};
   const config={rpcUrl:'http://127.0.0.1:12346',manifest:{chainId:'31337',folder:'root',filesProfile:'typed-directory-v1',authors:{alice:wallet.address,bob:'0x00000000000000000000000000000000000000b2'},contracts:{ledger:{address:wallet.address}}},mounts:[{id:'root',label:'Files'}]};
   if(!typed)delete config.manifest.filesProfile;
+  if(externalGateways)config.manifest.externalGateways=externalGateways;
   if(carriers){config.manifest.contentProfile='raw-sha256-aesgcm-v2';config.carrierOrigin='http://127.0.0.1:12347';}
   if(joined){config.manifest.contracts.joined={address:wallet.address};sdk.listFolderPage=async args=>{stats.joined++;const {value,coverage,knowledge,...page}=await sdk.listFolder(args);const result={...page,kind:'files-joined-page',queryKnowledge:knowledge,queryCoverage:coverage,selectedSoFar:'6',scannedSoFar:'6',rawTotal:'6',pageRows:value.map(r=>Object.freeze({...r,match:args.search?'UNKNOWN':'MATCH',point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{selection:{status:1,target:'record',author:wallet.address},revision:{recordId:'record',firstAdmission:'9',profile:'carrier-v1',bodyLength:64,assurance:'HEADER_VERIFIED_BODY_NOT_FETCHED'}}}}))};return joinedRead?joinedRead(args,result):result;};}
   const stored=new Map();const localStorage={getItem:k=>stored.get(k)??null,setItem:(k,v)=>stored.set(k,v)};
@@ -83,6 +84,18 @@ test('replacement waits for in-page consent and renewed consent after destinatio
   await a.submit({name:'occupied'});assert.equal(a.stats.prepare,0);assert.equal(a.element('replacement-consent').checked,false);
   a.element('replacement-consent').checked=true;
   await a.submit({name:'occupied'});assert.equal(a.stats.prepare,1);assert.equal(a.stats.prepared[0].replace,true);
+});
+
+test('external open names only its configured providers and requires per-open in-page consent',async()=>{
+  const a=await app({carriers:true,externalGateways:{ipfs:['https://gateway.pinata.cloud/ipfs/'],ar:['https://arweave.net/']},
+    fileRead:async()=>({knowledge:'PRESENT',coverage:'COMPLETE',value:{selection:{status:1,target:'record'},revision:{recordId:'record',profile:'carrier-v1',content:{carrier:3,length:4,locator:'ipfs://bafybeihkoviema7g3gxyt6la7vd5ho32ictqbilu3wnlo3rs7ewhnp7lly'}}}})});
+  assert.equal(a.stats.content,0);await a.click('select',{position:'root/root.txt'});
+  assert.match(a.element('detail').innerHTML,/https:\/\/gateway\.pinata\.cloud\/ipfs\//);
+  assert.doesNotMatch(a.element('detail').innerHTML,/https:\/\/arweave\.net/);
+  assert.doesNotMatch(a.element('detail').innerHTML,/<input id="allow-carrier"[^>]*checked/);
+  await a.click('openContent');assert.equal(a.stats.content,0);assert.match(a.element('detail').innerHTML,/allow a gateway fetch/);
+  assert.doesNotMatch(a.element('detail').innerHTML,/<input id="allow-carrier"[^>]*checked/);
+  assert.match(a.element('detail').innerHTML,/not an independent proof/);
 });
 
 test('exact UI filtering bypasses legacy predicate and retains UNKNOWN at the page basis',async()=>{

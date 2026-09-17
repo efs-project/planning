@@ -1,5 +1,71 @@
 # Clickable compact Files prototype
 
+## Current quickstart (2026-09-17)
+
+Run from `lab-b/` in the assigned prototype checkout, not the v1 contracts/client
+repos. Use Node 24+, Foundry/Anvil and locally available solc **0.8.30**;
+`foundry.toml` pins Cancun, optimizer 200 and via-IR. `package-lock.json` pins
+ethers **6.15.0** and Vite **8.3.0**. Install/build once:
+
+```sh
+npm ci
+forge build --offline
+```
+
+Keep the chain and UI in **separate terminals** (both in `lab-b/`):
+
+```sh
+# Terminal 1: fresh disposable chain; do not run if the current demo is alive.
+npm run chain
+# Terminal 2: restart this alone for UI changes, preserving the chain.
+npm run dev
+```
+
+Defaults: RPC `http://127.0.0.1:8545`, chain ID `31337`, UI
+`http://127.0.0.1:60627/`. `EFS_RPC_PORT` / `EFS_UI_PORT` select alternatives;
+keep the UI port consistent between chain and Vite for local byte-store CORS.
+`FOUNDRY_OUT` may select a separately built artifact directory from these exact
+sources; otherwise the runner uses `out/`. An existing `.workbench/config.json`
+does not prove its chain is alive. Do not reset an active chain to refresh the UI.
+
+Static build/host (leave the same chain running):
+
+```sh
+npm run build
+npm run static
+# Open http://127.0.0.1:4173/ipfs/local-workbench/
+```
+
+The static host is only a file server, not an EFS backend or actual IPFS publish.
+Relative assets and hash routes work under the prefix; the generated public
+`dist/config.json` still points at the configured RPC. Static output excludes
+demo keys, faucet/subsidy and ephemeral local raw storage. Guest reads need no
+wallet; writes need an explicitly connected compatible wallet and local test ETH.
+Vite development can use the disposable signer or a wallet with an opt-in local
+Anvil payer subsidy. Fee tables are dated scenario estimates, not live/all-in quotes.
+
+Carrier limits: inline 8160 stored bytes; temporary local raw storage 1 MiB / 5s;
+public Arweave/IPFS references 16 MiB output / 15s **per configured gateway**.
+Open requires a fresh in-page checkbox naming the providers; listing/selection
+never retrieves external payloads. Downloads remain inert; bounded decoded raster
+previews do not execute HTML/SVG. The existing public IPFS sample was retrieved
+2026-09-17 through `https://gateway.pinata.cloud/ipfs/` (12,435 bytes, retained
+SHA-256 `ce70365436aa32ae74cec485316fa415c5867d01729848791d9f70078e3d3a3a`).
+This checks the EFS publisher's payload fingerprint, **not CID/DAG identity or
+permanent availability**. The replaceable gateway sees the requested CID/path.
+Future fixtures use `script/external-content-fixtures.mjs`; a running fixture's
+`manifest.externalGateways` in `.workbench/config.json` can change transport
+without changing immutable locators/fingerprints or resetting the chain. Rebuild
+static output after changing it. Empty/failing provider lists mean unavailable,
+not an absent file. No Helia/discovery/service worker, upload/pinning account,
+paid Arweave upload or production payment flow is installed. Old dweb.link URL
+handling remains compatibility-only, not a current default or independent fallback.
+
+## Historical experiments and implementation notes
+
+The sections below preserve dated fixture details; use the quickstart above for
+the current combined workbench. Older entrypoints may create their own fresh chain.
+
 ## Bounded joined Files pages (Task 5A)
 
 The fresh carrier-profile runner now deploys `FilesPageReader`, an external
