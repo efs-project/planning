@@ -62,10 +62,10 @@ library IndexReplaySource {
             Fact memory f;f.admission=first+uint64(i);f.author=author;
             bytes32 base=root(f.admission,5);uint256 meta=uint256(at(source,base,0));
             f.kind=uint8(meta&15);bytes32 a=at(source,base,1);bytes32 b=at(source,base,2);
-            if(f.kind==0||f.kind>6||((meta>>4)&0xffff)!=i||((meta>>20)&MASK48)!=p)revert E_REPLAY_SOURCE();
+            if(f.kind==0||f.kind>7||((meta>>4)&0xffff)!=i||((meta>>20)&MASK48)!=p)revert E_REPLAY_SOURCE();
             if(f.kind==1||f.kind==2){
                 (f.recordId,f.typeId)=recordFact(source,meta,a,b,f.admission);
-            }else if(f.kind==3||f.kind==4){
+            }else if(f.kind==3||f.kind==4||f.kind==7){
                 f.bindingOrdinal=uint64((meta>>68)&MASK48);f.expectedRevision=uint32(meta>>116);
                 if(f.bindingOrdinal==0)revert E_REPLAY_SOURCE();
                 bytes32 position=at(source,root(f.bindingOrdinal,9),0);

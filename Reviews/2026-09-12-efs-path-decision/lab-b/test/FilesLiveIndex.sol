@@ -18,7 +18,7 @@ contract FilesLiveNamesIndex is FilesNamesIndex {
     FilesScopeState private immutable _scopeState;
     bytes32 public immutable scopeStateCodehash;
     function _extensionEntry(bytes32 f) internal view virtual override returns(ManifestEntry memory){
-        if(f==FAMILY_LIVE_SCOPE)return ManifestEntry(f,0,3,3,keccak256("live-positive-folder-binding-ordinals:dense-swap:scopeList:last-mutation-every-bind-unbind"),true);
+        if(f==FAMILY_LIVE_SCOPE)return ManifestEntry(f,0,3,3,keccak256("live-positive-folder-binding-ordinals:dense-swap:scopeList:last-mutation-every-bind-mask-release"),true);
         return super._extensionEntry(f);
     }
     constructor(address c,bytes32 rt,bytes32 ct,bytes32 rh,bytes32 ch,bytes32 nt,bytes32 nh)
@@ -33,7 +33,7 @@ contract FilesLiveNamesIndex is FilesNamesIndex {
     }
     function _foldEffect(Effect memory e) internal virtual override {
         super._foldEffect(e);
-        if(e.kind==3 || e.kind==4)scopeState().fold(e.kind,e.bindingOrdinal,e.scopeKey,e.admission);
+        if(e.kind==3 || e.kind==4 || e.kind==7)scopeState().fold(e.kind,e.bindingOrdinal,e.scopeKey,e.admission);
     }
     function liveCount(bytes32 key) external view returns(uint64) { return scopeState().liveCount(key); }
     function liveAt(bytes32 key,uint64 i) external view returns(uint64) { return scopeState().liveAt(key,i); }

@@ -84,6 +84,14 @@ contract TagStanceProfileTest is LabBase {
         ledger.bind(FOLDER,directoryD,name("f"),fileF,0);ledger.bind(FOLDER,directoryD,name("g"),fileG,0);
     }
     function count(bytes32 key) internal view returns(uint64 n){(n,,,)=index.postingHead(key);}
+    function test_tag_release_is_explicitly_unsupported_and_rolls_back() public {
+        seed();ledger.bind(PURPOSE,fileF,conceptC,tokens[0],0);
+        uint64 before=admissions();Ledger.Action memory action=aUnbind(PURPOSE,fileF,conceptC,1);action.kind=7;
+        (bool ok,bytes memory err)=address(ledger).call(abi.encodeCall(ledger.execute,(one(action),new bytes[](1),ledger.nonces(address(this)))));
+        require(!ok&&bytes4(err)==Ledger.E_INDEX.selector,"tag release silently accepted");
+        (uint8 state,uint32 revision,,,,bytes32 target)=ledger.head(Keys.binding(pid(address(this)),Keys.position(PURPOSE,fileF,conceptC)));
+        require(state==1&&revision==1&&target==tokens[0]&&admissions()==before,"tag refusal leaked state");
+    }
     function test_tag_baseline_gap_controls() public {
         seed();
         alice.bind(TAG,fileF,conceptC,conceptC,0);bob.bind(TAG,fileF,conceptC,conceptC,0);

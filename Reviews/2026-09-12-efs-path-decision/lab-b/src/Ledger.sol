@@ -39,7 +39,7 @@ contract Ledger {
     /// keccak256(abi.encode(actions)) is identical from calldata, memory, ethers, or a
     /// clean re-encoding from Admission rows. Unused fields MUST be zero (E_SHAPE).
     struct Action {
-        uint8 kind; // PUBLISH | REUSE | BIND | UNBIND | CREATE | WITHDRAW
+        uint8 kind; // PUBLISH | REUSE | BIND | UNBIND | CREATE | WITHDRAW | RELEASE
         bytes32 typeId; // publish/reuse: record Type
         bytes32 bodyHashOrRecordId; // publish: keccak256(body); reuse: existing record id
         bytes32 purpose; // bind/unbind (nonzero)
@@ -174,6 +174,7 @@ contract Ledger {
     uint8 public constant UNBIND = 4;
     uint8 public constant CREATE = 5;
     uint8 public constant WITHDRAW = 6;
+    uint8 public constant RELEASE = 7;
     uint8 public constant PROOF_NATIVE = 1; // author = msg.sender; portability proof = chain-state witness
     uint8 public constant PROOF_SIGNED = 2; // author = ecrecover(PublicationIntent); portability proof = the signature
     uint256 public constant MAX_ACTIONS = 64;
@@ -521,7 +522,7 @@ contract Ledger {
         if (k == PUBLISH || k == REUSE) return _applyPublish(p, x, data, i);
         if (data.length != 0) revert E_SHAPE(i);
         if (k == BIND) return _applyBind(p, x, i);
-        if (k == UNBIND) return _applyUnbind(p, x, i);
+        if (k == UNBIND || k == RELEASE) return _applyUnbind(p, x, i);
         if (k == CREATE) return _applyCreate(p, x, i);
         if (k == WITHDRAW) return _applyWithdraw(p, x, i);
         revert E_BOUNDS(2);
@@ -673,6 +674,7 @@ contract Ledger {
         HeadRow storage h = _head[key];
         uint256 meta = h.meta;
         uint8 state = uint8(meta);
+        if (state > 3) revert E_NOT_LIVE(key);
         uint32 revision = uint32(meta >> 8);
         if (revision != x.expectedRevision) revert E_CAS(key, x.expectedRevision, revision);
         if (revision >= type(uint32).max - 1) revert E_BOUNDS(5);
@@ -693,27 +695,13 @@ contract Ledger {
                 pc.role = x.role;
             }
         }
-        ef.oldTarget = h.target;
-        ef.oldLive = state == 1;
         ef.freshBinding = state == 0;
-        h.meta = 1 | (uint256(revision + 1) << 8) | (uint256(p.ord) << 40) | (uint256(1) << 88)
-            | (((meta >> 40) & GUARD) << 120) | (uint256(bOrd) << 168);
-        h.target = x.target;
-        AdmissionRow storage ar = _admission[p.ord];
-        ar.meta = uint256(BIND) | (leaf << 4) | (uint256(p.publication) << 20) | (uint256(bOrd) << 68)
-            | (uint256(x.expectedRevision) << 116);
-        ar.a = x.target;
-        bytes32 scopeKey = Keys.scope(p.author32, x.purpose, x.subject);
-        ef.kind = BIND;
-        ef.admission = p.ord;
-        ef.author = p.author32;
         ef.recordId = x.target;
         ef.typeId = targetType;
-        ef.scopeKey = scopeKey;
         ef.bindingKey = key;
         ef.bindingOrdinal = bOrd;
         ef.target = x.target;
-        emit Admitted(p.author32, scopeKey, x.target, p.ord);
+        _writeBinding(p,x,leaf,ef,h,meta,1);
     }
 
     function _applyUnbind(Pub memory p, Action memory x, uint256 leaf) private returns (IIndexModule.Effect memory ef) {
@@ -721,28 +709,36 @@ contract Ledger {
         bytes32 key = Keys.binding(p.author32, Keys.position(x.purpose, x.subject, x.role));
         HeadRow storage h = _head[key];
         uint256 meta = h.meta;
-        if (uint8(meta) != 1) revert E_NOT_LIVE(key);
+        uint8 state = uint8(meta);
+        if (state != 1 && !(x.kind == RELEASE && state == 2)) revert E_NOT_LIVE(key);
         uint32 revision = uint32(meta >> 8);
         if (revision != x.expectedRevision) revert E_CAS(key, x.expectedRevision, revision);
         if (revision >= type(uint32).max - 1) revert E_BOUNDS(5);
-        uint64 bOrd = uint64((meta >> 168) & GUARD);
+        ef.bindingKey = key;
+        ef.bindingOrdinal = uint64((meta >> 168) & GUARD);
+        _writeBinding(p,x,leaf,ef,h,meta,x.kind == RELEASE ? 3 : 2);
+    }
+
+    // Shared retained write boundary for bind, mask and release. No new roots.
+    function _writeBinding(Pub memory p,Action memory x,uint256 leaf,IIndexModule.Effect memory ef,
+        HeadRow storage h,uint256 meta,uint8 nextState) private
+    {
         ef.oldTarget = h.target;
-        ef.oldLive = true;
-        // tombstone: state 2, tombstoneCause 1 (BindingFold layout), target cleared, evidence kept
-        h.meta = 2 | (uint256(revision + 1) << 8) | (uint256(p.ord) << 40) | (uint256(1) << 96)
-            | (((meta >> 40) & GUARD) << 120) | (uint256(bOrd) << 168);
-        h.target = bytes32(0);
+        ef.oldLive = uint8(meta) == 1;
+        h.meta = uint256(nextState) | (uint256(x.expectedRevision + 1) << 8) | (uint256(p.ord) << 40)
+            | (nextState == 1 ? uint256(1) << 88 : nextState == 2 ? uint256(1) << 96 : 0)
+            | (((meta >> 40) & GUARD) << 120) | (uint256(ef.bindingOrdinal) << 168);
+        h.target = x.target;
         AdmissionRow storage ar = _admission[p.ord];
-        ar.meta = uint256(UNBIND) | (leaf << 4) | (uint256(p.publication) << 20) | (uint256(bOrd) << 68)
+        ar.meta = uint256(x.kind) | (leaf << 4) | (uint256(p.publication) << 20) | (uint256(ef.bindingOrdinal) << 68)
             | (uint256(x.expectedRevision) << 116);
+        if (nextState == 1) ar.a = x.target;
         bytes32 scopeKey = Keys.scope(p.author32, x.purpose, x.subject);
-        ef.kind = UNBIND;
+        ef.kind = x.kind;
         ef.admission = p.ord;
         ef.author = p.author32;
         ef.scopeKey = scopeKey;
-        ef.bindingKey = key;
-        ef.bindingOrdinal = bOrd;
-        emit Admitted(p.author32, scopeKey, bytes32(0), p.ord);
+        emit Admitted(p.author32, scopeKey, x.target, p.ord);
     }
 
     function _applyCreate(Pub memory p, Action memory x, uint256 leaf) private returns (IIndexModule.Effect memory ef) {
@@ -919,22 +915,22 @@ contract Ledger {
             uint64 activatedAt
         )
     {
-        (typeId, activation) = _basisKey(ordinal);
-        TypeView memory t = _typeOf(typeId);
-        mandatoryAcceptor = t.mandatory;
-        ruleId = t.ruleId;
-        (policyAcceptor, policyCodehash, epoch, activatedAt) = registry.activation(typeId, activation);
-    }
-
-    /// The (Type, policy row) an admission was accepted under; reverts for non-publish kinds.
-    function _basisKey(uint64 ordinal) private view returns (bytes32 typeId, uint16 activation) {
-        AdmissionRow storage ar = _admission[ordinal];
-        uint256 m = ar.meta;
-        uint8 kind = uint8(m & 0xF);
-        if (kind == PUBLISH) typeId = ar.b;
-        else if (kind == REUSE) typeId = _record[ar.a].typeId;
-        else revert E_NO_BASIS(ordinal);
-        activation = uint16(m >> 152);
+        _requireSupport();
+        bytes memory input=abi.encodeCall(PublicationSupport.acceptanceBasis,(address(this),address(registry),ordinal));
+        address support=publicationSupport;
+        // Read-only extraction; exactly eight static ABI words, bounded errors.
+        assembly ("memory-safe") {
+            let ptr:=mload(0x40)
+            let ok:=staticcall(gas(),support,add(input,32),mload(input),ptr,256)
+            if or(iszero(ok),iszero(eq(returndatasize(),256))) {
+                if or(ok,gt(returndatasize(),4164)) {
+                    mstore(ptr,shl(224,0x2bd4fb9c)) mstore(add(ptr,4),32) mstore(add(ptr,36),0)
+                    revert(ptr,68)
+                }
+                returndatacopy(ptr,0,returndatasize()) revert(ptr,returndatasize())
+            }
+            return(ptr,256)
+        }
     }
 
     function indexObligations() public view returns (bytes32) {
@@ -950,6 +946,9 @@ contract Ledger {
     }
 
     function layoutId() public pure virtual returns (bytes32) { return LAYOUT_ID; }
+    function bindingLifecycleProfile() external pure returns (bytes32) {
+        return keccak256("efs.lab.binding-lifecycle/2:bind-mask-release");
+    }
     function executionRevision() public view returns (uint256) { return ExecutionSlots.read(ExecutionSlots.REVISION); }
     function genesisChainId() external view returns (uint256) { return ExecutionSlots.read(ExecutionSlots.GENESIS); }
     function implementationCodeHash() external view returns (bytes32) { return implementationSelf.codehash; }

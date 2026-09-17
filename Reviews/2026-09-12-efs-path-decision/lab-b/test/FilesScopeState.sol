@@ -21,7 +21,7 @@ contract FilesScopeState {
         (bytes32 purpose,,) = ledger.positionCell(ledger.bindingPosition(ordinal));
         if (purpose != FOLDER) return;
         bytes32 key = Keys.scopeList(scopeKey);
-        // Every BIND/UNBIND is a change, including same-member overwrite and
+        // Every BIND/MASK/RELEASE is a change, including mask-to-release and
         // empty/terminal scopes. Never delete this stamp on removal.
         lastMutation[key] = admission;
         uint64[] storage active = _live[key];

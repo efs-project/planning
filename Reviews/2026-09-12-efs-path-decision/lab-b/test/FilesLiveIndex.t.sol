@@ -15,6 +15,20 @@ contract FilesLiveIndexTest is FilesNamesTest {
         namesIndex=liveIndex;index=liveIndex;ledger.setIndexModule(address(index));lens=new FilesLiveLens(ledger,index);
     }
     function _liveKey(address author) internal view returns(bytes32){return Keys.scopeList(Keys.scope(pid(author),FOLDER,MOUNT));}
+    function test_mask_to_release_invalidates_cursor_and_yields_lower_live_candidate() public {
+        (bytes32 file,)=_create(1,bytes("a.txt"),true,0);bob.bind(FOLDER,MOUNT,keccak256("a.txt"),file,0);
+        _submit(one(aUnbind(FOLDER,MOUNT,keccak256("a.txt"),1)),new bytes[](1));
+        bytes32[] memory principals=new bytes32[](2);principals[0]=pid(eoaA);principals[1]=pid(address(bob));
+        LensReader.PrincipalCursor memory fresh;
+        LensReader.PrincipalPage memory page=lens.listPrincipals(principals,FOLDER,MOUNT,fresh,0);
+        Ledger.Action memory action=aUnbind(FOLDER,MOUNT,keccak256("a.txt"),2);action.kind=7;
+        _submit(one(action),new bytes[](1));
+        require(liveIndex.lastMutation(_liveKey(eoaA))==admissions(),"mask release not stamped");
+        (bool ok,bytes memory err)=address(lens).staticcall(abi.encodeCall(lens.listPrincipals,(principals,FOLDER,MOUNT,page.next,32)));
+        require(!ok&&bytes4(err)==LensReader.E_CURSOR.selector,"changed selection kept old cursor");
+        page=lens.listPrincipals(principals,FOLDER,MOUNT,fresh,32);
+        require(page.status==2&&page.items.length==1&&page.items[0].principalId==pid(address(bob)),"released mask still hides lower candidate");
+    }
     function test_live_scope_stamp_tracks_overwrite_removal_and_restore() public {
         bytes32 key=_liveKey(eoaA);
         require(liveIndex.lastMutation(key)==0,"fresh scope has a mutation");

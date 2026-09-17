@@ -68,6 +68,22 @@ contract GuardedRecoveryTest is LabBase {
         a=one(aCreate(bytes32(uint256(2))));(id,src)=retain(PK_A,1,a);(full,b)=publication(id,src,a);
         recover(PK_A,1,id,full,b);require(ledger.nonces(eoaA)==2&&admissions()==4,"prefix did not continue");
     }
+    function test_recovery_prefix_preserves_release_and_rebind_revision() public {
+        Ledger.Action[] memory a=two(aCreate(bytes32(uint256(1))),aBind(FOLDER,DRAFTS,name("x"),subjectOf(eoaA,1),0));
+        (bytes32 id,Ledger.IntentV2 memory src)=retain(PK_A,0,a);
+        (Ledger.Action[] memory full,bytes[] memory b)=publication(id,src,a);recover(PK_A,0,id,full,b);
+        Ledger.Action memory action=aUnbind(FOLDER,DRAFTS,name("x"),1);action.kind=7;a=one(action);
+        (id,src)=retain(PK_A,1,a);(full,b)=publication(id,src,a);
+        uint64 p=recover(PK_A,1,id,full,b);
+        bytes32 key=Keys.binding(pid(eoaA),Keys.position(FOLDER,DRAFTS,name("x")));
+        (uint8 state,uint32 revision,,,uint64 ordinal,bytes32 target)=ledger.head(key);
+        require(state==3&&revision==2&&target==0,"recovery lost release state");
+        require(recover(PK_A,1,id,full,b)==p,"recovered release replayed");
+        a=one(aBind(FOLDER,DRAFTS,name("x"),subjectOf(eoaA,1),2));
+        (id,src)=retain(PK_A,2,a);(full,b)=publication(id,src,a);recover(PK_A,2,id,full,b);
+        uint64 nextOrdinal;(state,revision,,,nextOrdinal,target)=ledger.head(key);
+        require(state==1&&revision==3&&target==subjectOf(eoaA,1)&&nextOrdinal==ordinal,"recovery rebind forked coordinate");
+    }
     function reject(uint256 pk,uint64 nonce,bytes32 id,Ledger.Action[] memory a,bytes[] memory b) internal {
         uint64 beforeCount=admissions();uint64 beforeNonce=ledger.nonces(eoaA);
         Ledger.IntentV2 memory dst=intent(pk,nonce,a);

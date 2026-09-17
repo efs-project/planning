@@ -69,7 +69,7 @@ contract IndexModule is IIndexModule {
     uint64 public generation; // bumped by the admin after a backfill/re-index; part of a cursor's basis
     bool public gapped; // retained legacy diagnostic; current ingress rejects gaps without advancing the frontier
     bool private _liveStarted;
-    struct ShadowHead { bytes32 target; uint64 ordinal; uint32 revision; bool live; }
+    struct ShadowHead { bytes32 target; uint64 ordinal; uint32 revision; uint8 state; }
     mapping(bytes32=>ShadowHead) private _shadow;
     mapping(uint64=>bool) private _withdrawn;
 
@@ -153,7 +153,7 @@ contract IndexModule is IIndexModule {
         ) revert E_SEGMENT();
         for (uint256 i; i < n; ++i) {
             Effect calldata e = effects[i];
-            if (e.admission != lastProcessed + i + 1 || e.kind == 0 || e.kind > 6) revert E_SEGMENT();
+            if (e.admission != lastProcessed + i + 1 || e.kind == 0 || e.kind > 7) revert E_SEGMENT();
             _foldEffect(e);
         }
         lastProcessed = effects[n - 1].admission;
@@ -171,14 +171,17 @@ contract IndexModule is IIndexModule {
         for(uint256 i;i<facts.length;i++){
             IndexReplaySource.Fact memory f=facts[i];Effect memory e;
             e.kind=f.kind;e.admission=f.admission;e.author=f.author;e.recordId=f.recordId;e.typeId=f.typeId;
-            if(f.kind==3||f.kind==4){
+            if(f.kind==3||f.kind==4||f.kind==7){
                 e.bindingKey=f.bindingKey;e.scopeKey=f.scopeKey;
                 e.bindingOrdinal=f.bindingOrdinal;ShadowHead storage h=_shadow[e.bindingKey];
                 if(h.revision!=f.expectedRevision||h.revision>=type(uint32).max-1)revert E_SEGMENT();
-                e.freshBinding=h.ordinal==0;e.oldLive=h.live;e.oldTarget=h.target;
-                if((!e.freshBinding&&h.ordinal!=f.bindingOrdinal)||(f.kind==4&&!h.live))revert E_SEGMENT();
+                e.freshBinding=h.ordinal==0;e.oldLive=h.state==1;e.oldTarget=h.target;
+                // Allowed old-state bitsets: bind=0/1/2/3, mask=1,
+                // release=1/2. Out-of-profile states cannot pass this shift.
+                uint256 allowed=f.kind==3?15:f.kind==4?2:6;
+                if(((allowed>>h.state)&1)==0||(!e.freshBinding&&h.ordinal!=f.bindingOrdinal))revert E_SEGMENT();
                 e.target=f.kind==3?f.recordId:bytes32(0);
-                h.target=e.target;h.ordinal=f.bindingOrdinal;h.revision++;h.live=f.kind==3;
+                h.target=e.target;h.ordinal=f.bindingOrdinal;h.revision++;h.state=f.kind==3?1:f.kind==4?2:3;
             }else if(f.kind==6){
                 if(_withdrawn[f.withdrawalTarget])revert E_SEGMENT();
                 _withdrawn[f.withdrawalTarget]=true;
@@ -233,8 +236,8 @@ contract IndexModule is IIndexModule {
             if (e.oldLive) _release(Keys.backlinkList(e.oldTarget));
             _append(Keys.backlinkList(e.target), e.admission, false);
             _append(Keys.historyList(e.bindingKey), e.admission, true);
-        } else if (e.kind == 4) {
-            _release(Keys.backlinkList(e.oldTarget));
+        } else if (e.kind == 4 || e.kind == 7) {
+            if (e.oldLive) _release(Keys.backlinkList(e.oldTarget));
             _append(Keys.historyList(e.bindingKey), e.admission, true);
         } else if (e.kind == 6) {
             _release(Keys.byTypeList(e.typeId));
@@ -431,7 +434,7 @@ contract IndexModule is IIndexModule {
             IndexFieldProfile p = fieldProfile();
             if (address(p) == address(0)) return (UNKNOWN, 0, 0);
             if (family == FAMILY_DIGEST && scope == 0) {
-                if (!_declaresDigest(p, 0)) return (UNKNOWN, 0, 0);
+                if (!p.declaresDigest(0)) return (UNKNOWN, 0, 0);
             } else {
                 IndexFieldProfile.Spec memory s = p.spec(scope);
                 if (family == FAMILY_SCALAR ? s.scalars.length == 0 : !s.digest.enabled) return (UNKNOWN, 0, 0);
@@ -458,7 +461,7 @@ contract IndexModule is IIndexModule {
         IndexFieldProfile p = fieldProfile();
         if (address(p) == address(0) || algorithm == 0) return (UNKNOWN, 0, 0);
         if (t == 0) {
-            if (!_declaresDigest(p, algorithm)) return (UNKNOWN, 0, 0);
+            if (!p.declaresDigest(algorithm)) return (UNKNOWN, 0, 0);
         } else {
             IndexFieldProfile.Spec memory s = p.spec(t);
             if (!s.digest.enabled || s.digest.algorithm != algorithm) return (UNKNOWN, 0, 0);
@@ -466,14 +469,6 @@ contract IndexModule is IIndexModule {
         return coverage(FAMILY_DIGEST, t);
     }
 
-    function _declaresDigest(IndexFieldProfile p, bytes32 algorithm) private view returns (bool) {
-        uint256 n = p.count(); // constructor-bounded16; no arbitrary future Type probes
-        for (uint256 i; i < n; i++) {
-            IndexFieldProfile.Spec memory s = p.entry(i);
-            if (s.digest.enabled && (algorithm == 0 || s.digest.algorithm == algorithm)) return true;
-        }
-        return false;
-    }
 
     // ---------------------------------------------------------------- reads
     function postingHead(bytes32 key) external view returns (uint64 count, uint64 live, uint64 last, uint16 flags) {

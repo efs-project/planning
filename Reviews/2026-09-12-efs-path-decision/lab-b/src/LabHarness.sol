@@ -224,7 +224,7 @@ contract Reconstructor {
         } else if (kind == 2) {
             x.bodyHashOrRecordId = a;
             (x.typeId,,,) = ledger.record(a);
-        } else if (kind == 3 || kind == 4) {
+        } else if (kind == 3 || kind == 4 || kind == 7) {
             (x.purpose, x.subject, x.role) = ledger.positionCell(ledger.bindingPosition(bindingOrdinal));
             x.expectedRevision = expectedRevision;
             if (kind == 3) x.target = a;

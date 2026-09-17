@@ -31,6 +31,18 @@ contract FilesDirectoryProfileTest is LabBase {
     function test_file_subject_parent_raw_ingress_rejected() public {_reject(ledger.create(bytes32(uint256(2))),ledger.create(bytes32(uint256(1))));}
     function test_unrelated_record_parent_raw_ingress_rejected() public {_reject(ledger.publish(BINARY,bytes("forged-directory")),ledger.create(bytes32(uint256(1))));}
     function _directory(uint256 salt) internal returns(bytes32) {return ledger.publish(dt,abi.encode(ledger.create(bytes32(salt))));}
+    function test_release_nonempty_directory_placement_preserves_children_and_other_placement() public {
+        bytes32 root=_directory(1);bytes32 child=_directory(2);bytes32 file=ledger.create(bytes32(uint256(3)));
+        ledger.publish(nt,bytes("child"));ledger.publish(nt,bytes("other"));ledger.publish(nt,bytes("file"));
+        ledger.bind(FOLDER,root,name("child"),child,0);ledger.bind(FOLDER,root,name("other"),child,0);
+        ledger.bind(FOLDER,child,name("file"),file,0);
+        Ledger.Action memory action=aUnbind(FOLDER,root,name("child"),1);action.kind=7;
+        ledger.execute(one(action),new bytes[](1),ledger.nonces(address(this)));
+        require(FilesDirectoryLayout.validate(ledger,dt,child,admissions()),"directory erased");
+        require(live.liveCount(Keys.scopeList(Keys.scope(pid(address(this)),FOLDER,child)))==1,"child membership erased");
+        require(live.liveCount(Keys.scopeList(Keys.scope(pid(address(this)),FOLDER,root)))==1,"other placement erased");
+        (,uint64 backlinks,,)=index.postingHead(Keys.backlinkList(child));require(backlinks==1,"wrong placement backlink released");
+    }
     function test_directory_exact_body_length_required() public {
         bytes32 seed=ledger.create(bytes32(uint256(7)));
         (bool ok,)=address(ledger).call(abi.encodeCall(ledger.publish,(dt,bytes.concat(abi.encode(seed),hex"ff"))));

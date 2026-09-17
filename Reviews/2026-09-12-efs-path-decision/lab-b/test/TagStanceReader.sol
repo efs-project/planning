@@ -40,6 +40,8 @@ contract TagStanceLens is LensReader {
             if(revision!=0)++probes;
         }
         if(state==0){if(revision!=0||at!=0||token!=0)revert E_CURSOR();return(state,token,revision,at,probes);}
+        // This specialized observation vocabulary has no RELEASE category.
+        // Never relabel a released HEAD/stance as untouched or as a mask.
         if(state>2||at==0||at>origin)revert E_CURSOR();
         (uint8 kind,,uint64 publication,uint64 ordinal,uint32 expected,,bytes32 target,)=ledger.admission(at);
         if(kind!=(state==1?3:4)||expected+1!=revision||ledger.bindingPosition(ordinal)!=position

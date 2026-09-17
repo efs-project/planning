@@ -3,6 +3,7 @@ pragma solidity 0.8.30;
 import {IIndexModule, ITypeRegistry,IIndexReadiness,IndexReadinessProfile} from "./Interfaces.sol";
 import {ExecutionSlots} from "./ExecutionSlots.sol";
 import {IndexReplaySource} from "./IndexReplaySource.sol";
+import {IIndexSource} from "./IndexSource.sol";
 import {IndexWork} from "./IndexWork.sol";
 import {IndexFieldProfile} from "./IndexFieldProfile.sol";
 import {Keys} from "./Keys.sol";
@@ -31,6 +32,27 @@ contract PublicationSupport {
     error E_SOURCE_UNSUPPORTED();
     error E_DESTINATION_AUTH();
     error E_UNKNOWN_TYPE(bytes32 typeId);
+    error E_NO_BASIS(uint64 ordinal);
+
+    /// Read-only projection of canonical retained roots; never prepares authority
+    /// or writes state. The fixed Ledger caller validates this helper's codehash.
+    function acceptanceBasis(address source,address registry,uint64 ordinal) external view
+        returns(bytes32 typeId,uint16 activation,address mandatoryAcceptor,bytes32 ruleId,
+            address policyAcceptor,bytes32 policyCodehash,uint64 epoch,uint64 activatedAt)
+    {
+        bytes32 base=keccak256(abi.encode(ordinal,uint256(5)));
+        uint256 meta=uint256(IIndexSource(source).extsload(base));
+        uint8 kind=uint8(meta&15);
+        if(kind==1)typeId=IIndexSource(source).extsload(bytes32(uint256(base)+2));
+        else if(kind==2)typeId=IIndexSource(source).extsload(
+            keccak256(abi.encode(IIndexSource(source).extsload(bytes32(uint256(base)+1)),uint256(2))));
+        else revert E_NO_BASIS(ordinal);
+        activation=uint16(meta>>152);
+        bool registered;
+        (registered,mandatoryAcceptor,ruleId,,,,)=ITypeRegistry(registry).typeInfo(typeId);
+        if(!registered)revert E_UNKNOWN_TYPE(typeId);
+        (policyAcceptor,policyCodehash,epoch,activatedAt)=ITypeRegistry(registry).activation(typeId,activation);
+    }
 
     uint256 private constant SECP256K1_N_HALF = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0;
     bytes32 private constant LEGACY_TYPE = keccak256("PublicationIntent(bytes32 realmId,bytes32 coreCodeCommitment,address author,uint64 nonce,uint64 deadline,bytes32 acceptanceProfile,bytes32 indexObligations,bytes32 actionsHash)");

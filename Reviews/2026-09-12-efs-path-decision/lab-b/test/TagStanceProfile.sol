@@ -48,7 +48,7 @@ library TagStanceProfile {
             [uint256(1),uint256(2),uint256(3)],[uint8(0),1,1,2,1,2],[uint16(0),0,64,96,64,96],[uint8(0),3,0,15,0,63]);
     }
     function validate(Ledger core,Config memory c,IIndexModule.Effect memory e) internal view returns(bytes32 key){
-        if(e.kind!=3&&e.kind!=4)return 0;
+        if(e.kind!=3&&e.kind!=4&&e.kind!=7)return 0;
         bytes32 position=core.bindingPosition(e.bindingOrdinal);
         (bytes32 purpose,bytes32 subject,bytes32 concept_)=core.positionCell(position);
         // Authenticate the recovered coordinate even before purpose dispatch.
@@ -56,6 +56,9 @@ library TagStanceProfile {
         if(position!=Keys.position(purpose,subject,concept_)||e.bindingKey!=Keys.binding(e.author,position)
             ||e.scopeKey!=Keys.scope(e.author,purpose,subject))revert E_TAG_PROFILE();
         if(purpose!=PURPOSE)return 0;
+        // Stance already distinguishes ASSERT/DENY/SILENT. Release is not
+        // adopted by this specialized profile; fail the whole publication.
+        if(e.kind==7)revert E_TAG_PROFILE();
         if(e.admission==0)revert E_TAG_PROFILE();
         uint64 cutoff=e.admission-1;
         _concept(core,c,concept_,cutoff);_subject(core,c,subject,cutoff);
@@ -134,7 +137,7 @@ contract TagStanceIndex is LiveFilesIndex {
     }
     function _foldEffect(Effect memory e) internal override {
         bytes32 key;
-        if(e.kind==3||e.kind==4){
+        if(e.kind==3||e.kind==4||e.kind==7){
             address helper=address(stanceValidator);
             if(helper.codehash!=stanceValidatorHash)revert TagStanceProfile.E_TAG_PROFILE();
             bytes memory input=abi.encodeCall(stanceValidator.validate,(e));bool ok;uint256 size;

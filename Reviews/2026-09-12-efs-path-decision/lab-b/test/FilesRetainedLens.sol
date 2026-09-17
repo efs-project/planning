@@ -64,7 +64,7 @@ contract FilesRetainedLens is LensReader {
                 bool masked;
                 for(uint256 i;i<k;i++){
                     ++page.hydrations;(uint8 higher,,,)=_headAt(principals[i],position,cursor.basisAdmission);
-                    if(higher!=0){masked=true;break;}
+                    if(higher==1||higher==2){masked=true;break;}
                 }
                 if(masked)continue;
                 page.items[filled++]=Selection(position,k,target,revision,at);++cursor.selectedSoFar;cursor.position=position;

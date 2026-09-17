@@ -23,7 +23,7 @@ interface IAcceptor {
 ///         back the whole publication. Staged counters/coverage are not receipts.
 interface IIndexModule {
     struct Effect {
-        uint8 kind; // Ledger action kind (PUBLISH/REUSE/BIND/UNBIND/CREATE/WITHDRAW)
+        uint8 kind; // Ledger action kind (PUBLISH/REUSE/BIND/UNBIND/CREATE/WITHDRAW/RELEASE)
         uint64 admission; // admission ordinal of this action
         bytes32 author; // publication principal; WITHDRAW: target admission's retained principal being released
         bytes32 recordId; // record admitted (publish/reuse/withdraw) or bound target (bind)
@@ -32,7 +32,7 @@ interface IIndexModule {
         bytes32 bindingKey; // Keys.binding(author, position) for bind/unbind
         uint64 bindingOrdinal; // ledger binding ordinal (scope-list entry)
         bytes32 target; // new head target (bind)
-        bytes32 oldTarget; // previous head target when it was live (bind/unbind)
+        bytes32 oldTarget; // previous head target (bind/mask/release); decrement only when oldLive
         bool freshBinding; // first admission on this binding key (append to scope list)
         bool oldLive; // previous head was live (release one backlink)
     }

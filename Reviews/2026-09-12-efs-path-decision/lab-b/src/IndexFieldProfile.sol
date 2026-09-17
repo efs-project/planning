@@ -71,4 +71,14 @@ contract IndexFieldProfile {
         Spec storage s = _spec[t];
         return s.scalars.length + (s.digest.enabled ? 1 : 0);
     }
+
+    /// Same finite declaration predicate as the Index's prior entry loop, kept
+    /// with its immutable data to avoid duplicating dynamic ABI loops in indexes.
+    function declaresDigest(bytes32 algorithm) external view returns (bool) {
+        for (uint256 i; i < _types.length; i++) {
+            Digest storage d = _spec[_types[i]].digest;
+            if (d.enabled && (algorithm == 0 || d.algorithm == algorithm)) return true;
+        }
+        return false;
+    }
 }

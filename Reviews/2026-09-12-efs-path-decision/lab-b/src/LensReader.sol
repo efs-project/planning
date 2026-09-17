@@ -12,7 +12,7 @@ import {IndexModule} from "./IndexModule.sol";
 /// Point reducer (road-b §8.4, files-journey J4): walk the lens in order; the FIRST principal
 /// with any binding at the position decides — live → FOUND, tombstone → MASKED (a removal by
 /// a higher principal hides a lower principal's same name; it never falls through). Only a
-/// principal with no binding at all falls through. The page reducer is the same reducer.
+/// principal with no binding or an explicit released head falls through.
 ///
 /// Listing law (delta 4/D): a page consumes a bounded candidate budget and returns items,
 /// scanned, rawTotal (always known), selectedSoFar and status; the selected total is final
@@ -123,8 +123,12 @@ contract LensReader {
     error E_CURSOR();
 
     constructor(Ledger ledger_, IndexModule index_) {
+        if (ledger_.bindingLifecycleProfile() != bindingLifecycleProfile()) revert E_LENS();
         ledger = ledger_;
         index = index_;
+    }
+    function bindingLifecycleProfile() public pure returns(bytes32) {
+        return keccak256("efs.lab.binding-lifecycle/2:bind-mask-release");
     }
 
     /// Legacy convenience readers classify accounts now using the stable instance origin.
@@ -133,7 +137,8 @@ contract LensReader {
     }
 
     function _explicitBasis(bytes32 execution) private view {
-        if (ledger.layoutId() != SUPPORTED_LAYOUT || ledger.executionSet() != execution
+        if (ledger.bindingLifecycleProfile() != bindingLifecycleProfile()
+            || ledger.layoutId() != SUPPORTED_LAYOUT || ledger.executionSet() != execution
             || ledger.indexModule() != address(index)
             || (address(index) != address(0) && index.ledger() != address(ledger))) revert E_CURSOR();
     }
@@ -210,7 +215,7 @@ contract LensReader {
         bytes32 position=Keys.position(purpose,subject,role);
         for(uint256 i;i<principals.length;i++){
             (uint8 state,bytes32 value,uint32 rev,uint64 at)=_headAt(principals[i],position,asOf);
-            if(state!=0)return(state==1?FOUND:MASKED,state==1?value:bytes32(0),rev,principals[i],at);
+            if(state==1||state==2)return(state==1?FOUND:MASKED,state==1?value:bytes32(0),rev,principals[i],at);
         }
     }
 
@@ -233,10 +238,10 @@ contract LensReader {
     function _headAt(bytes32 principal,bytes32 position,uint64 asOf) internal view returns(uint8 state,bytes32 value,uint32 revision,uint64 at){
         (state,revision,at,value)=_selectionHead(Keys.binding(principal,position));
         if(at<=asOf)return(state,value,revision,at);
-        (uint8 h,bool live,bytes32 target,uint32 rev,uint64 admission)=historyPrincipal(principal,position,asOf);
+        (uint8 h,uint8 historicalState,bytes32 target,uint32 rev,uint64 admission)=_historyStatePrincipal(principal,position,asOf);
         if(h==UNKNOWN)revert E_CURSOR();
         if(h==H_NONE)return(0,0,0,0);
-        return(live?1:2,target,rev,admission);
+        return(historicalState,target,rev,admission);
     }
 
     /// One candidate/mask/paging reducer for both public ABIs. The wrappers own
@@ -292,7 +297,7 @@ contract LensReader {
         for (uint256 i; i < upto; ++i) {
             ++probes;
             (uint8 state,,,) = _selectionHead(Keys.binding(principals[i], position));
-            if (state != 0) return (true, probes);
+            if (state == 1 || state == 2) return (true, probes);
         }
         return (false, probes);
     }
@@ -302,6 +307,12 @@ contract LensReader {
     {
         _explicitBasis(execution);
         return historyPrincipal(principalId, position, asOf);
+    }
+    function historyStatePrincipalAt(bytes32 principalId, bytes32 position, uint64 asOf, bytes32 execution)
+        external view returns (uint8 coverage, uint8 state, bytes32 target, uint32 revision, uint64 admission)
+    {
+        _explicitBasis(execution);
+        return _historyStatePrincipal(principalId,position,asOf);
     }
 
     // ------------------------------------------------------------------ point reads
@@ -381,13 +392,14 @@ contract LensReader {
     }
 
     function _selectionHead(bytes32 key) internal view virtual returns(uint8 state,uint32 revision,uint64 admissionOrdinal,bytes32 target) {
-        return ledger.selectionHead(key);
+        (state,revision,admissionOrdinal,target)=ledger.selectionHead(key);
+        if(state>3)revert E_CURSOR();
     }
 
     function _resolve(bytes32[] memory ids, bytes32 position) private view returns (uint8 status, Selection memory selected) {
         for (uint256 i; i < ids.length; ++i) {
             (uint8 state,uint32 revision,uint64 at,bytes32 target) = _selectionHead(Keys.binding(ids[i],position));
-            if (state != 0) return (state == 1 ? FOUND : MASKED,Selection(position,i,state == 1 ? target : bytes32(0),revision,at));
+            if (state == 1 || state == 2) return (state == 1 ? FOUND : MASKED,Selection(position,i,state == 1 ? target : bytes32(0),revision,at));
         }
     }
 
@@ -449,10 +461,18 @@ contract LensReader {
     function historyPrincipal(bytes32 principalId, bytes32 position, uint64 asOf)
         public view returns (uint8 status, bool live, bytes32 target, uint32 revision, uint64 admissionOrdinal)
     {
-        if (address(index) == address(0)) return (UNKNOWN, false, bytes32(0), 0, 0);
+        uint8 state;
+        (status,state,target,revision,admissionOrdinal)=_historyStatePrincipal(principalId,position,asOf);
+        live=state==1; // Legacy diagnostic only: false cannot distinguish mask/release.
+    }
+
+    function _historyStatePrincipal(bytes32 principalId, bytes32 position, uint64 asOf)
+        private view returns (uint8 status, uint8 state, bytes32 target, uint32 revision, uint64 admissionOrdinal)
+    {
+        if (address(index) == address(0)) return (UNKNOWN, 0, bytes32(0), 0, 0);
         bytes32 listKey = Keys.historyList(Keys.binding(principalId, position));
         (uint8 cov,,) = index.coverage(index.FAMILY_HISTORY(), listKey);
-        if (cov != COMPLETE) return (UNKNOWN, false, bytes32(0), 0, 0);
+        if (cov != COMPLETE) return (UNKNOWN, 0, bytes32(0), 0, 0);
         (uint64 n,,,) = index.postingHead(listKey);
         // upper bound: number of history entries with ordinal <= asOf; entry i is revision i+1
         uint64 lo;
@@ -462,12 +482,13 @@ contract LensReader {
             if (index.postingAt(listKey, mid) <= asOf) lo = mid + 1;
             else hi = mid;
         }
-        if (lo == 0) return (H_NONE, false, bytes32(0), 0, 0);
+        if (lo == 0) return (H_NONE, 0, bytes32(0), 0, 0);
         admissionOrdinal = index.postingAt(listKey, lo - 1);
         revision = uint32(lo);
         (uint8 kind,,,,,, bytes32 a,) = ledger.admission(admissionOrdinal);
-        live = kind == 3; // BIND; an UNBIND row is the tombstone revision
-        target = live ? a : bytes32(0);
+        if(kind!=3&&kind!=4&&kind!=7)revert E_CURSOR();
+        state = kind==3?1:kind==4?2:3;
+        target = state==1 ? a : bytes32(0);
         status = H_FOUND;
     }
 
