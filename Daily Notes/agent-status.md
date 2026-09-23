@@ -4,6 +4,11 @@ Active agents append once per work-session. One line per active card. Newest at 
 
 Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
+## 2026-09-23
+
+- @pm (harness codex, session weekly-pm-retry-20260923): Retried weekly landscape review with independent read-only engineering/funding checks. Fresh fetch verified planning/main `80fe5a1` and prototype `44db867` remote-visible, with no tracked dirt before this housekeeping; untracked `.codex-*message` scratch files were preserved. Reconciled the completed Files card and owner-approved temporary successor repo naming; corrected legacy SDK merge status in the repo map. Updated Devcon follow-ups and Arbitrum deadline timezone from primary sources; no implementation or protocol decisions. / next: James checks private Devcon visa-support documents, settles the bounded Arbitrum go/no-go, and reviews the existing prototype-to-real-code handoff. September 29 PM run should recheck these gates before September 30 NLnet office hour and October 4 Arbitrum submission.
+  SDK operational watch: v1 SDK `origin/main` is `15314ce` (PR #1 and #6 merged). [September 21 Release workflow](https://github.com/efs-project/sdk/actions/runs/35662699216) failed because GitHub Actions is not permitted to create/approve pull requests; this is an automation-permission failure, not evidence of failing SDK tests. Publishing is intentionally disabled in the checked workflow. Route to the SDK owner at the next maintenance pass; no repository permissions were changed. No newer broad grants refresh than September 11/14 was found in Git. Presentation and Buildathon task check-ins ended with usage-limit errors; they were not restarted by this PM review.
+
 ## 2026-09-14
 
 - @pm (harness codex, session devcon-layer-examples-20260914): Integrated James's direction to use non-EFS examples throughout the talk, added a sourced comparison bank and expanded layer checks with improvement paths and tradeoffs. Updated the existing Tuesday reminder to preserve that teaching goal. / next: rehearse the same 20-minute story and select comparisons by the design choices they clarify; no live project audit or new product deadline.

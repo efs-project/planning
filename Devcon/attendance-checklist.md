@@ -3,13 +3,16 @@
 Personal attendance and EFS participation follow-ups for Devcon 8, November
 3–6, 2026 at Jio World Centre in BKC, Mumbai.
 
-**Status (2026-09-11):** James's talk is accepted, participation is confirmed,
+**Status (2026-09-23):** James's talk is accepted, participation is confirmed,
 and he already has a ticket. The Impact Booth application is submitted. A
 read-only connected-Gmail check found no Impact response and no new official
-speaker, visa, ticket, or support message after the 2026-09-02 confirmations.
+speaker, visa, ticket, or support message in the narrowly searched official
+sender/subject routes, including spam and trash. Search absence is not proof
+that no relevant message exists under another sender or subject.
 The private speaker portal was not checked. Organizer visa documents, the visa
 application, flight, and accommodation are not recorded as complete. The
-public session page still has no date, time, or room.
+exact session date, time, and room were not freshly verifiable; check the
+private portal rather than treating the older public-page observation as current.
 
 Do not put passport numbers, scans, visa application IDs, ticket/order numbers,
 booking references, or a private itinerary in this repository.
@@ -17,8 +20,8 @@ booking references, or a private itinerary in this repository.
 **Current PM priority:** clear the visa-document gate and reserve refundable
 accommodation before working outward into lower-risk travel details. In
 parallel, request the speaker-ticket refund and the overdue Impact application
-status; neither request has been sent from the connected Gmail account as of
-2026-09-11.
+status; neither sent request was found in the narrowly searched support-address
+routes on 2026-09-23, so completion remains unconfirmed.
 
 ## Speaker conference visa - act now
 
@@ -39,7 +42,7 @@ also warns that India may deny entry for the wrong visa type.
   Key material and backup details are intentionally not stored here.
 - [ ] Check the connected inbox and private speaker portal for the organizer's
   supporting letters. No new message from the relevant official organizer
-  senders was found in Gmail through **2026-09-11**; private portal state is
+  senders was found in Gmail through **2026-09-23**; private portal state is
   unknown.
 - [ ] If the supporting documents are still absent, send one concise follow-up
   through the organizer's speaker/visa support route.
@@ -84,7 +87,7 @@ Official references: [U.S. State Department India entry requirements](https://tr
   2026-08-11.
 - [ ] Follow up at [supporters@devcon.org](mailto:supporters@devcon.org). The
   official page says applications receive a response within 15 days; no reply
-  was found in connected Gmail through **2026-09-11**.
+  was found in the targeted connected-Gmail search through **2026-09-23**.
 - [ ] If selected, confirm mandatory staffing hours, allowed breaks or
   unattended periods, helper credentials/tickets, and whether solo operation
   is supported. Default to accepting if the booth is manageable solo; recruit
@@ -119,6 +122,9 @@ earlier requirements.
   First drafts are in [[presentation-spine]] and [[presentation-evidence]] as
   of **2026-09-14**. Review the story aloud and settle the demonstration scope
   before marking this target complete; live evidence rechecks remain open.
+  September 23 review: the internal target has passed without recorded spoken
+  review/demo selection. Next small action is a two-minute opening rehearsal,
+  not another rewrite of the whole story. This is not an organizer deadline.
 - [ ] By **2026-10-06**, have a complete first slide deck and demonstration draft,
   with the live-vs-recorded demonstration decision explicit.
 - [ ] By **2026-10-13**, perform the first full timed run and cut material that

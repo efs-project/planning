@@ -8,7 +8,7 @@ commands.
 /efs/
   planning/                  ← coordination vault and active v2 design work
   contracts/                 ← deployed v1/Sepolia implementation and specs
-  sdk/                       ← unmerged pre-v2 SDK implementation; legacy input
+  sdk/                       ← merged legacy v1 SDK; reference input for v2
   client/                    ← outdated v1 Vite/Lit client
   content/                   ← static content and playable examples
   devnet/                    ← v1 development-network operations
@@ -18,6 +18,21 @@ commands.
 
 Additional worktrees may sit beside these repos. They are task-local working
 state, not additional canonical repos.
+
+## Successor repository naming
+
+James agreed on 2026-09-21 to use temporary `contracts-v2`, `sdk-v2`, and
+`client-v2` repository names, leaving the existing public repository names in
+place until the owner-directed public-site v2 cutover (intended after Devcon).
+Legacy renames belong to that later cutover, not the start of implementation.
+This is naming direction, not evidence that those repositories exist or that
+production deployment/protocol freeze is authorized. The local successor
+directories were absent on 2026-09-23; remote-only existence was not checked.
+Coordinate repository creation and implementation scope with the owning PM.
+
+Fresh Git evidence on 2026-09-23: legacy SDK PR #1 is merged at `3147786`, and
+`origin/main` is `15314ce` after documentation PR #6. Older descriptions of it
+as unmerged are stale; merging v1 does not make its model the successor baseline.
 
 ## Current phase
 

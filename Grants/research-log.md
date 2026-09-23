@@ -15,6 +15,20 @@ Rows touched:
 Next check:
 ```
 
+## 2026-09-23 - Near-term funding date check
+
+Trigger: weekly PM retry; bounded independent read-only verification, not a
+new broad landscape survey or an application.
+
+- [Arbitrum portal](https://arbitrum-singapore.hackquest.io/buildathons/Arbitrum-Open-House-Singapore-Online-Buildathon): public embedded schedule identifies `Asia/Singapore`, registration close `2026-10-02T17:01:00Z`, submission close `2026-10-04T15:59:00Z`. Thus registration is October 3 01:01 SGT / October 2 12:01 CDT; project submission is October 4 23:59 SGT / October 4 10:59 CDT. The old unlabeled times were Chicago-local, not Singapore-local. Existing repositories are permitted with work produced during the buildathon identified; Arbitrum deployment is required and Sepolia qualifies. Public form requirements are discoverable without asking James to transcribe them. The controlling legal PDF returned 403 in this check; solo/geography, AI-use/IP and detailed milestone payment conditions remain unverified. Registration is recorded, final project submission is not. Next: owner scope/go-no-go before spending implementation time.
+- [NLnet office hour](https://nlnet.nl/events/20260930/office-hour/): September 30 16:00 CEST / 09:00 CDT. [Application deadline](https://nlnet.nl/propose/): November 3 12:00 CET / 05:00 CST. Eligibility is not settled: European dimension and substantial human contribution remain gates; the [September call](https://nlnet.nl/news/2026/20260903-call.html) advises LLM-using applicants to await revised policy, while the [published policy](https://nlnet.nl/foundation/policies/generativeAI/) remains version 1.1 dated January 26. Ask about the actual human/AI workflow and US applicant eligibility at the office hour before writing an application. Do not plan a Devcon-day submission.
+- [Filecoin PGF R&D](https://www.filpgf.io/rnd/): still drafting its first RFPs; no new funded call/deadline verified. Remains watching.
+
+Rows touched: Arbitrum schedule, freshness and next action. NLnet's already
+recorded dates remain correct. No submission, outreach, registration, contract
+change or new scope was performed. Next weekly check: September 29, before the
+office hour and Arbitrum submission deadline; recheck portal dates then.
+
 ## 2026-09-11 - Funding and personal-income sweep
 
 Trigger: James requested another broad sweep, including new opportunities and

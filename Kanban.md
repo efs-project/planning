@@ -33,11 +33,8 @@ kanban-plugin: board
 
 ## In Flight
 
-- [ ] **Finish the EFS v2 Files replacement prototype** — [[Reviews/2026-09-12-efs-path-decision/files-workbench-20260916|Usable workbench and walkthrough]] covers the guest/read/write/upload/path/Lens/tag loop plus real Arweave/IPFS links and local wallet setup. Current UI60627/RPC60615 is ready for James's MetaMask unlock/click-through; eight real-chain wallet-protocol writes pass, not actual extension approvals. Remaining: paid/durable uploads, one-approval/static-hosting journey and extra properties/lists/sorts/history/stance tools. V1 is behavior-only reference, no reused code. Older demos preserved. No production repositories or renewed general audit. #repo/planning #kind/task
-  — @v2-pm (harness codex, session wallet-carriers-20260916), prototype branch codex/efs-warroom-b-run at 53e2e30, docs main; checkpoint 2026-09-16, expires 2026-09-19
-
 - [ ] **Grants — research + tracker + submissions** (@grants) — funder-landscape research + a lightweight operational tracker in `Grants/` (README/programs/proposals/packet/research-log), + preparing James's actual submissions. First external anchor = the [EFS KarmaHQ page](https://www.karmahq.xyz/project/ethereum-file-system/about); first proposal row = Octant (rejected, competitive — keep the row + feedback). Tracking detail lives in `Grants/proposals.md` (not mirrored here); this card is just the swarm-visible pointer to the active work. James-actionable items (Karma cleanup: no team listed, funds raised = 0, bare "Path to Success"; program picks; submission sign-offs) route to [[Owner-Inbox]] only when they're real forks/deadlines. #repo/planning #kind/ops
-  — @pm (harness codex, session weekly-pm-baseline-20260911), claimed 2026-09-11, expires 2026-09-18; current step: await the FUTO status reply and prepare the NLnet September 30 eligibility/GenAI questions, with wider landscape refresh only when evidence warrants it
+  — @pm monitoring (harness codex, session weekly-pm-retry-20260923); no active specialist worker verified. Current step: owner go/no-go on the bounded Arbitrum submission due October 4, and NLnet September 30 eligibility/GenAI questions. September 11 broad refresh and September 14 registration update are landed; this is not a claim that a newer broad funding pass ran.
 
 ## Blocked
 
@@ -46,13 +43,15 @@ kanban-plugin: board
 ## Under Review
 
 - [ ] **Review the EFS v2 prototype-to-real-code handoff** — the approved greenfield spine remains [[Designs/efsv2/README]], [[Designs/efsv2/system-constitution]] and [[Designs/efsv2/core-architecture-candidate]]. The bounded six-packet closeout is complete through `c9cc15b`; [[Reviews/2026-09-12-efs-path-decision/core-closeout-final-review-20260916|combined review]] found no Critical/Important defect in its inspected scope, with six nonblocking evidence/test issues. [[Reviews/2026-09-12-efs-path-decision/core-closeout-results-20260915|Measured results]] preserve expensive queries/proofs, exact archive/build support and public-environment limits. Next: James reviews [[Reviews/2026-09-12-efs-path-decision/compact-mvp-build-plan-20260914|module packaging, public profiles and the SDK/Files/native vertical]] and authorizes the real-code environment. This closes the prototype pass, not the complete product or permanence gate; no requirement waiver, production repository, public deployment or renewed architecture tournament. #repo/planning #repo/contracts #repo/sdk #repo/client #kind/design
-  — @v2-pm (harness codex, session core-closeout-20260915), completed prototype pass 2026-09-16; awaiting owner build-handoff review, no expiry and no active prototype worker
+  — @v2-pm; updated by @pm 2026-09-23: the later [[Reviews/2026-09-12-efs-path-decision/prototype-finish-results-20260917|finite Files completion and handoff]] is the current user-facing checkpoint (`44db867`, pushed). Review it with the clean-slate build plan before the next contracts/SDK/static Files vertical. Paid upload, owner-operated MetaMask/public-testnet evidence, Ledger decomposition and production packaging remain. No active engineering worker was shown in connected tasks; other-machine activity is unknown.
 
 - [ ] **ArDrive product teardown → EFS File Browser feature requirements** (@ardrive-teardown) — all three deliverables landed 2026-07-29: teardown record [[2026-07-29-ardrive-product-teardown]] + 14-file corpus in `Reviews/`, [[file-browser-requirements]] draft in `Designs/clientv2/` (must-match / do-differently / can-skip + lenses-in-a-file-UI + mount constraints + 19 acceptance tests), positioning line included in both. Adversarially verified (7-reviewer pass: fact-check, rulings-consistency, conventions, 4 personas) and revised before landing. Awaiting review of the `#status/draft` requirements doc. #repo/planning #repo/client #kind/task
   — @ardrive-teardown (claude-fable-5) → awaiting review, no expiry
 
 
 ## Done
+
+- [x] **Finish the bounded EFS v2 Files prototype** — [[Reviews/2026-09-12-efs-path-decision/prototype-finish-results-20260917|September 17 handoff]] records Files/Lens/tag/history/release and verified external-content workflows, 37 app/fee checks and the static build. Code `44db867` remains on `codex/efs-warroom-b-run`; docs are on main, both verified remote-visible September 23. This is retained local evidence, not a fresh test rerun, production readiness or paid-storage completion. #repo/planning #kind/task
 
 - [x] **Closed ETHOnline 2026 without entry** — James confirmed 2026-09-11 that he did not register before signup closed. Preserve [[ETHOnline-2026]] as a future Continuity-track lesson; there is no submission, deadline, event milestone, or EFS implementation obligation. #repo/planning #kind/task #topic/games
 
