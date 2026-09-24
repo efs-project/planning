@@ -10,6 +10,8 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**September24 — one living delivery queue:** [[prototype-delivery-checklist|What is done, what remains, and the next dispatch]] is now the execution-status entry point. [[prototype-implementation-plan|Packet instructions and bounded agent workflow]] separate the remaining discriminators from real MVP implementation and permanent-freeze work. Earlier reports below remain dated evidence, not competing next-task queues. The recommendation is to begin the real upgradeable vertical once its environment is authorized; this planning update creates no product repository or deployment.
+
 **September17 — the Files journey now runs on the compact v2 core:**
 [[../../Reviews/2026-09-12-efs-path-decision/prototype-finish-results-20260917|Working browser, measured costs and clean-slate handoff]]
 covers create/edit/rename/move, link versus copy, cold history/restore,
