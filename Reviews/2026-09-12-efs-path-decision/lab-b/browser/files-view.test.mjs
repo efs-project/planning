@@ -132,6 +132,15 @@ test('tag filter distinguishes File from revision and retains unevaluated subjec
   assert.deepEqual(filterRows(rows,{tag:true,scope:'either'}).rows.map(r=>r.file), ['a','b','c']);
   assert.equal(filterRows(rows,{tag:true,scope:'file'}).uncertain, 1);
 });
+test('location tags filter the folder/name slot, not its current File', () => {
+  const rows=[
+    {file:'old',point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{fileTag:{assessment:'NOT_PRESENT'},revisionTag:{assessment:'NOT_PRESENT'},locationTag:{assessment:'PRESENT'}}}},
+    {file:'new',point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{fileTag:{assessment:'PRESENT'},revisionTag:{assessment:'NOT_PRESENT'},locationTag:{assessment:'NOT_PRESENT'}}}},
+    {file:'unread',point:{knowledge:'PRESENT',coverage:'COMPLETE',value:{locationTag:{assessment:'UNKNOWN'}}}},
+  ];
+  assert.deepEqual(filterRows(rows,{tag:true,scope:'placement'}).rows.map(r=>r.file),['old','unread']);
+  assert.equal(filterRows(rows,{tag:true,scope:'placement'}).uncertain,1);
+});
 test('tag presentation and fallback filters keep unknown masked and N/A distinct',()=>{
   assert.equal(typeof view.tagLabel,'function');
   for(const [tag,label] of [[{},'unknown'],[{present:false,evaluated:true},'unknown'],[{assessment:'UNKNOWN'},'unknown'],

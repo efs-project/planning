@@ -26,7 +26,8 @@ export function filterRows(rows, {search='',tag=false,scope='either',exclude=fal
     if (tag) {
       const point = row.point;
       const tags = scope === 'file' ? [point?.value?.fileTag] : scope === 'revision'
-        ? [point?.value?.revisionTag] : [point?.value?.fileTag,point?.value?.revisionTag];
+        ? [point?.value?.revisionTag] : scope === 'placement' ? [point?.value?.locationTag]
+        : [point?.value?.fileTag,point?.value?.revisionTag];
       if (point?.coverage !== 'COMPLETE' || point?.knowledge !== 'PRESENT') unknown = true;
       else if (tags.some(t => t?.assessment === 'PRESENT')) { if(exclude)return false; }
       else if (tags.every(t => ['NOT_PRESENT','NOT_APPLICABLE'].includes(t?.assessment))) { if(!exclude)return false; }

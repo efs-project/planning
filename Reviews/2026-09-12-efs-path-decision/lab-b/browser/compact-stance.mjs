@@ -62,5 +62,11 @@ export async function hydrateExactStances({sdk,row,concept,authors,context}){
     revision=await read('selectedRevision');
     if(revision.value.subject?.toLowerCase()!==record.recordId.toLowerCase())revision=unknown('SELECTED_REVISION_MISMATCH');
   }
-  return {...row,point:{...row.point,value:{...row.point?.value,fileTag:stable.value,revisionTag:revision.value}}};
+  // Location testimony is a separate exact FOLDER coordinate. Missing or
+  // unqualified names must not become a negative tag result.
+  const location=row.name?.knowledge==='PRESENT'&&row.folder
+    ?await sdk.readStance({scope:'placement',folder:row.folder,name:row.name.value,concept,authors,context})
+    :unknown('PLACEMENT_NAME_UNAVAILABLE');
+  return {...row,point:{...row.point,value:{...row.point?.value,fileTag:stable.value,
+    revisionTag:revision.value,locationTag:location.value}}};
 }

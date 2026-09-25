@@ -134,13 +134,27 @@ test('external open names only its configured providers and requires per-open in
 test('exact UI filtering bypasses legacy predicate and retains UNKNOWN at the page basis',async()=>{
   const queries=[],reads=[];
   const a=await app({carriers:true,joined:true,joinedRead:(args,page)=>{queries.push(args);return {...page,queryCoverage:'PARTIAL'};},
-    stanceRead:async args=>{reads.push(args);return {value:{subject:args.scope==='selectedRevision'?'record':args.subject,assessment:args.subject.includes('second')?'UNKNOWN':'NOT_PRESENT',exactStance:true,observations:[]}};}});
+    stanceRead:async args=>{reads.push(args);const subject=args.scope==='placement'?args.name:args.subject;
+      return {value:{subject:args.scope==='selectedRevision'?'record':subject,assessment:subject.includes('second')?'UNKNOWN':'NOT_PRESENT',exactStance:true,observations:[]}};}});
   a.element('filter-concept').value=ethers.id('exact');await a.click('filter');
   assert.equal(queries.at(-1).concept,ethers.ZeroHash);assert.equal(queries.at(-1).tagScope,'none');
   assert.ok(reads.every(r=>r.context===queries.at(-1).context));
   assert.match(a.element('rows').innerHTML,/second\.txt/);assert.doesNotMatch(a.element('rows').innerHTML,/root\.txt/);
   assert.match(a.element('coverage').textContent,/uncertain matches retained/);assert.equal(a.stats.renderedPage.coverage,'PARTIAL');
   await a.click('select',{position:'root/second.txt'});assert.match(a.element('detail').innerHTML,/Retract to silence/);
+});
+
+test('exact placement tag action keeps folder and verified name separate from File identity',async()=>{
+  const a=await app({joined:true,stanceRead:async args=>({value:{subject:args.subject??args.name,
+    assessment:'NOT_PRESENT',exactStance:true,observations:[]}})});
+  await a.click('connect');await a.click('select',{position:'root/root.txt'});
+  assert.match(a.element('detail').innerHTML,/This folder\/name/);
+  a.element('tag-concept').value='beach';a.element('tag-scope').value='placement';
+  await a.click('assertStance');
+  assert.equal(a.stats.prepared.at(-1).operation,'assertStance');
+  assert.deepEqual([a.stats.prepared.at(-1).scope,a.stats.prepared.at(-1).folder,a.stats.prepared.at(-1).name],
+    ['placement','root','root.txt']);
+  assert.equal(a.stats.prepared.at(-1).file,'root-root.txt');
 });
 
 test('exact revision stance follows displayed HEAD qualification in conflict and both ordered views',async()=>{

@@ -199,7 +199,7 @@ async function refresh(continuing=false) {
       const rows=continuing?[...state.rows,...fresh]:fresh;
       page={...joinedPage,value:rows,coverage:joinedPage.queryCoverage,knowledge:joinedPage.queryKnowledge,tagCoverageScope:'ACCUMULATED_PAGES',
         ...Object.fromEntries(['nameCoverage','kindCoverage','headerCoverage','tagCoverage'].map(key=>[key,continuing&&state.page?.[key]==='PARTIAL'?'PARTIAL':joinedPage[key]]))};
-      if(hasStances()&&state.filterConcept){page.tagCoverage=rows.every(r=>[r.point?.value?.fileTag,r.point?.value?.revisionTag].every(t=>t?.assessment&&t.assessment!=='UNKNOWN'))?'COMPLETE':'PARTIAL';page.exactStanceScope='ENUMERATED_FOLDER_ROWS_ONLY';}
+      if(hasStances()&&state.filterConcept){page.tagCoverage=rows.every(r=>[r.point?.value?.fileTag,r.point?.value?.revisionTag,r.point?.value?.locationTag].every(t=>t?.assessment&&t.assessment!=='UNKNOWN'))?'COMPLETE':'PARTIAL';page.exactStanceScope='ENUMERATED_FOLDER_ROWS_ONLY';}
       Object.assign(state,{rows,context,page,folder,route});if(state.paths)navigation.ready=true;
       if(state.fileRoute){
         const edge=state.fileRoute.edge;
@@ -335,8 +335,9 @@ function renderRelease(){
 function tagControls(point,directory=false){
   const label=point?.value?.fileTag?.label??point?.value?.revisionTag?.label;
   const exact=hasStances(),describe=tag=>tag?.exactStance?`${tag.assessment} · ${tag.stance??'no winning stance'}${tag.author?` by ${authorName(tag.author)}`:''}; ${tag.observations?.map(o=>`${authorName(o.author)}: ${o.kind}`).join(' → ')??tag.reason??''}`:tagLabel(tag);
-  return `<section class="file-tags"><strong>${exact?'Exact tag stances':directory?'Legacy Directory identity tag':'Legacy tags have a subject'}</strong><div class="tag-editor"><input id="tag-concept" aria-label="Tag concept" placeholder="Label or exact Concept Record ID" value="${escape(state.filterConcept)}"><select id="tag-scope"><option value="${directory?'directory':'file'}">${directory?'Directory':'File'} identity</option>${directory?'':`<option value="${exact?'selectedRevision':'revision'}">Selected revision</option>`}</select>${exact?'<button data-action="assertStance" data-write>Assert</button><button data-action="denyStance" data-write>Deny</button><button data-action="retractToSilent" data-write>Retract to silence</button>':'<button data-action="addTag" data-write>Add legacy tag</button><button data-action="removeTag" data-write>Remove legacy tag</button>'}</div>
-    <p>${label?.knowledge==='PRESENT'?`Verified label: “${escape(label.value.label)}”`:'Label not yet verified'} · ${escape(describe(point?.value?.fileTag))}${directory?'':` / selected revision ${escape(describe(point?.value?.revisionTag))}`}. Labels are scoped to this root namespace, not global authority.${directory?' This tag does not apply to descendants.':''}</p>${exact?'<p>First ASSERT or DENY in Lens order wins; silence falls through. Legacy seed labels (efs, photos) are not exact stances. Filtering is bounded to enumerated folder rows, not global inventory.</p>':''}</section>`;
+  const placement=selectedRow()?.name?.knowledge==='PRESENT'&&selectedRow()?.folder;
+  return `<section class="file-tags"><strong>${exact?'Exact tag stances':directory?'Legacy Directory identity tag':'Legacy tags have a subject'}</strong><div class="tag-editor"><input id="tag-concept" aria-label="Tag concept" placeholder="Label or exact Concept Record ID" value="${escape(state.filterConcept)}"><select id="tag-scope"><option value="${directory?'directory':'file'}">${directory?'Directory':'File'} identity</option>${directory?'':`<option value="${exact?'selectedRevision':'revision'}">Selected revision</option>`}${exact&&placement?'<option value="placement">This folder/name</option>':''}</select>${exact?'<button data-action="assertStance" data-write>Assert</button><button data-action="denyStance" data-write>Deny</button><button data-action="retractToSilent" data-write>Retract to silence</button>':'<button data-action="addTag" data-write>Add legacy tag</button><button data-action="removeTag" data-write>Remove legacy tag</button>'}</div>
+    <p>${label?.knowledge==='PRESENT'?`Verified label: “${escape(label.value.label)}”`:'Label not yet verified'} · ${escape(describe(point?.value?.fileTag))}${directory?'':` / selected revision ${escape(describe(point?.value?.revisionTag))}`}${exact?` / this folder/name ${escape(describe(point?.value?.locationTag))}`:''}. Labels are scoped to this root namespace, not global authority.${directory?' This tag does not apply to descendants.':''}</p>${exact?'<p>First ASSERT or DENY in Lens order wins; silence falls through. A folder/name tag stays on that location when its File changes. Legacy seed labels are separate. Filtering is bounded to enumerated folder rows, not global inventory.</p>':''}</section>`;
 }
 function renderActivity() {
   state.entries=journalEntries(); $('activity-count').textContent=state.entries.length?`(${state.entries.length})`:'';
@@ -670,7 +671,9 @@ document.addEventListener('click',event=>{
       const concept=$('tag-concept').value.trim(),scope=$('tag-scope').value;
       if(!concept) throw new Error('Enter the exact tag concept text first.');
       const tag=hasCarriers()?(/^0x[0-9a-f]{64}$/i.test(concept)?{concept}:{conceptLabel:concept,conceptNamespace:state.config.manifest.folder}):{concept:ethers.id(concept)};
-      const outcome=await write(action,{file:selectedRow().file,scope,...tag});
+      const location=scope==='placement'?{folder:selectedRow().folder,name:selectedRow().name?.value}:{};
+      if(scope==='placement'&&(!hasStances()||selectedRow().name?.knowledge!=='PRESENT'))throw Error('This location needs a verified folder/name.');
+      const outcome=await write(action,{file:selectedRow().file,scope,...location,...tag});
       checkRoute(navigation);
       if(outcome.status==='EFFECTS_VERIFIED') {
         state.filterConcept=concept; $('filter-concept').value=concept;await refresh();
