@@ -68,7 +68,7 @@ required for every support claim.
 | 5792 wallet calls / sponsorship | Adapter boundary | Adapter boundary | SDK + client: negotiate actual wallet RPC versions and capability results separately from4337/paymaster support. Batch status is not EFS effect success; partial batches need per-effect read-back. |
 | 7702, 6492, 7913, modular/session permissions | Adapter boundary, enable only tested profiles | Same; verify actual chain/wallet support | SDK + client: bounded validation, exact delegation code, scope/budget/expiry/revocation and no hidden persistent setup during signature verification. No implement-all mandate. |
 | 8130 native transaction / keystore | Watch; no activation claim | Watch priority; Base plan is not activation evidence | Ethereum PM + SDK: exact draft/client/account/keystore commits, chain activation and measured fallback required. Native authenticator restrictions are not a ban on arbitrary EVM wallet logic. |
-| 8141 native frames | Watch | Watch interoperability, no support assumption | Ethereum PM + SDK: exact draft/client revision, validation/payment rollback boundaries and any working keystore adapter. Do not import older forum atomicity descriptions as current rules. |
+| 8141 native frames | Watch; now scheduled for Hegotá, no activation/support claim | Watch interoperability, no Base support assumption | Ethereum PM + SDK: exact draft/client revision, fork activation, validation/payment rollback boundaries and any working account adapter. Do not import older forum atomicity descriptions as current rules. |
 | Vendor/bundler/paymaster disappears | Needed now: baseline direct path; adapter-specific escape | Same plus Base inclusion assumptions | Client + SDK: guest reads remain available; sponsor loss does not fabricate successful writes. Distinguish user-funded/account escape from reverting to a different EFS author. |
 | Cross-chain identity/policy disagreement | Needed now: explicit chain/basis | Needed now: independent chain/basis | Core: same address or keystore label does not prove same current policy, recovery state or historical authorization. No global “current key” without evidence. |
 | EIL funding from another chain | Not needed for MVP; optional adapter boundary | Same | SDK + client: funding/submission only. No shared authority or atomic cross-chain EFS-write claim. |
@@ -146,6 +146,36 @@ not verified deployment versions/support. Its8130 experimental-source pin is
 [`812317be00d6829e217e0cc92f75be362fde0711`](https://github.com/base/eip-8130/commit/812317be00d6829e217e0cc92f75be362fde0711);
 reported future fork gates, WIP code and an isolated development network do not
 prove Base mainnet/Sepolia activation. Ethereum PM retains activation/audit watch.
+
+## Watch delta — September 24
+
+At Ethereum EIPs repository head
+[`0b8184b`](https://github.com/ethereum/EIPs/tree/0b8184b1d6ed9fba836222684fd082b32782d4ef),
+Draft [EIP-8081](https://eips.ethereum.org/EIPS/eip-8081) places Draft
+[EIP-8141](https://eips.ethereum.org/EIPS/eip-8141) in **Scheduled for
+Inclusion** for Hegotá. Draft [EIP-7906](https://eips.ethereum.org/EIPS/eip-7906)
+assertions, [EIP-8250](https://eips.ethereum.org/EIPS/eip-8250) keyed nonces and
+[EIP-8272](https://eips.ethereum.org/EIPS/eip-8272) recent roots are only
+**Considered for Inclusion**. The same meta EIP leaves Sepolia, Hoodi and
+mainnet activation epochs/timestamps blank. This advances Frames' fork-planning
+status; it does not make EIP-8141 active or available to an EFS wallet.
+
+Nethermind [PR #12526](https://github.com/NethermindEth/nethermind/pull/12526)
+was squash-merged to `master` on September 24 as
+[`5246d0c`](https://github.com/NethermindEth/nethermind/commit/5246d0c79940962a277c06268e8fa32ee0dbfb6a).
+That is useful client-source evidence, not a released-client, public-network,
+wallet, recovery or sponsorship path. An Ethereum-PM-relayed
+[public preview](https://x.com/ox_shaman/status/2103054357310677206) of a common
+account standard above Frames remains attributed social evidence until a
+published draft and implementation profile exist.
+
+No client posture changes yet: guest reads remain wallet-free; `APPROVE` is not
+a human approval; no zero-popup, rotation/recovery, sponsorship or escape claim
+is available; and frame or transaction receipts do not replace independent
+canonical EFS effect read-back. The next practical evidence remains one pinned
+client-and-wallet journey measuring approval ceremonies, rotation, stale-key
+refusal, sponsor loss/user-funded escape and exact EFS effects. No owner choice
+is mature from this watch delta.
 
 ## Minimum useful test — proposed, not newly authorized implementation
 
