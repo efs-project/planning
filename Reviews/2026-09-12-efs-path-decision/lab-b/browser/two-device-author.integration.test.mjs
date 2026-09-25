@@ -154,13 +154,70 @@ test('two scoped 7702 device keys continue one EOA File without changing its Pri
   assert((await env.call('ledger','record',[seed.newRevision]))[1]>0n,'original EOA record remains');
   const retainedOriginal=(await env.call('ledger','publicationContext',[original.publication]))[0];
   assert.equal(retainedOriginal.principalId,ownerPrincipal,'original publication attribution remains');
-  const rows=[install,wrongFileReceipt,aReceipt,replayReceipt,bReceipt,revoke,staleReceipt,finalReceipt];
+  const ownerCall=async(label,data)=>{
+    counters.ownerTransactionSignatures++;
+    const hash=await env.enqueue(label,{to:owner.address,data},'alice');
+    const row=await env.observe(hash);assert.equal(row.status,'SUCCESS',label);return row;
+  };
+  // Regrant resets the child nonce, but not the epoch. Keep HEAD and Ledger nonce
+  // unchanged across revoke/regrant so the old signature fails on epoch alone.
+  const regrantA=await ownerCall('7702/regrant-pair-first',delegate.encodeFunctionData('grantPair',
+    [deviceA.address,deviceB.address,seed.file,expires,1]));
+  const priorEpoch=(await accountCall('grants',[deviceA.address]))[1];
+  const oldEpoch=await signEdit(deviceA,await prepareEdit(seed.file,'old epoch must not publish'));
+  const nonceAtRegrant=(await env.call('ledger','nonces',[owner.address]))[0];
+  await rpc('eth_call',[{from:payer.address,to:owner.address,data:oldEpoch.data},'latest']);
+  const revokeAgain=await ownerCall('7702/revoke-A-again',delegate.encodeFunctionData('revoke',[deviceA.address]));
+  const regrantB=await ownerCall('7702/regrant-pair-second',delegate.encodeFunctionData('grantPair',
+    [deviceA.address,deviceB.address,seed.file,expires,1]));
+  const renewed=(await accountCall('grants',[deviceA.address]));
+  assert(renewed[1]>priorEpoch);assert.equal(renewed[2],0n);
+  assert.equal((await env.call('ledger','nonces',[owner.address]))[0],nonceAtRegrant);
+  assert.equal((await sdk.readFile({file:seed.file,principals:[ownerPrincipal],context:await sdk.pin()})).value.revision.recordId,
+    finalPlan.newRevision,'regrant did not change the File HEAD');
+  await expectDenied(oldEpoch,'E_SIGNATURE');
+  const oldEpochReceipt=await relay('device-A/old-epoch',oldEpoch,'REVERTED');
+  assert.equal((await env.call('ledger','nonces',[owner.address]))[0],nonceAtRegrant);
+
+  const capPlan=await prepareEdit(seed.file,'device A one-use edit');
+  const capReceipt=await relay('device-A/one-use-edit',await signEdit(deviceA,capPlan));
+  assert.equal((await accountCall('grants',[deviceA.address]))[5],0n);
+  const exhausted=await signEdit(deviceA,await prepareEdit(seed.file,'A must be exhausted'));
+  assert((await accountCall('grants',[deviceA.address]))[4],'exhausted grant remains active');
+  assert(BigInt((await rpc('eth_getBlockByNumber',['latest',false])).timestamp)<expires,'exhaustion precedes expiry');
+  await expectDenied(exhausted,'E_GRANT');
+  const exhaustedReceipt=await relay('device-A/exhausted',exhausted,'REVERTED');
+  const stillActivePlan=await prepareEdit(seed.file,'device B survives A exhaustion');
+  const stillActiveReceipt=await relay('device-B/after-A-exhaustion',await signEdit(deviceB,stillActivePlan));
+  assert.equal((await accountCall('grants',[deviceB.address]))[5],0n);
+  assert.equal((await sdk.readFile({file:seed.file,principals:[ownerPrincipal],context:await sdk.pin()})).value.revision.recordId,
+    stillActivePlan.newRevision);
+
+  const shortExpiry=BigInt((await rpc('eth_getBlockByNumber',['latest',false])).timestamp)+10n;
+  assert(shortExpiry<expires,'short grant expires before the signed request deadline');
+  const expiryGrant=await ownerCall('7702/grant-short-expiry',delegate.encodeFunctionData('grantPair',
+    [deviceA.address,deviceB.address,seed.file,shortExpiry,1]));
+  const expirySigned=await signEdit(deviceB,await prepareEdit(seed.file,'expiry boundary edit'));
+  const expiring=(await accountCall('grants',[deviceB.address]));
+  assert(expiring[4]);assert.equal(expiring[5],1n);assert.equal(expiring[3],shortExpiry);
+  const nonceAtExpiry=(await env.call('ledger','nonces',[owner.address]))[0];
+  await rpc('evm_setNextBlockTimestamp',[Number(shortExpiry)]);await rpc('evm_mine',[]);
+  assert.equal(BigInt((await rpc('eth_getBlockByNumber',['latest',false])).timestamp),shortExpiry);
+  await rpc('eth_call',[{from:payer.address,to:owner.address,data:expirySigned.data},'latest']);
+  assert.equal((await env.call('ledger','nonces',[owner.address]))[0],nonceAtExpiry,'expiry-boundary call has no write');
+  await rpc('evm_setNextBlockTimestamp',[Number(shortExpiry+1n)]);await rpc('evm_mine',[]);
+  assert.equal(BigInt((await rpc('eth_getBlockByNumber',['latest',false])).timestamp),shortExpiry+1n);
+  await expectDenied(expirySigned,'E_GRANT');
+  const expiredReceipt=await relay('device-B/expired',expirySigned,'REVERTED');
+  assert.equal((await env.call('ledger','nonces',[owner.address]))[0],nonceAtExpiry);
+  const rows=[install,wrongFileReceipt,aReceipt,replayReceipt,bReceipt,revoke,staleReceipt,finalReceipt,
+    regrantA,revokeAgain,regrantB,oldEpochReceipt,capReceipt,exhaustedReceipt,stillActiveReceipt,expiryGrant,expiredReceipt];
   const receiptRow=r=>({label:r.label,payer:r.signer,status:r.status,gasUsed:r.gasUsed,
     gasPriceWei:r.effectiveGasPriceWei,transaction:r.transactionHash});
   const setup=env.transactions.filter(r=>r.label==='deploy/scopedDelegate'||r.label.startsWith('seed/'));
   await env.writeReport('two-device-author',{status:'PASS',hardfork:'prague',realAuthorizationList:true,
     owner:owner.address,principal:ownerPrincipal,file:seed.file,deviceKeys:[deviceA.address,deviceB.address],
-    scope:'one File HEAD; child revision PUBLISH plus matching HEAD BIND; one hour; at most three edits per device',
+    scope:'one File HEAD; child revision PUBLISH plus matching HEAD BIND; initial one-hour/three-use grants, then one-use and short-expiry controls',
     counters,setupTransactions:setup.map(receiptRow),workflowTransactions:rows.map(receiptRow),
     caveat:'No wallet UI was driven; cryptographic signature operations are counted, observed UI prompts are unknown. Ledger records native EOA authority, not the child key.'});
 });
