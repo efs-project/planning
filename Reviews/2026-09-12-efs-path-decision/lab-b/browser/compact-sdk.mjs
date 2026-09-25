@@ -123,7 +123,10 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   const decode=(iface,fn,raw)=>{const value=iface.decodeFunctionResult(fn,raw);check(e.checkResultErrors(value).length===0,'ABI_RESULT');return value;};
   const call = async (key,fn,args,context) => {
     const data = interfaces[key].encodeFunctionData(fn,args);
-    return decode(interfaces[key],fn,await rawRead('eth_call',[{to:config.contracts[key].address,data},blockArg(context)],raw=>decode(interfaces[key],fn,raw)));
+    let decoded;
+    await rawRead('eth_call',[{to:config.contracts[key].address,data},blockArg(context)],
+      raw=>{decoded=decode(interfaces[key],fn,raw);});
+    return decoded;
   };
   const scalar = async (...args) => (await call(...args))[0];
   const code = (address,context) => rawRead('eth_getCode',[address,blockArg(context)],raw=>check(/^0x(?:[0-9a-f]{2})*$/i.test(raw),'CODE_BYTES'));
