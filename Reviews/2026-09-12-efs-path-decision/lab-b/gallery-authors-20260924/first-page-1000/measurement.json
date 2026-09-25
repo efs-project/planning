@@ -1,0 +1,1003 @@
+{
+  "status": "PASS_FIRST_PAGE_ONLY",
+  "fixture": "actual-multi-author-gallery",
+  "mode": "fresh-1000-eight-author-first-page-only",
+  "safety": {
+    "wallMs": 900000,
+    "nodeRss": 805306368,
+    "anvilRss": 1610612736,
+    "outputBytes": 268435456,
+    "transactions": 650,
+    "files": 1000,
+    "paidCandidates": 50,
+    "gasLimit": "16777216"
+  },
+  "history": {
+    "states": 16,
+    "transactionBlocks": 32
+  },
+  "stages": [],
+  "checkpoints": [
+    {
+      "phase": "deployed",
+      "n": 0,
+      "elapsedMs": 961,
+      "nodeRss": 139509760,
+      "nodePeakRss": 139509760,
+      "anvilRss": 33013760,
+      "outputBytes": 697153,
+      "transactions": 39
+    },
+    {
+      "phase": "seed-one",
+      "n": 25,
+      "elapsedMs": 1198,
+      "nodeRss": 141230080,
+      "nodePeakRss": 141230080,
+      "anvilRss": 35684352,
+      "outputBytes": 878004,
+      "transactions": 45
+    },
+    {
+      "phase": "seed-one",
+      "n": 50,
+      "elapsedMs": 1422,
+      "nodeRss": 161808384,
+      "nodePeakRss": 161808384,
+      "anvilRss": 38453248,
+      "outputBytes": 1051938,
+      "transactions": 51
+    },
+    {
+      "phase": "seed-one",
+      "n": 75,
+      "elapsedMs": 1636,
+      "nodeRss": 165134336,
+      "nodePeakRss": 165134336,
+      "anvilRss": 42450944,
+      "outputBytes": 1225873,
+      "transactions": 57
+    },
+    {
+      "phase": "seed-one",
+      "n": 100,
+      "elapsedMs": 1873,
+      "nodeRss": 169115648,
+      "nodePeakRss": 169115648,
+      "anvilRss": 46972928,
+      "outputBytes": 1428761,
+      "transactions": 64
+    },
+    {
+      "phase": "seed-one",
+      "n": 125,
+      "elapsedMs": 2108,
+      "nodeRss": 170770432,
+      "nodePeakRss": 170770432,
+      "anvilRss": 51642368,
+      "outputBytes": 1602810,
+      "transactions": 70
+    },
+    {
+      "phase": "seed-one",
+      "n": 150,
+      "elapsedMs": 2337,
+      "nodeRss": 173522944,
+      "nodePeakRss": 173522944,
+      "anvilRss": 55508992,
+      "outputBytes": 1776752,
+      "transactions": 76
+    },
+    {
+      "phase": "seed-one",
+      "n": 175,
+      "elapsedMs": 2542,
+      "nodeRss": 175210496,
+      "nodePeakRss": 175210496,
+      "anvilRss": 58392576,
+      "outputBytes": 1950694,
+      "transactions": 82
+    },
+    {
+      "phase": "seed-one",
+      "n": 200,
+      "elapsedMs": 2787,
+      "nodeRss": 175456256,
+      "nodePeakRss": 175456256,
+      "anvilRss": 59998208,
+      "outputBytes": 2153589,
+      "transactions": 89
+    },
+    {
+      "phase": "seed-one",
+      "n": 225,
+      "elapsedMs": 2993,
+      "nodeRss": 175521792,
+      "nodePeakRss": 175521792,
+      "anvilRss": 62504960,
+      "outputBytes": 2327636,
+      "transactions": 95
+    },
+    {
+      "phase": "seed-one",
+      "n": 250,
+      "elapsedMs": 3208,
+      "nodeRss": 175521792,
+      "nodePeakRss": 175521792,
+      "anvilRss": 65667072,
+      "outputBytes": 2501580,
+      "transactions": 101
+    },
+    {
+      "phase": "seed-one",
+      "n": 275,
+      "elapsedMs": 3416,
+      "nodeRss": 176570368,
+      "nodePeakRss": 176734208,
+      "anvilRss": 70664192,
+      "outputBytes": 2675529,
+      "transactions": 107
+    },
+    {
+      "phase": "seed-one",
+      "n": 300,
+      "elapsedMs": 3658,
+      "nodeRss": 176586752,
+      "nodePeakRss": 176734208,
+      "anvilRss": 74956800,
+      "outputBytes": 2878432,
+      "transactions": 114
+    },
+    {
+      "phase": "seed-one",
+      "n": 325,
+      "elapsedMs": 3872,
+      "nodeRss": 175128576,
+      "nodePeakRss": 176734208,
+      "anvilRss": 76906496,
+      "outputBytes": 3052494,
+      "transactions": 120
+    },
+    {
+      "phase": "seed-one",
+      "n": 350,
+      "elapsedMs": 4079,
+      "nodeRss": 173768704,
+      "nodePeakRss": 176734208,
+      "anvilRss": 78184448,
+      "outputBytes": 3226443,
+      "transactions": 126
+    },
+    {
+      "phase": "seed-one",
+      "n": 375,
+      "elapsedMs": 4299,
+      "nodeRss": 172654592,
+      "nodePeakRss": 176734208,
+      "anvilRss": 77955072,
+      "outputBytes": 3400392,
+      "transactions": 132
+    },
+    {
+      "phase": "seed-one",
+      "n": 400,
+      "elapsedMs": 4564,
+      "nodeRss": 172818432,
+      "nodePeakRss": 176734208,
+      "anvilRss": 78462976,
+      "outputBytes": 3603295,
+      "transactions": 139
+    },
+    {
+      "phase": "seed-one",
+      "n": 425,
+      "elapsedMs": 4785,
+      "nodeRss": 172851200,
+      "nodePeakRss": 176734208,
+      "anvilRss": 78626816,
+      "outputBytes": 3777349,
+      "transactions": 145
+    },
+    {
+      "phase": "seed-one",
+      "n": 450,
+      "elapsedMs": 5018,
+      "nodeRss": 172851200,
+      "nodePeakRss": 176734208,
+      "anvilRss": 80904192,
+      "outputBytes": 3951298,
+      "transactions": 151
+    },
+    {
+      "phase": "seed-one",
+      "n": 475,
+      "elapsedMs": 5236,
+      "nodeRss": 172900352,
+      "nodePeakRss": 176734208,
+      "anvilRss": 89538560,
+      "outputBytes": 4125247,
+      "transactions": 157
+    },
+    {
+      "phase": "seed-one",
+      "n": 500,
+      "elapsedMs": 5495,
+      "nodeRss": 172916736,
+      "nodePeakRss": 176734208,
+      "anvilRss": 99221504,
+      "outputBytes": 4328150,
+      "transactions": 164
+    },
+    {
+      "phase": "seed-one",
+      "n": 525,
+      "elapsedMs": 5722,
+      "nodeRss": 172933120,
+      "nodePeakRss": 176734208,
+      "anvilRss": 105693184,
+      "outputBytes": 4502216,
+      "transactions": 170
+    },
+    {
+      "phase": "seed-one",
+      "n": 550,
+      "elapsedMs": 6081,
+      "nodeRss": 173326336,
+      "nodePeakRss": 176734208,
+      "anvilRss": 105562112,
+      "outputBytes": 4676178,
+      "transactions": 176
+    },
+    {
+      "phase": "seed-one",
+      "n": 575,
+      "elapsedMs": 6294,
+      "nodeRss": 173326336,
+      "nodePeakRss": 176734208,
+      "anvilRss": 106070016,
+      "outputBytes": 4850140,
+      "transactions": 182
+    },
+    {
+      "phase": "seed-one",
+      "n": 600,
+      "elapsedMs": 6573,
+      "nodeRss": 173326336,
+      "nodePeakRss": 176734208,
+      "anvilRss": 106725376,
+      "outputBytes": 5053058,
+      "transactions": 189
+    },
+    {
+      "phase": "seed-one",
+      "n": 625,
+      "elapsedMs": 6828,
+      "nodeRss": 173293568,
+      "nodePeakRss": 176734208,
+      "anvilRss": 105512960,
+      "outputBytes": 5227125,
+      "transactions": 195
+    },
+    {
+      "phase": "seed-one",
+      "n": 650,
+      "elapsedMs": 7109,
+      "nodeRss": 173555712,
+      "nodePeakRss": 176734208,
+      "anvilRss": 106020864,
+      "outputBytes": 5401087,
+      "transactions": 201
+    },
+    {
+      "phase": "seed-one",
+      "n": 675,
+      "elapsedMs": 7331,
+      "nodeRss": 175243264,
+      "nodePeakRss": 176734208,
+      "anvilRss": 106020864,
+      "outputBytes": 5575049,
+      "transactions": 207
+    },
+    {
+      "phase": "seed-one",
+      "n": 700,
+      "elapsedMs": 7599,
+      "nodeRss": 175243264,
+      "nodePeakRss": 176734208,
+      "anvilRss": 104448000,
+      "outputBytes": 5777967,
+      "transactions": 214
+    },
+    {
+      "phase": "seed-one",
+      "n": 725,
+      "elapsedMs": 7837,
+      "nodeRss": 169656320,
+      "nodePeakRss": 176734208,
+      "anvilRss": 103972864,
+      "outputBytes": 5952043,
+      "transactions": 220
+    },
+    {
+      "phase": "seed-one",
+      "n": 750,
+      "elapsedMs": 8102,
+      "nodeRss": 169656320,
+      "nodePeakRss": 176734208,
+      "anvilRss": 103989248,
+      "outputBytes": 6126005,
+      "transactions": 226
+    },
+    {
+      "phase": "seed-one",
+      "n": 775,
+      "elapsedMs": 8484,
+      "nodeRss": 166166528,
+      "nodePeakRss": 176734208,
+      "anvilRss": 102514688,
+      "outputBytes": 6299967,
+      "transactions": 232
+    },
+    {
+      "phase": "seed-one",
+      "n": 800,
+      "elapsedMs": 8823,
+      "nodeRss": 167903232,
+      "nodePeakRss": 176734208,
+      "anvilRss": 102694912,
+      "outputBytes": 6502885,
+      "transactions": 239
+    },
+    {
+      "phase": "seed-one",
+      "n": 825,
+      "elapsedMs": 9079,
+      "nodeRss": 168034304,
+      "nodePeakRss": 176734208,
+      "anvilRss": 102711296,
+      "outputBytes": 6676952,
+      "transactions": 245
+    },
+    {
+      "phase": "seed-one",
+      "n": 850,
+      "elapsedMs": 9375,
+      "nodeRss": 168050688,
+      "nodePeakRss": 176734208,
+      "anvilRss": 102744064,
+      "outputBytes": 6850914,
+      "transactions": 251
+    },
+    {
+      "phase": "seed-one",
+      "n": 875,
+      "elapsedMs": 9674,
+      "nodeRss": 168034304,
+      "nodePeakRss": 176734208,
+      "anvilRss": 102760448,
+      "outputBytes": 7024916,
+      "transactions": 257
+    },
+    {
+      "phase": "seed-one",
+      "n": 900,
+      "elapsedMs": 10070,
+      "nodeRss": 168034304,
+      "nodePeakRss": 176734208,
+      "anvilRss": 116113408,
+      "outputBytes": 7227972,
+      "transactions": 264
+    },
+    {
+      "phase": "seed-one",
+      "n": 925,
+      "elapsedMs": 10418,
+      "nodeRss": 168509440,
+      "nodePeakRss": 176734208,
+      "anvilRss": 128958464,
+      "outputBytes": 7402168,
+      "transactions": 270
+    },
+    {
+      "phase": "seed-one",
+      "n": 950,
+      "elapsedMs": 10804,
+      "nodeRss": 167608320,
+      "nodePeakRss": 176734208,
+      "anvilRss": 147013632,
+      "outputBytes": 7576251,
+      "transactions": 276
+    },
+    {
+      "phase": "seed-one",
+      "n": 975,
+      "elapsedMs": 11141,
+      "nodeRss": 167608320,
+      "nodePeakRss": 176734208,
+      "anvilRss": 151863296,
+      "outputBytes": 7750334,
+      "transactions": 282
+    },
+    {
+      "phase": "seed-one",
+      "n": 1000,
+      "elapsedMs": 11539,
+      "nodeRss": 167657472,
+      "nodePeakRss": 176734208,
+      "anvilRss": 153042944,
+      "outputBytes": 7953394,
+      "transactions": 289
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 1,
+      "elapsedMs": 11980,
+      "nodeRss": 168083456,
+      "nodePeakRss": 176734208,
+      "anvilRss": 158056448,
+      "outputBytes": 8150851,
+      "transactions": 297
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 2,
+      "elapsedMs": 12429,
+      "nodeRss": 161742848,
+      "nodePeakRss": 176734208,
+      "anvilRss": 158416896,
+      "outputBytes": 8348210,
+      "transactions": 305
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 3,
+      "elapsedMs": 12876,
+      "nodeRss": 161529856,
+      "nodePeakRss": 176734208,
+      "anvilRss": 160727040,
+      "outputBytes": 8545573,
+      "transactions": 313
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 4,
+      "elapsedMs": 13339,
+      "nodeRss": 161857536,
+      "nodePeakRss": 176734208,
+      "anvilRss": 165412864,
+      "outputBytes": 8742936,
+      "transactions": 321
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 5,
+      "elapsedMs": 13815,
+      "nodeRss": 161218560,
+      "nodePeakRss": 176734208,
+      "anvilRss": 165904384,
+      "outputBytes": 8940299,
+      "transactions": 329
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 6,
+      "elapsedMs": 14290,
+      "nodeRss": 161169408,
+      "nodePeakRss": 176734208,
+      "anvilRss": 168886272,
+      "outputBytes": 9137662,
+      "transactions": 337
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 7,
+      "elapsedMs": 14760,
+      "nodeRss": 161136640,
+      "nodePeakRss": 176734208,
+      "anvilRss": 169279488,
+      "outputBytes": 9335025,
+      "transactions": 345
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 8,
+      "elapsedMs": 15230,
+      "nodeRss": 161153024,
+      "nodePeakRss": 176734208,
+      "anvilRss": 169607168,
+      "outputBytes": 9532388,
+      "transactions": 353
+    },
+    {
+      "phase": "seed-complete",
+      "n": 1000,
+      "elapsedMs": 15288,
+      "nodeRss": 161169408,
+      "nodePeakRss": 176734208,
+      "anvilRss": 169623552,
+      "outputBytes": 9539818,
+      "transactions": 354
+    },
+    {
+      "phase": "sdk-first-page",
+      "n": 1000,
+      "elapsedMs": 15409,
+      "nodeRss": 344244224,
+      "nodePeakRss": 344244224,
+      "anvilRss": 175095808,
+      "outputBytes": 9540932,
+      "transactions": 354
+    },
+    {
+      "phase": "paid-first-page",
+      "n": 1000,
+      "elapsedMs": 15462,
+      "nodeRss": 344276992,
+      "nodePeakRss": 344276992,
+      "anvilRss": 179994624,
+      "outputBytes": 9546879,
+      "transactions": 355
+    }
+  ],
+  "sources": {
+    "gitHead": "fa00cc10f6b09da03ad70e3ee3c09340cf4b04ab",
+    "files": {
+      "src/ContractSignatureEvidenceStore.sol": "0xa058f02c0449945937c99f1b697ac63ecf5d656844c13e7c3ee731c7e1d11bb9",
+      "src/ExecutionSlots.sol": "0xd3373859ef68327e54a0c761c7863c4456d34e1b444fc5036f465d76feb9e927",
+      "src/IndexFieldProfile.sol": "0x10fd5ea0e3822f6f01945e34e7780ab66458f657395c394b5e7696aa68174668",
+      "src/IndexReplaySource.sol": "0xf01bd2d59999edbaf1951bb948d141b710006ff74ec608959077216596851cef",
+      "src/IndexSource.sol": "0xdb8c85802584f29530fc4484a3280f94474efcd72219ec1ea6dccfb270d07639",
+      "src/IndexWork.sol": "0x62960f1d86ab4c8db13f33764dedef9ad84747175aaa4a264524e37630fe244e",
+      "src/Interfaces.sol": "0xbe882e27e718c00a26476935b822d0301cbee8c611c152cce15b5e2d17b2dbd0",
+      "src/Keys.sol": "0x7072116cb4809ae6d857031bdadb2d23e2373203a335781ee2383ae9fbf7abee",
+      "src/Ledger.sol": "0x558bc729e501ff1c0fa48ff3854cf897f1f2df9ff404c0a43b1815c182bd3753",
+      "src/PublicationPreparation.sol": "0x30ca7927d2aeaa989785beed80e03dfdb3cfef71ca9288538f8496f187635600",
+      "src/PublicationSupport.sol": "0x619e84977b9dc1381c9ec982f724a57b241780778149a7b4bb7d4dfcd3fe7cb4",
+      "src/ReadSetStorage.sol": "0x132c48a528664721b3e170de19fe478d40c59180be64755d7729a5c97cf8ab04",
+      "src/DescribedTypeProfile.sol": "0x9571406c5007d3924a0efdaba2af415f26507aa1eb97a0be9187c4e66cfef2a0",
+      "src/IndexModule.sol": "0x0caca9f56f130c80968bd9ee208527dd52f18d9820737200547c7a3fd33eda31",
+      "src/LensReader.sol": "0xa4a8f32b20eaff061f5339e28961baf820b7e7f84fdbd1e44a61f08ff08ece38",
+      "src/TypeRegistry.sol": "0x8f95b1c40e5f498c60330f7e28b8e209154c191b715d1b8ea14328da5227ed09",
+      "test/FilesCarrierProfile.sol": "0x03a5756b722d1c8941fc9b2b1c4a5b09f2fb0b8adf930e0cc89b6fa2f9b2e320",
+      "test/FilesDirectoryProfile.sol": "0xd5a78dd9cb3a63894dc6c7e9def5d9a9c1dceab065470e59e85aadb85007e7f6",
+      "test/FilesJoinedProfile.sol": "0xcf86667d05ada0bef5fce3f7550991699c202ca0a15f7731a6b7f62b3553136b",
+      "test/FilesLiveIndex.sol": "0xf46ded63d2eba10d75bc09a80649334e40efc1303f068918377e5a092da427e7",
+      "test/FilesNamesProfile.sol": "0x892bc262ba82b57a7f6a06e793f0380f35446e196efdd2daf83f524875d22189",
+      "test/FilesPageReader.sol": "0x6378f97a6ef6b2a4b3352b37b826463154acb1e2ed6826f620d9328f7b469c54",
+      "test/FilesScopeState.sol": "0x488fabb7e12c6e3bebc05edc1a7acfb9ef306c6fcc352f8d29e072c0d86fc1f1",
+      "script/measure-joined.mjs": "0x4bc480d44b75125c00d73d652db966668cd21687becbe79719544d40a6383f66",
+      "script/diagnose-joined-read.mjs": "0x4d85bcce01e7610b864686637c0655234d7cd6f031cd0120db868258873b32c3",
+      "script/compact-environment.mjs": "0x3b73435562f863d59cd1e341a1cbd07f80e8898ebebb8cecc733d7f361d453e9",
+      "browser/compact-sdk.mjs": "0x6f362f40909b7335d9c5002c463d53495ff823a986e64d302ea88246605049d3",
+      "browser/compact-sdk-v2.mjs": "0x0f5af5ab79e9dcfc547287668302af9bf5a6e7e5d59a974bbd9bf16472b2deda",
+      "browser/compact-files-sdk.mjs": "0xbbdc6b69c5364427772fffa284f30dec0b07b41d03a5aacf7627d824029a2d30"
+    },
+    "compiler": [
+      {
+        "name": "Ledger",
+        "compiler": {
+          "version": "0.8.30+commit.73712a01"
+        },
+        "settings": {
+          "remappings": [
+            "src/libraries/=src/vendor/optimism/"
+          ],
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "compilationTarget": {
+            "src/Ledger.sol": "Ledger"
+          },
+          "evmVersion": "cancun",
+          "libraries": {},
+          "viaIR": true
+        }
+      },
+      {
+        "name": "FilesPageReader",
+        "compiler": {
+          "version": "0.8.30+commit.73712a01"
+        },
+        "settings": {
+          "remappings": [
+            "src/libraries/=src/vendor/optimism/"
+          ],
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "compilationTarget": {
+            "test/FilesPageReader.sol": "FilesPageReader"
+          },
+          "evmVersion": "cancun",
+          "libraries": {},
+          "viaIR": true
+        }
+      },
+      {
+        "name": "FilesLiveLens",
+        "compiler": {
+          "version": "0.8.30+commit.73712a01"
+        },
+        "settings": {
+          "remappings": [
+            "src/libraries/=src/vendor/optimism/"
+          ],
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "compilationTarget": {
+            "test/FilesLiveIndex.sol": "FilesLiveLens"
+          },
+          "evmVersion": "cancun",
+          "libraries": {},
+          "viaIR": true
+        }
+      },
+      {
+        "name": "FilesCarrierIndex",
+        "compiler": {
+          "version": "0.8.30+commit.73712a01"
+        },
+        "settings": {
+          "remappings": [
+            "src/libraries/=src/vendor/optimism/"
+          ],
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "compilationTarget": {
+            "test/FilesCarrierProfile.sol": "FilesCarrierIndex"
+          },
+          "evmVersion": "cancun",
+          "libraries": {},
+          "viaIR": true
+        }
+      }
+    ],
+    "anvil": "anvil Version: 1.7.1\nCommit SHA: 4072e48705af9d93e3c0f6e29e93b5e9a40caed8\nBuild Timestamp: 2026-05-08T07:54:31.470926000Z (1778226871)\nBuild Profile: dist",
+    "node": "v26.0.0",
+    "hardfork": "cancun",
+    "contentProfile": "raw-sha256-aesgcm-v2",
+    "measurementScriptHash": "0xffda99f8778cda470544a3ce19aff65d543ba271728ee30b45616e7cbec66be9"
+  },
+  "seedProjections": [
+    {
+      "files": 100,
+      "projectedNodeRss": 435568640,
+      "baselineNodeRss": 139509760
+    },
+    {
+      "files": 200,
+      "projectedNodeRss": 319242240,
+      "baselineNodeRss": 139509760
+    },
+    {
+      "files": 300,
+      "projectedNodeRss": 263099733.3333333,
+      "baselineNodeRss": 139509760
+    },
+    {
+      "files": 400,
+      "projectedNodeRss": 222781440,
+      "baselineNodeRss": 139509760
+    },
+    {
+      "files": 500,
+      "projectedNodeRss": 206323712,
+      "baselineNodeRss": 139509760
+    },
+    {
+      "files": 600,
+      "projectedNodeRss": 195870720,
+      "baselineNodeRss": 139509760
+    },
+    {
+      "files": 700,
+      "projectedNodeRss": 190557622.85714287,
+      "baselineNodeRss": 139509760
+    },
+    {
+      "files": 800,
+      "projectedNodeRss": 175001600,
+      "baselineNodeRss": 139509760
+    },
+    {
+      "files": 900,
+      "projectedNodeRss": 171203697.7777778,
+      "baselineNodeRss": 139509760
+    },
+    {
+      "files": 1000,
+      "projectedNodeRss": 167657472,
+      "baselineNodeRss": 139509760
+    }
+  ],
+  "limits": [
+    "Disposable loopback-only Anvil; no public-RPC latency or fee inference.",
+    "A successful paid page is not proof that one onchain transaction can consume the whole gallery.",
+    "Paid cursor advancement is supplied from an eth_call to the same pinned reader; FilesPagePaid emits only a digest.",
+    "Header qualification does not fetch or verify full content bodies.",
+    "No full SDK traversal, warm pass, or paid continuation was attempted at 1000 Files."
+  ],
+  "setup": {
+    "files": 1000,
+    "placementAuthors": [
+      "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+      "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+      "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
+      "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+      "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+      "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f",
+      "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720"
+    ],
+    "placementCounts": [
+      125,
+      125,
+      125,
+      125,
+      125,
+      125,
+      125,
+      125
+    ],
+    "extraOverlayPlacementAuthor": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+    "headTagAuthorship": "Alice initial HEAD and positive selected-revision tags for even Files; signer 1 has a competing untagged HEAD on File 0",
+    "elapsedMs": 14320,
+    "transactions": 315
+  },
+  "sdkFirstPage": {
+    "pin": {
+      "ms": 46.62379200000032,
+      "calls": 95,
+      "httpRequests": 95,
+      "httpBatches": 0,
+      "requestBytes": 23242,
+      "responseBytes": 337855,
+      "memoryAfter": {
+        "rss": 164560896,
+        "heapTotal": 92160000,
+        "heapUsed": 39885464,
+        "external": 5683415,
+        "arrayBuffers": 1952522
+      }
+    },
+    "ms": 53.352084000000104,
+    "calls": 11,
+    "httpRequests": 11,
+    "httpBatches": 0,
+    "requestBytes": 3645,
+    "responseBytes": 95691,
+    "folder": "0xc22a630ee459a03e1927ee552e40905ccce8d7c73e53bebb30aff792a53e9e23",
+    "authors": [
+      "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+      "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+      "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
+      "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+      "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+      "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f",
+      "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720"
+    ],
+    "budget": 32,
+    "coverage": "PARTIAL",
+    "candidatesScanned": 32,
+    "rawTotal": 1001,
+    "selectedSoFar": 32,
+    "rows": 32,
+    "qualifications": {
+      "name": {
+        "PRESENT": 32
+      },
+      "header": {
+        "PRESENT": 32
+      },
+      "revisionTag": {
+        "PRESENT": 32
+      },
+      "match": {
+        "MATCH": 32
+      }
+    },
+    "hasContinuation": true,
+    "memoryAfter": {
+      "rss": 344244224,
+      "heapTotal": 93732864,
+      "heapUsed": 30787000,
+      "external": 126446290,
+      "arrayBuffers": 122715397
+    },
+    "bodyBytesFetched": 0
+  },
+  "paidFirstPage": {
+    "budget": 4,
+    "tagScope": "selected-revision",
+    "status": "SUCCESS",
+    "observed": {
+      "scanned": 4,
+      "rows": 4,
+      "scanStatus": 1,
+      "completeFromOrigin": false,
+      "queryAbsent": false,
+      "resultHash": "0x6deaadf084f30bc186b3e3b8e7a34d7374f34c6f5f05d82971a67c5cd291356f"
+    },
+    "gasUsed": "1009029",
+    "transactionHash": "0xd98d6f00abe81beaa3acebc60e70761d68b2cf0995e8dd92b85829aa46134cc6",
+    "calldataBytes": 804,
+    "ms": 48.12062499999956,
+    "calls": 7,
+    "httpRequests": 7,
+    "httpBatches": 0,
+    "requestBytes": 2747,
+    "responseBytes": 6113
+  },
+  "setupGasTotal": "1475902336",
+  "transactionCount": 355,
+  "elapsedMs": 15464,
+  "metrics": {
+    "calls": 2706,
+    "wireCalls": 2706,
+    "httpRequests": 2706,
+    "httpBatches": 0,
+    "requestBytes": 5065578,
+    "responseBytes": 10812754,
+    "fallbacks": 0,
+    "byMethod": {
+      "eth_chainId": 3,
+      "eth_getTransactionCount": 355,
+      "eth_sendRawTransaction": 355,
+      "eth_getTransactionReceipt": 819,
+      "eth_getBlockByHash": 355,
+      "eth_getTransactionByHash": 355,
+      "eth_getCode": 47,
+      "eth_call": 412,
+      "eth_getBlockByNumber": 5
+    },
+    "byRequest": {
+      "{\"phase\":\"unscoped\",\"method\":\"eth_chainId\",\"target\":null,\"selector\":null,\"blockHash\":null}": 3,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getTransactionCount\",\"target\":null,\"selector\":null,\"blockHash\":null}": 355,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_sendRawTransaction\",\"target\":null,\"selector\":null,\"blockHash\":null}": 355,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getTransactionReceipt\",\"target\":null,\"selector\":null,\"blockHash\":null}": 819,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getBlockByHash\",\"target\":null,\"selector\":null,\"blockHash\":null}": 355,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getTransactionByHash\",\"target\":null,\"selector\":null,\"blockHash\":null}": 355,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":null,\"blockHash\":\"0x32a90c075a5413b9d00b83c3152cb8ef85cb12aeb86ac6a4f89193f4fcf05648\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":null,\"blockHash\":\"0x59749b143d2a298c6efc32029551a76f2f73a3ab786b117bfebc4ebe6e194fc7\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0\",\"selector\":null,\"blockHash\":\"0xb7409f1ee505ba1276bd116bbf1048b8171a16c0dd912f30d19e9d66f814f349\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":\"0x541289e1\",\"blockHash\":null}": 9,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xdc64a140aa3e981100a9beca4e685f962f0cf6c9\",\"selector\":null,\"blockHash\":\"0x1d7bac2c4781002d60a2ca466a0554e0bfda5098e87a63fae8eccc75772632bc\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x0165878a594ca255338adfa4d48449f69242eb8f\",\"selector\":null,\"blockHash\":\"0x53d03203cd2dabf2979184bd89ac051411b38206547a9a65f8e95edd1212ad50\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6\",\"selector\":null,\"blockHash\":\"0x2781ec166c0953a0488d8dc680fad659b5870046ce2e49cc0278e670b5607dd8\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x610178da211fef7d417bc0e6fed39f05609ad788\",\"selector\":null,\"blockHash\":\"0x85b04fe57fefca796082cc3030c3b5615cc7ca94d967047e4883627f3a21ef86\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0\",\"selector\":null,\"blockHash\":\"0x794026d35fb0c81c5c58f65a1daf2eb704e27bde5f715b30efb26ef17114374f\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x9a676e781a523b5d0c0e43731313a708cb607508\",\"selector\":null,\"blockHash\":\"0x1a15ba282a970654db29af49ea873e64bb4077888fbb17987e61d19b98ef456c\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x959922be3caee4b8cd9a407cc3ac1c251c2007b1\",\"selector\":null,\"blockHash\":\"0x06d1898b6f183e6fc861ab95ff24546c788bc6de6eef20f0cb8111eee365b60d\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x68b1d87f95878fe05b998f19b66f4baba5de1aed\",\"selector\":null,\"blockHash\":\"0x9581c9edda8e0dc49a1b7db96429d09f9bf5ee4aa89dec05cd68b7657cdf7354\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":null,\"blockHash\":\"0x0e95af2b635e2623ad6599bbd5ea876cc282dd0f9f39875c57fb49b0c4316d97\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1\",\"selector\":null,\"blockHash\":\"0x4d4b9f288c36496836c31418be75a2f566fd3d52b68bd3c1d0c870cd5d5e10e1\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":null,\"blockHash\":\"0xca2b88c51adff12a21e8b594f91d27a47e5b4c88e44de7a704c32ececf36a07a\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":null,\"blockHash\":\"0xb37913aab8edee5f6ff192d4a060ace17b520dfa40ae3f570d92f7ff178b9f82\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":null,\"blockHash\":\"0x3ce7595d094da66e418209d296ba1396392e9c3f6529a377edbd8fe5de74bb44\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x7a2088a1bfc9d81c55368ae168c2c02570cb814f\",\"selector\":null,\"blockHash\":\"0xec47ba2f4805296c559afcde1e67c483d4f372491e58f02e77566bbb0406687b\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x817cc1ea\",\"blockHash\":null}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x61e20a1c\",\"blockHash\":null}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xd5bfc2c4\",\"blockHash\":null}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xca3e077c\",\"blockHash\":null}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xf698da25\",\"blockHash\":null}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x1660e329\",\"blockHash\":null}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xafce3b99\",\"blockHash\":null}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x3d27fdde\",\"blockHash\":null}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x3d045107\",\"blockHash\":null}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xCafac3dD18aC6c6e92c921884f9E4176737C052c\",\"selector\":null,\"blockHash\":null}": 2,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xCafac3dD18aC6c6e92c921884f9E4176737C052c\",\"selector\":\"0x3a203759\",\"blockHash\":null}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xAe367415f4BDe0aDEE3e59C35221d259f517413E\",\"selector\":null,\"blockHash\":null}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xc5a5c42992decbae36851359345fe25997f5c42d\",\"selector\":null,\"blockHash\":\"0xa9f775293229aee9c167067524cb7d5d79f7df6933be9ba95fc1cdd31b84eae3\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x96def709\",\"blockHash\":null}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x7ecebe00\",\"blockHash\":null}": 318,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getBlockByNumber\",\"target\":null,\"selector\":null,\"blockHash\":null}": 5,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x817cc1ea\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x17219522\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":\"0x900cf0cf\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x7b103999\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x287ada37\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1\",\"selector\":\"0x56397c35\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1\",\"selector\":\"0x2986c0e5\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x56397c35\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x56397c35\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x3b24916c\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x38a0fbfd\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x56397c35\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x67e828bf\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":\"0x56397c35\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":\"0x112666b7\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":\"0x2986c0e5\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":\"0xb546ea55\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 9,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":\"0x64b69433\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 9,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x0165878A594ca255338adfa4d48449f69242Eb8F\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x697e31e5\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x1fab1936\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x33526ba9\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x5687a6c0\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x21304c60\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x190b402e\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x74ba3fcb\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x9681470b\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x697e31e5\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x1fab1936\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x33526ba9\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x21304c60\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x190b402e\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x74ba3fcb\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9\",\"selector\":\"0x697e31e5\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x0134956e\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x02c742dc\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x610178dA211FEF7D417bC0e6FeD39F05609AD788\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x9A676e781A523b5d0C0e43731313A708CB607508\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x68B1D87F95878fE05B998F19b66F4baba5De1aed\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0xc8619ce9\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 5,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x7ed79413\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 5,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xd5bfc2c4\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x490423a3\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xca3e077c\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xf698da25\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x1660e329\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x69acff0e\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xb827bbe0\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x56c35ac8\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512\",\"selector\":\"0xafce3b99\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1\",\"selector\":\"0xafce3b99\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512\",\"selector\":\"0x3d27fdde\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512\",\"selector\":\"0x3d045107\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xCafac3dD18aC6c6e92c921884f9E4176737C052c\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x70997970C51812dc3A010C7d01b50e0d17dc79C8\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x90F79bf6EB2c4f870365E785982E1f101E93b906\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x976EA74026E726554dB657fA54763abd0C3a0aa9\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x14dC79964da2C08b23698B3D3cc7Ca32193d9955\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xa0Ee7A142d267C1f36714E4a8F75612F20a79720\",\"selector\":null,\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1,
+      "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":\"0x56dc607a\",\"blockHash\":\"0x61ffe1ed080b5cdb9f1fc4a494d088f93daf71d57fef6795dcea970f88983436\"}": 1
+    },
+    "phases": {
+      "unscoped": {
+        "calls": 2706,
+        "wireCalls": 2706,
+        "httpRequests": 2706,
+        "httpBatches": 0,
+        "requestBytes": 5065578,
+        "responseBytes": 10812754,
+        "fallbacks": 0
+      }
+    },
+    "droppedDiagnosticKeys": 0
+  }
+}
