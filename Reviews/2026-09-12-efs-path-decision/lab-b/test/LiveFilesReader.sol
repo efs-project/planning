@@ -34,6 +34,14 @@ contract LiveFilesPageReader is FilesPageReader {
 
 /// Explicit live-aware path. The old FilesJoinedConsumer remains inline-only.
 contract LiveFilesMountedReader {
+    uint8 public constant UNKNOWN=0;
+    uint8 public constant LIVE_SHAPE_ONLY=1;
+    uint8 public constant STORED_BYTES=2;
+    uint8 public constant OPAQUE_ENCRYPTED=3;
+    uint8 public constant EXTERNAL_UNSUPPORTED=4;
+    uint8 public constant SELECTED_PROVIDER_FAILED=5;
+    uint8 public constant NOT_ON_THIS_PAGE=6;
+    uint8 public constant ABSENT_PROVEN=7;
     struct Result {
         uint8 status; bytes32 file; bytes32 revision; bytes32 descriptor;
         uint64 selectionOrigin; uint256 observationBlock; uint256 observationChain;
@@ -47,8 +55,10 @@ contract LiveFilesMountedReader {
         page=p;adapter=a;pageHash=address(p).codehash;adapterHash=address(a).codehash;
         require(address(a.ledger())==address(p.ledger())&&a.descriptorType()==LiveFilesIndex(address(p.index())).liveTypes(0),"live context");
     }
-    // status: 0 UNKNOWN/NOT_ON_THIS_PAGE, 1 LIVE_SHAPE_ONLY, 2 STORED_BYTES,
-    // 3 OPAQUE_ENCRYPTED, 4 EXTERNAL_UNSUPPORTED, 5 SELECTED_PROVIDER_FAILED.
+    // A selected row with uncertain HEAD/header remains UNKNOWN. A missing row
+    // is ABSENT_PROVEN only after one complete origin-started scan; a partial
+    // or suffix page is merely NOT_ON_THIS_PAGE. No client may infer absence
+    // from an empty page or the default zero value of Result.
     function read(bytes32 folder,bytes32[] calldata principals,bytes32 role,FilesPageReader.Basis calldata basis,bytes calldata continuation,uint256 budget)
         public view returns(Result memory result){
         require(address(page).codehash==pageHash&&address(adapter).codehash==adapterHash,"reader code drift");
@@ -81,6 +91,8 @@ contract LiveFilesMountedReader {
             if(result.descriptor!=0&&sha256(result.raw)!=FilesLayout.word(ledger,result.descriptor,5))return result;
             result.status=2;return result;
         }
+        if(p.completeFromOrigin)result.status=ABSENT_PROVEN;
+        else if(p.scanStatus==1||p.scanStatus==2)result.status=NOT_ON_THIS_PAGE;
     }
 }
 

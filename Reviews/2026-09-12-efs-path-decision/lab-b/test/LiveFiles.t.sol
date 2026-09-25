@@ -163,6 +163,30 @@ contract LiveFilesTest is FilesCarrierIndexTest {
         provider.update(75,true,1,address(liveAdapter));r=reader.read(folder,principals,name("value"),basis,"",8);
         require(r.file==f&&r.revision==root&&r.status==5&&r.live.status==5&&r.raw.length==0,"provider failure revealed lower-priority File");
     }
+    function test_mounted_reader_distinguishes_page_miss_from_proven_absence() public {
+        bytes32 folder=_directory(601);
+        bytes32 first=ledger.create(bytes32(uint256(602)));
+        bytes32 second=ledger.create(bytes32(uint256(603)));
+        bytes32 firstRevision=ledger.publish(rt,abi.encode(first));
+        bytes32 secondRevision=ledger.publish(rt,abi.encode(second));
+        ledger.bind(HEAD,first,0,firstRevision,0);
+        ledger.bind(HEAD,second,0,secondRevision,0);
+        ledger.publish(nt,bytes("a"));ledger.bind(FOLDER,folder,name("a"),first,0);
+        ledger.publish(nt,bytes("b"));ledger.bind(FOLDER,folder,name("b"),second,0);
+        LiveFilesPageReader page=new LiveFilesPageReader(ledger,new FilesLiveLens(ledger,index),LiveFilesIndex(address(index)));
+        LiveFilesMountedReader reader=new LiveFilesMountedReader(page,liveAdapter);
+        bytes32[] memory principals=new bytes32[](1);principals[0]=pid(address(this));
+        FilesPageReader.Basis memory pinned=FilesPageReader.Basis(admissions(),index.generation(),registry.epoch(),ledger.executionSet());
+        LiveFilesMountedReader.Result memory firstPage=reader.read(folder,principals,name("b"),pinned,"",1);
+        require(firstPage.status==reader.NOT_ON_THIS_PAGE()&&firstPage.continuation.length!=0
+            &&!firstPage.descriptorsCompleteFromOrigin,"partial page lied about absence");
+        LiveFilesMountedReader.Result memory secondPage=reader.read(folder,principals,name("b"),pinned,firstPage.continuation,1);
+        require(secondPage.status==reader.STORED_BYTES()&&secondPage.file==second,"continuation lost selected file");
+        LiveFilesMountedReader.Result memory absent=reader.read(folder,principals,name("missing"),pinned,"",8);
+        require(absent.status==reader.ABSENT_PROVEN()&&absent.descriptorsCompleteFromOrigin,"full origin scan failed to prove absence");
+        LiveFilesMountedReader.Result memory suffix=reader.read(folder,principals,name("missing"),pinned,firstPage.continuation,8);
+        require(suffix.status==reader.NOT_ON_THIS_PAGE()&&!suffix.descriptorsCompleteFromOrigin,"suffix scan forged full-query absence");
+    }
     function test_live_child_parent_configuration_changes_exact_rule_identity() public {
         LiveFilesChildRule a=new LiveFilesChildRule([rt,ct,ts[2],ts[3],lt[1]]);
         LiveFilesChildRule b=new LiveFilesChildRule([rt,ct,ts[2],ts[3],bytes32(uint256(123))]);

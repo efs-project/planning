@@ -168,6 +168,19 @@ contract CuratedListProfileTest is LabBase {
         catch (bytes memory err) { expectSel(err, Ledger.E_REJECTED.selector, "Type validates all members at admission"); }
     }
 
+    function test_entry_type_rejects_noncanonical_label_padding() public {
+        bytes32 target = ledger.publish(BINARY, bytes("song"));
+        bytes32 edition = _createEdition(bytes32("edition"));
+        bytes32 salt = bytes32("entry");
+        bytes32 id = Keys.subject(pid(eoaA), salt);
+        _signed(PK_A, one(aCreate(salt)), new bytes[](1));
+        bytes memory body = _entry(target, edition, id, salt, "A");
+        ledger.publish(entryType, body);
+        body[body.length - 1] = bytes1(uint8(1));
+        try ledger.publish(entryType, body) { revert("noncanonical label padding admitted"); }
+        catch (bytes memory err) { expectSel(err, Ledger.E_REJECTED.selector, "alternate bytes for decoded label"); }
+    }
+
     function publishBadSnapshot(bytes32 edition, CuratedListProfile.EntryRef[] memory refs) external {
         _setSnapshot(edition, refs, 0);
     }

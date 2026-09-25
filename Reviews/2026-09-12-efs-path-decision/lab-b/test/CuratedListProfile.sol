@@ -36,6 +36,9 @@ contract CuratedEntryRule is IAcceptor {
         }
         if (target != refs[0] || target == bytes32(0) || salt == bytes32(0) || editionSalt == bytes32(0)
             || offset != 192 || labelLength > 64 || body.length != 224 + ((labelLength + 31) / 32) * 32) return false;
+        // ABI dynamic-string padding is part of the Record's content address.
+        // Reject alternate byte strings that decode to the same visible label.
+        for (uint256 i = 224 + labelLength; i < body.length; ++i) if (body[i] != 0) return false;
         return id == Keys.subject(curatorPrincipal, salt) && edition == Keys.subject(curatorPrincipal, editionSalt)
             && ledger.subjectCreatedAt(id) != 0 && ledger.subjectCreatedAt(edition) != 0;
     }
@@ -98,10 +101,11 @@ contract CuratedSnapshotRule is IAcceptor {
     }
 }
 
-/// Stateless reader/validator for curator-signed Ledger publications. The curator
-/// mints edition and entry Subjects, publishes typed immutable entry Records, and
-/// updates one edition HEAD binding to an immutable ordered snapshot Record.
-/// Membership, order, labels and provenance live in Ledger, not this contract.
+/// Stateless reader/validator for a curator-selected List. The curator mints
+/// edition and entry Subjects and signs the edition HEAD binding selecting an
+/// exact immutable snapshot. Anyone may publish valid Entry/Snapshot Records;
+/// that publication is not evidence of curator authorship. Membership, order,
+/// labels, selection and publication provenance remain distinct Ledger facts.
 contract CuratedListProfile {
     uint256 public constant MAX_ENTRIES = 8;
     struct EntryRef { bytes32 id; bytes32 recordId; }
