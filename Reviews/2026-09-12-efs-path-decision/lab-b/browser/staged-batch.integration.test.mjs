@@ -52,9 +52,30 @@ test('one staged five-operation save is guarded, signed once, and atomic on late
     assert.equal(placement.knowledge,'PRESENT');assert.equal(placement.value.target,plan.file);
   }
   const file=await sdk.readFile({file:plan.file,authors,context});
-  assert.equal(e.toUtf8String(file.value.revision.document),'final content');
+  assert.equal(file.knowledge,'PRESENT');assert.equal(file.coverage,'COMPLETE');
+  assert.equal(file.value.revision.document,'0x66696e616c20636f6e74656e74','exact final document bytes');
   assert.equal(file.value.revision.recordId,plan.newRevision);
-  assert.equal((await sdk.readTag({subject:plan.file,target:plan.file,concept,authors,context})).value.assessment,'PRESENT');
+  const tag=await sdk.readTag({subject:plan.file,target:plan.file,concept,authors,context});
+  assert.equal(tag.knowledge,'PRESENT');assert.equal(tag.coverage,'COMPLETE');assert.equal(tag.value.assessment,'PRESENT');
+  const listing=await sdk.listFolder({folder,authors,context});
+  assert.equal(listing.coverage,'COMPLETE');assert.equal(listing.nameCoverage,'COMPLETE');assert.equal(listing.kindCoverage,'COMPLETE');
+  assert.deepEqual(listing.value.map(row=>[row.name.value,row.file]).sort((a,b)=>a[0].localeCompare(b[0])),
+    [['a.txt',plan.file],['b.txt',plan.file]]);
+  const posting=(kind,value)=>hash(['bytes32','bytes32','uint256','uint256','bytes32'],[e.id('efs2/pk/1'),Z,kind,0,value]);
+  const scope=hash(['bytes32','bytes32','bytes32','bytes32'],
+    [e.id('efs2/vk/binding-scope/1'),e.zeroPadValue(author,32),TAG,plan.file]);
+  const finalRecord=plan.actions.findIndex(a=>a.kind===1
+    &&hash(['bytes32','bytes32','bytes32'],[e.id('efs2/record/1'),a.typeId,a.bodyHashOrRecordId])===plan.newRevision);
+  assert(finalRecord>=0,'signed final Record action for index readback');
+  const first=BigInt(outcome.evidence.firstAdmission),indexThrough=BigInt(context.admission);
+  for(const [family,coverageScope] of [['FAMILY_SCOPE',hash(['bytes32','bytes32'],[TAG,plan.file])],['FAMILY_BY_RECORD',Z]]){
+    const coverage=await env.call('index','coverage',[(await env.call('index',family))[0],coverageScope]);
+    assert.equal(Number(coverage[0]),2,`${family} complete`);assert.equal(coverage[1],1n);assert.equal(coverage[2],indexThrough);
+  }
+  const tagBindingOrdinal=(await env.call('index','postingAt',[posting(10,scope),0]))[0];
+  assert(tagBindingOrdinal>0n,'TAG scope posting retains a binding ordinal');
+  assert.equal((await env.call('ledger','bindingPosition',[tagBindingOrdinal]))[0],position(TAG,plan.file,concept));
+  assert.equal((await env.call('index','postingAt',[posting(12,plan.newRevision),0]))[0],first+BigInt(finalRecord));
 
   const stale=await sdk.prepare(recipe('before-sign','stale-a.txt','stale-b.txt'));
   await run('create',{name:'stale-a.txt',salt:e.id('staged-batch/competitor-1'),document:'competitor'});
@@ -97,6 +118,8 @@ test('one staged five-operation save is guarded, signed once, and atomic on late
   assert.equal((await sdk.readPlacement({folder,name:'late-a.txt',authors,context:await sdk.pin()})).knowledge,'ABSENT');
   assert.equal((await sdk.readPlacement({folder,name:'late-b.txt',authors,context:await sdk.pin()})).knowledge,'ABSENT');
   console.log(JSON.stringify({receipt:{status:successfulReceipt.status,gasUsed:successfulReceipt.gasUsed,
+    effectiveGasPriceWei:successfulReceipt.effectiveGasPriceWei,
+    fixtureExecutionFeeWei:(BigInt(successfulReceipt.gasUsed)*BigInt(successfulReceipt.effectiveGasPriceWei)).toString(),
     calldataBytes:successfulReceipt.calldataBytes,transactionHash:successfulReceipt.transactionHash},prompts,sends,
     negativeReceipts:env.transactions.filter(x=>x.label.startsWith('staged/')&&x.status==='REVERTED').map(x=>({label:x.label,gasUsed:x.gasUsed}))}));
 });
