@@ -1,0 +1,2049 @@
+{
+  "status": "PASS_RSS_DISCRIMINATOR",
+  "fixture": "actual-multi-author-gallery",
+  "mode": "fresh-250-child-rss-discriminator",
+  "safety": {
+    "wallMs": 900000,
+    "nodeRss": 805306368,
+    "anvilRss": 1610612736,
+    "outputBytes": 268435456,
+    "transactions": 650,
+    "files": 1000,
+    "paidCandidates": 50,
+    "gasLimit": "16777216"
+  },
+  "history": {
+    "states": 16,
+    "transactionBlocks": 32
+  },
+  "stages": [],
+  "checkpoints": [
+    {
+      "phase": "deployed",
+      "n": 0,
+      "elapsedMs": 829,
+      "nodeRss": 140214272,
+      "nodePeakRss": 140214272,
+      "anvilRss": 33030144,
+      "outputBytes": 688962,
+      "transactions": 38
+    },
+    {
+      "phase": "seed-one",
+      "n": 25,
+      "elapsedMs": 1043,
+      "nodeRss": 141754368,
+      "nodePeakRss": 141754368,
+      "anvilRss": 36700160,
+      "outputBytes": 903431,
+      "transactions": 44
+    },
+    {
+      "phase": "seed-one",
+      "n": 50,
+      "elapsedMs": 1270,
+      "nodeRss": 169115648,
+      "nodePeakRss": 169115648,
+      "anvilRss": 40484864,
+      "outputBytes": 1110891,
+      "transactions": 50
+    },
+    {
+      "phase": "seed-one",
+      "n": 75,
+      "elapsedMs": 1489,
+      "nodeRss": 170524672,
+      "nodePeakRss": 170524672,
+      "anvilRss": 44777472,
+      "outputBytes": 1318354,
+      "transactions": 56
+    },
+    {
+      "phase": "seed-one",
+      "n": 100,
+      "elapsedMs": 1729,
+      "nodeRss": 171393024,
+      "nodePeakRss": 171393024,
+      "anvilRss": 51511296,
+      "outputBytes": 1560358,
+      "transactions": 63
+    },
+    {
+      "phase": "seed-one",
+      "n": 125,
+      "elapsedMs": 1982,
+      "nodeRss": 172998656,
+      "nodePeakRss": 172998656,
+      "anvilRss": 56279040,
+      "outputBytes": 1767826,
+      "transactions": 69
+    },
+    {
+      "phase": "seed-one",
+      "n": 150,
+      "elapsedMs": 2186,
+      "nodeRss": 178847744,
+      "nodePeakRss": 178847744,
+      "anvilRss": 59916288,
+      "outputBytes": 1975296,
+      "transactions": 75
+    },
+    {
+      "phase": "seed-one",
+      "n": 175,
+      "elapsedMs": 2382,
+      "nodeRss": 179109888,
+      "nodePeakRss": 179109888,
+      "anvilRss": 61931520,
+      "outputBytes": 2182764,
+      "transactions": 81
+    },
+    {
+      "phase": "seed-one",
+      "n": 200,
+      "elapsedMs": 2613,
+      "nodeRss": 179240960,
+      "nodePeakRss": 179240960,
+      "anvilRss": 69287936,
+      "outputBytes": 2424775,
+      "transactions": 88
+    },
+    {
+      "phase": "seed-one",
+      "n": 225,
+      "elapsedMs": 2819,
+      "nodeRss": 179322880,
+      "nodePeakRss": 179322880,
+      "anvilRss": 75546624,
+      "outputBytes": 2632245,
+      "transactions": 94
+    },
+    {
+      "phase": "seed-one",
+      "n": 250,
+      "elapsedMs": 3047,
+      "nodeRss": 179388416,
+      "nodePeakRss": 179388416,
+      "anvilRss": 80822272,
+      "outputBytes": 2858383,
+      "transactions": 101
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 1,
+      "elapsedMs": 3114,
+      "nodeRss": 179863552,
+      "nodePeakRss": 179863552,
+      "anvilRss": 81395712,
+      "outputBytes": 2908894,
+      "transactions": 103
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 2,
+      "elapsedMs": 3176,
+      "nodeRss": 180060160,
+      "nodePeakRss": 180060160,
+      "anvilRss": 82034688,
+      "outputBytes": 2959420,
+      "transactions": 105
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 3,
+      "elapsedMs": 3240,
+      "nodeRss": 180305920,
+      "nodePeakRss": 180305920,
+      "anvilRss": 82051072,
+      "outputBytes": 3008549,
+      "transactions": 107
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 4,
+      "elapsedMs": 3305,
+      "nodeRss": 180453376,
+      "nodePeakRss": 180453376,
+      "anvilRss": 82444288,
+      "outputBytes": 3057678,
+      "transactions": 109
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 5,
+      "elapsedMs": 3370,
+      "nodeRss": 180486144,
+      "nodePeakRss": 180486144,
+      "anvilRss": 82739200,
+      "outputBytes": 3106807,
+      "transactions": 111
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 6,
+      "elapsedMs": 3444,
+      "nodeRss": 180551680,
+      "nodePeakRss": 180551680,
+      "anvilRss": 83099648,
+      "outputBytes": 3155936,
+      "transactions": 113
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 7,
+      "elapsedMs": 3513,
+      "nodeRss": 180633600,
+      "nodePeakRss": 180633600,
+      "anvilRss": 83263488,
+      "outputBytes": 3205065,
+      "transactions": 115
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 8,
+      "elapsedMs": 3575,
+      "nodeRss": 180682752,
+      "nodePeakRss": 180682752,
+      "anvilRss": 83509248,
+      "outputBytes": 3254194,
+      "transactions": 117
+    },
+    {
+      "phase": "seed-complete",
+      "n": 250,
+      "elapsedMs": 3605,
+      "nodeRss": 180682752,
+      "nodePeakRss": 180682752,
+      "anvilRss": 83574784,
+      "outputBytes": 3261617,
+      "transactions": 118
+    },
+    {
+      "phase": "child-eight-complete",
+      "n": 250,
+      "elapsedMs": 3979,
+      "nodeRss": 180699136,
+      "nodePeakRss": 180699136,
+      "anvilRss": 93847552,
+      "outputBytes": 3608097,
+      "transactions": 118
+    },
+    {
+      "phase": "child-sequence-complete",
+      "n": 250,
+      "elapsedMs": 4540,
+      "nodeRss": 180715520,
+      "nodePeakRss": 180715520,
+      "anvilRss": 97468416,
+      "outputBytes": 3653694,
+      "transactions": 118
+    }
+  ],
+  "sources": {
+    "gitHead": "12eab74c30536aabda8425301ee6f0c635b034e2",
+    "files": {
+      "src/ContractSignatureEvidenceStore.sol": "0xa058f02c0449945937c99f1b697ac63ecf5d656844c13e7c3ee731c7e1d11bb9",
+      "src/ExecutionSlots.sol": "0xd3373859ef68327e54a0c761c7863c4456d34e1b444fc5036f465d76feb9e927",
+      "src/IndexFieldProfile.sol": "0x10fd5ea0e3822f6f01945e34e7780ab66458f657395c394b5e7696aa68174668",
+      "src/IndexReplaySource.sol": "0xf01bd2d59999edbaf1951bb948d141b710006ff74ec608959077216596851cef",
+      "src/IndexSource.sol": "0xdb8c85802584f29530fc4484a3280f94474efcd72219ec1ea6dccfb270d07639",
+      "src/IndexWork.sol": "0x62960f1d86ab4c8db13f33764dedef9ad84747175aaa4a264524e37630fe244e",
+      "src/Interfaces.sol": "0xbe882e27e718c00a26476935b822d0301cbee8c611c152cce15b5e2d17b2dbd0",
+      "src/Keys.sol": "0x7072116cb4809ae6d857031bdadb2d23e2373203a335781ee2383ae9fbf7abee",
+      "src/Ledger.sol": "0x558bc729e501ff1c0fa48ff3854cf897f1f2df9ff404c0a43b1815c182bd3753",
+      "src/PublicationPreparation.sol": "0x30ca7927d2aeaa989785beed80e03dfdb3cfef71ca9288538f8496f187635600",
+      "src/PublicationSupport.sol": "0x619e84977b9dc1381c9ec982f724a57b241780778149a7b4bb7d4dfcd3fe7cb4",
+      "src/ReadSetStorage.sol": "0x132c48a528664721b3e170de19fe478d40c59180be64755d7729a5c97cf8ab04",
+      "src/DescribedTypeProfile.sol": "0x9571406c5007d3924a0efdaba2af415f26507aa1eb97a0be9187c4e66cfef2a0",
+      "src/IndexModule.sol": "0x0caca9f56f130c80968bd9ee208527dd52f18d9820737200547c7a3fd33eda31",
+      "src/LensReader.sol": "0xa4a8f32b20eaff061f5339e28961baf820b7e7f84fdbd1e44a61f08ff08ece38",
+      "src/TypeRegistry.sol": "0x8f95b1c40e5f498c60330f7e28b8e209154c191b715d1b8ea14328da5227ed09",
+      "test/FilesCarrierProfile.sol": "0x03a5756b722d1c8941fc9b2b1c4a5b09f2fb0b8adf930e0cc89b6fa2f9b2e320",
+      "test/FilesDirectoryProfile.sol": "0xd5a78dd9cb3a63894dc6c7e9def5d9a9c1dceab065470e59e85aadb85007e7f6",
+      "test/FilesJoinedProfile.sol": "0xcf86667d05ada0bef5fce3f7550991699c202ca0a15f7731a6b7f62b3553136b",
+      "test/FilesLiveIndex.sol": "0xf46ded63d2eba10d75bc09a80649334e40efc1303f068918377e5a092da427e7",
+      "test/FilesNamesProfile.sol": "0x892bc262ba82b57a7f6a06e793f0380f35446e196efdd2daf83f524875d22189",
+      "test/FilesPageReader.sol": "0x6378f97a6ef6b2a4b3352b37b826463154acb1e2ed6826f620d9328f7b469c54",
+      "test/FilesScopeState.sol": "0x488fabb7e12c6e3bebc05edc1a7acfb9ef306c6fcc352f8d29e072c0d86fc1f1",
+      "script/measure-joined.mjs": "0x4bc480d44b75125c00d73d652db966668cd21687becbe79719544d40a6383f66",
+      "script/diagnose-joined-read.mjs": "0x4d85bcce01e7610b864686637c0655234d7cd6f031cd0120db868258873b32c3",
+      "script/compact-environment.mjs": "0x3b73435562f863d59cd1e341a1cbd07f80e8898ebebb8cecc733d7f361d453e9",
+      "browser/compact-sdk.mjs": "0x6f362f40909b7335d9c5002c463d53495ff823a986e64d302ea88246605049d3",
+      "browser/compact-sdk-v2.mjs": "0x0f5af5ab79e9dcfc547287668302af9bf5a6e7e5d59a974bbd9bf16472b2deda",
+      "browser/compact-files-sdk.mjs": "0xbbdc6b69c5364427772fffa284f30dec0b07b41d03a5aacf7627d824029a2d30"
+    },
+    "compiler": [
+      {
+        "name": "Ledger",
+        "compiler": {
+          "version": "0.8.30+commit.73712a01"
+        },
+        "settings": {
+          "remappings": [
+            "src/libraries/=src/vendor/optimism/"
+          ],
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "compilationTarget": {
+            "src/Ledger.sol": "Ledger"
+          },
+          "evmVersion": "cancun",
+          "libraries": {},
+          "viaIR": true
+        }
+      },
+      {
+        "name": "FilesPageReader",
+        "compiler": {
+          "version": "0.8.30+commit.73712a01"
+        },
+        "settings": {
+          "remappings": [
+            "src/libraries/=src/vendor/optimism/"
+          ],
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "compilationTarget": {
+            "test/FilesPageReader.sol": "FilesPageReader"
+          },
+          "evmVersion": "cancun",
+          "libraries": {},
+          "viaIR": true
+        }
+      },
+      {
+        "name": "FilesLiveLens",
+        "compiler": {
+          "version": "0.8.30+commit.73712a01"
+        },
+        "settings": {
+          "remappings": [
+            "src/libraries/=src/vendor/optimism/"
+          ],
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "compilationTarget": {
+            "test/FilesLiveIndex.sol": "FilesLiveLens"
+          },
+          "evmVersion": "cancun",
+          "libraries": {},
+          "viaIR": true
+        }
+      },
+      {
+        "name": "FilesCarrierIndex",
+        "compiler": {
+          "version": "0.8.30+commit.73712a01"
+        },
+        "settings": {
+          "remappings": [
+            "src/libraries/=src/vendor/optimism/"
+          ],
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "compilationTarget": {
+            "test/FilesCarrierProfile.sol": "FilesCarrierIndex"
+          },
+          "evmVersion": "cancun",
+          "libraries": {},
+          "viaIR": true
+        }
+      }
+    ],
+    "anvil": "anvil Version: 1.7.1\nCommit SHA: 4072e48705af9d93e3c0f6e29e93b5e9a40caed8\nBuild Timestamp: 2026-05-08T07:54:31.470926000Z (1778226871)\nBuild Profile: dist",
+    "node": "v26.0.0",
+    "hardfork": "cancun",
+    "contentProfile": "raw-sha256-aesgcm-v2",
+    "measurementScriptHash": "0xacc150ce8a27f45d3ea6cc5ad6fe619a98023bf21bd4434cb2bb4011c8c83653",
+    "rssChildScriptHash": "0x58dbb02c505eefb0cd4222eb8f02260ff0aad483b7717706b9c6f45b56422ffb"
+  },
+  "seedProjections": [],
+  "limits": [
+    "Disposable loopback-only Anvil; no public-RPC latency or fee inference.",
+    "A successful paid page is not proof that one onchain transaction can consume the whole gallery.",
+    "Paid cursor advancement is supplied from an eth_call to the same pinned reader; FilesPagePaid emits only a digest.",
+    "Header qualification does not fetch or verify full content bodies.",
+    "Both children are read-only; no paid wrapper, warm pass, or 1000-File traversal in this experiment."
+  ],
+  "seed": {
+    "elapsedMs": 2772,
+    "transactions": 80,
+    "files": 250
+  },
+  "children": [
+    {
+      "sequence": "eight",
+      "pid": 9906,
+      "records": [
+        {
+          "kind": "pin",
+          "width": 8,
+          "elapsedMs": 61.98141600000001,
+          "memory": {
+            "rss": 106889216,
+            "heapTotal": 32653312,
+            "heapUsed": 19332800,
+            "external": 4465501,
+            "arrayBuffers": 755124,
+            "peakRss": 106889216
+          },
+          "cache": {
+            "attempts": 88,
+            "hits": 0,
+            "misses": 88,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 88,
+            "bytes": 353128,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 1,
+          "elapsedMs": 35.55879199999998,
+          "scanned": 32,
+          "scannedSoFar": 32,
+          "rawTotal": 251,
+          "rows": 32,
+          "rowsSoFar": 32,
+          "coverage": "PARTIAL",
+          "rpcCalls": 11,
+          "httpRequests": 11,
+          "responseBytes": 95680,
+          "memory": {
+            "rss": 201834496,
+            "heapTotal": 33439744,
+            "heapUsed": 23441432,
+            "external": 56905606,
+            "arrayBuffers": 53195210,
+            "peakRss": 201834496
+          },
+          "cache": {
+            "attempts": 97,
+            "hits": 0,
+            "misses": 97,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 97,
+            "bytes": 448688,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 2,
+          "elapsedMs": 8.880207999999982,
+          "scanned": 32,
+          "scannedSoFar": 64,
+          "rawTotal": 251,
+          "rows": 0,
+          "rowsSoFar": 32,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 5252,
+          "memory": {
+            "rss": 202604544,
+            "heapTotal": 34750464,
+            "heapUsed": 16314696,
+            "external": 3901153,
+            "arrayBuffers": 190757,
+            "peakRss": 202604544
+          },
+          "cache": {
+            "attempts": 106,
+            "hits": 8,
+            "misses": 98,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 98,
+            "bytes": 452920,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 3,
+          "elapsedMs": 31.966250000000002,
+          "scanned": 32,
+          "scannedSoFar": 96,
+          "rawTotal": 251,
+          "rows": 31,
+          "rowsSoFar": 63,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 92548,
+          "memory": {
+            "rss": 290897920,
+            "heapTotal": 44974080,
+            "heapUsed": 22222944,
+            "external": 98213190,
+            "arrayBuffers": 94502794,
+            "peakRss": 290897920
+          },
+          "cache": {
+            "attempts": 115,
+            "hits": 16,
+            "misses": 99,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 99,
+            "bytes": 544448,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 4,
+          "elapsedMs": 8.433334000000002,
+          "scanned": 32,
+          "scannedSoFar": 128,
+          "rawTotal": 251,
+          "rows": 1,
+          "rowsSoFar": 64,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 8068,
+          "memory": {
+            "rss": 291323904,
+            "heapTotal": 44974080,
+            "heapUsed": 24316400,
+            "external": 98654351,
+            "arrayBuffers": 94943955,
+            "peakRss": 291323904
+          },
+          "cache": {
+            "attempts": 124,
+            "hits": 24,
+            "misses": 100,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 100,
+            "bytes": 551496,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 5,
+          "elapsedMs": 30.794125000000008,
+          "scanned": 32,
+          "scannedSoFar": 160,
+          "rawTotal": 251,
+          "rows": 30,
+          "rowsSoFar": 94,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 89732,
+          "memory": {
+            "rss": 330465280,
+            "heapTotal": 52838400,
+            "heapUsed": 16111776,
+            "external": 121019687,
+            "arrayBuffers": 24670590,
+            "peakRss": 330465280
+          },
+          "cache": {
+            "attempts": 133,
+            "hits": 32,
+            "misses": 101,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 101,
+            "bytes": 640208,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 6,
+          "elapsedMs": 9.672584000000029,
+          "scanned": 32,
+          "scannedSoFar": 192,
+          "rawTotal": 251,
+          "rows": 3,
+          "rowsSoFar": 97,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 13700,
+          "memory": {
+            "rss": 331939840,
+            "heapTotal": 52838400,
+            "heapUsed": 19551576,
+            "external": 9755957,
+            "arrayBuffers": 6054608,
+            "peakRss": 331939840
+          },
+          "cache": {
+            "attempts": 142,
+            "hits": 40,
+            "misses": 102,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 102,
+            "bytes": 652888,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 7,
+          "elapsedMs": 24.158333000000027,
+          "scanned": 32,
+          "scannedSoFar": 224,
+          "rawTotal": 251,
+          "rows": 28,
+          "rowsSoFar": 125,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 84100,
+          "memory": {
+            "rss": 335953920,
+            "heapTotal": 52838400,
+            "heapUsed": 21103344,
+            "external": 67690511,
+            "arrayBuffers": 63989162,
+            "peakRss": 335953920
+          },
+          "cache": {
+            "attempts": 151,
+            "hits": 48,
+            "misses": 103,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 103,
+            "bytes": 735968,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 8,
+          "elapsedMs": 7.160124999999994,
+          "scanned": 27,
+          "scannedSoFar": 251,
+          "rawTotal": 251,
+          "rows": 0,
+          "rowsSoFar": 125,
+          "coverage": "COMPLETE",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 4548,
+          "memory": {
+            "rss": 335986688,
+            "heapTotal": 52838400,
+            "heapUsed": 22645568,
+            "external": 67752880,
+            "arrayBuffers": 64051531,
+            "peakRss": 335986688
+          },
+          "cache": {
+            "attempts": 160,
+            "hits": 56,
+            "misses": 104,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 104,
+            "bytes": 739496,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "released",
+          "width": 8,
+          "memory": {
+            "rss": 335872000,
+            "heapTotal": 51789824,
+            "heapUsed": 12809888,
+            "external": 67752880,
+            "arrayBuffers": 47930952,
+            "peakRss": 336003072
+          }
+        },
+        {
+          "kind": "complete",
+          "sequence": "eight",
+          "results": [
+            {
+              "width": 8,
+              "pages": 8,
+              "scanned": 251,
+              "rows": 125,
+              "memory": {
+                "rss": 335986688,
+                "heapTotal": 52838400,
+                "heapUsed": 22664024,
+                "external": 67752880,
+                "arrayBuffers": 64051531,
+                "peakRss": 335986688
+              },
+              "cache": {
+                "attempts": 160,
+                "hits": 56,
+                "misses": 104,
+                "inflightHits": 0,
+                "evictions": 0,
+                "oversize": 0,
+                "entries": 104,
+                "bytes": 739496,
+                "inflight": 0,
+                "maxEntries": 512,
+                "maxBytes": 8388608,
+                "maxInflight": 64,
+                "enabled": true,
+                "contexts": 1,
+                "contextHits": 0,
+                "contextMisses": 1,
+                "contextBytes": 1420,
+                "contextLimits": {
+                  "maxEntries": 8,
+                  "maxBytes": 131072
+                },
+                "groupWidth": 16
+              }
+            }
+          ],
+          "memory": {
+            "rss": 335872000,
+            "heapTotal": 51789824,
+            "heapUsed": 12837104,
+            "external": 67752880,
+            "arrayBuffers": 15915944,
+            "peakRss": 336003072
+          },
+          "transport": {
+            "calls": 127,
+            "wireCalls": 127,
+            "httpRequests": 127,
+            "httpBatches": 0,
+            "requestBytes": 45149,
+            "responseBytes": 731290,
+            "fallbacks": 0,
+            "byMethod": {
+              "eth_getBlockByNumber": 19,
+              "eth_chainId": 1,
+              "eth_call": 81,
+              "eth_getCode": 26
+            },
+            "byRequest": {
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getBlockByNumber\",\"target\":null,\"selector\":null,\"blockHash\":null}": 19,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_chainId\",\"target\":null,\"selector\":null,\"blockHash\":null}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x817cc1ea\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x17219522\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":\"0x900cf0cf\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x7b103999\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x287ada37\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1\",\"selector\":\"0x56397c35\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1\",\"selector\":\"0x2986c0e5\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x56397c35\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x56397c35\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x3b24916c\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x38a0fbfd\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x56397c35\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x67e828bf\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":\"0x56397c35\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":\"0x112666b7\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":\"0x2986c0e5\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":\"0xb546ea55\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 9,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":\"0x64b69433\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 9,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x0165878A594ca255338adfa4d48449f69242Eb8F\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x1fab1936\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x697e31e5\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x33526ba9\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x5687a6c0\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x190b402e\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x21304c60\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x74ba3fcb\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x9681470b\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x1fab1936\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x697e31e5\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x33526ba9\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x190b402e\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x21304c60\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x74ba3fcb\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9\",\"selector\":\"0x697e31e5\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x0134956e\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x02c742dc\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x610178dA211FEF7D417bC0e6FeD39F05609AD788\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x9A676e781A523b5d0C0e43731313A708CB607508\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x68B1D87F95878fE05B998F19b66F4baba5De1aed\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0xc8619ce9\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 5,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x7ed79413\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 5,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xd5bfc2c4\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x490423a3\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xca3e077c\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xf698da25\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x1660e329\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x69acff0e\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xb827bbe0\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x56c35ac8\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512\",\"selector\":\"0xafce3b99\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1\",\"selector\":\"0xafce3b99\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512\",\"selector\":\"0x3d27fdde\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512\",\"selector\":\"0x3d045107\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xCafac3dD18aC6c6e92c921884f9E4176737C052c\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x70997970C51812dc3A010C7d01b50e0d17dc79C8\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x90F79bf6EB2c4f870365E785982E1f101E93b906\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x976EA74026E726554dB657fA54763abd0C3a0aa9\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x14dC79964da2C08b23698B3D3cc7Ca32193d9955\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xa0Ee7A142d267C1f36714E4a8F75612F20a79720\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":\"0x56dc607a\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 8
+            },
+            "phases": {
+              "unscoped": {
+                "calls": 127,
+                "wireCalls": 127,
+                "httpRequests": 127,
+                "httpBatches": 0,
+                "requestBytes": 45149,
+                "responseBytes": 731290,
+                "fallbacks": 0
+              }
+            },
+            "droppedDiagnosticKeys": 0
+          }
+        }
+      ],
+      "maxCombinedNodeRss": 516702208,
+      "exitCode": 0,
+      "stopReason": null,
+      "stderr": ""
+    },
+    {
+      "sequence": "one-then-eight",
+      "pid": 9931,
+      "records": [
+        {
+          "kind": "pin",
+          "width": 1,
+          "elapsedMs": 62.4645,
+          "memory": {
+            "rss": 108003328,
+            "heapTotal": 32653312,
+            "heapUsed": 21836328,
+            "external": 4593953,
+            "arrayBuffers": 883576,
+            "peakRss": 108003328
+          },
+          "cache": {
+            "attempts": 88,
+            "hits": 0,
+            "misses": 88,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 88,
+            "bytes": 353128,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 1,
+          "page": 1,
+          "elapsedMs": 20.141500000000008,
+          "scanned": 32,
+          "scannedSoFar": 32,
+          "rawTotal": 250,
+          "rows": 16,
+          "rowsSoFar": 16,
+          "coverage": "PARTIAL",
+          "rpcCalls": 4,
+          "httpRequests": 4,
+          "responseBytes": 50344,
+          "memory": {
+            "rss": 151502848,
+            "heapTotal": 33701888,
+            "heapUsed": 20548216,
+            "external": 36739365,
+            "arrayBuffers": 33028969,
+            "peakRss": 151502848
+          },
+          "cache": {
+            "attempts": 90,
+            "hits": 0,
+            "misses": 90,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 90,
+            "bytes": 401504,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 1,
+          "page": 2,
+          "elapsedMs": 19.940249999999992,
+          "scanned": 32,
+          "scannedSoFar": 64,
+          "rawTotal": 250,
+          "rows": 16,
+          "rowsSoFar": 32,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 50308,
+          "memory": {
+            "rss": 204865536,
+            "heapTotal": 43139072,
+            "heapUsed": 17416536,
+            "external": 80107735,
+            "arrayBuffers": 39667662,
+            "peakRss": 204881920
+          },
+          "cache": {
+            "attempts": 92,
+            "hits": 1,
+            "misses": 91,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 91,
+            "bytes": 450344,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 1,
+          "page": 3,
+          "elapsedMs": 16.215541,
+          "scanned": 32,
+          "scannedSoFar": 96,
+          "rawTotal": 250,
+          "rows": 16,
+          "rowsSoFar": 48,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 50308,
+          "memory": {
+            "rss": 208764928,
+            "heapTotal": 46284800,
+            "heapUsed": 16721728,
+            "external": 68852532,
+            "arrayBuffers": 20755250,
+            "peakRss": 208764928
+          },
+          "cache": {
+            "attempts": 94,
+            "hits": 2,
+            "misses": 92,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 92,
+            "bytes": 499184,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 1,
+          "page": 4,
+          "elapsedMs": 15.655166000000008,
+          "scanned": 32,
+          "scannedSoFar": 128,
+          "rawTotal": 250,
+          "rows": 16,
+          "rowsSoFar": 64,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 50308,
+          "memory": {
+            "rss": 209158144,
+            "heapTotal": 46546944,
+            "heapUsed": 16236120,
+            "external": 61471800,
+            "arrayBuffers": 21675010,
+            "peakRss": 209158144
+          },
+          "cache": {
+            "attempts": 96,
+            "hits": 3,
+            "misses": 93,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 93,
+            "bytes": 548024,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 1,
+          "page": 5,
+          "elapsedMs": 13.681375000000031,
+          "scanned": 32,
+          "scannedSoFar": 160,
+          "rawTotal": 250,
+          "rows": 16,
+          "rowsSoFar": 80,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 50308,
+          "memory": {
+            "rss": 209190912,
+            "heapTotal": 46546944,
+            "heapUsed": 27291776,
+            "external": 47251192,
+            "arrayBuffers": 43540796,
+            "peakRss": 209190912
+          },
+          "cache": {
+            "attempts": 98,
+            "hits": 4,
+            "misses": 94,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 94,
+            "bytes": 596864,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 1,
+          "page": 6,
+          "elapsedMs": 18.257167000000038,
+          "scanned": 32,
+          "scannedSoFar": 192,
+          "rawTotal": 250,
+          "rows": 16,
+          "rowsSoFar": 96,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 50308,
+          "memory": {
+            "rss": 209649664,
+            "heapTotal": 46546944,
+            "heapUsed": 15660184,
+            "external": 47239249,
+            "arrayBuffers": 16591071,
+            "peakRss": 209928192
+          },
+          "cache": {
+            "attempts": 100,
+            "hits": 5,
+            "misses": 95,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 95,
+            "bytes": 645704,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 1,
+          "page": 7,
+          "elapsedMs": 15.927624999999978,
+          "scanned": 32,
+          "scannedSoFar": 224,
+          "rawTotal": 250,
+          "rows": 16,
+          "rowsSoFar": 112,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 50308,
+          "memory": {
+            "rss": 209731584,
+            "heapTotal": 46546944,
+            "heapUsed": 15841296,
+            "external": 59723905,
+            "arrayBuffers": 18728170,
+            "peakRss": 209928192
+          },
+          "cache": {
+            "attempts": 102,
+            "hits": 6,
+            "misses": 96,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 96,
+            "bytes": 694544,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 1,
+          "page": 8,
+          "elapsedMs": 12.86462499999999,
+          "scanned": 26,
+          "scannedSoFar": 250,
+          "rawTotal": 250,
+          "rows": 13,
+          "rowsSoFar": 125,
+          "coverage": "COMPLETE",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 41156,
+          "memory": {
+            "rss": 234848256,
+            "heapTotal": 46546944,
+            "heapUsed": 24999832,
+            "external": 50912521,
+            "arrayBuffers": 47211172,
+            "peakRss": 234848256
+          },
+          "cache": {
+            "attempts": 104,
+            "hits": 7,
+            "misses": 97,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 97,
+            "bytes": 734232,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "released",
+          "width": 1,
+          "memory": {
+            "rss": 234782720,
+            "heapTotal": 45498368,
+            "heapUsed": 12769352,
+            "external": 3855343,
+            "arrayBuffers": 97512,
+            "peakRss": 234913792
+          }
+        },
+        {
+          "kind": "pin",
+          "width": 8,
+          "elapsedMs": 35.08100000000002,
+          "memory": {
+            "rss": 236552192,
+            "heapTotal": 47857664,
+            "heapUsed": 16549456,
+            "external": 4185413,
+            "arrayBuffers": 484064,
+            "peakRss": 236552192
+          },
+          "cache": {
+            "attempts": 88,
+            "hits": 0,
+            "misses": 88,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 88,
+            "bytes": 353128,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 1,
+          "elapsedMs": 37.25745800000004,
+          "scanned": 32,
+          "scannedSoFar": 32,
+          "rawTotal": 251,
+          "rows": 32,
+          "rowsSoFar": 32,
+          "coverage": "PARTIAL",
+          "rpcCalls": 11,
+          "httpRequests": 11,
+          "responseBytes": 95684,
+          "memory": {
+            "rss": 396394496,
+            "heapTotal": 49692672,
+            "heapUsed": 23779248,
+            "external": 104471575,
+            "arrayBuffers": 100770226,
+            "peakRss": 396394496
+          },
+          "cache": {
+            "attempts": 97,
+            "hits": 0,
+            "misses": 97,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 97,
+            "bytes": 448688,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 2,
+          "elapsedMs": 7.48395800000003,
+          "scanned": 32,
+          "scannedSoFar": 64,
+          "rawTotal": 251,
+          "rows": 0,
+          "rowsSoFar": 32,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 5252,
+          "memory": {
+            "rss": 396443648,
+            "heapTotal": 49692672,
+            "heapUsed": 25345000,
+            "external": 104561336,
+            "arrayBuffers": 100859987,
+            "peakRss": 396443648
+          },
+          "cache": {
+            "attempts": 106,
+            "hits": 8,
+            "misses": 98,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 98,
+            "bytes": 452920,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 3,
+          "elapsedMs": 29.02558399999998,
+          "scanned": 32,
+          "scannedSoFar": 96,
+          "rawTotal": 251,
+          "rows": 31,
+          "rowsSoFar": 63,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 92548,
+          "memory": {
+            "rss": 430800896,
+            "heapTotal": 50479104,
+            "heapUsed": 18787936,
+            "external": 101288907,
+            "arrayBuffers": 97587558,
+            "peakRss": 430800896
+          },
+          "cache": {
+            "attempts": 115,
+            "hits": 16,
+            "misses": 99,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 99,
+            "bytes": 544448,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 4,
+          "elapsedMs": 8.98637500000001,
+          "scanned": 32,
+          "scannedSoFar": 128,
+          "rawTotal": 251,
+          "rows": 1,
+          "rowsSoFar": 64,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 8068,
+          "memory": {
+            "rss": 431161344,
+            "heapTotal": 50479104,
+            "heapUsed": 20953888,
+            "external": 101730068,
+            "arrayBuffers": 98028719,
+            "peakRss": 431161344
+          },
+          "cache": {
+            "attempts": 124,
+            "hits": 24,
+            "misses": 100,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 100,
+            "bytes": 551496,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 5,
+          "elapsedMs": 33.63333399999999,
+          "scanned": 32,
+          "scannedSoFar": 160,
+          "rawTotal": 251,
+          "rows": 30,
+          "rowsSoFar": 94,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 89732,
+          "memory": {
+            "rss": 502644736,
+            "heapTotal": 58867712,
+            "heapUsed": 18720512,
+            "external": 248889190,
+            "arrayBuffers": 160985094,
+            "peakRss": 502644736
+          },
+          "cache": {
+            "attempts": 133,
+            "hits": 32,
+            "misses": 101,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 101,
+            "bytes": 640208,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 6,
+          "elapsedMs": 9.818333999999993,
+          "scanned": 32,
+          "scannedSoFar": 192,
+          "rawTotal": 251,
+          "rows": 3,
+          "rowsSoFar": 97,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 13700,
+          "memory": {
+            "rss": 504201216,
+            "heapTotal": 58867712,
+            "heapUsed": 22118664,
+            "external": 86732989,
+            "arrayBuffers": 83031640,
+            "peakRss": 504201216
+          },
+          "cache": {
+            "attempts": 142,
+            "hits": 40,
+            "misses": 102,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 102,
+            "bytes": 652888,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 7,
+          "elapsedMs": 27.537082999999996,
+          "scanned": 32,
+          "scannedSoFar": 224,
+          "rawTotal": 251,
+          "rows": 28,
+          "rowsSoFar": 125,
+          "coverage": "PARTIAL",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 84100,
+          "memory": {
+            "rss": 512720896,
+            "heapTotal": 63586304,
+            "heapUsed": 17163064,
+            "external": 215299519,
+            "arrayBuffers": 113123170,
+            "peakRss": 512720896
+          },
+          "cache": {
+            "attempts": 151,
+            "hits": 48,
+            "misses": 103,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 103,
+            "bytes": 735968,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "page",
+          "width": 8,
+          "page": 8,
+          "elapsedMs": 7.353583999999955,
+          "scanned": 27,
+          "scannedSoFar": 251,
+          "rawTotal": 251,
+          "rows": 0,
+          "rowsSoFar": 125,
+          "coverage": "COMPLETE",
+          "rpcCalls": 3,
+          "httpRequests": 3,
+          "responseBytes": 4548,
+          "memory": {
+            "rss": 512737280,
+            "heapTotal": 63586304,
+            "heapUsed": 18669920,
+            "external": 67993616,
+            "arrayBuffers": 64292267,
+            "peakRss": 512737280
+          },
+          "cache": {
+            "attempts": 160,
+            "hits": 56,
+            "misses": 104,
+            "inflightHits": 0,
+            "evictions": 0,
+            "oversize": 0,
+            "entries": 104,
+            "bytes": 739496,
+            "inflight": 0,
+            "maxEntries": 512,
+            "maxBytes": 8388608,
+            "maxInflight": 64,
+            "enabled": true,
+            "contexts": 1,
+            "contextHits": 0,
+            "contextMisses": 1,
+            "contextBytes": 1420,
+            "contextLimits": {
+              "maxEntries": 8,
+              "maxBytes": 131072
+            },
+            "groupWidth": 16
+          }
+        },
+        {
+          "kind": "released",
+          "width": 8,
+          "memory": {
+            "rss": 512737280,
+            "heapTotal": 63586304,
+            "heapUsed": 13028560,
+            "external": 67993616,
+            "arrayBuffers": 45248044,
+            "peakRss": 512737280
+          }
+        },
+        {
+          "kind": "complete",
+          "sequence": "one-then-eight",
+          "results": [
+            {
+              "width": 1,
+              "pages": 8,
+              "scanned": 250,
+              "rows": 125,
+              "memory": {
+                "rss": 234848256,
+                "heapTotal": 46546944,
+                "heapUsed": 25007936,
+                "external": 50912521,
+                "arrayBuffers": 47211172,
+                "peakRss": 234848256
+              },
+              "cache": {
+                "attempts": 104,
+                "hits": 7,
+                "misses": 97,
+                "inflightHits": 0,
+                "evictions": 0,
+                "oversize": 0,
+                "entries": 97,
+                "bytes": 734232,
+                "inflight": 0,
+                "maxEntries": 512,
+                "maxBytes": 8388608,
+                "maxInflight": 64,
+                "enabled": true,
+                "contexts": 1,
+                "contextHits": 0,
+                "contextMisses": 1,
+                "contextBytes": 1420,
+                "contextLimits": {
+                  "maxEntries": 8,
+                  "maxBytes": 131072
+                },
+                "groupWidth": 16
+              }
+            },
+            {
+              "width": 8,
+              "pages": 8,
+              "scanned": 251,
+              "rows": 125,
+              "memory": {
+                "rss": 512737280,
+                "heapTotal": 63586304,
+                "heapUsed": 18676128,
+                "external": 67993616,
+                "arrayBuffers": 64292267,
+                "peakRss": 512737280
+              },
+              "cache": {
+                "attempts": 160,
+                "hits": 56,
+                "misses": 104,
+                "inflightHits": 0,
+                "evictions": 0,
+                "oversize": 0,
+                "entries": 104,
+                "bytes": 739496,
+                "inflight": 0,
+                "maxEntries": 512,
+                "maxBytes": 8388608,
+                "maxInflight": 64,
+                "enabled": true,
+                "contexts": 1,
+                "contextHits": 0,
+                "contextMisses": 1,
+                "contextBytes": 1420,
+                "contextLimits": {
+                  "maxEntries": 8,
+                  "maxBytes": 131072
+                },
+                "groupWidth": 16
+              }
+            }
+          ],
+          "memory": {
+            "rss": 512737280,
+            "heapTotal": 63586304,
+            "heapUsed": 13033232,
+            "external": 67993616,
+            "arrayBuffers": 31777996,
+            "peakRss": 512737280
+          },
+          "transport": {
+            "calls": 247,
+            "wireCalls": 247,
+            "httpRequests": 247,
+            "httpBatches": 0,
+            "requestBytes": 85338,
+            "responseBytes": 1462408,
+            "fallbacks": 0,
+            "byMethod": {
+              "eth_getBlockByNumber": 38,
+              "eth_chainId": 2,
+              "eth_call": 162,
+              "eth_getCode": 45
+            },
+            "byRequest": {
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getBlockByNumber\",\"target\":null,\"selector\":null,\"blockHash\":null}": 38,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_chainId\",\"target\":null,\"selector\":null,\"blockHash\":null}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x817cc1ea\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x17219522\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":\"0x900cf0cf\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x7b103999\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x287ada37\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1\",\"selector\":\"0x56397c35\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1\",\"selector\":\"0x2986c0e5\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x56397c35\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x56397c35\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x3b24916c\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x38a0fbfd\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x56397c35\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x67e828bf\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":\"0x56397c35\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":\"0x112666b7\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":\"0x2986c0e5\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":\"0xb546ea55\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 18,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x5fbdb2315678afecb367f032d93f642f64180aa3\",\"selector\":\"0x64b69433\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 18,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x0165878A594ca255338adfa4d48449f69242Eb8F\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x697e31e5\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x1fab1936\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x33526ba9\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x5687a6c0\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x21304c60\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x190b402e\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x74ba3fcb\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x9681470b\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x697e31e5\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x1fab1936\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x21304c60\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x322813fd9a801c5507c9de605d63cea4f2ce6c44\",\"selector\":\"0x190b402e\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x33526ba9\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9\",\"selector\":\"0x697e31e5\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x74ba3fcb\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x0134956e\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xa85233c63b9ee964add6f2cffe00fd84eb32338f\",\"selector\":\"0x02c742dc\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x610178dA211FEF7D417bC0e6FeD39F05609AD788\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x9A676e781A523b5d0C0e43731313A708CB607508\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x68B1D87F95878fE05B998F19b66F4baba5De1aed\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0xc8619ce9\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 10,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xc6e7df5e7b4f2a278906862b61205850344d4e7d\",\"selector\":\"0x7ed79413\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 10,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xd5bfc2c4\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x490423a3\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xca3e077c\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xf698da25\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x1660e329\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x69acff0e\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0xb827bbe0\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725e7734ce288f8367e1bb143e90bb3f0512\",\"selector\":\"0x56c35ac8\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512\",\"selector\":\"0xafce3b99\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1\",\"selector\":\"0xafce3b99\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512\",\"selector\":\"0x3d27fdde\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512\",\"selector\":\"0x3d045107\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xCafac3dD18aC6c6e92c921884f9E4176737C052c\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x70997970C51812dc3A010C7d01b50e0d17dc79C8\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 2,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_call\",\"target\":\"0x4a679253410272dd5232b3ff7cf5dbb88f295319\",\"selector\":\"0x56dc607a\",\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 16,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x90F79bf6EB2c4f870365E785982E1f101E93b906\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x976EA74026E726554dB657fA54763abd0C3a0aa9\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x14dC79964da2C08b23698B3D3cc7Ca32193d9955\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1,
+              "{\"phase\":\"unscoped\",\"method\":\"eth_getCode\",\"target\":\"0xa0Ee7A142d267C1f36714E4a8F75612F20a79720\",\"selector\":null,\"blockHash\":\"0xe94b37958f0c6f77bf7037657c9b79eb2b71c4d6f56fe69a7147aecb9858fb02\"}": 1
+            },
+            "phases": {
+              "unscoped": {
+                "calls": 247,
+                "wireCalls": 247,
+                "httpRequests": 247,
+                "httpBatches": 0,
+                "requestBytes": 85338,
+                "responseBytes": 1462408,
+                "fallbacks": 0
+              }
+            },
+            "droppedDiagnosticKeys": 0
+          }
+        }
+      ],
+      "maxCombinedNodeRss": 693452800,
+      "exitCode": 0,
+      "stopReason": null,
+      "stderr": ""
+    }
+  ],
+  "elapsedMs": 4540,
+  "transactionCount": 118,
+  "setupGasTotal": "452674399"
+}

@@ -1,7 +1,7 @@
 /** Bounded disposable multi-author gallery measurement; never a public-RPC SLA. */
 import assert from 'node:assert/strict';
 import {readFile, readdir, stat, writeFile} from 'node:fs/promises';
-import {execFileSync} from 'node:child_process';
+import {execFileSync, spawn} from 'node:child_process';
 import {join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createEnvironment} from './compact-environment.mjs';
@@ -33,20 +33,24 @@ async function directoryBytes(path) {
 }
 
 /** A single fixture grows from 100 to 1000 Files; the two folders share those IDs. */
-export async function measureGalleryAuthors({environment = createEnvironment, firstPageOnly = false} = {}) {
+export async function measureGalleryAuthors({environment = createEnvironment, firstPageOnly = false,
+  rssDiscriminator = false} = {}) {
+  assert(!(firstPageOnly && rssDiscriminator), 'one bounded mode at a time');
   const started = Date.now();
   const env = await environment({protocol: 'compact-guarded-v2', filesProfile: 'typed-directory-v1',
     contentProfile: 'raw-sha256-aesgcm-v2', evidenceMode: 'append', benchmarkHistory: true});
   const {ethers: e, manifest, wallets} = env, coder = e.AbiCoder.defaultAbiCoder(), Z = e.ZeroHash;
   const report = {status: 'RUNNING', fixture: 'actual-multi-author-gallery',
-    mode: firstPageOnly ? 'fresh-1000-eight-author-first-page-only' : 'full-100-250-stop-go', runDirectory: env.dir,
+    mode: rssDiscriminator ? 'fresh-250-child-rss-discriminator'
+      : firstPageOnly ? 'fresh-1000-eight-author-first-page-only' : 'full-100-250-stop-go', runDirectory: env.dir,
     safety: {...cap, gasLimit: String(cap.gasLimit)}, history: env.historyPolicy, stages: [], checkpoints: [],
     sources: null, seedProjections: [],
     limits: ['Disposable loopback-only Anvil; no public-RPC latency or fee inference.',
       'A successful paid page is not proof that one onchain transaction can consume the whole gallery.',
       'Paid cursor advancement is supplied from an eth_call to the same pinned reader; FilesPagePaid emits only a digest.',
       'Header qualification does not fetch or verify full content bodies.']};
-  const reportName = firstPageOnly ? 'gallery-authors-first-page-1000.json' : 'gallery-authors-measurement.json';
+  const reportName = rssDiscriminator ? 'gallery-authors-child-rss-250.json'
+    : firstPageOnly ? 'gallery-authors-first-page-1000.json' : 'gallery-authors-measurement.json';
   const persist = () => writeFile(join(env.dir, reportName), json(report));
   let abortTimer;
   const checkpoint = async (phase, n) => {
@@ -72,7 +76,9 @@ export async function measureGalleryAuthors({environment = createEnvironment, fi
     abortTimer = setTimeout(() => {void env.close();}, Math.max(1, cap.wallMs - (Date.now() - started)));
     report.sources = {...await sourcePins(env), measurementScriptHash: e.keccak256(
       await readFile(join(lab, 'script/measure-gallery-authors.mjs')))};
-    await env.deploy('pagePaid', 'FilesPageReader.sol', 'FilesPagePaid');
+    if (rssDiscriminator) report.sources.rssChildScriptHash = e.keccak256(
+      await readFile(join(lab, 'script/measure-gallery-authors-child.mjs')));
+    if (!rssDiscriminator) await env.deploy('pagePaid', 'FilesPageReader.sol', 'FilesPagePaid');
     const hash = (types, values) => e.keccak256(coder.encode(types, values));
     const subject = (who, salt) => hash(['bytes32', 'bytes32', 'bytes32'],
       [e.id('efs2/subject/1'), e.zeroPadValue(wallets[who].address, 32), salt]);
@@ -242,6 +248,70 @@ export async function measureGalleryAuthors({environment = createEnvironment, fi
         gasTotal: paid.reduce((sum, row) => sum + BigInt(row.gasUsed), 0n).toString()};
     };
     await checkpoint('deployed', 0);
+    if (rssDiscriminator) {
+      report.seed = await seed(0, 250);
+      report.seed.files = files.length;
+      await checkpoint('seed-complete', 250);
+      const inputPath = join(env.dir, 'child-rss-input.json');
+      await writeFile(inputPath, json({rpcUrl: env.rpcUrl, manifest, folders, concept,
+        authors: authors.map(a => a.address), files}));
+      report.children = [];
+      const worker = join(lab, 'script/measure-gallery-authors-child.mjs');
+      const runChild = sequence => new Promise((resolve, reject) => {
+        const child = spawn(process.execPath, ['--expose-gc', '--max-old-space-size=640', worker,
+          inputPath, sequence], {stdio: ['ignore', 'pipe', 'pipe']});
+        const result = {sequence, pid: child.pid, records: [], maxCombinedNodeRss: 0};
+        report.children.push(result);
+        let stdout = '', stderr = '', stopped = null;
+        const kill = reason => {if (!stopped) {stopped = reason; child.kill('SIGTERM');}};
+        const guard = setInterval(() => {
+          try {
+            const childRss = Number(execFileSync('ps', ['-o', 'rss=', '-p', String(child.pid)],
+              {encoding: 'utf8'}).trim()) * 1024;
+            const combined = process.memoryUsage().rss + childRss;
+            result.maxCombinedNodeRss = Math.max(result.maxCombinedNodeRss, combined);
+            if (combined > cap.nodeRss) kill('COMBINED_NODE_RSS_CAP');
+            if (Date.now() - started > cap.wallMs) kill('WALL_TIME_CAP');
+          } catch { /* child may have exited between polls */ }
+        }, 100);
+        const timeout = setTimeout(() => kill('CHILD_60S_CAP'), 60_000);
+        child.stdout.on('data', chunk => {
+          stdout += chunk;
+          if (stdout.length > 2 * 2**20) kill('CHILD_OUTPUT_CAP');
+          let end;
+          while ((end = stdout.indexOf('\n')) >= 0) {
+            const line = stdout.slice(0, end); stdout = stdout.slice(end + 1);
+            try {const row = JSON.parse(line); result.records.push(row);
+              if (row.memory?.peakRss && row.memory.peakRss + process.memoryUsage().rss > cap.nodeRss)
+                kill('COMBINED_NODE_PEAK_CAP');
+            } catch (error) {kill('CHILD_RECORD_PARSE: ' + error.message);}
+          }
+        });
+        child.stderr.on('data', chunk => {stderr = (stderr + chunk).slice(-4000);});
+        child.on('error', error => {stopped = error.message;});
+        child.on('close', async code => {
+          clearInterval(guard); clearTimeout(timeout);
+          result.exitCode = code; result.stopReason = stopped; result.stderr = stderr;
+          result.maxCombinedNodeRss = Math.max(result.maxCombinedNodeRss,
+            ...result.records.filter(row => row.memory?.peakRss)
+              .map(row => row.memory.peakRss + process.memoryUsage().rss));
+          try {await persist();
+            assert.equal(code, 0, `read-only child ${sequence} failed: ${stopped ?? stderr}`);
+            assert(result.records.at(-1)?.kind === 'complete', 'child full traversal complete');
+            resolve(result);
+          } catch (error) {reject(error);}
+        });
+      });
+      await runChild('eight'); await checkpoint('child-eight-complete', 250);
+      await runChild('one-then-eight'); await checkpoint('child-sequence-complete', 250);
+      report.status = 'PASS_RSS_DISCRIMINATOR'; report.elapsedMs = Date.now() - started;
+      report.transactionCount = env.transactions.length;
+      report.setupGasTotal = env.transactions.filter(row => row.label.startsWith('setup/'))
+        .reduce((sum, row) => sum + BigInt(row.gasUsed), 0n).toString();
+      report.limits.push('Both children are read-only; no paid wrapper, warm pass, or 1000-File traversal in this experiment.');
+      await persist(); console.log('GALLERY_REPORT ' + join(env.dir, reportName));
+      return report;
+    }
     if (firstPageOnly) {
       const seeded = await seed(0, 1000);
       report.setup = {files: files.length, placementAuthors: authors.map(a => a.address),
@@ -384,5 +454,6 @@ if (process.argv.includes('--self-test')) {
   assert.equal(expectedTagged(1000), 500);
   console.log('gallery authors plan self-test PASS');
 } else if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  await measureGalleryAuthors({firstPageOnly: process.argv.includes('--first-page-1000')});
+  await measureGalleryAuthors({firstPageOnly: process.argv.includes('--first-page-1000'),
+    rssDiscriminator: process.argv.includes('--rss-discriminator-250')});
 }

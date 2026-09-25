@@ -1,0 +1,17 @@
+# Fresh-child 250-File RSS discriminator
+
+**Result:** A full eight-author cold SDK traversal completed in a fresh read-only child at 320.4 MiB peak RSS. A separate fresh child first completed the one-author traversal, forced GC, then completed the identical eight-author traversal at 489.0 MiB peak RSS. The 168.6 MiB difference is evidence of **within-process cumulative high-water/allocator effects**, not a per-traversal 250-File memory requirement. It does not prove the specific allocator or transport code responsible, nor establish a 1,000-File full-traversal bound.
+
+The [runner](../../script/measure-gallery-authors.mjs) created one new disposable loopback-Anvil fixture with 250 distinct live Files. All eight signers authored actual placements in the eight-author folder; Alice placed the same IDs in the one-author folder, authored the initial HEADs and selected-revision tags on even Files, and a second signer authored the same-name overlay plus competing HEAD on File 0. Each read-only [child](../../script/measure-gallery-authors-child.mjs) received only a local RPC URL and fixture manifest, created a new SDK instance per width, pinned context, and traversed budget-32 pages with `tagScope=revision`. Every returned File ID and name/header/tag/match qualification was checked; no content bodies were fetched.
+
+| Child sequence | Width | Pages / scanned / selected | RSS after pin → pages 1–8 (MiB) | RSS after GC (MiB) |
+|---|---:|---:|---|---:|
+| Eight only | 8 | 8 / 251 / 125 | 102 → 192, 193, 277, 278, 315, 317, 320, 320 | 320 |
+| One then eight | 1 | 8 / 250 / 125 | 103 → 144, 195, 199, 199, 200, 200, 200, 224 | 224 |
+| One then eight | 8 | 8 / 251 / 125 | 226 → 378, 378, 411, 411, 479, 481, 489, 489 | 489 |
+
+The one-author child's post-GC heap was 12.2 MiB and external memory 3.7 MiB, yet RSS stayed at 224 MiB. The subsequent eight-author traversal used a **new** SDK instance. Its page-8 cache was 739,496 bytes, the same as the isolated eight-only child's page-8 cache; an SDK context/cache retained across widths is not the main explanation. Transient external memory reached 237 MiB on sequential eight-author page 5, then fell; the precise native allocation path remains unproven. [Measurement JSON](measurement.json) preserves all per-page RSS, heap, external, cache, latency, logical/HTTP RPC and response-byte measurements.
+
+Both children exited 0 with terminal `COMPLETE`; no paid call, warm pass, or 1,000-File traversal was made in this discriminator. Seed and read together took 4.54 s, 118 signed transactions, 452,674,399 setup gas, at most 661.3 MiB combined parent+child RSS, 93 MiB Anvil RSS and 3.5 MiB scratch output. These stayed under the original 15-minute, 650-transaction, 768 MiB Node, 1,536 MiB Anvil and 256 MiB output caps. The [manifest](manifest.json) and [signed transaction/receipt log](transactions.jsonl.gz) preserve fixture evidence. The runner's source Keccak-256 was `0xacc150ce8a27f45d3ea6cc5ad6fe619a98023bf21bd4434cb2bb4011c8c83653`; the child source hash was `0x58dbb02c505eefb0cd4222eb8f02260ff0aad483b7717706b9c6f45b56422ffb`.
+
+This result favors short-lived read-only child processes for wider gallery traversals, with aggregate supervisor caps and exact per-page candidate checks preserved. It is local resource evidence only, not a public-RPC SLA or an onchain consumer feasibility claim. Machine-local scratch paths were removed from the committed report copy.
