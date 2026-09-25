@@ -20,6 +20,14 @@ test('exact stances use the normal journal, ordered Lens and selected HEAD guard
   const first=await prepare('assertStance',{conceptNamespace:env.manifest.folder,conceptLabel:'exact'});
   assert.deepEqual(first.actions.map(a=>a.kind),[1,3]);await send(first);
   const concept=first.concept;
+  await w.run('linkPlacement',{folder:seed.docs.file,name:'stance-slot.txt',file:seed.meeting.file});
+  const location=await prepare('assertStance',{concept,scope:'placement',folder:seed.docs.file,name:'stance-slot.txt'});
+  await send(location);
+  const atLocation=async()=>sdk.readStance({scope:'placement',folder:seed.docs.file,name:'stance-slot.txt',concept,authors,context:await sdk.pin()});
+  assert.equal((await atLocation()).value.assessment,'PRESENT');
+  await w.run('linkPlacement',{folder:seed.docs.file,name:'stance-slot.txt',file:seed.image.file,replace:true});
+  assert.equal((await atLocation()).value.assessment,'PRESENT','location testimony survives occupant replacement');
+  assert.equal((await sdk.readStance({subject:seed.image.file,scope:'file',concept,authors,context:await sdk.pin()})).value.assessment,'NOT_PRESENT');
   const point=async(order=authors,extra={})=>sdk.readStance({subject:seed.meeting.file,scope:'file',concept,authors:order,context:await sdk.pin(),...extra});
   await send(await prepare('denyStance',{concept},'bob'),'bob');
   const asserted=await point();assert.equal(asserted.value.assessment,'PRESENT',JSON.stringify(asserted.value));

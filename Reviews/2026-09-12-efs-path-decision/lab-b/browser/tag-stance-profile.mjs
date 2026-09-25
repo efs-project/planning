@@ -16,7 +16,7 @@ export function createTagStancePlanner({ethers:e,call,ledgerAbi,profileHash,pinn
   const hash=(types,values)=>e.keccak256(coder.encode(types,values)),scalar=async(name,fn,args=[]) => (await call(name,fn,args))[0];
   const position=(p,s,r)=>hash(['bytes32','bytes32','bytes32','bytes32'],[e.id('efs2/position/1'),p,s,r]);
   const recordId=(t,b)=>hash(['bytes32','bytes32','bytes32'],[e.id('efs2/record/1'),t,e.keccak256(b)]);
-  const configType='tuple(bytes32 tokenType,bytes32 tokenRuleHash,bytes tokenDescriptor,bytes32 conceptType,bytes32 conceptHash,bytes32 directoryType,bytes32 directoryHash,bytes32[6] revisions,bytes32[6] revisionHashes)';
+  const configType='tuple(bytes32 tokenType,bytes32 tokenRuleHash,bytes tokenDescriptor,bytes32 conceptType,bytes32 conceptHash,bytes32 directoryType,bytes32 directoryHash,bytes32 nameType,bytes32 nameHash,bytes32[6] revisions,bytes32[6] revisionHashes)';
   const blank={typeId:Z,bodyHashOrRecordId:Z,purpose:Z,subject:Z,role:Z,target:Z,expectedRevision:0n,salt:Z};
   const frozen=value=>{if(value&&typeof value==='object'){Object.values(value).forEach(frozen);Object.freeze(value);}return value;};
   let authenticated;
@@ -25,7 +25,7 @@ export function createTagStancePlanner({ethers:e,call,ledgerAbi,profileHash,pinn
     check(e.getBytes(bytes).length<=8192,'PROFILE_SIZE');
     check(profileHash&&eq(e.keccak256(bytes),profileHash)&&eq(await scalar('tagIndex','tagProfileHash'),profileHash),'PROFILE_UNAVAILABLE');
     const [version,purpose,family,cfg,tokens,words,offsets,widths,masks]=coder.decode(['bytes32','bytes32','bytes32',configType,'bytes32[3]','uint256[3]','uint8[6]','uint16[6]','uint8[6]'],bytes);
-    check(eq(version,e.id('TagStance/1:own-cutoff:exact-retained:directed-parent:unbind-silent:withdraw-not-retract'))
+    check(eq(version,e.id('TagStance/2:exact-placement-file-revision:own-cutoff:retained:unbind-silent'))
       &&eq(purpose,e.id('efs.lab/tag-stance/1'))&&eq(family,e.id('efs.lab/tag-role-inventory/1')),'PROFILE_UNSUPPORTED');
     const read=async id=>{
       const [type,first,,body]=await call('ledger','record',[id]);
@@ -69,6 +69,21 @@ export function createTagStancePlanner({ethers:e,call,ledgerAbi,profileHash,pinn
       }
     }else if(args.scope==='directory'){
       const r=await read(subject);check(eq(r.type,cfg.directoryType)&&e.getBytes(r.body).length===32&&await exists(r.body),'SUBJECT_CLASS');
+    }else if(args.scope==='placement'){
+      const name=args.name,folder=args.folder;
+      check(typeof name==='string'&&name.length>0&&e.toUtf8Bytes(name).length<=255
+        &&/^[a-z0-9._-]+$/.test(name)&&name!=='.'&&name!=='..','NAME_CLASS');
+      check(/^0x[0-9a-f]{64}$/i.test(folder),'FOLDER_CLASS');
+      const directory=await read(folder);
+      check(eq(directory.type,cfg.directoryType)&&e.getBytes(directory.body).length===32
+        &&await exists(directory.body),'FOLDER_CLASS');
+      const bytes=e.toUtf8Bytes(name),role=e.keccak256(bytes);
+      const retainedName=await read(recordId(cfg.nameType,bytes));
+      check(eq(retainedName.type,cfg.nameType)&&eq(retainedName.body,e.hexlify(bytes)),'NAME_CLASS');
+      subject=position(e.id('efs2/purpose/folder/1'),folder,role);
+      const cell=await call('ledger','positionCell',[subject]);
+      check(eq(cell[0],e.id('efs2/purpose/folder/1'))&&eq(cell[1],folder)&&eq(cell[2],role),'PLACEMENT_UNOBSERVED');
+      selectionClaim='EXACT_PLACEMENT_COORDINATE';
     }else throw Error('EXPLICIT_SUBJECT_SCOPE');
     if(args.claimedFile!==undefined)check(eq(args.claimedFile,intrinsicFile),'FILE_MISMATCH');
     const actions=[],bodies=[];let concept=args.concept;

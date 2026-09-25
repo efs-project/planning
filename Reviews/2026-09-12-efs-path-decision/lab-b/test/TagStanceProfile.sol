@@ -8,6 +8,7 @@ import {IndexWork} from "../src/IndexWork.sol";
 import {DescribedCodec} from "../src/DescribedTypeProfile.sol";
 import {FilesLayout} from "./FilesJoinedProfile.sol";
 import {FilesDirectoryLayout} from "./FilesDirectoryProfile.sol";
+import {FilesNameLayout} from "./FilesNamesProfile.sol";
 import {FilesFinalValidator} from "./FilesFinalValidator.sol";
 import {LiveFilesIndex} from "./LiveFilesProfile.sol";
 
@@ -16,10 +17,11 @@ import {LiveFilesIndex} from "./LiveFilesProfile.sol";
 library TagStanceProfile {
     bytes32 internal constant PURPOSE=keccak256("efs.lab/tag-stance/1");
     bytes32 internal constant FAMILY=keccak256("efs.lab/tag-role-inventory/1");
-    bytes32 internal constant VERSION=keccak256("TagStance/1:own-cutoff:exact-retained:directed-parent:unbind-silent:withdraw-not-retract");
+    bytes32 internal constant VERSION=keccak256("TagStance/2:exact-placement-file-revision:own-cutoff:retained:unbind-silent");
     struct Config {
         bytes32 tokenType;bytes32 tokenRuleHash;bytes tokenDescriptor;
         bytes32 conceptType;bytes32 conceptHash;bytes32 directoryType;bytes32 directoryHash;
+        bytes32 nameType;bytes32 nameHash;
         // inline root/child, stored root/child, live root/child; never future Types.
         bytes32[6] revisions;bytes32[6] revisionHashes;
     }
@@ -33,6 +35,7 @@ library TagStanceProfile {
     function inventory(bytes32 principal,bytes32 concept_) internal pure returns(bytes32){return keccak256(abi.encode(FAMILY,principal,PURPOSE,concept_));}
     function pin(Ledger core,Config memory c) internal view {
         TypeRegistry registry=TypeRegistry(address(core.registry()));
+        FilesNameLayout.pin(core,c.nameType,c.nameHash);
         DescribedCodec.Schema memory schema=DescribedCodec.parse(c.tokenDescriptor);
         if(keccak256(c.tokenDescriptor)!=keccak256(descriptor(schema.key))
             ||keccak256(registry.descriptorBytes(c.tokenType))!=keccak256(c.tokenDescriptor))revert E_TAG_PROFILE();
@@ -89,6 +92,19 @@ library TagStanceProfile {
         uint64 created=core.subjectCreatedAt(id);if(created!=0&&created<=cutoff)return;
         (bytes32 t,,)=FilesLayout.header(core,id);
         if(t==c.directoryType){if(!FilesDirectoryLayout.validate(core,c.directoryType,id,cutoff))revert E_TAG_PROFILE();return;}
+        // A location is the retained FOLDER coordinate, not its current File.
+        // It can remain tagged after rebind/removal; an unobserved or forged
+        // coordinate cannot be tagged. The Name and parent Directory must have
+        // existed before this stance's admission, under exact pinned rules.
+        (bytes32 purpose,bytes32 folder,bytes32 role)=core.positionCell(id);
+        if(purpose==FilesNameLayout.FOLDER){
+            if(id!=Keys.position(purpose,folder,role)||!FilesDirectoryLayout.validate(core,c.directoryType,folder,cutoff))revert E_TAG_PROFILE();
+            bytes32 nameId=Keys.recordFromHash(c.nameType,role);
+            (uint8 status,bytes32 actualNameType,uint64 nameFirst,bytes memory value)=FilesNameLayout.load(address(core),nameId);
+            if(status!=1||actualNameType!=c.nameType||nameFirst==0||nameFirst>cutoff||!FilesNameLayout.valid(value)
+                ||keccak256(value)!=role)revert E_TAG_PROFILE();
+            return;
+        }
         (uint256 kind,bytes32 file,uint64 first)=_revision(core,c,id,cutoff);
         if(kind%2==0)return;
         (uint256 parentKind,bytes32 parentFile,)=_revision(core,c,FilesLayout.word(core,id,0),first-1);
@@ -108,7 +124,7 @@ contract TagStanceValidator {
     constructor(address c,bytes32[8] memory legacy,bytes32[5] memory ts,bytes32[5] memory hs,bytes32[3] memory lt,bytes32[3] memory lh,
         bytes32 tokenType,bytes32 tokenHash,bytes memory descriptor_){
         ledger=Ledger(c);filesConfigurationHash=keccak256(abi.encode(legacy,ts,hs,lt,lh));
-        TagStanceProfile.Config memory config=TagStanceProfile.Config(tokenType,tokenHash,descriptor_,ts[4],hs[4],legacy[6],legacy[7],
+        TagStanceProfile.Config memory config=TagStanceProfile.Config(tokenType,tokenHash,descriptor_,ts[4],hs[4],legacy[6],legacy[7],legacy[4],legacy[5],
             [legacy[0],legacy[1],ts[2],ts[3],lt[1],lt[2]],[legacy[2],legacy[3],hs[2],hs[3],lh[1],lh[2]]);
         TagStanceProfile.pin(Ledger(c),config);_tag=config;
         profileBytes=TagStanceProfile.profile(config);profileHash=keccak256(profileBytes);

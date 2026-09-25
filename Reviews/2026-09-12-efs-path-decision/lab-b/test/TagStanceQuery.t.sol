@@ -30,6 +30,20 @@ contract TagStanceQueryTest is TagStanceProfileTest {
         require(p.rawTotal==3&&p.rows.length==2,"inverse inventory wrong");
         require(p.rows[1].subject==orphanH&&p.rows[1].assessment==1,"orphan lost");
     }
+    function test_query_exact_placement_stance_and_inverse_after_occupant_change() public {
+        setupQuery();bytes32 slot=Keys.position(FOLDER,directoryD,name("f"));
+        alice.bind(PURPOSE,slot,conceptC,tokens[0],0);
+        TagStanceReader.Row memory point=reader.assess(principals(),slot,conceptC,basis());
+        require(point.assessment==1&&point.subject==slot&&point.intrinsicFile==0,"location point not qualified");
+        TagStanceReader.TagPage memory bySlot=reader.readPage(principals(),TagStanceReader.Query(1,5,slot,false),basis(),"",8);
+        require(bySlot.scanStatus==2&&bySlot.rows.length==1&&bySlot.rows[0].assessment==1,"location's tags incomplete");
+        ledger.bind(FOLDER,directoryD,name("f"),fileG,1);
+        TagStanceReader.TagPage memory byConcept=reader.readPage(principals(),TagStanceReader.Query(2,5,conceptC,false),basis(),"",8);
+        require(byConcept.scanStatus==2&&byConcept.rows.length==1&&byConcept.rows[0].subject==slot
+            &&byConcept.rows[0].assessment==1,"slot tag did not survive rebind in inverse query");
+        TagStanceReader.Row memory filePoint=reader.assess(principals(),fileG,conceptC,basis());
+        require(filePoint.assessment==2,"slot tag silently became File tag");
+    }
     function test_query_frozen_origin_and_zero_match_partial() public {
         setupQuery();alice.bind(PURPOSE,fileF,conceptC,tokens[2],0);alice.bind(PURPOSE,fileG,conceptC,tokens[0],0);
         TagStanceReader.Basis memory b=basis();TagStanceReader.Query memory q=TagStanceReader.Query(2,1,conceptC,false);

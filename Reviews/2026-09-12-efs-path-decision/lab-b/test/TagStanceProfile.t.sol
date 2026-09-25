@@ -26,6 +26,7 @@ contract TagPrefixRule is IAcceptor {
 interface TagVm {function store(address,bytes32,bytes32) external;function etch(address,bytes calldata) external;}
 
 contract TagStanceProfileTest is LabBase {
+    event LocationStanceGas(uint256 gasUsed);
     bytes32 constant PURPOSE=keccak256("efs.lab/tag-stance/1");
     bytes32 constant FAMILY=keccak256("efs.lab/tag-role-inventory/1");
     bytes32[8] legacy;bytes32[5] ts;bytes32[5] hs;bytes32[3] lt;bytes32[3] lh;
@@ -101,6 +102,29 @@ contract TagStanceProfileTest is LabBase {
         alice.unbind(TAG,fileF,conceptC,1);
         (uint8 status,,,,)=lens.resolve(lensOf(address(alice),address(bob)),TAG,fileF,conceptC);
         require(status==2,"old removal no longer masks fallback");
+    }
+    function test_exact_location_stance_follows_folder_name_slot_not_file_or_revision() public {
+        seed();
+        bytes32 slot=Keys.position(FOLDER,directoryD,name("f"));
+        uint256 beforeGas=gasleft();
+        ledger.bind(PURPOSE,slot,conceptC,tokens[0],0);
+        emit LocationStanceGas(beforeGas-gasleft()); // local execution, not all-in network receipt
+        require(count(inventory(pid(address(this)),conceptC))==1,"location stance absent from concept inventory");
+        (uint8 status,bytes32 selected,,,)=lens.resolve(lensOf(address(this)),PURPOSE,slot,conceptC);
+        require(status==1&&selected==tokens[0],"location stance not selected");
+        (status,,,,)=lens.resolve(lensOf(address(this)),PURPOSE,fileF,conceptC);
+        require(status==0,"location stance became File testimony");
+        ledger.bind(FOLDER,directoryD,name("f"),fileG,1);
+        (status,selected,,,)=lens.resolve(lensOf(address(this)),PURPOSE,slot,conceptC);
+        require(status==1&&selected==tokens[0],"location stance followed old occupant");
+        (status,,,,)=lens.resolve(lensOf(address(this)),PURPOSE,fileG,conceptC);
+        require(status==0,"location stance became new occupant testimony");
+        ledger.unbind(FOLDER,directoryD,name("f"),2);
+        (status,selected,,,)=lens.resolve(lensOf(address(this)),PURPOSE,slot,conceptC);
+        require(status==1&&selected==tokens[0],"location testimony erased by placement removal");
+        ledger.publish(legacy[4],bytes("unused"));
+        bytes32 unobserved=Keys.position(FOLDER,directoryD,name("unused"));
+        refuse(one(aBind(PURPOSE,unobserved,conceptC,tokens[0],0)),new bytes[](1),unobserved,conceptC,tokens[0]);
     }
     function test_tag_fresh_inverse_is_exact_author_concept_coordinate() public {
         seed();

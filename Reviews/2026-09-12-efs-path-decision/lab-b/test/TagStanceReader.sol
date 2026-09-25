@@ -7,6 +7,7 @@ import {Keys} from "../src/Keys.sol";
 import {IIndexModule} from "../src/Interfaces.sol";
 import {FilesLayout} from "./FilesJoinedProfile.sol";
 import {FilesDirectoryLayout} from "./FilesDirectoryProfile.sol";
+import {FilesNameLayout} from "./FilesNamesProfile.sol";
 
 /// Fixed, separately deployed retained-history and inventory adapter.
 contract TagStanceLens is LensReader {
@@ -110,7 +111,8 @@ contract TagStanceReader {
     error E_CURSOR(); error E_LENS();
     struct Basis {uint64 admission;uint64 generation;uint64 epoch;bytes32 execution;bytes32 realm;bytes32 profile;}
     // direction1 tagsOnSubject,2 subjectsForConcept. mode1 File,2 exact
-    // revision,3 selected revision,4 Directory. Diagnostic HEAD is explicit.
+    // revision,3 selected revision,4 Directory,5 retained placement coordinate.
+    // Diagnostic HEAD is explicit and applies only to a File/revision subject.
     struct Query {uint8 direction;uint8 mode;bytes32 exact;bool diagnosticHead;}
     // assessment0 UNKNOWN,1 PRESENT,2 NOT_PRESENT,3 NOT_APPLICABLE.
     struct Row {bytes32 subject;bytes32 concept;bytes32 intrinsicFile;bytes32 author;bytes32 token;uint8 stance;uint8 assessment;uint32 revision;uint64 admission;uint8 headStatus;}
@@ -222,6 +224,14 @@ contract TagStanceReader {
     function classify(bytes32 subject,uint64 origin) public view returns(uint8 kind,bytes32 file){
         uint64 created=ledger.subjectCreatedAt(subject);if(created!=0&&created<=origin)return(1,subject);
         if(FilesDirectoryLayout.validate(ledger,_config.directoryType,subject,origin))return(4,0);
+        (bytes32 purpose,bytes32 folder,bytes32 role)=ledger.positionCell(subject);
+        if(purpose==FilesNameLayout.FOLDER&&subject==Keys.position(purpose,folder,role)
+            &&FilesDirectoryLayout.validate(ledger,_config.directoryType,folder,origin)){
+            bytes32 nameId=Keys.recordFromHash(_config.nameType,role);
+            (uint8 status,bytes32 t,uint64 first,bytes memory value)=FilesNameLayout.load(address(ledger),nameId);
+            if(status==1&&t==_config.nameType&&first!=0&&first<=origin&&FilesNameLayout.valid(value)
+                &&keccak256(value)==role)return(5,0);
+        }
         (bytes32 t,uint64 first,uint32 size)=FilesLayout.header(ledger,subject);
         if(first==0||first>origin||size>8192)return(0,0);
         for(uint256 i;i<6;i++)if(t==_config.revisions[i]){
@@ -261,7 +271,7 @@ contract TagStanceReader {
     function _read(bytes32[] memory principals,Query memory q,Basis memory b,bytes memory next,uint256 budget)
         private view returns(TagPage memory page)
     {
-        _basis(principals,b);if(q.direction<1||q.direction>2||q.mode<1||q.mode>4||q.exact==0||budget==0||budget>256)revert E_QUERY();
+        _basis(principals,b);if(q.direction<1||q.direction>2||q.mode<1||q.mode>5||q.exact==0||budget==0||budget>256)revert E_QUERY();
         page.startsAtOrigin=next.length==0;(page.observedCurrent,,,)=ledger.counts();
         if(b.admission>page.observedCurrent)revert E_CURSOR();
         try lens.checkHistory(b.admission,b.execution){}catch{return page;}
