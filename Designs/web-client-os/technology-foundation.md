@@ -5,7 +5,7 @@
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/product-constitution-and-roadmap]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/web-client-os/privacy-and-agents]], [[Designs/web-client-os/ethereum-standards-and-interop]]
 **Standards profile:** [[Designs/web-client-os/web-platform-standards-and-forward-profile]]
 **Reviewers:** @web-platform-standards (2026-08-14), @historical-client-architecture (2026-08-14), @current-v2-read-path (2026-08-14)
-**Last touched:** 2026-08-23
+**Last touched:** 2026-09-24
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/web-platform #topic/pwa #topic/i18n #topic/accessibility #topic/performance #topic/wasm #topic/wasi
 
@@ -173,6 +173,27 @@ unavailable, record `GUIDANCE_UNAVAILABLE` and continue with the retained and
 primary evidence. It is not a required gate input, offline-build dependency or
 part of the retained closure, and may become one only after permission or a
 suitable license is established.
+
+[Web Awesome's first-party Agent Skills](https://webawesome.com/docs/ai/agent-skills)
+are the task-local guidance source for any future authorized Web Awesome
+implementation. The documentation reviewed 2026-09-24 publishes two
+complementary skills: `webawesome` for exact component APIs and
+`webawesome-design` for layout, theming and composition. Use both when the
+agent harness supports the Agent Skills format. They ship inside each installed
+Web Awesome package under `dist/skills/`; the component skill is generated
+from that release's Custom Elements Manifest, while the design skill is
+hand-authored and checked against the library during its build. This is useful
+version-coupled progressive disclosure, not a reason to install a floating
+copy from the network.
+
+The publisher labels the feature experimental. A future repository therefore
+loads both skills from the exact pinned, retained Web Awesome package and
+records that package identity in its contribution evidence. If the harness
+cannot load them, the author consults the corresponding retained references
+directly and records the limitation. These skills remain rank-6 guidance: they
+do not select Web Awesome, override EFS design/security/accessibility rules,
+prove component behavior, or replace primary documentation and measured EFS
+fixtures.
 
 Use a small complementary evidence set rather than a marketplace “skill zoo”:
 
@@ -434,6 +455,10 @@ Rules for use:
 - pin one reviewed release and import individual Core components; never use a
   CDN, runtime autoloader, remote theme kit, unbounded icon library, or remote
   font;
+- for agent-authored Web Awesome work, load both bundled `webawesome` and
+  `webawesome-design` skills from that exact pinned package before choosing or
+  composing components; never substitute a floating skill copy or its advice
+  for the required API, accessibility, interaction and visual verification;
 - replace the current default icon library before components load: Web
   Awesome's [icon guidance](https://webawesome.com/docs/components/icon/)
   allows self-hosting, while its default library may otherwise contact the Font

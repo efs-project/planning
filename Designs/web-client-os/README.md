@@ -306,6 +306,13 @@ applicable primary standards/profile evidence:
   remains accessible and records unavailability honestly, but it is not part
   of the required retained/offline guidance set unless its redistribution
   license is resolved.
+- [Web Awesome's first-party Agent Skills](https://webawesome.com/docs/ai/agent-skills)
+  are the version-coupled implementation references whenever the provisional
+  Web Awesome candidate is exercised: load both the `webawesome` component-API
+  skill and the `webawesome-design` composition skill from the exact pinned
+  package. They are experimental guidance, not selection authority or a
+  substitute for EFS review and browser/accessibility fixtures. See
+  [[technology-foundation#Modern Web guidance and evidence gate]].
 
 The decision order is semantic HTML, then native CSS, then a standard browser
 API, then the smallest library that earns its retained bytes and maintenance
