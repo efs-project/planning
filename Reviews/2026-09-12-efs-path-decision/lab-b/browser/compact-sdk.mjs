@@ -796,8 +796,14 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
   const bytesOf = input => typeof input === 'string' ? e.toUtf8Bytes(input) : e.getBytes(input);
   async function prepare(args) {
     onPhase('prepare');
+    const request=args,staged=args.operation==='stagedBatch';
     const context = args.context ?? await pin(); await guard(context);
-    const author = e.getAddress(args.author), authors = await protocol.selectors(args,context);
+    const author = e.getAddress(args.author), authors = await protocol.selectors(staged?{authors:[author]}:args,context);
+    if(staged){
+      check(Object.keys(request).every(key=>['operation','author','authors','folder','context','deadline','steps'].includes(key))
+        &&(!request.authors||(Array.isArray(request.authors)&&request.authors.length===1&&eq(request.authors[0],author))),
+      'STAGED_BATCH_LENS');
+    }
     const principalId = await protocol.signedPrincipal(author,context);
     const actions = [], bodies = [], expectedHeads = new Map(), startingHeads = new Map(), retainedNames = new Set(), selectionDependencies = [];
     const guardPositions = new Map();
@@ -807,7 +813,8 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       if(!guardPositions.has(position))guardPositions.set(position,{position,purpose:p,subject:s,role:r,meaning,
         selection:selected??await resolve(authors,p,s,r,context)});
     };
-    let file = args.file, newRevision = null,concept=args.concept;
+    let file = args.file, newRevision = null,concept=args.concept,virtualRevision=null;
+    const stagedSteps=staged?args.steps:null;
     const push = (fields,body='0x') => {actions.push(action(fields)); bodies.push(e.hexlify(body));};
     const ownHead = async (p,s,r) => {
       const position = positionOf(p,s,r), key = bindingOf(author,position);
@@ -862,12 +869,46 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       push({kind:1,typeId:type,bodyHashOrRecordId:bodyHash},body);
     };
     const selected = async () => {
+      if(staged&&virtualRevision)return virtualRevision;
       const point = await fileAt({file,authors,context});
       check(point.knowledge === 'PRESENT','NO_SELECTED_REVISION');
       selectionDependencies.push({purpose:purpose.head,subject:file,role:Z,selection:point.value.selection});
       await watch(purpose.head,file,Z,'selected-head',point.value.selection);
       return point.value.revision;
     };
+    const stagedPlacement=(folder,role)=>{
+      const h=expectedHeads.get(bindingOf(author,positionOf(purpose.folder,folder,role)));
+      return h?{status:h.state===1?1:h.state===2?2:0,target:h.target}:null;
+    };
+    // This disposable recipe has exactly four pre-publication coordinates.
+    // Later steps consume the local ordered prefix, never a fresh pinned-chain
+    // selection pretending the newly created File already exists there.
+    let stagedFolder,stagedFromRole,stagedToRole;
+    if(staged){
+      check(directories&&!carriers&&protocol.watchPositions&&Array.isArray(stagedSteps)&&stagedSteps.length===5,'STAGED_BATCH_PROFILE');
+      const keys=[['operation','name','salt','document'],['operation','document'],['operation','scope','concept'],
+        ['operation','fromName','name'],['operation','name']];
+      for(let i=0;i<5;i++)check(stagedSteps[i]&&typeof stagedSteps[i]==='object'
+        &&Object.keys(stagedSteps[i]).every(key=>keys[i].includes(key)),'STAGED_BATCH_SHAPE');
+      const [create,edit,tag,rename,link]=stagedSteps;
+      check(create.operation==='create'&&edit.operation==='edit'&&tag.operation==='addTag'&&tag.scope==='file'
+        &&rename.operation==='rename'&&link.operation==='linkPlacement'
+        &&typeof create.document==='string'&&typeof edit.document==='string'
+        &&typeof create.name==='string'&&typeof rename.fromName==='string'&&typeof rename.name==='string'&&typeof link.name==='string'
+        &&create.name===rename.fromName&&create.name===link.name&&create.name!==rename.name
+        &&/^0x[0-9a-f]{64}$/i.test(create.salt??'')&&!eq(create.salt,Z)
+        &&/^0x[0-9a-f]{64}$/i.test(tag.concept??'')&&!eq(tag.concept,Z),'STAGED_BATCH_SHAPE');
+      stagedFolder=await folderFor(request.folder,context);
+      stagedFromRole=e.keccak256(bytesOf(create.name));stagedToRole=e.keccak256(bytesOf(rename.name));
+      validName(bytesOf(create.name));validName(bytesOf(rename.name));
+      file=hash(['bytes32','bytes32','bytes32'],[e.id('efs2/subject/1'),principalId,create.salt]);
+      await watch(purpose.head,file,Z,'selected-head');
+      await watch(purpose.tag,file,tag.concept,'tag');
+      await watch(purpose.folder,stagedFolder,stagedFromRole,'source');
+      await watch(purpose.folder,stagedFolder,stagedToRole,'destination');
+    }
+    for(const step of staged?stagedSteps:[null]){
+    if(staged){args={...request,...step,file,folder:stagedFolder};if(step.operation==='addTag')concept=step.concept;}
     const operation = args.operation;
     if(args.replacementPlacement){
       check(operation==='edit','REPLACEMENT_OPERATION');
@@ -879,9 +920,10 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     }
     const destination=async(folder,role)=>{
       if(!directories){await watch(purpose.folder,folder,role,'destination');return;}
-      const selected=await resolve(authors,purpose.folder,folder,role,context);
-      check(selected.status===0||args.replace===true,'DESTINATION_OCCUPIED');
-      await watch(purpose.folder,folder,role,'destination',selected);
+      const selected=(staged&&stagedPlacement(folder,role))||await resolve(authors,purpose.folder,folder,role,context);
+      check(selected.status===0||args.replace===true
+        ||(staged&&operation==='linkPlacement'&&selected.status===2&&eq(folder,stagedFolder)&&eq(role,stagedFromRole)),'DESTINATION_OCCUPIED');
+      if(!staged)await watch(purpose.folder,folder,role,'destination',selected);
     };
     if (['assertStance','denyStance','retractToSilent'].includes(operation)) {
       const exact=await (await stanceAt(context)).planner[operation]({...args,author,principals:authors,subject:args.file,
@@ -913,6 +955,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
       const folder=await folderFor(args.folder,context);await destination(folder,role);
       if(operation!=='createDirectory')await binding(purpose.head,file,Z,newRevision);
       await binding(purpose.folder,folder,role,file);
+      if(staged)virtualRevision={recordId:newRevision,profile:'legacy-inline',document:e.hexlify(bytesOf(args.document)),content:null};
     } else if (operation === 'releasePlacement') {
       check(context.bindingLifecycleProfile===e.id('efs.lab.binding-lifecycle/2:bind-mask-release'),'BINDING_LIFECYCLE_UNSUPPORTED');
       const folder=await folderFor(args.folder,context),bytes=bytesOf(args.name);validName(bytes);
@@ -929,7 +972,8 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     } else {
       check(file && !eq(file,Z),'FILE_ID');
       const placementOperation=['move','rename','remove','restorePlacement','linkPlacement'].includes(operation);
-      if(directories&&(placementOperation||(carriers&&['addTag','removeTag'].includes(operation)&&args.scope==='directory')))check((await targetAt(file,context)).knowledge==='PRESENT','TARGET_UNAVAILABLE');
+      if(staged){check(eq(file,hash(['bytes32','bytes32','bytes32'],[e.id('efs2/subject/1'),principalId,stagedSteps[0].salt])),'STAGED_FILE');}
+      else if(directories&&(placementOperation||(carriers&&['addTag','removeTag'].includes(operation)&&args.scope==='directory')))check((await targetAt(file,context)).knowledge==='PRESENT','TARGET_UNAVAILABLE');
       else {const created = await scalar('ledger','subjectCreatedAt',[file],context);
         check(created > 0n && created <= BigInt(context.admission),'FILE_SUBJECT');}
       if (operation === 'edit' || operation === 'restoreContents') {
@@ -947,15 +991,16 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
         check(current.content?.encryption!==1||content?.descriptor?.encryption===1,'ENCRYPTED_SUCCESSOR_REQUIRED');
         await publishRevision(document,current.recordId,content);
         await binding(purpose.head,file,Z,newRevision);
+        if(staged)virtualRevision={recordId:newRevision,profile:'legacy-inline',document:e.hexlify(bytesOf(document)),content:null};
       } else if (operation === 'move' || operation === 'rename') {
         const from = await folderFor(args.fromFolder ?? args.folder,context), to = await folderFor(args.toFolder ?? args.folder,context);
         if(directories)check(!eq(to,file),'DIRECTORY_SELF_LINK');
         const fromRole = await retainName(args.fromName), toRole = await retainName(args.name);
         check(!eq(from,to) || !eq(fromRole,toRole),'SAME_PLACEMENT');
-        const source = await resolve(authors,purpose.folder,from,fromRole,context);
+        const source=(staged&&stagedPlacement(from,fromRole))||await resolve(authors,purpose.folder,from,fromRole,context);
         check(source.status === 1 && eq(source.target,file),'SOURCE_PLACEMENT');
-        selectionDependencies.push({purpose:purpose.folder,subject:from,role:fromRole,selection:source});
-        await watch(purpose.folder,from,fromRole,'source',source);
+        if(!staged){selectionDependencies.push({purpose:purpose.folder,subject:from,role:fromRole,selection:source});
+          await watch(purpose.folder,from,fromRole,'source',source);}
         await destination(to,toRole);
         await binding(purpose.folder,from,fromRole,file,true);
         await binding(purpose.folder,to,toRole,file);
@@ -980,6 +1025,8 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
         await binding(purpose.tag,subject,concept,file,operation === 'removeTag');
       } else fail('OPERATION');
     }
+    }
+    if(staged)check(actions.length<=64&&guardPositions.size===4,'STAGED_BATCH_BOUNDS');
     const actionsHash = hash([interfaces.ledger.getFunction('execute').inputs[0]],[actions]);
     const intent = {realmId:await scalar('ledger','realmId',[],context),coreCodeCommitment:context.core,author,
       nonce:String(await scalar('ledger','nonces',[author],context)),deadline:String(args.deadline ?? BigInt(context.timestamp)+3600n),
@@ -988,7 +1035,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     const authorization = await protocol.authorization({intent,actionsHash,actions,authors,principalId,context,guardPositions:[...guardPositions.values()]});
     const {publicationId} = authorization;
     const id = hash(['uint256','address','bytes32'],[context.chainId,addresses.ledger,publicationId]);
-    const plan = freeze(plain({id,operation,file,newRevision,concept,authors,basis:context,intent,actions,bodies,actionsHash,...authorization,
+    const plan = freeze(plain({id,operation:request.operation,file,newRevision,concept,authors,basis:context,intent,actions,bodies,actionsHash,...authorization,
       startingHeads:[...startingHeads.values()],expectedHeads:[...expectedHeads.values()],selectionDependencies}));
     await canonical(context);plans.add(plan); return plan;
   }
@@ -996,7 +1043,7 @@ export function createCompactEngine({ethers: e, rpc: transport, manifest, journa
     onPhase('authorize');
     check(plans.has(plan),'PLAN');
     await canonical(plan.basis);
-    if(['assertStance','denyStance','retractToSilent'].includes(plan.operation))await protocol.preflight(plan,await pin());
+    if(['assertStance','denyStance','retractToSilent','stagedBatch'].includes(plan.operation))await protocol.preflight(plan,await pin());
     const signature = e.Signature.from(await signDigest(plan.digest,plan)).serialized;
     check(eq(e.recoverAddress(plan.digest,signature),plan.intent.author),'SIGNER');
     const transaction = {to:addresses.ledger,data:protocol.encode(plan,signature),value:'0x0'};
