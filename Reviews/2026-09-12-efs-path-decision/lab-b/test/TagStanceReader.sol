@@ -227,6 +227,8 @@ contract TagStanceReader {
         (bytes32 purpose,bytes32 folder,bytes32 role)=ledger.positionCell(subject);
         if(purpose==FilesNameLayout.FOLDER&&subject==Keys.position(purpose,folder,role)
             &&FilesDirectoryLayout.validate(ledger,_config.directoryType,folder,origin)){
+            uint64 firstFolder=index.firstFolderObservation(subject);
+            if(firstFolder==0||firstFolder>origin)return(0,0);
             bytes32 nameId=Keys.recordFromHash(_config.nameType,role);
             (uint8 status,bytes32 t,uint64 first,bytes memory value)=FilesNameLayout.load(address(ledger),nameId);
             if(status==1&&t==_config.nameType&&first!=0&&first<=origin&&FilesNameLayout.valid(value)

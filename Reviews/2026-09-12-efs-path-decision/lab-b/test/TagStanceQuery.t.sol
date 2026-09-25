@@ -44,6 +44,38 @@ contract TagStanceQueryTest is TagStanceProfileTest {
         TagStanceReader.Row memory filePoint=reader.assess(principals(),fileG,conceptC,basis());
         require(filePoint.assessment==2,"slot tag silently became File tag");
     }
+    function test_query_future_folder_observation_cannot_qualify_past_origin() public {
+        setupQuery();
+        ledger.publish(legacy[4],bytes("future"));
+        bytes32 slot=Keys.position(FOLDER,directoryD,name("future"));
+        TagStanceIndex stanceIndex=TagStanceIndex(address(index));
+        TagStanceReader.Basis memory beforeBind=basis();
+        require(stanceIndex.firstFolderObservation(slot)==0,"unbound slot has first observation");
+        bytes32 invalidSlot=Keys.position(FOLDER,directoryD,name("never-published"));
+        (bool ok,)=address(ledger).call(abi.encodeCall(ledger.bind,
+            (FOLDER,directoryD,name("never-published"),fileF,uint32(0))));
+        require(!ok&&stanceIndex.firstFolderObservation(invalidSlot)==0,"failed FOLDER bind leaked observation");
+        (uint8 kind,)=reader.classify(slot,beforeBind.admission);
+        require(kind==0,"unobserved slot qualified before bind");
+
+        ledger.bind(FOLDER,directoryD,name("future"),fileF,0);
+        uint64 firstFolder=admissions();
+        require(stanceIndex.firstFolderObservation(slot)==firstFolder,"first FOLDER admission not retained");
+        (kind,)=reader.classify(slot,beforeBind.admission);
+        require(kind==0,"future FOLDER bind retroactively qualified slot");
+        require(reader.assess(principals(),slot,conceptC,beforeBind).assessment==0,"past point became qualified absence");
+        (ok,)=address(reader).staticcall(abi.encodeCall(reader.readPage,
+            (principals(),TagStanceReader.Query(1,5,slot,false),beforeBind,bytes(""),uint256(8))));
+        require(!ok,"past location returned a complete empty page");
+        (kind,)=reader.classify(slot,basis().admission);
+        require(kind==5,"observed location did not qualify at current origin");
+        TagStanceReader.TagPage memory current=reader.readPage(principals(),
+            TagStanceReader.Query(1,5,slot,false),basis(),"",8);
+        require(current.scanStatus==2&&current.rows.length==0&&current.queryAssessment==1,
+            "current observed location did not support qualified absence");
+        ledger.bind(FOLDER,directoryD,name("future"),fileG,1);
+        require(stanceIndex.firstFolderObservation(slot)==firstFolder,"rebind rewrote first FOLDER observation");
+    }
     function test_query_frozen_origin_and_zero_match_partial() public {
         setupQuery();alice.bind(PURPOSE,fileF,conceptC,tokens[2],0);alice.bind(PURPOSE,fileG,conceptC,tokens[0],0);
         TagStanceReader.Basis memory b=basis();TagStanceReader.Query memory q=TagStanceReader.Query(2,1,conceptC,false);

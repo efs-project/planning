@@ -138,6 +138,9 @@ contract TagStanceIndex is LiveFilesIndex {
     TagStanceValidator public immutable stanceValidator;
     bytes32 public immutable stanceValidatorHash;
     bytes32 public immutable tagProfileHash;
+    // The retained position cell alone cannot establish when a FOLDER slot
+    // became observable. This required-index witness is replayed from genesis.
+    mapping(bytes32 => uint64) public firstFolderObservation;
     constructor(address c,bytes32[8] memory legacy,bytes32[5] memory ts,bytes32[5] memory hs,bytes32[3] memory lt,bytes32[3] memory lh,
         FilesFinalValidator helper,bytes32 helperHash,TagStanceValidator validator,bytes32 validatorHash)
         LiveFilesIndex(c,legacy,ts,hs,lt,lh,helper,helperHash){
@@ -146,7 +149,10 @@ contract TagStanceIndex is LiveFilesIndex {
         stanceValidator=validator;stanceValidatorHash=validatorHash;tagProfileHash=validator.profileHash();
         _declare(TagStanceProfile.FAMILY,true,attachedFrom);
     }
-    function _manifestExtension() internal view override returns(bytes32){return keccak256(abi.encode(super._manifestExtension(),tagProfileHash));}
+    function _manifestExtension() internal view override returns(bytes32){
+        return keccak256(abi.encode(super._manifestExtension(),tagProfileHash,
+            keccak256("TagStance/first-FOLDER-observation/1:exact-position:first-valid-BIND-admission:retained")));
+    }
     function _extensionEntry(bytes32 f) internal view override returns(ManifestEntry memory){
         if(f==TagStanceProfile.FAMILY)return ManifestEntry(f,0,3,2,keccak256("abi.encode(familyDomain,Principal,purpose,exactConcept):bindingOrdinal:iff-BIND-freshBinding"),true);
         return super._extensionEntry(f);
@@ -166,6 +172,14 @@ contract TagStanceIndex is LiveFilesIndex {
             if(!ok||size!=32)revert TagStanceProfile.E_TAG_PROFILE();
         }
         super._foldEffect(e);
+        if(e.kind==3){
+            bytes32 position=Ledger(ledger).bindingPosition(e.bindingOrdinal);
+            (bytes32 purpose,bytes32 folder,bytes32 role)=Ledger(ledger).positionCell(position);
+            if(purpose==FilesNameLayout.FOLDER){
+                if(position!=Keys.position(purpose,folder,role)||e.admission==0)revert TagStanceProfile.E_TAG_PROFILE();
+                if(firstFolderObservation[position]==0)firstFolderObservation[position]=e.admission;
+            }
+        }
         if(key!=0&&e.kind==3&&e.freshBinding)_append(key,e.bindingOrdinal,true);
     }
 }
