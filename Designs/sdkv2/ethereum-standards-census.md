@@ -3,7 +3,7 @@
 **Status:** reference — dated official-source census and proposed SDK integration posture; no protocol, package, ABI, address, chain profile, or deployment is adopted
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[README]], [[research-precedents]]
-**Last touched:** 2026-09-17 — scoped ERC-7562 status correction; other census rows retain their original evidence date
+**Last touched:** 2026-09-24 — bounded Hegotá/native-AA watch update; other census rows retain their original evidence date
 
 #status/reference #kind/research #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/onchain #topic/read-path
 
@@ -165,6 +165,36 @@ authenticated header's `receiptsRoot` under an exact fork/encoding profile.
   [EIP-8130](https://eips.ethereum.org/EIPS/eip-8130),
   [EIP-8141](https://eips.ethereum.org/EIPS/eip-8141), and
   [EIP-8164](https://eips.ethereum.org/EIPS/eip-8164).
+
+### Native account-abstraction watch delta — 2026-09-24
+
+The official draft [Hegotá meta EIP-8081](https://eips.ethereum.org/EIPS/eip-8081),
+as changed at
+[`ethereum/EIPs@95176db`](https://github.com/ethereum/EIPs/commit/95176db61e5751e44964fb5e0766412cf2bf6e9a),
+now lists EIP-8141 Frame Transactions as **Scheduled for Inclusion**. EIP-7906
+transaction assertions, EIP-8250 keyed nonces, and EIP-8272 recent roots remain
+only **Considered for Inclusion**. Sepolia, Hoodi, and Mainnet activation fields
+are blank. Scheduling is therefore stronger watch evidence, not activation,
+released-client, wallet, Base, or EFS-support evidence.
+
+[Nethermind PR #12526](https://github.com/NethermindEth/nethermind/pull/12526)
+merged to `master` on September 24 at merge commit
+`5246d0c79940962a277c06268e8fa32ee0dbfb6a`. Its source work spans EIP-8141
+frames plus EIP-8250/EIP-8272 integration. This is a pinned implementation input,
+not proof of a released client, activated network feature, interoperable wallet,
+stable transaction profile, or EFS adapter. An attributed public preview of
+[Mislav/Ethlabs's common-account-standard plan](https://x.com/ox_shaman/status/2103054357310677206)
+is a coordination signal only: no draft or adoption was available, and the full
+post was not independently verified.
+
+The SDK seam remains unchanged. EFS action-plan authorization stays distinct
+from a frame transaction, verifier, keyed-nonce domain, payer/sponsor, submission,
+receipt, and independently read-back semantic effect. Do not reserve proposal
+bytes or claim a supported wallet. The next useful evidence is a published
+common-account-standard draft plus one exact-revision Nethermind test covering
+controller rotation, old-key rejection, sponsorship, and independent EFS effect
+read-back.
+
 - Signature/transaction agility and post-quantum research:
   [EIP-8197](https://eips.ethereum.org/EIPS/eip-8197),
   [EIP-8202](https://eips.ethereum.org/EIPS/eip-8202),
