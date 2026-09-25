@@ -1,0 +1,2077 @@
+{
+  "status": "STOPPED",
+  "fixture": "actual-multi-author-gallery",
+  "safety": {
+    "wallMs": 900000,
+    "nodeRss": 805306368,
+    "anvilRss": 1610612736,
+    "outputBytes": 268435456,
+    "transactions": 650,
+    "files": 1000,
+    "paidCandidates": 50,
+    "gasLimit": "16777216"
+  },
+  "history": {
+    "states": 16,
+    "transactionBlocks": 32
+  },
+  "stages": [
+    {
+      "files": 100,
+      "folders": {
+        "one": "0x62938d636276b9ad9cb85fe38e04e7c20eed770c042b85cc8b34a0d48872a853",
+        "eight": "0xc22a630ee459a03e1927ee552e40905ccce8d7c73e53bebb30aff792a53e9e23"
+      },
+      "placementAuthors": [
+        "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+        "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+        "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
+        "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+        "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+        "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f",
+        "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720"
+      ],
+      "placementCounts": [
+        13,
+        13,
+        13,
+        13,
+        12,
+        12,
+        12,
+        12
+      ],
+      "headTagAuthorship": "Alice initial HEAD and positive selected-revision tags for every even File; signer 1 has competing untagged HEAD on File 0",
+      "setup": {
+        "elapsedMs": 1116,
+        "transactions": 34
+      },
+      "samples": [
+        {
+          "width": 1,
+          "folder": "0x62938d636276b9ad9cb85fe38e04e7c20eed770c042b85cc8b34a0d48872a853",
+          "authors": [
+            "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+          ],
+          "context": {
+            "chainId": "31337",
+            "blockHash": "0x0f078d58e68220b1acdc2042e99456f566138612dd7970ba6ac6e0a9da9bf21b",
+            "blockNumber": "73",
+            "timestamp": "1790298454",
+            "core": "0x645f0cfe165abe1529f03acbd3a06db79cf890588a94304b0dca0fe5d09efd2a",
+            "ledger": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+            "index": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
+            "grade": "RPC_OBSERVED",
+            "admission": "660",
+            "generation": "0",
+            "epoch": "9",
+            "bindingLifecycleProfile": "0x1901a3595e5dd8733ebea7a78a570f5c713794a6b6566d49186d24dc75868b71",
+            "protocol": "compact-guarded-v2",
+            "origin": "0x1280fd02d5f870bab61078e1eada61eaf88a766c93eaa698677781931201cfdc",
+            "executionSet": "0xb12a09dc0c586b832ad6dfb94a12ea4363c6511d9f68c4e03685be942ac8f58e",
+            "execution": {
+              "origin": "0x1280fd02d5f870bab61078e1eada61eaf88a766c93eaa698677781931201cfdc",
+              "revision": "2",
+              "shellCodeHash": "0x645f0cfe165abe1529f03acbd3a06db79cf890588a94304b0dca0fe5d09efd2a",
+              "implementation": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "implementationCodeHash": "0x645f0cfe165abe1529f03acbd3a06db79cf890588a94304b0dca0fe5d09efd2a",
+              "registryAddress": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+              "registryCodeHash": "0x21f1872365c37bf5c3357b45081858ae1b2e5dfd986dc7e23e77768f4c2318d9",
+              "indexAddress": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
+              "indexCodeHash": "0x9f6e58434f76026d0e892881a4f666ecc7a3f8bce55cb67981be52395548e0d3",
+              "indexGeneration": "0"
+            }
+          },
+          "reads": [
+            {
+              "temperature": "cold",
+              "pin": {
+                "ms": 37.57691600000021,
+                "calls": 95,
+                "httpRequests": 95,
+                "httpBatches": 0,
+                "requestBytes": 23145,
+                "responseBytes": 337769,
+                "memoryAfter": {
+                  "rss": 177700864,
+                  "heapTotal": 85606400,
+                  "heapUsed": 37528512,
+                  "external": 5554658,
+                  "arrayBuffers": 1813342
+                }
+              },
+              "ms": 55.280250000000024,
+              "calls": 13,
+              "httpRequests": 13,
+              "httpBatches": 0,
+              "requestBytes": 8276,
+              "responseBytes": 161152,
+              "firstPage": {
+                "ms": 21.503000000000156,
+                "calls": 4,
+                "httpRequests": 4,
+                "httpBatches": 0,
+                "requestBytes": 1700,
+                "responseBytes": 50350,
+                "rows": 16,
+                "scanned": "32",
+                "coverage": "PARTIAL"
+              },
+              "pages": 4,
+              "candidates": 100,
+              "rows": 50,
+              "selected": 100,
+              "qualifications": {
+                "name": {
+                  "PRESENT": 50
+                },
+                "header": {
+                  "PRESENT": 50
+                },
+                "revisionTag": {
+                  "PRESENT": 50
+                },
+                "match": {
+                  "MATCH": 50
+                }
+              },
+              "bodyBytesFetched": 0,
+              "memoryAfter": {
+                "rss": 225607680,
+                "heapTotal": 83247104,
+                "heapUsed": 20749544,
+                "external": 4885325,
+                "arrayBuffers": 1154432
+              },
+              "memoryAfterGC": {
+                "rss": 225476608,
+                "heapTotal": 83247104,
+                "heapUsed": 17695680,
+                "external": 4885325,
+                "arrayBuffers": 105717
+              }
+            },
+            {
+              "temperature": "warm",
+              "ms": 45.67954200000031,
+              "calls": 8,
+              "httpRequests": 8,
+              "httpBatches": 0,
+              "requestBytes": 656,
+              "responseBytes": 13944,
+              "firstPage": {
+                "ms": 11.766415999999936,
+                "calls": 2,
+                "httpRequests": 2,
+                "httpBatches": 0,
+                "requestBytes": 164,
+                "responseBytes": 3486,
+                "rows": 16,
+                "scanned": "32",
+                "coverage": "PARTIAL"
+              },
+              "pages": 4,
+              "candidates": 100,
+              "rows": 50,
+              "selected": 100,
+              "qualifications": {
+                "name": {
+                  "PRESENT": 50
+                },
+                "header": {
+                  "PRESENT": 50
+                },
+                "revisionTag": {
+                  "PRESENT": 50
+                },
+                "match": {
+                  "MATCH": 50
+                }
+              },
+              "bodyBytesFetched": 0,
+              "memoryAfter": {
+                "rss": 272973824,
+                "heapTotal": 85082112,
+                "heapUsed": 23969536,
+                "external": 47953110,
+                "arrayBuffers": 44222217
+              },
+              "memoryAfterGC": {
+                "rss": 272973824,
+                "heapTotal": 83771392,
+                "heapUsed": 17438144,
+                "external": 47953110,
+                "arrayBuffers": 43308581
+              }
+            }
+          ],
+          "memoryAfterSdkRelease": {
+            "rss": 272973824,
+            "heapTotal": 82198528,
+            "heapUsed": 16284600,
+            "external": 3836610,
+            "arrayBuffers": 105717
+          }
+        },
+        {
+          "width": 8,
+          "folder": "0xc22a630ee459a03e1927ee552e40905ccce8d7c73e53bebb30aff792a53e9e23",
+          "authors": [
+            "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+            "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+            "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
+            "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+            "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+            "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f",
+            "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720"
+          ],
+          "context": {
+            "chainId": "31337",
+            "blockHash": "0xe1004fe33729292b18e0227c277898b6381520855ec3c42d201ea183ae2df6c2",
+            "blockNumber": "74",
+            "timestamp": "1790298454",
+            "core": "0x645f0cfe165abe1529f03acbd3a06db79cf890588a94304b0dca0fe5d09efd2a",
+            "ledger": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+            "index": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
+            "grade": "RPC_OBSERVED",
+            "admission": "660",
+            "generation": "0",
+            "epoch": "9",
+            "bindingLifecycleProfile": "0x1901a3595e5dd8733ebea7a78a570f5c713794a6b6566d49186d24dc75868b71",
+            "protocol": "compact-guarded-v2",
+            "origin": "0x1280fd02d5f870bab61078e1eada61eaf88a766c93eaa698677781931201cfdc",
+            "executionSet": "0xb12a09dc0c586b832ad6dfb94a12ea4363c6511d9f68c4e03685be942ac8f58e",
+            "execution": {
+              "origin": "0x1280fd02d5f870bab61078e1eada61eaf88a766c93eaa698677781931201cfdc",
+              "revision": "2",
+              "shellCodeHash": "0x645f0cfe165abe1529f03acbd3a06db79cf890588a94304b0dca0fe5d09efd2a",
+              "implementation": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "implementationCodeHash": "0x645f0cfe165abe1529f03acbd3a06db79cf890588a94304b0dca0fe5d09efd2a",
+              "registryAddress": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+              "registryCodeHash": "0x21f1872365c37bf5c3357b45081858ae1b2e5dfd986dc7e23e77768f4c2318d9",
+              "indexAddress": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
+              "indexCodeHash": "0x9f6e58434f76026d0e892881a4f666ecc7a3f8bce55cb67981be52395548e0d3",
+              "indexGeneration": "0"
+            }
+          },
+          "reads": [
+            {
+              "temperature": "cold",
+              "pin": {
+                "ms": 33.776082999999744,
+                "calls": 95,
+                "httpRequests": 95,
+                "httpBatches": 0,
+                "requestBytes": 23145,
+                "responseBytes": 337766,
+                "memoryAfter": {
+                  "rss": 273022976,
+                  "heapTotal": 82198528,
+                  "heapUsed": 21151120,
+                  "external": 4339623,
+                  "arrayBuffers": 608730
+                }
+              },
+              "ms": 66.0659999999998,
+              "calls": 20,
+              "httpRequests": 20,
+              "httpBatches": 0,
+              "requestBytes": 11552,
+              "responseBytes": 161424,
+              "firstPage": {
+                "ms": 20.71695899999986,
+                "calls": 11,
+                "httpRequests": 11,
+                "httpBatches": 0,
+                "requestBytes": 3632,
+                "responseBytes": 56260,
+                "rows": 18,
+                "scanned": "32",
+                "coverage": "PARTIAL"
+              },
+              "pages": 4,
+              "candidates": 101,
+              "rows": 50,
+              "selected": 100,
+              "qualifications": {
+                "name": {
+                  "PRESENT": 50
+                },
+                "header": {
+                  "PRESENT": 50
+                },
+                "revisionTag": {
+                  "PRESENT": 50
+                },
+                "match": {
+                  "MATCH": 50
+                }
+              },
+              "bodyBytesFetched": 0,
+              "memoryAfter": {
+                "rss": 347275264,
+                "heapTotal": 82460672,
+                "heapUsed": 18623616,
+                "external": 3902462,
+                "arrayBuffers": 171569
+              },
+              "memoryAfterGC": {
+                "rss": 347291648,
+                "heapTotal": 82460672,
+                "heapUsed": 17552352,
+                "external": 3902462,
+                "arrayBuffers": 105716
+              }
+            },
+            {
+              "temperature": "warm",
+              "ms": 36.57099999999991,
+              "calls": 8,
+              "httpRequests": 8,
+              "httpBatches": 0,
+              "requestBytes": 656,
+              "responseBytes": 13936,
+              "firstPage": {
+                "ms": 13.584333000000242,
+                "calls": 2,
+                "httpRequests": 2,
+                "httpBatches": 0,
+                "requestBytes": 164,
+                "responseBytes": 3484,
+                "rows": 18,
+                "scanned": "32",
+                "coverage": "PARTIAL"
+              },
+              "pages": 4,
+              "candidates": 101,
+              "rows": 50,
+              "selected": 100,
+              "qualifications": {
+                "name": {
+                  "PRESENT": 50
+                },
+                "header": {
+                  "PRESENT": 50
+                },
+                "revisionTag": {
+                  "PRESENT": 50
+                },
+                "match": {
+                  "MATCH": 50
+                }
+              },
+              "bodyBytesFetched": 0,
+              "memoryAfter": {
+                "rss": 347947008,
+                "heapTotal": 82460672,
+                "heapUsed": 29265288,
+                "external": 32882266,
+                "arrayBuffers": 29151373
+              },
+              "memoryAfterGC": {
+                "rss": 347947008,
+                "heapTotal": 82460672,
+                "heapUsed": 17516352,
+                "external": 3885619,
+                "arrayBuffers": 106580
+              }
+            }
+          ],
+          "memoryAfterSdkRelease": {
+            "rss": 347947008,
+            "heapTotal": 81674240,
+            "heapUsed": 16386752,
+            "external": 3837473,
+            "arrayBuffers": 105716
+          }
+        }
+      ],
+      "paid": [
+        {
+          "width": 1,
+          "candidateLimit": 4,
+          "candidatesScanned": 4,
+          "pages": [
+            {
+              "candidateStart": 0,
+              "budget": 4,
+              "gasUsed": "816957",
+              "status": "SUCCESS",
+              "transactionHash": "0x728b53965c93a154e4e821739dff7a3c5dbf6a4f8b6d65451d7ce87ac59d6326",
+              "calldataBytes": 580,
+              "ms": 24.81904200000008,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 2149,
+              "responseBytes": 5618
+            }
+          ],
+          "gasTotal": "816957"
+        },
+        {
+          "width": 8,
+          "candidateLimit": 50,
+          "candidatesScanned": 50,
+          "pages": [
+            {
+              "candidateStart": 0,
+              "budget": 4,
+              "gasUsed": "973682",
+              "status": "SUCCESS",
+              "transactionHash": "0x343e83baf2c56e509e6004d944942d97f0cf86825d639073eba5393a0286a49a",
+              "calldataBytes": 804,
+              "ms": 24.12762500000008,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 2597,
+              "responseBytes": 6067
+            },
+            {
+              "candidateStart": 4,
+              "budget": 4,
+              "gasUsed": "1030747",
+              "status": "SUCCESS",
+              "transactionHash": "0x8a8d2f745c66a8808517a7870c541cbeee113b17d0e008d664d93d1cb279d3ed",
+              "calldataBytes": 1156,
+              "ms": 23.52325000000019,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3301,
+              "responseBytes": 6771
+            },
+            {
+              "candidateStart": 8,
+              "budget": 4,
+              "gasUsed": "1030747",
+              "status": "SUCCESS",
+              "transactionHash": "0xc6ccc7fc2e29af9eedeb661c3a4425222e911a80af5fad4f3ddcf4a90b94c10e",
+              "calldataBytes": 1156,
+              "ms": 24.375416000000314,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3301,
+              "responseBytes": 6771
+            },
+            {
+              "candidateStart": 12,
+              "budget": 4,
+              "gasUsed": "1126923",
+              "status": "SUCCESS",
+              "transactionHash": "0xfd87542b4e9138def281f3095d9f91d2d86ed70bf958837bad053bec9a3782e1",
+              "calldataBytes": 1156,
+              "ms": 24.449542000000292,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3301,
+              "responseBytes": 6774
+            },
+            {
+              "candidateStart": 16,
+              "budget": 4,
+              "gasUsed": "1154533",
+              "status": "SUCCESS",
+              "transactionHash": "0x94ba377ab9bf8469f17af27b5344048e15fda5315631059f71f42c59bc0383cb",
+              "calldataBytes": 1156,
+              "ms": 24.401084000000083,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3301,
+              "responseBytes": 6774
+            },
+            {
+              "candidateStart": 20,
+              "budget": 4,
+              "gasUsed": "1154533",
+              "status": "SUCCESS",
+              "transactionHash": "0xcf0d65f32e20b6f66166cbf1dbf8f4d7b2aa315d8fad8bc5bb99cf5d6da8aeee",
+              "calldataBytes": 1156,
+              "ms": 24.571957999999995,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3301,
+              "responseBytes": 6773
+            },
+            {
+              "candidateStart": 24,
+              "budget": 4,
+              "gasUsed": "937341",
+              "status": "SUCCESS",
+              "transactionHash": "0x2f0abcd7915855314678a46ceb19f33e951caf535d3f54ea9319805018c96fb5",
+              "calldataBytes": 1156,
+              "ms": 23.590375000000222,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3301,
+              "responseBytes": 6771
+            },
+            {
+              "candidateStart": 28,
+              "budget": 4,
+              "gasUsed": "1065366",
+              "status": "SUCCESS",
+              "transactionHash": "0xeaf477293a7d13d9c1b4d02ecb7f5b6f709fc0028112ed5e1bc719a25454805a",
+              "calldataBytes": 1156,
+              "ms": 24.667165999999725,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3301,
+              "responseBytes": 6773
+            },
+            {
+              "candidateStart": 32,
+              "budget": 4,
+              "gasUsed": "1065366",
+              "status": "SUCCESS",
+              "transactionHash": "0x904fea9b2216cc1e21eaf9b4e748c28b98785305bfaf227ed1979a068736e066",
+              "calldataBytes": 1156,
+              "ms": 24.68324999999959,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3301,
+              "responseBytes": 6774
+            },
+            {
+              "candidateStart": 36,
+              "budget": 4,
+              "gasUsed": "1068214",
+              "status": "SUCCESS",
+              "transactionHash": "0x5d069581dc67081b47bc4ecf7944f19512c634ae5c9e3a9db172ee6b4d870388",
+              "calldataBytes": 1156,
+              "ms": 24.43158299999959,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3301,
+              "responseBytes": 6774
+            },
+            {
+              "candidateStart": 40,
+              "budget": 4,
+              "gasUsed": "1185136",
+              "status": "SUCCESS",
+              "transactionHash": "0x920119d2501fbd42cf8d89e976ca402bea82200215106f3891fd75a5600800a3",
+              "calldataBytes": 1156,
+              "ms": 23.63679200000024,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3301,
+              "responseBytes": 6774
+            },
+            {
+              "candidateStart": 44,
+              "budget": 4,
+              "gasUsed": "1185148",
+              "status": "SUCCESS",
+              "transactionHash": "0x85394500d13cea1a26f8f4d2cec43d21b0ffea3f593a86ed5789e690f97f8433",
+              "calldataBytes": 1156,
+              "ms": 24.872334000000137,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3301,
+              "responseBytes": 6774
+            },
+            {
+              "candidateStart": 48,
+              "budget": 2,
+              "gasUsed": "731919",
+              "status": "SUCCESS",
+              "transactionHash": "0x53f52fe3c222c5df2d9d245f0b0127558df7aede3005e851f6c1167bc5e7456f",
+              "calldataBytes": 1156,
+              "ms": 24.69699999999966,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3301,
+              "responseBytes": 6771
+            }
+          ],
+          "gasTotal": "13709655"
+        }
+      ],
+      "seedCheckpoint": {
+        "phase": "seed-complete",
+        "n": 100,
+        "elapsedMs": 1938,
+        "nodeRss": 173654016,
+        "nodePeakRss": 173654016,
+        "anvilRss": 57704448,
+        "outputBytes": 1739711,
+        "transactions": 73
+      },
+      "retainedTransactionJsonBytes": 802714,
+      "checkpoint": {
+        "phase": "stage-complete",
+        "n": 100,
+        "elapsedMs": 2699,
+        "nodeRss": 345636864,
+        "nodePeakRss": 347947008,
+        "anvilRss": 86507520,
+        "outputBytes": 1829698,
+        "transactions": 87
+      },
+      "stopGoProjection": {
+        "model": "10x seed slope plus one read allocation",
+        "elapsedMs": 14575.371128,
+        "nodeRss": 652935168,
+        "anvilRss": 311083008,
+        "outputBytes": 11212720,
+        "transactions": 519
+      }
+    },
+    {
+      "files": 250,
+      "folders": {
+        "one": "0x62938d636276b9ad9cb85fe38e04e7c20eed770c042b85cc8b34a0d48872a853",
+        "eight": "0xc22a630ee459a03e1927ee552e40905ccce8d7c73e53bebb30aff792a53e9e23"
+      },
+      "placementAuthors": [
+        "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+        "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+        "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
+        "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+        "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+        "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f",
+        "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720"
+      ],
+      "placementCounts": [
+        32,
+        32,
+        31,
+        31,
+        31,
+        31,
+        31,
+        31
+      ],
+      "headTagAuthorship": "Alice initial HEAD and positive selected-revision tags for every even File; signer 1 has competing untagged HEAD on File 0",
+      "setup": {
+        "elapsedMs": 1781,
+        "transactions": 54
+      },
+      "samples": [
+        {
+          "width": 1,
+          "folder": "0x62938d636276b9ad9cb85fe38e04e7c20eed770c042b85cc8b34a0d48872a853",
+          "authors": [
+            "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+          ],
+          "context": {
+            "chainId": "31337",
+            "blockHash": "0x2ffef0e4991e363daddd4b4341b3ac80d48e53240d9ea5375b9fdd8285b4d520",
+            "blockNumber": "141",
+            "timestamp": "1790298456",
+            "core": "0x645f0cfe165abe1529f03acbd3a06db79cf890588a94304b0dca0fe5d09efd2a",
+            "ledger": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+            "index": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
+            "grade": "RPC_OBSERVED",
+            "admission": "1635",
+            "generation": "0",
+            "epoch": "9",
+            "bindingLifecycleProfile": "0x1901a3595e5dd8733ebea7a78a570f5c713794a6b6566d49186d24dc75868b71",
+            "protocol": "compact-guarded-v2",
+            "origin": "0x1280fd02d5f870bab61078e1eada61eaf88a766c93eaa698677781931201cfdc",
+            "executionSet": "0xb12a09dc0c586b832ad6dfb94a12ea4363c6511d9f68c4e03685be942ac8f58e",
+            "execution": {
+              "origin": "0x1280fd02d5f870bab61078e1eada61eaf88a766c93eaa698677781931201cfdc",
+              "revision": "2",
+              "shellCodeHash": "0x645f0cfe165abe1529f03acbd3a06db79cf890588a94304b0dca0fe5d09efd2a",
+              "implementation": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "implementationCodeHash": "0x645f0cfe165abe1529f03acbd3a06db79cf890588a94304b0dca0fe5d09efd2a",
+              "registryAddress": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+              "registryCodeHash": "0x21f1872365c37bf5c3357b45081858ae1b2e5dfd986dc7e23e77768f4c2318d9",
+              "indexAddress": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
+              "indexCodeHash": "0x9f6e58434f76026d0e892881a4f666ecc7a3f8bce55cb67981be52395548e0d3",
+              "indexGeneration": "0"
+            }
+          },
+          "reads": [
+            {
+              "temperature": "cold",
+              "pin": {
+                "ms": 33.35137500000019,
+                "calls": 95,
+                "httpRequests": 95,
+                "httpBatches": 0,
+                "requestBytes": 23240,
+                "responseBytes": 337858,
+                "memoryAfter": {
+                  "rss": 289226752,
+                  "heapTotal": 87965696,
+                  "heapUsed": 44387704,
+                  "external": 6404359,
+                  "arrayBuffers": 2673466
+                }
+              },
+              "ms": 130.10733399999936,
+              "calls": 25,
+              "httpRequests": 25,
+              "httpBatches": 0,
+              "requestBytes": 17069,
+              "responseBytes": 393361,
+              "firstPage": {
+                "ms": 21.04675000000043,
+                "calls": 4,
+                "httpRequests": 4,
+                "httpBatches": 0,
+                "requestBytes": 1704,
+                "responseBytes": 50350,
+                "rows": 16,
+                "scanned": "32",
+                "coverage": "PARTIAL"
+              },
+              "pages": 8,
+              "candidates": 250,
+              "rows": 125,
+              "selected": 250,
+              "qualifications": {
+                "name": {
+                  "PRESENT": 125
+                },
+                "header": {
+                  "PRESENT": 125
+                },
+                "revisionTag": {
+                  "PRESENT": 125
+                },
+                "match": {
+                  "MATCH": 125
+                }
+              },
+              "bodyBytesFetched": 0,
+              "memoryAfter": {
+                "rss": 304037888,
+                "heapTotal": 89276416,
+                "heapUsed": 28424032,
+                "external": 32388162,
+                "arrayBuffers": 28657269
+              },
+              "memoryAfterGC": {
+                "rss": 304037888,
+                "heapTotal": 89014272,
+                "heapUsed": 18783440,
+                "external": 3840094,
+                "arrayBuffers": 105717
+              }
+            },
+            {
+              "temperature": "warm",
+              "ms": 95.21791699999994,
+              "calls": 16,
+              "httpRequests": 16,
+              "httpBatches": 0,
+              "requestBytes": 1328,
+              "responseBytes": 27872,
+              "firstPage": {
+                "ms": 9.52599999999984,
+                "calls": 2,
+                "httpRequests": 2,
+                "httpBatches": 0,
+                "requestBytes": 166,
+                "responseBytes": 3484,
+                "rows": 16,
+                "scanned": "32",
+                "coverage": "PARTIAL"
+              },
+              "pages": 8,
+              "candidates": 250,
+              "rows": 125,
+              "selected": 250,
+              "qualifications": {
+                "name": {
+                  "PRESENT": 125
+                },
+                "header": {
+                  "PRESENT": 125
+                },
+                "revisionTag": {
+                  "PRESENT": 125
+                },
+                "match": {
+                  "MATCH": 125
+                }
+              },
+              "bodyBytesFetched": 0,
+              "memoryAfter": {
+                "rss": 386007040,
+                "heapTotal": 89014272,
+                "heapUsed": 21197160,
+                "external": 118503536,
+                "arrayBuffers": 73888353
+              },
+              "memoryAfterGC": {
+                "rss": 386007040,
+                "heapTotal": 89014272,
+                "heapUsed": 18745448,
+                "external": 32162068,
+                "arrayBuffers": 23377654
+              }
+            }
+          ],
+          "memoryAfterSdkRelease": {
+            "rss": 386007040,
+            "heapTotal": 88227840,
+            "heapUsed": 17210288,
+            "external": 3836610,
+            "arrayBuffers": 105717
+          }
+        },
+        {
+          "width": 8,
+          "folder": "0xc22a630ee459a03e1927ee552e40905ccce8d7c73e53bebb30aff792a53e9e23",
+          "authors": [
+            "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+            "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+            "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
+            "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+            "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+            "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f",
+            "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720"
+          ],
+          "context": {
+            "chainId": "31337",
+            "blockHash": "0x4d448f7ae46637ff106f628f3f9384c1213ba15f0cc8a09ad9abb233a6d41b47",
+            "blockNumber": "142",
+            "timestamp": "1790298456",
+            "core": "0x645f0cfe165abe1529f03acbd3a06db79cf890588a94304b0dca0fe5d09efd2a",
+            "ledger": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+            "index": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
+            "grade": "RPC_OBSERVED",
+            "admission": "1635",
+            "generation": "0",
+            "epoch": "9",
+            "bindingLifecycleProfile": "0x1901a3595e5dd8733ebea7a78a570f5c713794a6b6566d49186d24dc75868b71",
+            "protocol": "compact-guarded-v2",
+            "origin": "0x1280fd02d5f870bab61078e1eada61eaf88a766c93eaa698677781931201cfdc",
+            "executionSet": "0xb12a09dc0c586b832ad6dfb94a12ea4363c6511d9f68c4e03685be942ac8f58e",
+            "execution": {
+              "origin": "0x1280fd02d5f870bab61078e1eada61eaf88a766c93eaa698677781931201cfdc",
+              "revision": "2",
+              "shellCodeHash": "0x645f0cfe165abe1529f03acbd3a06db79cf890588a94304b0dca0fe5d09efd2a",
+              "implementation": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "implementationCodeHash": "0x645f0cfe165abe1529f03acbd3a06db79cf890588a94304b0dca0fe5d09efd2a",
+              "registryAddress": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+              "registryCodeHash": "0x21f1872365c37bf5c3357b45081858ae1b2e5dfd986dc7e23e77768f4c2318d9",
+              "indexAddress": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
+              "indexCodeHash": "0x9f6e58434f76026d0e892881a4f666ecc7a3f8bce55cb67981be52395548e0d3",
+              "indexGeneration": "0"
+            }
+          },
+          "reads": [
+            {
+              "temperature": "cold",
+              "pin": {
+                "ms": 37.99491600000056,
+                "calls": 95,
+                "httpRequests": 95,
+                "httpBatches": 0,
+                "requestBytes": 23240,
+                "responseBytes": 337855,
+                "memoryAfter": {
+                  "rss": 386007040,
+                  "heapTotal": 88489984,
+                  "heapUsed": 21900368,
+                  "external": 4339844,
+                  "arrayBuffers": 608951
+                }
+              },
+              "ms": 243.79600000000028,
+              "calls": 32,
+              "httpRequests": 32,
+              "httpBatches": 0,
+              "requestBytes": 22144,
+              "responseBytes": 393632,
+              "firstPage": {
+                "ms": 59.01112499999999,
+                "calls": 11,
+                "httpRequests": 11,
+                "httpBatches": 0,
+                "requestBytes": 3643,
+                "responseBytes": 95691,
+                "rows": 32,
+                "scanned": "32",
+                "coverage": "PARTIAL"
+              },
+              "pages": 8,
+              "candidates": 251,
+              "rows": 125,
+              "selected": 250,
+              "qualifications": {
+                "name": {
+                  "PRESENT": 125
+                },
+                "header": {
+                  "PRESENT": 125
+                },
+                "revisionTag": {
+                  "PRESENT": 125
+                },
+                "match": {
+                  "MATCH": 125
+                }
+              },
+              "bodyBytesFetched": 0,
+              "memoryAfter": {
+                "rss": 686538752,
+                "heapTotal": 90587136,
+                "heapUsed": 22994088,
+                "external": 67695211,
+                "arrayBuffers": 63964318
+              },
+              "memoryAfterGC": {
+                "rss": 686538752,
+                "heapTotal": 90587136,
+                "heapUsed": 18689680,
+                "external": 67695211,
+                "arrayBuffers": 53681280
+              }
+            },
+            {
+              "temperature": "warm",
+              "ms": 148.22962499999994,
+              "calls": 16,
+              "httpRequests": 16,
+              "httpBatches": 0,
+              "requestBytes": 1328,
+              "responseBytes": 27856,
+              "firstPage": {
+                "ms": 57.89104199999929,
+                "calls": 2,
+                "httpRequests": 2,
+                "httpBatches": 0,
+                "requestBytes": 166,
+                "responseBytes": 3482,
+                "rows": 32,
+                "scanned": "32",
+                "coverage": "PARTIAL"
+              },
+              "pages": 8,
+              "candidates": 251,
+              "rows": 125,
+              "selected": 250,
+              "qualifications": {
+                "name": {
+                  "PRESENT": 125
+                },
+                "header": {
+                  "PRESENT": 125
+                },
+                "revisionTag": {
+                  "PRESENT": 125
+                },
+                "match": {
+                  "MATCH": 125
+                }
+              },
+              "bodyBytesFetched": 0,
+              "memoryAfter": {
+                "rss": 706887680,
+                "heapTotal": 90324992,
+                "heapUsed": 22789224,
+                "external": 67376167,
+                "arrayBuffers": 63645274
+              },
+              "memoryAfterGC": {
+                "rss": 706887680,
+                "heapTotal": 90324992,
+                "heapUsed": 18607136,
+                "external": 67376167,
+                "arrayBuffers": 58789216
+              }
+            }
+          ],
+          "memoryAfterSdkRelease": {
+            "rss": 706887680,
+            "heapTotal": 87441408,
+            "heapUsed": 17233640,
+            "external": 3836609,
+            "arrayBuffers": 105716
+          }
+        }
+      ],
+      "paid": [
+        {
+          "width": 1,
+          "candidateLimit": 4,
+          "candidatesScanned": 4,
+          "pages": [
+            {
+              "candidateStart": 0,
+              "budget": 4,
+              "gasUsed": "816957",
+              "status": "SUCCESS",
+              "transactionHash": "0xac9561ed69f9bf8acc8ab0d8b802b40123a7e378c0f03676f79ffccbc612d401",
+              "calldataBytes": 580,
+              "ms": 25.389375000000655,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 2155,
+              "responseBytes": 5622
+            }
+          ],
+          "gasTotal": "816957"
+        },
+        {
+          "width": 8,
+          "candidateLimit": 50,
+          "candidatesScanned": 50,
+          "pages": [
+            {
+              "candidateStart": 0,
+              "budget": 4,
+              "gasUsed": "973682",
+              "status": "SUCCESS",
+              "transactionHash": "0xbfc7d06306b1c9ce9eb95389c308f320093ba8a20fd6d89607aa8f9c43050743",
+              "calldataBytes": 804,
+              "ms": 25.072583000000122,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 2603,
+              "responseBytes": 6071
+            },
+            {
+              "candidateStart": 4,
+              "budget": 4,
+              "gasUsed": "1030747",
+              "status": "SUCCESS",
+              "transactionHash": "0x141cd856ba427809f6da3d97737978bcc4add9940e945524a25c0df5dbbeefc6",
+              "calldataBytes": 1156,
+              "ms": 24.314167000000452,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3307,
+              "responseBytes": 6774
+            },
+            {
+              "candidateStart": 8,
+              "budget": 4,
+              "gasUsed": "1030747",
+              "status": "SUCCESS",
+              "transactionHash": "0x90ec726b8748bf8b27495203b9ca0a4224629de453f3e11adc4f0832b0d3c064",
+              "calldataBytes": 1156,
+              "ms": 24.99933300000066,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3307,
+              "responseBytes": 6775
+            },
+            {
+              "candidateStart": 12,
+              "budget": 4,
+              "gasUsed": "1030747",
+              "status": "SUCCESS",
+              "transactionHash": "0x7985703de5d33b839640da860aea67855617f3029bc51b850c31397e6c80c1ff",
+              "calldataBytes": 1156,
+              "ms": 25.759749999999258,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3307,
+              "responseBytes": 6775
+            },
+            {
+              "candidateStart": 16,
+              "budget": 4,
+              "gasUsed": "1030747",
+              "status": "SUCCESS",
+              "transactionHash": "0x93b91816652bc8d2f6e8949420c74e14e90c094e630d970a6cca6734c1b09744",
+              "calldataBytes": 1156,
+              "ms": 25.389415999999983,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3307,
+              "responseBytes": 6775
+            },
+            {
+              "candidateStart": 20,
+              "budget": 4,
+              "gasUsed": "1030747",
+              "status": "SUCCESS",
+              "transactionHash": "0x70e3cd95af0f24f9771533b3aabafb36da2c595dab24b3396b9f52a629755156",
+              "calldataBytes": 1156,
+              "ms": 24.70545899999979,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3307,
+              "responseBytes": 6775
+            },
+            {
+              "candidateStart": 24,
+              "budget": 4,
+              "gasUsed": "1030747",
+              "status": "SUCCESS",
+              "transactionHash": "0xb09e03cf1afc45df98027be90e3d4f41cbeed399d6c29267498dc2eb34396b94",
+              "calldataBytes": 1156,
+              "ms": 24.446124999999483,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3307,
+              "responseBytes": 6774
+            },
+            {
+              "candidateStart": 28,
+              "budget": 4,
+              "gasUsed": "1033592",
+              "status": "SUCCESS",
+              "transactionHash": "0x8b0e41daef70b300dfb9479f78377474e0c47b490eb382e5d0aaa77d54118cc7",
+              "calldataBytes": 1156,
+              "ms": 25.649999999999636,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3307,
+              "responseBytes": 6775
+            },
+            {
+              "candidateStart": 32,
+              "budget": 4,
+              "gasUsed": "1152509",
+              "status": "SUCCESS",
+              "transactionHash": "0xf8a5d2567cd3a5d9ca10b28d6ca88cef65894a86af727967a9a4b5a3f6b02868",
+              "calldataBytes": 1156,
+              "ms": 25.342916999999943,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3307,
+              "responseBytes": 6777
+            },
+            {
+              "candidateStart": 36,
+              "budget": 4,
+              "gasUsed": "1152521",
+              "status": "SUCCESS",
+              "transactionHash": "0x7c099494c5af598c04777d6e5658e1125cfe6ed508575289dbbf5c4cb079e568",
+              "calldataBytes": 1156,
+              "ms": 24.99566700000014,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3307,
+              "responseBytes": 6777
+            },
+            {
+              "candidateStart": 40,
+              "budget": 4,
+              "gasUsed": "1152533",
+              "status": "SUCCESS",
+              "transactionHash": "0x640ae99d9f06eb1183e20223c0cfbab147dc288a0200b576ac58b1d580b42b18",
+              "calldataBytes": 1156,
+              "ms": 24.53204199999982,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3307,
+              "responseBytes": 6777
+            },
+            {
+              "candidateStart": 44,
+              "budget": 4,
+              "gasUsed": "952788",
+              "status": "SUCCESS",
+              "transactionHash": "0x10d9c90eebfc54232428b6834b3dbc418f9fff7490a86ab9d7740a24482260fc",
+              "calldataBytes": 1156,
+              "ms": 24.929124999999658,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3307,
+              "responseBytes": 6774
+            },
+            {
+              "candidateStart": 48,
+              "budget": 2,
+              "gasUsed": "715624",
+              "status": "SUCCESS",
+              "transactionHash": "0x15069cbada720569a6179ec7528c71d5be793d55134cebd8acc697a283a98118",
+              "calldataBytes": 1156,
+              "ms": 24.901708999999755,
+              "calls": 6,
+              "httpRequests": 6,
+              "httpBatches": 0,
+              "requestBytes": 3307,
+              "responseBytes": 6774
+            }
+          ],
+          "gasTotal": "13317731"
+        }
+      ],
+      "seedCheckpoint": {
+        "phase": "seed-complete",
+        "n": 250,
+        "elapsedMs": 4485,
+        "nodeRss": 298008576,
+        "nodePeakRss": 347947008,
+        "anvilRss": 108134400,
+        "outputBytes": 3384796,
+        "transactions": 141
+      },
+      "retainedTransactionJsonBytes": 1840847,
+      "checkpoint": {
+        "phase": "stage-complete",
+        "n": 250,
+        "elapsedMs": 5687,
+        "nodeRss": 694566912,
+        "nodePeakRss": 711458816,
+        "anvilRss": 103481344,
+        "outputBytes": 3474831,
+        "transactions": 155
+      },
+      "stopGoProjection": {
+        "model": "100-to-250 observed whole-stage slope, extended to 1000",
+        "elapsedMs": 20627,
+        "nodeRss": 2439217152,
+        "anvilRss": 188350464,
+        "outputBytes": 11700496,
+        "transactions": 495
+      }
+    }
+  ],
+  "checkpoints": [
+    {
+      "phase": "deployed",
+      "n": 0,
+      "elapsedMs": 819,
+      "nodeRss": 139509760,
+      "nodePeakRss": 139509760,
+      "anvilRss": 32751616,
+      "outputBytes": 697153,
+      "transactions": 39
+    },
+    {
+      "phase": "seed-one",
+      "n": 25,
+      "elapsedMs": 1019,
+      "nodeRss": 140197888,
+      "nodePeakRss": 140394496,
+      "anvilRss": 36913152,
+      "outputBytes": 911454,
+      "transactions": 45
+    },
+    {
+      "phase": "seed-one",
+      "n": 50,
+      "elapsedMs": 1220,
+      "nodeRss": 167903232,
+      "nodePeakRss": 167903232,
+      "anvilRss": 40566784,
+      "outputBytes": 1118914,
+      "transactions": 51
+    },
+    {
+      "phase": "seed-one",
+      "n": 75,
+      "elapsedMs": 1415,
+      "nodeRss": 169345024,
+      "nodePeakRss": 169345024,
+      "anvilRss": 44843008,
+      "outputBytes": 1326377,
+      "transactions": 57
+    },
+    {
+      "phase": "seed-one",
+      "n": 100,
+      "elapsedMs": 1644,
+      "nodeRss": 170917888,
+      "nodePeakRss": 170917888,
+      "anvilRss": 51363840,
+      "outputBytes": 1568381,
+      "transactions": 64
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 1,
+      "elapsedMs": 1677,
+      "nodeRss": 171393024,
+      "nodePeakRss": 171393024,
+      "anvilRss": 52199424,
+      "outputBytes": 1589558,
+      "transactions": 65
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 2,
+      "elapsedMs": 1709,
+      "nodeRss": 171573248,
+      "nodePeakRss": 171573248,
+      "anvilRss": 52985856,
+      "outputBytes": 1610746,
+      "transactions": 66
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 3,
+      "elapsedMs": 1747,
+      "nodeRss": 171769856,
+      "nodePeakRss": 171769856,
+      "anvilRss": 53542912,
+      "outputBytes": 1631934,
+      "transactions": 67
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 4,
+      "elapsedMs": 1779,
+      "nodeRss": 171950080,
+      "nodePeakRss": 171950080,
+      "anvilRss": 54460416,
+      "outputBytes": 1653122,
+      "transactions": 68
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 5,
+      "elapsedMs": 1812,
+      "nodeRss": 172621824,
+      "nodePeakRss": 172621824,
+      "anvilRss": 55345152,
+      "outputBytes": 1672914,
+      "transactions": 69
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 6,
+      "elapsedMs": 1844,
+      "nodeRss": 172670976,
+      "nodePeakRss": 172670976,
+      "anvilRss": 55885824,
+      "outputBytes": 1692706,
+      "transactions": 70
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 7,
+      "elapsedMs": 1875,
+      "nodeRss": 172769280,
+      "nodePeakRss": 172769280,
+      "anvilRss": 56426496,
+      "outputBytes": 1712498,
+      "transactions": 71
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 8,
+      "elapsedMs": 1907,
+      "nodeRss": 173621248,
+      "nodePeakRss": 173621248,
+      "anvilRss": 57032704,
+      "outputBytes": 1732290,
+      "transactions": 72
+    },
+    {
+      "phase": "seed-complete",
+      "n": 100,
+      "elapsedMs": 1938,
+      "nodeRss": 173654016,
+      "nodePeakRss": 173654016,
+      "anvilRss": 57704448,
+      "outputBytes": 1739711,
+      "transactions": 73
+    },
+    {
+      "phase": "paid-page",
+      "n": 4,
+      "elapsedMs": 2132,
+      "nodeRss": 272990208,
+      "nodePeakRss": 273104896,
+      "anvilRss": 66338816,
+      "outputBytes": 1751446,
+      "transactions": 74
+    },
+    {
+      "phase": "read/100/1",
+      "n": 1,
+      "elapsedMs": 2135,
+      "nodeRss": 272990208,
+      "nodePeakRss": 273104896,
+      "anvilRss": 66338816,
+      "outputBytes": 1751669,
+      "transactions": 74
+    },
+    {
+      "phase": "paid-page",
+      "n": 4,
+      "elapsedMs": 2327,
+      "nodeRss": 347947008,
+      "nodePeakRss": 347947008,
+      "anvilRss": 71647232,
+      "outputBytes": 1763056,
+      "transactions": 75
+    },
+    {
+      "phase": "paid-page",
+      "n": 8,
+      "elapsedMs": 2356,
+      "nodeRss": 346488832,
+      "nodePeakRss": 347947008,
+      "anvilRss": 73285632,
+      "outputBytes": 1768467,
+      "transactions": 76
+    },
+    {
+      "phase": "paid-page",
+      "n": 12,
+      "elapsedMs": 2386,
+      "nodeRss": 346521600,
+      "nodePeakRss": 347947008,
+      "anvilRss": 74842112,
+      "outputBytes": 1773879,
+      "transactions": 77
+    },
+    {
+      "phase": "paid-page",
+      "n": 16,
+      "elapsedMs": 2416,
+      "nodeRss": 346013696,
+      "nodePeakRss": 347947008,
+      "anvilRss": 76349440,
+      "outputBytes": 1779296,
+      "transactions": 78
+    },
+    {
+      "phase": "paid-page",
+      "n": 20,
+      "elapsedMs": 2446,
+      "nodeRss": 345161728,
+      "nodePeakRss": 347947008,
+      "anvilRss": 77365248,
+      "outputBytes": 1784713,
+      "transactions": 79
+    },
+    {
+      "phase": "paid-page",
+      "n": 24,
+      "elapsedMs": 2476,
+      "nodeRss": 345227264,
+      "nodePeakRss": 347947008,
+      "anvilRss": 78528512,
+      "outputBytes": 1790130,
+      "transactions": 80
+    },
+    {
+      "phase": "paid-page",
+      "n": 28,
+      "elapsedMs": 2505,
+      "nodeRss": 345276416,
+      "nodePeakRss": 347947008,
+      "anvilRss": 79642624,
+      "outputBytes": 1795543,
+      "transactions": 81
+    },
+    {
+      "phase": "paid-page",
+      "n": 32,
+      "elapsedMs": 2535,
+      "nodeRss": 345374720,
+      "nodePeakRss": 347947008,
+      "anvilRss": 80740352,
+      "outputBytes": 1800960,
+      "transactions": 82
+    },
+    {
+      "phase": "paid-page",
+      "n": 36,
+      "elapsedMs": 2565,
+      "nodeRss": 345505792,
+      "nodePeakRss": 347947008,
+      "anvilRss": 82067456,
+      "outputBytes": 1806376,
+      "transactions": 83
+    },
+    {
+      "phase": "paid-page",
+      "n": 40,
+      "elapsedMs": 2595,
+      "nodeRss": 345505792,
+      "nodePeakRss": 347947008,
+      "anvilRss": 83165184,
+      "outputBytes": 1811792,
+      "transactions": 84
+    },
+    {
+      "phase": "paid-page",
+      "n": 44,
+      "elapsedMs": 2624,
+      "nodeRss": 345538560,
+      "nodePeakRss": 347947008,
+      "anvilRss": 84295680,
+      "outputBytes": 1817208,
+      "transactions": 85
+    },
+    {
+      "phase": "paid-page",
+      "n": 48,
+      "elapsedMs": 2655,
+      "nodeRss": 345604096,
+      "nodePeakRss": 347947008,
+      "anvilRss": 85491712,
+      "outputBytes": 1822625,
+      "transactions": 86
+    },
+    {
+      "phase": "paid-page",
+      "n": 50,
+      "elapsedMs": 2686,
+      "nodeRss": 345620480,
+      "nodePeakRss": 347947008,
+      "anvilRss": 86507520,
+      "outputBytes": 1828037,
+      "transactions": 87
+    },
+    {
+      "phase": "read/100/8",
+      "n": 8,
+      "elapsedMs": 2689,
+      "nodeRss": 345620480,
+      "nodePeakRss": 347947008,
+      "anvilRss": 86507520,
+      "outputBytes": 1828261,
+      "transactions": 87
+    },
+    {
+      "phase": "stage-complete",
+      "n": 100,
+      "elapsedMs": 2699,
+      "nodeRss": 345636864,
+      "nodePeakRss": 347947008,
+      "anvilRss": 86507520,
+      "outputBytes": 1829698,
+      "transactions": 87
+    },
+    {
+      "phase": "seed-one",
+      "n": 125,
+      "elapsedMs": 2901,
+      "nodeRss": 345718784,
+      "nodePeakRss": 347947008,
+      "anvilRss": 89686016,
+      "outputBytes": 2037761,
+      "transactions": 93
+    },
+    {
+      "phase": "seed-one",
+      "n": 150,
+      "elapsedMs": 3104,
+      "nodeRss": 345718784,
+      "nodePeakRss": 347947008,
+      "anvilRss": 95485952,
+      "outputBytes": 2245231,
+      "transactions": 99
+    },
+    {
+      "phase": "seed-one",
+      "n": 175,
+      "elapsedMs": 3313,
+      "nodeRss": 345718784,
+      "nodePeakRss": 347947008,
+      "anvilRss": 96043008,
+      "outputBytes": 2452707,
+      "transactions": 105
+    },
+    {
+      "phase": "seed-one",
+      "n": 200,
+      "elapsedMs": 3559,
+      "nodeRss": 333807616,
+      "nodePeakRss": 347947008,
+      "anvilRss": 98205696,
+      "outputBytes": 2694726,
+      "transactions": 112
+    },
+    {
+      "phase": "seed-one",
+      "n": 225,
+      "elapsedMs": 3755,
+      "nodeRss": 334741504,
+      "nodePeakRss": 347947008,
+      "anvilRss": 102514688,
+      "outputBytes": 2902203,
+      "transactions": 118
+    },
+    {
+      "phase": "seed-one",
+      "n": 250,
+      "elapsedMs": 3982,
+      "nodeRss": 334692352,
+      "nodePeakRss": 347947008,
+      "anvilRss": 104644608,
+      "outputBytes": 3128348,
+      "transactions": 125
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 1,
+      "elapsedMs": 4041,
+      "nodeRss": 334692352,
+      "nodePeakRss": 347947008,
+      "anvilRss": 104841216,
+      "outputBytes": 3160711,
+      "transactions": 127
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 2,
+      "elapsedMs": 4102,
+      "nodeRss": 334774272,
+      "nodePeakRss": 347947008,
+      "anvilRss": 104906752,
+      "outputBytes": 3193089,
+      "transactions": 129
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 3,
+      "elapsedMs": 4162,
+      "nodeRss": 334774272,
+      "nodePeakRss": 347947008,
+      "anvilRss": 106577920,
+      "outputBytes": 3224070,
+      "transactions": 131
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 4,
+      "elapsedMs": 4223,
+      "nodeRss": 334774272,
+      "nodePeakRss": 347947008,
+      "anvilRss": 106676224,
+      "outputBytes": 3255051,
+      "transactions": 133
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 5,
+      "elapsedMs": 4290,
+      "nodeRss": 330792960,
+      "nodePeakRss": 347947008,
+      "anvilRss": 107249664,
+      "outputBytes": 3287429,
+      "transactions": 135
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 6,
+      "elapsedMs": 4357,
+      "nodeRss": 306872320,
+      "nodePeakRss": 347947008,
+      "anvilRss": 107560960,
+      "outputBytes": 3319807,
+      "transactions": 137
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 7,
+      "elapsedMs": 4419,
+      "nodeRss": 303349760,
+      "nodePeakRss": 347947008,
+      "anvilRss": 107773952,
+      "outputBytes": 3352185,
+      "transactions": 139
+    },
+    {
+      "phase": "seed-eight-author",
+      "n": 8,
+      "elapsedMs": 4481,
+      "nodeRss": 298008576,
+      "nodePeakRss": 347947008,
+      "anvilRss": 108134400,
+      "outputBytes": 3384563,
+      "transactions": 141
+    },
+    {
+      "phase": "seed-complete",
+      "n": 250,
+      "elapsedMs": 4485,
+      "nodeRss": 298008576,
+      "nodePeakRss": 347947008,
+      "anvilRss": 108134400,
+      "outputBytes": 3384796,
+      "transactions": 141
+    },
+    {
+      "phase": "paid-page",
+      "n": 4,
+      "elapsedMs": 4803,
+      "nodeRss": 386007040,
+      "nodePeakRss": 386007040,
+      "anvilRss": 96419840,
+      "outputBytes": 3396528,
+      "transactions": 142
+    },
+    {
+      "phase": "read/250/1",
+      "n": 1,
+      "elapsedMs": 4807,
+      "nodeRss": 386007040,
+      "nodePeakRss": 386007040,
+      "anvilRss": 96419840,
+      "outputBytes": 3396752,
+      "transactions": 142
+    },
+    {
+      "phase": "paid-page",
+      "n": 4,
+      "elapsedMs": 5294,
+      "nodeRss": 706887680,
+      "nodePeakRss": 711458816,
+      "anvilRss": 91701248,
+      "outputBytes": 3408167,
+      "transactions": 143
+    },
+    {
+      "phase": "paid-page",
+      "n": 8,
+      "elapsedMs": 5324,
+      "nodeRss": 706887680,
+      "nodePeakRss": 711458816,
+      "anvilRss": 94404608,
+      "outputBytes": 3413581,
+      "transactions": 144
+    },
+    {
+      "phase": "paid-page",
+      "n": 12,
+      "elapsedMs": 5357,
+      "nodeRss": 706887680,
+      "nodePeakRss": 711458816,
+      "anvilRss": 94830592,
+      "outputBytes": 3418994,
+      "transactions": 145
+    },
+    {
+      "phase": "paid-page",
+      "n": 16,
+      "elapsedMs": 5389,
+      "nodeRss": 706887680,
+      "nodePeakRss": 711458816,
+      "anvilRss": 96993280,
+      "outputBytes": 3424411,
+      "transactions": 146
+    },
+    {
+      "phase": "paid-page",
+      "n": 20,
+      "elapsedMs": 5420,
+      "nodeRss": 706887680,
+      "nodePeakRss": 711458816,
+      "anvilRss": 97124352,
+      "outputBytes": 3429828,
+      "transactions": 147
+    },
+    {
+      "phase": "paid-page",
+      "n": 24,
+      "elapsedMs": 5451,
+      "nodeRss": 699564032,
+      "nodePeakRss": 711458816,
+      "anvilRss": 96305152,
+      "outputBytes": 3435244,
+      "transactions": 148
+    },
+    {
+      "phase": "paid-page",
+      "n": 28,
+      "elapsedMs": 5481,
+      "nodeRss": 699580416,
+      "nodePeakRss": 711458816,
+      "anvilRss": 96452608,
+      "outputBytes": 3440661,
+      "transactions": 149
+    },
+    {
+      "phase": "paid-page",
+      "n": 32,
+      "elapsedMs": 5513,
+      "nodeRss": 696680448,
+      "nodePeakRss": 711458816,
+      "anvilRss": 98320384,
+      "outputBytes": 3446078,
+      "transactions": 150
+    },
+    {
+      "phase": "paid-page",
+      "n": 36,
+      "elapsedMs": 5546,
+      "nodeRss": 693125120,
+      "nodePeakRss": 711458816,
+      "anvilRss": 99319808,
+      "outputBytes": 3451497,
+      "transactions": 151
+    },
+    {
+      "phase": "paid-page",
+      "n": 40,
+      "elapsedMs": 5577,
+      "nodeRss": 693125120,
+      "nodePeakRss": 711458816,
+      "anvilRss": 101367808,
+      "outputBytes": 3456915,
+      "transactions": 152
+    },
+    {
+      "phase": "paid-page",
+      "n": 44,
+      "elapsedMs": 5608,
+      "nodeRss": 693125120,
+      "nodePeakRss": 711458816,
+      "anvilRss": 102006784,
+      "outputBytes": 3462334,
+      "transactions": 153
+    },
+    {
+      "phase": "paid-page",
+      "n": 48,
+      "elapsedMs": 5639,
+      "nodeRss": 692715520,
+      "nodePeakRss": 711458816,
+      "anvilRss": 103170048,
+      "outputBytes": 3467750,
+      "transactions": 154
+    },
+    {
+      "phase": "paid-page",
+      "n": 50,
+      "elapsedMs": 5670,
+      "nodeRss": 692715520,
+      "nodePeakRss": 711458816,
+      "anvilRss": 103481344,
+      "outputBytes": 3473166,
+      "transactions": 155
+    },
+    {
+      "phase": "read/250/8",
+      "n": 8,
+      "elapsedMs": 5675,
+      "nodeRss": 692715520,
+      "nodePeakRss": 711458816,
+      "anvilRss": 103481344,
+      "outputBytes": 3473392,
+      "transactions": 155
+    },
+    {
+      "phase": "stage-complete",
+      "n": 250,
+      "elapsedMs": 5687,
+      "nodeRss": 694566912,
+      "nodePeakRss": 711458816,
+      "anvilRss": 103481344,
+      "outputBytes": 3474831,
+      "transactions": 155
+    }
+  ],
+  "sources": {
+    "gitHead": "28919c14949fdcb5c4776f240b6d113f857a57e2",
+    "files": {
+      "src/ContractSignatureEvidenceStore.sol": "0xa058f02c0449945937c99f1b697ac63ecf5d656844c13e7c3ee731c7e1d11bb9",
+      "src/ExecutionSlots.sol": "0xd3373859ef68327e54a0c761c7863c4456d34e1b444fc5036f465d76feb9e927",
+      "src/IndexFieldProfile.sol": "0x10fd5ea0e3822f6f01945e34e7780ab66458f657395c394b5e7696aa68174668",
+      "src/IndexReplaySource.sol": "0xf01bd2d59999edbaf1951bb948d141b710006ff74ec608959077216596851cef",
+      "src/IndexSource.sol": "0xdb8c85802584f29530fc4484a3280f94474efcd72219ec1ea6dccfb270d07639",
+      "src/IndexWork.sol": "0x62960f1d86ab4c8db13f33764dedef9ad84747175aaa4a264524e37630fe244e",
+      "src/Interfaces.sol": "0xbe882e27e718c00a26476935b822d0301cbee8c611c152cce15b5e2d17b2dbd0",
+      "src/Keys.sol": "0x7072116cb4809ae6d857031bdadb2d23e2373203a335781ee2383ae9fbf7abee",
+      "src/Ledger.sol": "0x558bc729e501ff1c0fa48ff3854cf897f1f2df9ff404c0a43b1815c182bd3753",
+      "src/PublicationPreparation.sol": "0x30ca7927d2aeaa989785beed80e03dfdb3cfef71ca9288538f8496f187635600",
+      "src/PublicationSupport.sol": "0x619e84977b9dc1381c9ec982f724a57b241780778149a7b4bb7d4dfcd3fe7cb4",
+      "src/ReadSetStorage.sol": "0x132c48a528664721b3e170de19fe478d40c59180be64755d7729a5c97cf8ab04",
+      "src/DescribedTypeProfile.sol": "0x9571406c5007d3924a0efdaba2af415f26507aa1eb97a0be9187c4e66cfef2a0",
+      "src/IndexModule.sol": "0x0caca9f56f130c80968bd9ee208527dd52f18d9820737200547c7a3fd33eda31",
+      "src/LensReader.sol": "0xa4a8f32b20eaff061f5339e28961baf820b7e7f84fdbd1e44a61f08ff08ece38",
+      "src/TypeRegistry.sol": "0x8f95b1c40e5f498c60330f7e28b8e209154c191b715d1b8ea14328da5227ed09",
+      "test/FilesCarrierProfile.sol": "0x03a5756b722d1c8941fc9b2b1c4a5b09f2fb0b8adf930e0cc89b6fa2f9b2e320",
+      "test/FilesDirectoryProfile.sol": "0xd5a78dd9cb3a63894dc6c7e9def5d9a9c1dceab065470e59e85aadb85007e7f6",
+      "test/FilesJoinedProfile.sol": "0xcf86667d05ada0bef5fce3f7550991699c202ca0a15f7731a6b7f62b3553136b",
+      "test/FilesLiveIndex.sol": "0xf46ded63d2eba10d75bc09a80649334e40efc1303f068918377e5a092da427e7",
+      "test/FilesNamesProfile.sol": "0x892bc262ba82b57a7f6a06e793f0380f35446e196efdd2daf83f524875d22189",
+      "test/FilesPageReader.sol": "0x6378f97a6ef6b2a4b3352b37b826463154acb1e2ed6826f620d9328f7b469c54",
+      "test/FilesScopeState.sol": "0x488fabb7e12c6e3bebc05edc1a7acfb9ef306c6fcc352f8d29e072c0d86fc1f1",
+      "script/measure-joined.mjs": "0x4bc480d44b75125c00d73d652db966668cd21687becbe79719544d40a6383f66",
+      "script/diagnose-joined-read.mjs": "0x4d85bcce01e7610b864686637c0655234d7cd6f031cd0120db868258873b32c3",
+      "script/compact-environment.mjs": "0x3b73435562f863d59cd1e341a1cbd07f80e8898ebebb8cecc733d7f361d453e9",
+      "browser/compact-sdk.mjs": "0x6f362f40909b7335d9c5002c463d53495ff823a986e64d302ea88246605049d3",
+      "browser/compact-sdk-v2.mjs": "0x0f5af5ab79e9dcfc547287668302af9bf5a6e7e5d59a974bbd9bf16472b2deda",
+      "browser/compact-files-sdk.mjs": "0xbbdc6b69c5364427772fffa284f30dec0b07b41d03a5aacf7627d824029a2d30"
+    },
+    "compiler": [
+      {
+        "name": "Ledger",
+        "compiler": {
+          "version": "0.8.30+commit.73712a01"
+        },
+        "settings": {
+          "remappings": [
+            "src/libraries/=src/vendor/optimism/"
+          ],
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "compilationTarget": {
+            "src/Ledger.sol": "Ledger"
+          },
+          "evmVersion": "cancun",
+          "libraries": {},
+          "viaIR": true
+        }
+      },
+      {
+        "name": "FilesPageReader",
+        "compiler": {
+          "version": "0.8.30+commit.73712a01"
+        },
+        "settings": {
+          "remappings": [
+            "src/libraries/=src/vendor/optimism/"
+          ],
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "compilationTarget": {
+            "test/FilesPageReader.sol": "FilesPageReader"
+          },
+          "evmVersion": "cancun",
+          "libraries": {},
+          "viaIR": true
+        }
+      },
+      {
+        "name": "FilesLiveLens",
+        "compiler": {
+          "version": "0.8.30+commit.73712a01"
+        },
+        "settings": {
+          "remappings": [
+            "src/libraries/=src/vendor/optimism/"
+          ],
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "compilationTarget": {
+            "test/FilesLiveIndex.sol": "FilesLiveLens"
+          },
+          "evmVersion": "cancun",
+          "libraries": {},
+          "viaIR": true
+        }
+      },
+      {
+        "name": "FilesCarrierIndex",
+        "compiler": {
+          "version": "0.8.30+commit.73712a01"
+        },
+        "settings": {
+          "remappings": [
+            "src/libraries/=src/vendor/optimism/"
+          ],
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "compilationTarget": {
+            "test/FilesCarrierProfile.sol": "FilesCarrierIndex"
+          },
+          "evmVersion": "cancun",
+          "libraries": {},
+          "viaIR": true
+        }
+      }
+    ],
+    "anvil": "anvil Version: 1.7.1\nCommit SHA: 4072e48705af9d93e3c0f6e29e93b5e9a40caed8\nBuild Timestamp: 2026-05-08T07:54:31.470926000Z (1778226871)\nBuild Profile: dist",
+    "node": "v26.0.0",
+    "hardfork": "cancun",
+    "contentProfile": "raw-sha256-aesgcm-v2",
+    "measurementScriptHash": "0xfb21b2dc4c35a17668eb1ff735dc59e5baaa80102683b1608033127552b0657e"
+  },
+  "limits": [
+    "Disposable loopback-only Anvil; no public-RPC latency or fee inference.",
+    "A successful paid page is not proof that one onchain transaction can consume the whole gallery.",
+    "Paid cursor advancement is supplied from an eth_call to the same pinned reader; FilesPagePaid emits only a digest.",
+    "Header qualification does not fetch or verify full content bodies."
+  ],
+  "currentPaid": null,
+  "completedStage": 100,
+  "error": "UNSAFE_1000_TREND",
+  "elapsedMs": 5689,
+  "lastTransaction": {
+    "label": "paid/250/8/48",
+    "signer": "deployer",
+    "transactionHash": "0x15069cbada720569a6179ec7528c71d5be793d55134cebd8acc697a283a98118",
+    "blockHash": "0x520787916d645676d2aeeda3ca8adca48a66d9dab7262589a549e42ac3842d85",
+    "blockNumber": "155",
+    "gasUsed": "715624",
+    "effectiveGasPriceWei": "2000000000",
+    "calldataBytes": 1156,
+    "type": 0,
+    "gasLimit": "16777216",
+    "status": "SUCCESS",
+    "receipt": {
+      "type": "0x0",
+      "status": "0x1",
+      "cumulativeGasUsed": "0xaeb68",
+      "logs": [
+        {
+          "address": "0xc5a5c42992decbae36851359345fe25997f5c42d",
+          "topics": [
+            "0x566c7c000ebdd760ed22717c74f396c2df78f0204f596e048799c150ac226fbf"
+          ],
+          "data": "0x275987eff47a583e8617fd34f5a7d9cd1d5dc0a20f22a0ef810928e34f592c5400000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "blockHash": "0x520787916d645676d2aeeda3ca8adca48a66d9dab7262589a549e42ac3842d85",
+          "blockNumber": "0x9b",
+          "blockTimestamp": "0x6ab5c959",
+          "transactionHash": "0x15069cbada720569a6179ec7528c71d5be793d55134cebd8acc697a283a98118",
+          "transactionIndex": "0x0",
+          "logIndex": "0x0",
+          "removed": false
+        }
+      ],
+      "logsBloom": "0x00000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000100000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000",
+      "transactionHash": "0x15069cbada720569a6179ec7528c71d5be793d55134cebd8acc697a283a98118",
+      "transactionIndex": "0x0",
+      "blockHash": "0x520787916d645676d2aeeda3ca8adca48a66d9dab7262589a549e42ac3842d85",
+      "blockNumber": "0x9b",
+      "gasUsed": "0xaeb68",
+      "effectiveGasPrice": "0x77359400",
+      "blobGasPrice": "0x1",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": "0xc5a5c42992decbae36851359345fe25997f5c42d",
+      "contractAddress": null,
+      "blockTimestamp": 1790298457
+    }
+  }
+}
