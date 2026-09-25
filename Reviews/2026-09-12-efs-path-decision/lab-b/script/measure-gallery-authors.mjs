@@ -34,14 +34,16 @@ async function directoryBytes(path) {
 
 /** A single fixture grows from 100 to 1000 Files; the two folders share those IDs. */
 export async function measureGalleryAuthors({environment = createEnvironment, firstPageOnly = false,
-  rssDiscriminator = false} = {}) {
-  assert(!(firstPageOnly && rssDiscriminator), 'one bounded mode at a time');
+  rssDiscriminator = false, fullChild1000 = false} = {}) {
+  assert([firstPageOnly, rssDiscriminator, fullChild1000].filter(Boolean).length <= 1,
+    'one bounded mode at a time');
   const started = Date.now();
   const env = await environment({protocol: 'compact-guarded-v2', filesProfile: 'typed-directory-v1',
     contentProfile: 'raw-sha256-aesgcm-v2', evidenceMode: 'append', benchmarkHistory: true});
   const {ethers: e, manifest, wallets} = env, coder = e.AbiCoder.defaultAbiCoder(), Z = e.ZeroHash;
   const report = {status: 'RUNNING', fixture: 'actual-multi-author-gallery',
-    mode: rssDiscriminator ? 'fresh-250-child-rss-discriminator'
+    mode: fullChild1000 ? 'fresh-1000-eight-author-child-full-cold'
+      : rssDiscriminator ? 'fresh-250-child-rss-discriminator'
       : firstPageOnly ? 'fresh-1000-eight-author-first-page-only' : 'full-100-250-stop-go', runDirectory: env.dir,
     safety: {...cap, gasLimit: String(cap.gasLimit)}, history: env.historyPolicy, stages: [], checkpoints: [],
     sources: null, seedProjections: [],
@@ -49,7 +51,8 @@ export async function measureGalleryAuthors({environment = createEnvironment, fi
       'A successful paid page is not proof that one onchain transaction can consume the whole gallery.',
       'Paid cursor advancement is supplied from an eth_call to the same pinned reader; FilesPagePaid emits only a digest.',
       'Header qualification does not fetch or verify full content bodies.']};
-  const reportName = rssDiscriminator ? 'gallery-authors-child-rss-250.json'
+  const reportName = fullChild1000 ? 'gallery-authors-child-full-1000.json'
+    : rssDiscriminator ? 'gallery-authors-child-rss-250.json'
     : firstPageOnly ? 'gallery-authors-first-page-1000.json' : 'gallery-authors-measurement.json';
   const persist = () => writeFile(join(env.dir, reportName), json(report));
   let abortTimer;
@@ -60,7 +63,7 @@ export async function measureGalleryAuthors({environment = createEnvironment, fi
       transactions: env.transactions.length};
     report.checkpoints.push(row);
     let projectedNodeRss;
-    if (firstPageOnly && phase === 'seed-one' && n % 100 === 0) {
+    if ((firstPageOnly || fullChild1000) && phase === 'seed-one' && n % 100 === 0) {
       const baseline = report.checkpoints.find(entry => entry.phase === 'deployed');
       projectedNodeRss = baseline.nodeRss + (row.nodeRss - baseline.nodeRss) * 1000 / n;
       report.seedProjections.push({files: n, projectedNodeRss, baselineNodeRss: baseline.nodeRss});
@@ -76,9 +79,9 @@ export async function measureGalleryAuthors({environment = createEnvironment, fi
     abortTimer = setTimeout(() => {void env.close();}, Math.max(1, cap.wallMs - (Date.now() - started)));
     report.sources = {...await sourcePins(env), measurementScriptHash: e.keccak256(
       await readFile(join(lab, 'script/measure-gallery-authors.mjs')))};
-    if (rssDiscriminator) report.sources.rssChildScriptHash = e.keccak256(
+    if (rssDiscriminator || fullChild1000) report.sources.rssChildScriptHash = e.keccak256(
       await readFile(join(lab, 'script/measure-gallery-authors-child.mjs')));
-    if (!rssDiscriminator) await env.deploy('pagePaid', 'FilesPageReader.sol', 'FilesPagePaid');
+    if (!rssDiscriminator && !fullChild1000) await env.deploy('pagePaid', 'FilesPageReader.sol', 'FilesPagePaid');
     const hash = (types, values) => e.keccak256(coder.encode(types, values));
     const subject = (who, salt) => hash(['bytes32', 'bytes32', 'bytes32'],
       [e.id('efs2/subject/1'), e.zeroPadValue(wallets[who].address, 32), salt]);
@@ -137,7 +140,7 @@ export async function measureGalleryAuthors({environment = createEnvironment, fi
           e.concat([file, e.toUtf8Bytes(`gallery-content-${i}`.padEnd(41, 'x'))]));
         publish(manifest.types.name, e.hexlify(e.toUtf8Bytes(name)));
         bind(purpose.head, file, Z, revision);
-        if (!firstPageOnly) bind(purpose.folder, folders.one, e.id(name), file);
+        if (!firstPageOnly && !fullChild1000) bind(purpose.folder, folders.one, e.id(name), file);
         if (i % 2 === 0) bind(purpose.tag, revision, concept, file);
         files.push({file, revision, name});
         if ((i + 1) % 4 === 0 || i + 1 === to) await flush('setup/file/' + (i + 1));
@@ -248,10 +251,11 @@ export async function measureGalleryAuthors({environment = createEnvironment, fi
         gasTotal: paid.reduce((sum, row) => sum + BigInt(row.gasUsed), 0n).toString()};
     };
     await checkpoint('deployed', 0);
-    if (rssDiscriminator) {
-      report.seed = await seed(0, 250);
+    if (rssDiscriminator || fullChild1000) {
+      const target = fullChild1000 ? 1000 : 250;
+      report.seed = await seed(0, target);
       report.seed.files = files.length;
-      await checkpoint('seed-complete', 250);
+      await checkpoint('seed-complete', target);
       const inputPath = join(env.dir, 'child-rss-input.json');
       await writeFile(inputPath, json({rpcUrl: env.rpcUrl, manifest, folders, concept,
         authors: authors.map(a => a.address), files}));
@@ -270,7 +274,8 @@ export async function measureGalleryAuthors({environment = createEnvironment, fi
               {encoding: 'utf8'}).trim()) * 1024;
             const combined = process.memoryUsage().rss + childRss;
             result.maxCombinedNodeRss = Math.max(result.maxCombinedNodeRss, combined);
-            if (combined > cap.nodeRss) kill('COMBINED_NODE_RSS_CAP');
+            if (combined > (fullChild1000 ? cap.nodeRss - 128 * 2**20 : cap.nodeRss))
+              kill(fullChild1000 ? 'COMBINED_NODE_RSS_HEADROOM_STOP' : 'COMBINED_NODE_RSS_CAP');
             if (Date.now() - started > cap.wallMs) kill('WALL_TIME_CAP');
           } catch { /* child may have exited between polls */ }
         }, 100);
@@ -282,8 +287,9 @@ export async function measureGalleryAuthors({environment = createEnvironment, fi
           while ((end = stdout.indexOf('\n')) >= 0) {
             const line = stdout.slice(0, end); stdout = stdout.slice(end + 1);
             try {const row = JSON.parse(line); result.records.push(row);
-              if (row.memory?.peakRss && row.memory.peakRss + process.memoryUsage().rss > cap.nodeRss)
-                kill('COMBINED_NODE_PEAK_CAP');
+              if (row.memory?.peakRss && row.memory.peakRss + process.memoryUsage().rss
+                > (fullChild1000 ? cap.nodeRss - 128 * 2**20 : cap.nodeRss))
+                kill(fullChild1000 ? 'COMBINED_NODE_PEAK_HEADROOM_STOP' : 'COMBINED_NODE_PEAK_CAP');
             } catch (error) {kill('CHILD_RECORD_PARSE: ' + error.message);}
           }
         });
@@ -302,13 +308,19 @@ export async function measureGalleryAuthors({environment = createEnvironment, fi
           } catch (error) {reject(error);}
         });
       });
-      await runChild('eight'); await checkpoint('child-eight-complete', 250);
-      await runChild('one-then-eight'); await checkpoint('child-sequence-complete', 250);
-      report.status = 'PASS_RSS_DISCRIMINATOR'; report.elapsedMs = Date.now() - started;
+      await runChild(fullChild1000 ? 'eight-1000' : 'eight');
+      await checkpoint('child-eight-complete', target);
+      if (!fullChild1000) {
+        await runChild('one-then-eight'); await checkpoint('child-sequence-complete', target);
+      }
+      report.status = fullChild1000 ? 'PASS_FULL_1000_CHILD' : 'PASS_RSS_DISCRIMINATOR';
+      report.elapsedMs = Date.now() - started;
       report.transactionCount = env.transactions.length;
       report.setupGasTotal = env.transactions.filter(row => row.label.startsWith('setup/'))
         .reduce((sum, row) => sum + BigInt(row.gasUsed), 0n).toString();
-      report.limits.push('Both children are read-only; no paid wrapper, warm pass, or 1000-File traversal in this experiment.');
+      report.limits.push(fullChild1000
+        ? 'One read-only child, full cold traversal only; no paid call or warm pass. A 128 MiB combined-Node headroom stop was enforced.'
+        : 'Both children are read-only; no paid wrapper, warm pass, or 1000-File traversal in this experiment.');
       await persist(); console.log('GALLERY_REPORT ' + join(env.dir, reportName));
       return report;
     }
@@ -440,7 +452,15 @@ export async function measureGalleryAuthors({environment = createEnvironment, fi
     console.log('GALLERY_REPORT ' + join(env.dir, reportName));
     return report;
   } catch (error) {
-    report.status = 'STOPPED'; report.error = error.message; report.elapsedMs = Date.now() - started;
+    report.status = fullChild1000 && report.children?.length ? 'PARTIAL_SAFETY_STOP' : 'STOPPED';
+    report.error = error.message; report.elapsedMs = Date.now() - started;
+    if (fullChild1000) {
+      report.completedPages = report.children?.[0]?.records.filter(row => row.kind === 'page').length ?? 0;
+      report.transactionCount = env.transactions.length;
+      report.setupGasTotal = env.transactions.filter(row => row.label.startsWith('setup/'))
+        .reduce((sum, row) => sum + BigInt(row.gasUsed), 0n).toString();
+      report.limits.push('A partial safety stop is not terminal COMPLETE coverage or a full 1000-File result.');
+    }
     report.lastTransaction = env.transactions.at(-1); await persist();
     console.error('GALLERY_REPORT ' + join(env.dir, reportName));
     throw error;
@@ -455,5 +475,6 @@ if (process.argv.includes('--self-test')) {
   console.log('gallery authors plan self-test PASS');
 } else if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   await measureGalleryAuthors({firstPageOnly: process.argv.includes('--first-page-1000'),
-    rssDiscriminator: process.argv.includes('--rss-discriminator-250')});
+    rssDiscriminator: process.argv.includes('--rss-discriminator-250'),
+    fullChild1000: process.argv.includes('--full-child-1000')});
 }

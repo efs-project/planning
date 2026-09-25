@@ -6,11 +6,13 @@ import {createReadTransport} from './compact-read-transport.mjs';
 import {createFilesCompactSdk} from '../browser/compact-files-sdk.mjs';
 
 const [inputPath, sequence] = process.argv.slice(2);
-assert(inputPath && ['eight', 'one-then-eight'].includes(sequence), 'bounded read sequence');
+assert(inputPath && ['eight', 'one-then-eight', 'eight-1000'].includes(sequence), 'bounded read sequence');
 const input = JSON.parse(await readFile(inputPath, 'utf8'));
-assert(input.files.length === 250 && input.authors.length === 8, 'exact 250-File/eight-author fixture');
+const fileCount = sequence === 'eight-1000' ? 1000 : 250;
+assert(input.files.length === fileCount && input.authors.length === 8, 'exact File/eight-author fixture');
 assert(input.rpcUrl.startsWith('http://127.0.0.1:'), 'owned loopback RPC only');
-const cap = {nodeRss: 768 * 2**20, wallMs: 60_000, pages: 16};
+const cap = {nodeRss: (sequence === 'eight-1000' ? 640 : 768) * 2**20,
+  wallMs: 60_000, pages: sequence === 'eight-1000' ? 40 : 16};
 const started = Date.now(), e = await loadEthers();
 const rpc = createReadTransport({url: input.rpcUrl});
 const memory = () => ({...process.memoryUsage(), peakRss: process.resourceUsage().maxRSS * 1024});
@@ -56,13 +58,13 @@ async function walk(width) {
   } while (page.continuation);
   assert.equal(page.queryCoverage, 'COMPLETE');
   assert.equal(scanned, Number(page.rawTotal));
-  assert.equal(rows, 125);
+  assert.equal(rows, fileCount / 2);
   assert.equal(seen.size, expected.size);
   return {width, pages, scanned, rows, memory: check(), cache: sdk.readMetrics()};
 }
 
 const results = [];
-for (const width of sequence === 'eight' ? [8] : [1, 8]) {
+for (const width of sequence === 'one-then-eight' ? [1, 8] : [8]) {
   results.push(await walk(width));
   global.gc?.();
   emit({kind: 'released', width, memory: check()});
