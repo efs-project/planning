@@ -14,9 +14,9 @@
 
 James wants a filesystem for users **and contracts**: portable attributed data; composable validated Types; compatible evolution; shared files/tags/Lenses; direct static access; reasonable total cost; future OS-drive/app use. He wants visible progress and autonomous bounded execution, not more context-heavy coordination, unlimited tests or another management platform.
 
-Three routes were considered. Continuing to polish the whole disposable browser duplicates production effort. Starting a rewrite without carrying over evidence risks losing the semantics already earned. **Recommended: start the real upgradeable vertical after environment approval, using the lab as a reference and four explicit discriminators.** A discriminator is a small experiment whose failure could change an interface or supported workload. M1's design can proceed while P1–P4 run; affected interfaces stay provisional until their probe results are incorporated.
+Three routes were considered. Continuing to polish the whole disposable browser duplicates production effort. Starting a rewrite without carrying over evidence risks losing the semantics already earned. **Current sequence: carry the now-repaired seeded demo and bounded P1/P3/P4/P5 results into the real upgradeable vertical after environment approval; settle the public Name/profile choice before M3 freezes it.** The observed results and limits are in [[../../Reviews/2026-09-24-prototype-delivery/README|the September closeout]]. A discriminator is a small experiment whose failure could change an interface or supported workload. M1's design can proceed while P2/P3 product interfaces remain provisional; target-chain fees and long-lived-browser behavior are M5 release evidence, not a reason to keep rewriting the lab.
 
-This is a program-level implementation plan. P1–P4 are dispatchable experiment packets with paths, inputs and exit tests. M1–M6 are dependent implementation briefs: before a worker edits a new repository, the integrator expands that brief into one reviewed file-level plan against the actual selected interface. This avoids inventing permanent ABI signatures before the relevant experiment. Each package must produce working behavior, not just another plan.
+This is a program-level implementation plan. P1–P5 are experiment packets with paths, inputs and exit tests; their current state lives only in the checklist. R1 is retained as the closed regression recipe. M1–M6 are dependent implementation briefs: before a worker edits a new repository, the integrator expands that brief into one reviewed file-level plan against the actual selected interface. This avoids inventing permanent ABI signatures before the relevant experiment. Each package must produce working behavior, not just another plan.
 
 ## Global constraints
 
@@ -38,7 +38,8 @@ These five failure classes must be included in their owning packet, rather than 
 2. A stale plan, changed account/network, lost receipt or failed index callback must not duplicate a write or leave half a save — M1/M2/M4.
 3. Replacing or moving a file must not silently move somebody's content testimony to a different subject — P2/M3.
 4. A harmless build change or authorized upgrade must not make yesterday's exported Types unreadable or reinterpret their authority — M1/M2/M6.
-5. A List that passes client checks but violates duplicate, capacity, type or append-only rules must be refused onchain, including within one batch — P1/M3.
+5. A basic curated List must have stable entry identity, curator authority, deterministic order and qualified pagination; stale reorder/remove must fail safely — P1/M3. Specialized membership policies are separate application profiles.
+6. Two device keys must remain attributable to one stable author, with a revocable scope and old history preserved after revocation — P5/M1/M2.
 
 ## Workspace and evidence map
 
@@ -56,27 +57,35 @@ From the EFS workspace, the current lab root is `planning-warroom-b-run/Reviews/
 
 Use the September 17 Files report for recent action measurements; the September 15/16 Core reports retain deeper experiments. Do not combine numbers from different builds, guarantees or fee snapshots into an imaginary single benchmark.
 
-## P1 — Curated Lists and v1 semantic parity
+## R1 — Fresh seeded click-through after the location-index change
 
-**Purpose:** prove a useful non-Files collection fits without adding a `LIST` primitive to the kernel, and enumerate v1 features rather than assuming file CRUD equals parity.
-**Lead:** contract/profile implementer, Astra High; v2 PM integrates; an independent Astra High reader checks invariant enforcement.
-**Files:** read `test/FilesApplication.t.sol`, `test/CoreOrderedAcceptance.t.sol`, `src/IndexModule.sol`; read v1 `contracts/specs/06-Lists-and-Collections.md` and `contracts/specs/overview.md` as behavior only. Proposed new lab files: `test/CollectionProfile.sol`, `test/CollectionProfile.t.sol`, `script/probe-collections.mjs`. Result: `planning/Reviews/2026-09-24-prototype-delivery/p1-collections.md`.
-**Consumes:** existing exact Types, typed references, author-qualified Bindings, required indexes and admission prefix. **Produces:** disposable collection Type/validator descriptors plus a contract-readable collection fixture; no permanent List ABI.
+**Purpose:** prove the repaired historical location qualification also survives the real workbench's required callback budget and end-to-end static Files path. The original unit suite passed while fresh `externalContent:true` bootstrap reverted on the first FOLDER placement: the extra witness work left too little of the unchanged index allowance for final validation. This is a demonstrated integration regression, not a Type-model objection.
+
+**Files:** `test/TagStanceProfile.sol`, `test/TagStanceQuery.t.sol`, `core-closeout-tags-20260915/fixture.mjs`, `script/workbench-chain.mjs`, `script/workbench-browser.mjs`, Vite static build. Retain the first-observation witness. Diagnose callback split before editing; optimize duplicate work or select a justified allowance with measurements, never omit final validation.
+
+**Exit:** fresh `npm run chain` reaches seeded completion on port 8545, `npm run dev` exposes the SPA on 60627, guest read sees seeded names/content, one signed File/tag action is independently reconciled, the old-origin slot query still refuses false absence, and source/build/config identities match. The chain is disposable and must not use an active port or reset user data without checking first. No native modal dialogs, wallet actions or browser focus stealing are part of automated verification.
+
+## P1 — Ordinary curated Lists and v1 semantic parity
+
+**Purpose:** prove an ordinary curated collection fits without adding a `LIST` primitive to the kernel, and enumerate v1 features rather than assuming file CRUD equals parity.
+**Lead:** contract/profile implementer, Sol High; v2 PM integrates; an independent Sol High reader checks invariant enforcement.
+**Files:** read `test/FilesApplication.t.sol`, `test/CoreOrderedAcceptance.t.sol`, `src/IndexModule.sol`; read v1 `contracts/specs/06-Lists-and-Collections.md` and `contracts/specs/overview.md` as behavior only. Proposed new lab files: `test/CuratedListProfile.sol`, `test/CuratedListProfile.t.sol`, `script/probe-collections.mjs`. Result: `planning/Reviews/2026-09-24-prototype-delivery/p1-collections.md`.
+**Consumes:** existing exact Types, typed references, author-qualified Bindings, required indexes and admission prefix. **Produces:** disposable ordinary collection Types plus a contract-readable fixture; no permanent List ABI.
 
 Sequence:
 
 1. Write a small parity table: Files operations; mirror alternatives; metadata/properties; redirects; Lists. Give every v1 behavior an existing v2 equivalent, a concrete gap, or an explicit semantic difference. No EAS carrier/code reuse.
-2. Use ordinary records for a collection and stable entry identity. Include curator-qualified membership, target references and mutable entry order/label facts. Choose the smallest exact type set that enforces the rules; explain its keys in the result before implementing it.
-3. Add failing scenarios: wrong target Type, duplicate target when forbidden, capacity exceeded, non-curator mutation, append-only removal/replacement, and two same-batch insertions that jointly break a rule. Reordering/renaming must preserve entry identity and labels. A late failure leaves no partial membership or index effects.
+2. Use ordinary records/bindings for a curated ordered reference collection with stable entry identity, an optional label and author-qualified current edition. Bound any snapshot representation explicitly; a small top-eight List may use a different storage shape from a huge evolving collection.
+3. Add focused controls: non-curator mutation rejected; stale reorder/remove rejected; page continuation after a changed HEAD refuses the old basis; a late failure leaves no partial membership or index effects. Reordering preserves entry identity and labels. Keep advanced target-Type, duplicate, capacity and append-only policies as possible later application profiles, not this packet's exit gate.
 4. Implement only the profile/reader needed to pass. Alice curates photos; Bob has an independently attributed edition. A third-party contract reads exact membership and a selected target without scanning the Realm.
-5. Measure cold first creation, reused-Type insertion, reorder, removal and contract membership reads with all required indexes. Capture receipt gas, setup costs separately, and bounded-pagination behavior.
+5. Measure cold first creation, insertion, reorder, removal and contract membership reads with all required indexes. Capture receipt gas, setup costs separately, and bounded-pagination behavior. Name the cost/size threshold where this simple profile should use another representation.
 6. Report whether generic Core suffices. If it does not, show the minimal failing sequence and proposed generic operation; do not sneak an application-specific noun into Core. One focused review, fix consequential findings, then close or record the blocker.
 
 Focused checks, after the proposed files exist:
 
 ```sh
-forge test --offline --match-path test/CollectionProfile.t.sol -vv
-node script/probe-collections.mjs
+forge test --offline --match-path test/CuratedListProfile.t.sol -vv
+    node script/probe-collections.mjs
 ```
 
 The runner must own a disposable local chain and stop it. Success is enforced rules + useful contract reads + measured cost, not merely serializable List data. P1 may finish before a polished playlist UI exists.
@@ -84,7 +93,7 @@ The runner must own a disposable local chain and stop it. Success is enforced ru
 ## P2 — Public names, shared Concepts, tag subjects and personal homes
 
 **Purpose:** avoid building apps around prototype-only ASCII names or incompatible tag identities; make personal-home discovery a small profile instead of a kernel redesign.
-**Lead:** profile/SDK implementer, Astra High; Extra High only for a demonstrated normalization/validation architecture problem.
+**Lead:** profile/SDK implementer, Sol High; Extra High only for a demonstrated normalization/validation architecture problem.
 **Files:** read `test/FilesNamesProfile.sol`, `test/TagStanceProfile.sol`, `test/FilesNames.t.sol`, `browser/compact-paths.test.mjs`, `browser/exact-stance.integration.test.mjs`. Proposed fixtures: `browser/public-profile-vectors.test.mjs`, `test/PublicProfileVectors.t.sol`. Result: `planning/Reviews/2026-09-24-prototype-delivery/p2-public-profiles.md`.
 **Consumes:** current exact identities and owner tag rulings. **Produces:** versioned example vectors, proposed exact profile boundaries and home/query semantics; permanent normalization bytes remain unselected until reviewed.
 
@@ -92,7 +101,7 @@ Sequence:
 
 1. Specify one pinned normalization profile for the experiment. Include composed/decomposed accents, non-Latin names, emoji, case differences, slash/control rejection and byte-length boundaries. Distinguish Files names from the Commons Concept rule `NFC → lowercase → space→underscore`.
 2. Compare browser and Solidity acceptance/identity for the same vectors. Client-only cleanup is not onchain validation. Price the necessary validator/helper and pin any Unicode version/data dependency; reject unsupported input explicitly rather than normalizing inconsistently.
-3. Trace `/docs/efs.doc`: a location tag remains on that placement when the occupant changes; a File tag follows the same File across names; a revision tag remains on the exact revision. Show both Lens orders and a conflicting revision. Directory tags do not silently mean all descendants are tagged.
+3. Trace `/docs/efs.doc`: a location tag remains on that placement when the occupant changes; a File tag follows the same File across names; a revision tag remains on the exact revision. Show both Lens orders and a conflicting revision. The current exact-Stance subject validator accepts File/Directory/revision but not a placement coordinate, so extend an application profile that authenticates the position and its binding at the cited basis before calling this proved. Directory tags do not silently mean all descendants are tagged.
 4. Define ordinary profile/home records and an author-qualified current-home binding. Address/Principal access works without ENS. ENS is a replaceable discovery adapter; repointing a name must not rewrite historical citations.
 5. Define “files I authored” over one named Realm/basis: identify the exact author index and filtering/deduplication needed to show files rather than all internal/revision records. Distinguish that inventory from files visible in the published home and from all-chain discovery.
 6. Produce a small interface packet for M3, including a profile example referencing a photo/AR biography and a scoped authored-files query. Any need for a new index or costly onchain Unicode behavior becomes an explicit measured finding.
@@ -108,19 +117,20 @@ Do not make a full ENS integration or website builder a prerequisite to this pro
 
 ## P3 — Shared-gallery and contract economics envelope
 
-**Purpose:** answer “will normal people and contracts use this comfortably?” with a whole workflow, not scary isolated gas numbers or hidden setup exclusions.
-**Lead:** performance/integration implementer, Astra High; sole benchmark runtime owner.
+**Purpose:** answer “will normal people and contracts use this comfortably?” with a whole workflow, including several user edits saved together, not isolated gas numbers or hidden setup exclusions.
+**Lead:** performance/integration implementer, Sol High; sole benchmark runtime owner.
 **Files:** extend examples from `browser/files-workflows.integration.test.mjs`, `browser/exact-stance.integration.test.mjs`, `test/FilesQueryOrigin.t.sol`, `test/FilesRetainedQuery.t.sol`; inspect `script/measure-joined.mjs` before reusing any setup. Proposed bounded runner: `script/probe-shared-gallery.mjs`. Result: `planning/Reviews/2026-09-24-prototype-delivery/p3-gallery-envelope.md` and small JSON summaries in the lab.
 **Consumes:** existing Files/Concept profiles initially; repeat only affected cells after P1/P2. **Produces:** a workload/cost table and explicit supported recipe, not a new maximum embedded in the protocol.
 
 Sequence:
 
 1. Seed one shared directory with Alice, Bob and Carol, distinct files and conflicting names. Use one exact shared tag concept. Exercise both Lens orders, ASSERT/DENY/SILENT, copy/link, edit, move, mask and release. Cold restart the reader; no browser-local filename truth.
-2. Measure 100 and 1,000 live entries with 1 and 8 included authors; reuse retained 10,000-lifetime-name evidence and rerun that cell only if relevant inventory logic changed. Include low-selectivity filters and unavailable/opaque rows. Page budget counts candidates, not matches.
-3. Measure a paid contract point/path read, membership check and small continued query. A 64-author stress case is diagnostic, not the ordinary-user target. Verify unrelated writes do not prevent progress and relevant changes do not silently reuse a cursor.
-4. Price complete create/register/edit/tag/rebind recipes: cold setup versus reuse; required indexes; byte storage; validation; signatures; execution; L1 posting/operator fees and AR storage separately. Use small inline files plus external descriptors for 1 KiB/1 MiB/16 MiB payload cases. Payload retrieval work grows with size even when registration does not.
-5. Before public deployment, label L1/Base/Arbitrum dollar values as dated models. After permission, M5 measures actual target execution and provider behavior. Do not send private transaction payloads to a fee oracle; use explicitly public fixtures.
-6. Produce one pass/optimize/impractical/unsupported finding per recipe. If normal shared-gallery operations require near-block-limit transactions, silently incomplete listings, or repeated full-Realm scans, stop calling that recipe viable and propose the smallest repair.
+2. Stage five distinct same-author operations on one new File: create `a.txt`, edit its contents, tag its stable File with a pre-existing Concept, rename to `b.txt`, and add `a.txt` as a second name. These fit the current four guarded positions: the new File HEAD, its tag, and the two names. Compose one plan with virtual in-batch state, simulate it, submit it once and read back every effect. Do not concatenate five independently prepared plans: later operations depend on earlier in-batch results. Count approvals/receipts and measure total gas versus separate saves. A stale relevant name/tag/HEAD or late failure must revert every effect; unrelated writes must not invalidate the plan by changing only a global counter. The 64 internal-action capacity is not a five-operation SDK proof, and five independently guarded source positions exceed the current four-position read-set limit. If the plan exceeds a supported transaction envelope, surface an explicit split preview and its loss of atomicity.
+3. Measure 100 and 1,000 live entries with 1 and 8 actual contributing authors, not merely eight Lens selectors with seven empty authors; reuse retained 10,000-lifetime-name evidence and rerun that cell only if relevant inventory logic changed. Include low-selectivity filters and unavailable/opaque rows. Page budget counts candidates, not matches. Existing joined `tagScope` uses legacy TAG bindings; exact ASSERT/DENY/SILENT stances currently require post-enumeration hydration, so preserve the enumeration basis and UNKNOWN rows when filtering. A contract-side exact-stance predicate is a separate measured reader feature if needed.
+4. Measure a paid contract point/path read, membership check and small continued query. A 64-author stress case is diagnostic, not the ordinary-user target. Verify unrelated writes do not prevent progress and relevant changes do not silently reuse a cursor.
+5. Price complete create/register/edit/tag/rebind recipes: cold setup versus reuse; required indexes; byte storage; validation; signatures; execution; L1 posting/operator fees and AR storage separately. Use small inline files plus external descriptors for 1 KiB/1 MiB/16 MiB payload cases. Payload retrieval work grows with size even when registration does not. A completed AR upload preceding a reverted onchain batch remains an external artifact for retry or cleanup, never a claimed atomic rollback.
+6. Before public deployment, label L1/Base/Arbitrum dollar values as dated models. After permission, M5 measures actual target execution and provider behavior. Do not send private transaction payloads to a fee oracle; use explicitly public fixtures.
+7. Produce one pass/optimize/impractical/unsupported finding per recipe. If normal shared-gallery operations require near-block-limit transactions, silently incomplete listings, or repeated full-Realm scans, stop calling that recipe viable and propose the smallest repair.
 
 Proposed **investigation tripwires**, not owner-approved fees or permanent limits: ordinary 1–8-author mutation exceeding 5M gas; narrow paid point/membership read exceeding 1M; one paid continuation exceeding 3M; first 32-candidate folder page exceeding 25 HTTP requests; representative ordinary-provider first-page delay exceeding 5 seconds. Crossing one triggers analysis, not automatic scope reduction. Any supported operation failing the target network's actual transaction/block limits is a hard failure.
 
@@ -134,13 +144,13 @@ Retain first-page/full-traversal RPC counts, bytes, elapsed time, relevant gas l
 ## P4 — Independent contract and OS-drive projection
 
 **Purpose:** demonstrate the same data is useful beyond our own browser without prematurely building three native drivers.
-**Lead:** SDK/contract integration implementer, Astra High; native-filesystem PM consulted only for an actual semantic disagreement.
+**Lead:** SDK/contract integration implementer, Sol High; native-filesystem PM consulted only for an actual semantic disagreement.
 **Files:** use `test/FilesApplication.t.sol`, `test/LiveFiles.t.sol`, `test/FilesPageReader.t.sol`, `browser/compact-sdk.mjs`, `browser/files-workflows.mjs` and [[mountable-filesystem-semantics]]. Proposed fixtures: `browser/drive-projection.test.mjs`, `test/ExternalFilesystemConsumer.t.sol`. Result: `planning/Reviews/2026-09-24-prototype-delivery/p4-independent-consumers.md`.
 **Consumes:** exact reader/basis semantics and existing external-contract examples; P1/P2 outputs for the final integrated examples. **Produces:** headless drive projection and consumer conformance traces; not a shipped Linux/macOS/Windows mount.
 
 Sequence:
 
-1. Build a small consumer from public interfaces rather than copying the browser's selection logic. Read a typed record/path, enforce a predicate and publish under the calling contract's authority. Wrong revision, stale basis and failed required index must revert the whole app action.
+1. Build a small consumer from public interfaces rather than copying the browser's selection logic. Read a typed record/path, enforce a predicate and publish under the calling contract's authority. Wrong revision, stale basis and failed required index must revert the whole app action. The current concrete lab consumer imports a test reader; test whether a slim public qualified reader ABI suffices before M1/M2 freeze. `UNKNOWN` and `NOT_ON_THIS_PAGE` must have distinct machine-readable outcomes (the current live mounted reader maps both to status 0).
 2. Compare the SDK tree with an independently assembled headless drive projection of a pinned fixture: ordered conflicts, aliases, masks, moved directories, partial pages, unavailable external bytes and an encrypted/opaque node. Compare stable IDs, names, bytes and error meanings.
 3. Exercise open/range/copy-out and a simulated editor save: stage temporary bytes locally, publish one complete revision/placement change, simulate a crash before/after submission, and recover without duplicate publication. State exactly when local durability differs from chain acceptance.
 4. Reuse the live-contract value fixture: a path exposes changing provider state; an explicit snapshot becomes retained data. Provider upgrade/failure is not a new immutable file version unless explicitly published.
@@ -153,6 +163,24 @@ forge test --offline --match-path test/ExternalFilesystemConsumer.t.sol -vv
 
 A pure projection cannot close F1. Actual host mounts, permission behavior, fsync/rename and crash tests remain separately named work.
 
+## P5 — Two device keys, one stable author
+
+**Purpose:** test the owner's browser-and-phone requirement before author identity, authorization and SDK interfaces harden. A stable author must be cryptographically attributable through scoped device authority; an ENS display name alone is insufficient. Prioritize two device keys continuing an existing EOA author's Files; a new smart-wallet author remains a separate control profile.
+**Lead:** identity/contract implementer, Sol Extra High or Astra High for the first design judgment; v2 PM integrates. Existing deployed ERC-1271 and real local Prague type-4 account-transition checks are evidence to reuse, not a substitute for the scoped two-device journey.
+**Files:** inspect `src/Ledger.sol`, `src/Keys.sol`, `test/Guarded1271.t.sol`, `test/IdentityTransition.t.sol`, `browser/compact-sdk.mjs`, and [[../../Reviews/2026-09-17-native-aa-compatibility|native AA compatibility review]]. Proposed new lab fixtures: `test/TwoDeviceAuthor.t.sol` and `browser/two-device-author.integration.test.mjs`. Result: `planning/Reviews/2026-09-24-prototype-delivery/p5-two-device-author.md`.
+**Consumes:** current author/Principal derivation, signed publication, ordinary Files and Lens reads. **Produces:** a runnable disposable authority profile and an identity-facing interface recommendation, without adopting old KEL mechanics wholesale.
+
+Sequence:
+
+1. Pin who remains stable across keys: author/Principal, controller, signing device, transaction submitter and gas payer. State which bytes/identity are portable and which are local to chain/Realm. ENS may display `JamesCarnley.eth`, but raw-identity access must work when ENS is unavailable or repointed. In the current Core a deployed ERC-1271 wallet address can act as one stable local author; its Principal also includes the Realm origin, so the same wallet address on another chain is not silently the same Principal. `P_EOA` for an existing address and `P_W` for its smart wallet are different author IDs; a Lens `[P_EOA,P_W]` has two selectors and cannot fuse conflicting bindings or give W control of old EOA Files.
+2. Run the existing-EOA continuation discriminator first. The lab already has a real Prague type-4 install/change/clear and native continuation test under the original EOA Principal, but the original EOA signed those delegations and no scoped device grant was exercised. Add a disposable delegated-account implementation with two device grants scoped to an exact File/operation, expiry and grant epoch. Each device signs an action commitment that includes chain/Realm/execution, the Ledger's shared nonce and an epoch. A separate payer submits the delegated account call, which verifies the signature/scope and calls Ledger native ingress. Continue an EOA-authored File through A, then B; revoke A, reject A's pre-signed write, and let B continue. Verify the unchanged Principal/Lens/head/history and all failed effects. Keep device evidence separate from the Ledger's native caller evidence.
+3. Use the existing deployed ERC-1271 wallet as a control for a newly chosen smart-wallet author. It has a separate Realm-qualified Principal; it does not make old EOA Files editable by W. If a scoped two-device 1271 arm is also built, its wallet must verify actual intent/action bytes behind the digest and fit the 4,096-byte witness/300,000-gas callback bounds. This extra arm is useful, but must not displace the existing-EOA proof.
+4. If the product also wants an EOA/W grouped profile, add a verifiable EOA-signed association and W acknowledgement as ordinary attributed records/bindings. An unavailable or repointed ENS name must not rewrite historical author IDs. A group view retains each Principal and basis; it does not relabel old occurrences or imply W controls P_EOA bindings. This association is not required to close the single-EOA delegated-key arm.
+5. Measure initial delegation/grant approvals, routine device signatures and wallet prompts, onchain transactions, gas and payer behavior. Test relayed and direct/self-paid paths if supported; loss of a sponsor must not fabricate an effect or silently change author. The root EOA can change/clear its delegation; child grants constrain device keys, not the root. Current native Core evidence proves the account caller, not which device signature the delegated code checked; describe the per-device historical witness limit explicitly.
+6. If existing-EOA continuity needs an additional Core/ABI seam, show the smallest failing sequence and a compatible extension path. Do not equate key loss with safe recovery; report that separately.
+
+Close only with exact build/source identity, positive and negative checks, a real local-chain joined trace, and review of any authority change. Existing two-chain original-author restoration covers EOA signatures; the current import path refuses guarded ERC-1271 publications. This P5 packet proves local continuity and retained source attribution, not cross-chain smart-wallet control. Treat extension of smart-wallet authority across Realms as a separately visible requirement before claiming it.
+
 ## Real implementation briefs — expand only when their interfaces are ready
 
 G0 supplies the work environment. The following paths describe proposed responsibilities inside the temporary real repositories, not repositories created by this plan. The implementer must pin the actual repository/configuration before turning a brief into executable steps. Each brief gets a small consumer-visible slice before broad scaffolding.
@@ -163,11 +191,11 @@ Design `contracts-v2/src/core/`, `src/index/`, `src/readers/`, `src/profiles/` a
 
 Carry over the behavior of `FoundationUpgrade`, `CoreOrderedAcceptance`, `Guarded1271`, `IdentityTransition`, `RecordOccurrenceBounds` and described-Type tests. Include an independent developer's new Type, linked composition, compatible extension, malformed/bypass attempts, late-batch failures and account/controller changes. Current approval cannot rewrite historical authorship. Separate pure/read-only acceptance predicates from a state-changing application operation.
 
-Exit: modules deploy under ordinary runtime/initcode limits with documented growth room; populated Files/index/history state survives upgrades; stale signatures/cursors fail; storage layout is reviewed; exact build manifests and validator/Type identity dependencies are reproducible. A clean-slate engineer reviews boundaries before the implementation grows. P1/P2 may change profiles without reopening the entire system; any P3/P4 contract-facing blocker must also be resolved before that interface settles, not dismissed as client integration work.
+Exit: modules deploy under ordinary runtime/initcode limits with documented growth room; populated Files/index/history state survives upgrades; stale signatures/cursors fail; storage layout is reviewed; exact build manifests and validator/Type identity dependencies are reproducible. A clean-slate engineer reviews boundaries before the implementation grows. P1/P2 may change profiles without reopening the entire system; P5 settles the author/authorization seam; any P3/P4 contract-facing blocker must also be resolved before that interface settles.
 
 ### M2 — SDK, transport, authority and recovery
 
-Implement `sdk-v2/src/` around prepare → authorize → submit → reconcile and one qualified read model. Result types make inspecting a value without its coverage/basis difficult; ordinary application code must not assemble the lab's internal rows. Include JS/browser and Solidity consumer examples, EOA and selected deployed ERC-1271 profiles, bounded caching/batching, account/network changes and lost receipts.
+Implement `sdk-v2/src/` around prepare → authorize → submit → reconcile and one qualified read model. Result types make inspecting a value without its coverage/basis difficult; ordinary application code must not assemble the lab's internal rows. Include JS/browser and Solidity consumer examples, EOA and selected deployed ERC-1271 profiles, P5's device-author profile, staged mixed-operation saves, bounded caching/batching, account/network changes and lost receipts.
 
 Implement versioned archive adapters for **M1's exact build**, not just the historical wrapper supported by the lab. Stop the source, independently reconstruct bytes/Types/original evidence, restore only under valid destination authority and continue allowed writes. Preserve distinctions among exported attribution evidence, local-chain observation and authenticated foreign state. Unknown rule/build profiles stay unsupported. An upgradeable-source proof limitation must be shown to James before a launch portability claim.
 
@@ -175,7 +203,7 @@ Exit: the same facade drives a static guest reader, a wallet mutation, a third-p
 
 ### M3 — Public application profiles and v1 parity
 
-Implement the P1/P2 outcomes as versioned application profiles, not extra kernel nouns. Includes public Names/Concepts, File/revision/location tags, Lists with onchain rules, metadata and mirror/redirect equivalents from the parity casebook, home/profile binding and scoped authored-file discovery. Keep stable identity versus slot behavior explicit.
+Implement the P1/P2 outcomes as versioned application profiles, not extra kernel nouns. Includes public Names/Concepts, File/revision/location tags, ordinary curated Lists, metadata and mirror/redirect equivalents from the parity casebook, home/profile binding and scoped authored-file discovery. Keep stable identity versus slot behavior explicit. More restrictive List policies can be added as explicit application Types later.
 
 Exit: the v1 casebook has demonstrated equivalents or owner-approved differences; a user can publish a home containing files and a curated collection, a second user can contribute under a Lens, and raw-identity access survives ENS/service failure. No requirement is marked done merely because it can be encoded in a generic record.
 
@@ -193,7 +221,7 @@ Exit: supported scale/read/write envelopes, all-in fee components, failure/retry
 
 ### M6 — Joined release and owner acceptance
 
-Pin one contracts deployment manifest, one SDK release and one static build. Perform the three-user gallery + List + personal-home workflow, then upgrade populated contracts, revisit old citations, retry an interrupted write and cold-recover an exported slice. An independent reviewer checks the integrated boundaries, not every historical test again.
+Pin one contracts deployment manifest, one SDK release and one static build. Perform the three-user gallery + List + personal-home workflow, including two device keys acting for one author and a staged mixed-operation save. Then upgrade populated contracts, revisit old citations, retry an interrupted write and cold-recover an exported slice. An independent reviewer checks the integrated boundaries, not every historical test again.
 
 Exit: James can use the browser with his own wallet, follow the same short walkthrough and see costs and outcomes; the release has startup/deployment/recovery instructions and an explicit limitations page. His actual wallet actions are not replaced by a simulated provider and called equivalent. Before public release, surface deferred privacy/native/proof features and any unmet original requirement for approval.
 
@@ -211,8 +239,8 @@ This is an EFS-local working agreement, not a new harness or replacement for rep
 
 ### Parallelism and model policy
 
-- Default experimental implementation/review: **Astra High**. Use **Astra Extra High** for a specific cross-cutting design or difficult correctness failure. **5.6 Sol High/Extra High** is the owner-approved backup, not an automatic silent downgrade.
-- No Ultra by default, no cheap-model development to save tokens at the expense of judgment, and no Fable dispatch unless James explicitly allocates it.
+- For the September 24 prototype closeout, James selected **GPT-6 Sol High** for the coordinator. Use Sol High for bounded implementation/review, Sol Extra High for a specific cross-cutting correctness question, and Astra High only when a concrete design problem warrants it. Model availability and later owner preferences can change; this is a resource plan, not an identity guarantee.
+- No automatic Fable dispatch or downgrade to a cheap model to save tokens at the expense of judgment.
 - Set model and effort explicitly when dispatching and recheck the current allowlist. Use isolated context with the relevant packet, not this conversation's full history. Do not claim the parent can change its own active reasoning setting through a child spawn.
 - At most **two implementation workers**, plus coordinator and one reviewer, within actual available slots. In the shared lab, at most **one source/build/chain writer**; the second lane is read-only or works on non-overlapping approved artifacts. In real repos, use owned code worktrees and pinned cross-repo interfaces. Planning stays on main.
 - A worker owns one packet to its stopping point. Reuse that worker for a bounded fix, rather than repeatedly creating new readers. No nested swarm or repeated unchanged status polling.
