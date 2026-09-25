@@ -39,7 +39,7 @@ contract IndexWorkTest {
         actions[0].typeId = t;
         WorkUnitsProbe five = new WorkUnitsProbe(5);
         require(
-            support.indexAllowance(address(five), address(registry), abi.encode(actions)) == 790_600,
+            support.indexAllowance(address(five), address(registry), abi.encode(actions)) == 840_600,
             "full8-plus5 quote"
         );
         actions = new Ledger.Action[](64);
@@ -48,7 +48,7 @@ contract IndexWorkTest {
             actions[i].typeId = t;
         }
         require(
-            support.indexAllowance(address(five), address(registry), abi.encode(actions)) == 9_800_000, "shared maximum"
+            support.indexAllowance(address(five), address(registry), abi.encode(actions)) == 9_850_000, "shared maximum"
         );
         WorkUnitsProbe six = new WorkUnitsProbe(6);
         (bool ok,) = address(support)

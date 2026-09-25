@@ -180,7 +180,7 @@ contract Ledger {
     uint256 public constant MAX_ACTIONS = 64;
     uint256 public constant MAX_BODY = 8192;
     uint256 public constant ACCEPT_GAS = 300_000; // bounded STATICCALL to the acceptor
-    uint256 public constant INDEX_GAS_BASE = 200_000; // bounded CALL to the index module ...
+    uint256 public constant INDEX_GAS_BASE = 250_000; // bounded CALL to the index module ...
     uint256 public constant INDEX_GAS_PER_ACTION = 150_000; // ... plus this per action
     uint64 private constant GUARD = (uint64(1) << 48) - 1;
     bytes32 public constant INTENT_TYPEHASH = keccak256(
