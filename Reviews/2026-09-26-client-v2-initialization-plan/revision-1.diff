@@ -1,0 +1,484 @@
+diff --git a/README.md (revision 0) b/README.md (revision 1)
+index c58971e..6808c5e 100644
+--- a/README.md (revision 0)
++++ b/README.md (revision 1)
+@@ -2,3 +2,3 @@
+ 
+-**Status:** proposal from the web client dev for Web Client/OS PM review. No repository content, dependency installation, build, chain or wallet action was performed by this pass. A second pass on a different model is expected before this goes to the PM.
++**Status:** proposal from the web client dev for Web Client/OS PM review, **revision 1**: it applies the PM's first review (the five corrections plus the MessageFormat note; see §14). No repository content, dependency installation, build, chain or wallet action was performed by either pass.
+ **Author:** web-client-dev (Claude Opus 5.5, Claude Code) for James, to forward to the Codex Web Client/OS PM
+@@ -8,3 +8,3 @@
+ - [[client-repository-and-development]] (PM proposal), [[technology-foundation]], [[web-platform-standards-and-forward-profile]], [[architecture-and-modules]], [[app-runtime-and-direct-launch]], [[system-profiles-and-generations]], [[mvp0-acceptance]], [[Designs/web-client-os/README|web-client-os README]].
+-- [[repository-and-distribution-plan]] (SDK), [[contracts-repository-and-development]], and the uncommitted sibling [[../2026-09-26-contracts-v2-initialization-plan/README|contracts-v2 initialization plan]].
++- [[repository-and-distribution-plan]] (SDK), [[contracts-repository-and-development]], and the uncommitted sibling plans [[../2026-09-26-contracts-v2-initialization-plan/README|contracts-v2 initialization plan]] and [[../2026-09-26-sdk-v2-initialization-plan/README|sdk-v2 initialization plan]], re-read for revision 1.
+ - [[../2026-09-24-prototype-delivery/README|September 24–25 prototype closeout]], the lab-b browser at `4fbea63`, [[prototype-delivery-checklist]] and [[prototype-implementation-plan]].
+@@ -30,5 +30,7 @@ A proof counts only when it is checked against the **built output**: its import
+ - Starts or resumes this worktree's private seeded chain, through the **contracts-owned fixture package**.
+-- Puts a small **dev RPC gateway** in front of the chain. It owns method allowlisting, CORS, RPC metering and fault injection.
++- Puts a small **dev RPC gateway** in front of the chain. It enforces an exact JSON-RPC method allowlist that excludes signing, unlocked-account and admin methods, and it handles CORS, RPC metering and fault injection.
+ - Hosts Vite in-process.
+-- Prints one JSON `ready` event once the chain, deployment, seed and a real SDK guest read have all been verified.
++- Prints JSON readiness events at two levels:
++  - `infra-ready` once the chain, deployment and gateway are verified;
++  - `files-ready` once a real SDK guest read of the seeded Files tree also passes. That second level requires artifacts the sibling repos haven't scheduled yet (§9.2).
+ 
+@@ -42,5 +44,9 @@ Instances, ports, chain IDs and process ownership live in one small per-OS-user
+ 4. **Toolchain:** Node 24 LTS, pnpm 12, TypeScript 7 (native `tsc`) for typechecking only, Vite 8, Biome 2, Vitest 5 and Playwright 1.63. Every version is exact. The Node tools are written in erasable TypeScript and run directly on Node 24 with no build step (§4).
+-5. **Dev environment:** the client supervisor composes chain (fixture package), gateway and UI. The gateway takes the familiar `127.0.0.1:8545` and Anvil sits behind it on a private port. Assignments are sticky per worktree. Anvil ships through the fixture package's `@foundry-rs/anvil` dependency, so a client-only checkout needs no `foundryup` (§5).
++5. **Dev environment:** the client supervisor composes chain (fixture package), gateway and UI.
++   - The gateway takes the familiar `127.0.0.1:8545`. Anvil sits behind it on an unadvertised loopback port, runs with no unlocked accounts, and is explicitly qualified as **not** private from same-user local processes.
++   - Assignments are sticky per worktree. Only a new, never-published assignment may be reallocated automatically.
++   - Anvil ships through the fixture package's `@foundry-rs/anvil` dependency, so a client-only checkout needs no `foundryup`.
++   - A destructive reset or lossy restore changes the replay domain by default. That means a new chain ID, plus a new realm salt agreed with contracts. It is proven by resubmitting an old signed transaction (§5, §5.8).
+ 6. **The lockfile is the integration lock.** The client pins exactly two sibling artifacts: the SDK package and the fixture package, which carries its contracts release bundle. `doctor` checks that the SDK's protocol-input digest equals the fixture's release digest. There is no separate `integration.lock.json` unless contracts keeps the bundle outside the fixture package (§7.1).
+-7. **First persistent store:** the pending-submission journal, because reconciliation after a reload needs it. It is versioned, namespaced and exportable from its first write (§6.4).
++7. **First persistent store:** the pending-submission journal, because reconciliation after a reload needs it. The client **consumes the SDK's `indexedDbJournal`** (durable writes, a Web Lock per attempt) and its port conformance tests rather than writing its own. Cross-tab coordination of prompts, attempts and journal updates is C3 scope, not deferred (§6.4).
+ 8. **Release evidence:** one content-addressed `release.json` per build. CI builds once, tests those bytes, and publishes those bytes. Evidence is graded E0–E4 so a dev build doesn't pay for an audit (§7.4).
+@@ -54,3 +60,3 @@ Instances, ports, chain IDs and process ownership live in one small per-OS-user
+ - Declare Windows unsupported for `pnpm dev` until a process-tree test exists (§5.7).
+-- Ask contracts to ship the fixture CLI with its **S1** bundle, not S3 (§9).
++- Ask contracts to ship the fixture CLI with its **S1** bundle, not S3. Files readiness still waits on the Files profile and seed, and the three plans' milestones are reconciled by artifact in §9.2.
+ 
+@@ -103,4 +109,4 @@ client-v2/
+     tsconfig.json              C0  Node types, no DOM
+-    build/                     C0  check-graph.ts, scan-leaks.ts, licenses.ts, release-manifest.ts,
+-                                   messages.ts (MF2-subset compiler)
++    build/                     C0  provenance plugin, check-graph.ts, scan-leaks.ts, licenses.ts,
++                                   release-manifest.ts, check-messages.ts (MF2 subset check via messageformat)
+     serve/                     C0  static-serve.ts (prefix mounting, header profiles)
+@@ -121,3 +127,19 @@ Unit tests sit beside their source as `*.test.ts`. Supervisor tests live in `too
+ 
+-**Workspace membership is the environment boundary.** `apps/web` cannot depend on `tools`. Node APIs, fixture code and dev keys are therefore not merely forbidden in browser source: they are not resolvable from it. `tools` may depend on the SDK, which it uses for readiness reads and seeding in Node, and on the fixture package.
++**Environment separation is enforced by three layered mechanisms, not by workspace membership alone.** Membership only keeps `tools` out of `apps/web`'s declared dependencies. Two paths would still reach it:
++- Node's parent-directory lookup can still find root-level `node_modules` packages from `apps/web`.
++- A relative path like `../../tools/…` resolves no matter what the package declares.
++
++So:
++1. **Declared dependencies stay small.** The root `package.json` holds only toolchain devDependencies (TypeScript, Biome, Vitest, Playwright), never runtime or fixture code. `tools` alone depends on the fixture package and on the SDK's Node surfaces.
++2. **Source rules.** Biome `noRestrictedImports` on `apps/web/src/**` bans:
++   - `node:*` and Node builtins;
++   - `@efs-client/tools`;
++   - the fixture package and test runners;
++   - `@efs/sdk/node` and `@efs/sdk/testing`;
++   - relative specifiers that leave `apps/web/src`.
++
++   `apps/web/tsconfig.json` has `types: []` and no Node lib, so Node globals fail to typecheck.
++3. **Output provenance.** The build-output check (§4.4) inspects every module that contributed code to the shipped chunks. This is the gate that actually decides what shipped, whatever a source rule missed.
++
++`tools` may depend on the SDK, which it uses for readiness reads and seeding in Node, and on the fixture package.
+ 
+@@ -127,4 +149,4 @@ Unit tests sit beside their source as `*.test.ts`. Supervisor tests live in `too
+ |---|---|---|---|
+-| `index.html` → `boot/main.ts` (guest) | the only HTML entry | `boot/*`, `state/*`, `platform/scope`, `composition/reader-session`, `shell/viewer-frame`, SDK reader + EVM **read** subpath, native `features/files/views` | wallet discovery, SDK account/submission subpaths, Lit, Web Awesome, `shell/action-review`, storage, anything in `tools/` |
+-| `features/files/write/entry.ts` (lazy) | dynamic import after an explicit write intent | `composition/writer-session`, `platform/wallet`, `shell/action-review`, Lit, `ui/wa`, SDK wallet/submit subpaths | the Session Shell and later OS services |
++| `index.html` → `boot/main.ts` (guest) | the only HTML entry | `boot/*`, `state/*`, `platform/scope`, `composition/reader-session`, `shell/viewer-frame`, `@efs/sdk` (root: `createEfs`, `httpRpc`, `verifyDeployment`) and `@efs/sdk/files`, native `features/files/views` + their `define.ts` | wallet discovery, `@efs/sdk/actions`, the journal half of `@efs/sdk/web`, Lit, Web Awesome, `shell/action-review`, storage, anything in `tools/` |
++| `features/files/write/entry.ts` (lazy) | dynamic import after an explicit write intent | `composition/writer-session`, `platform/wallet`, `shell/action-review`, Lit, `ui/wa`, `@efs/sdk/actions`, `indexedDbJournal` from `@efs/sdk/web` | the Session Shell and later OS services |
+ | Worker entries (when measured useful) | `new Worker(new URL('./x.worker.ts', import.meta.url), { type: 'module' })` | explicit, bounded | the DOM and the main-thread state realm |
+@@ -156,7 +178,7 @@ boot → composition → shell → features/* → ui → state → platform
+ | Only `state/signals.ts` imports `signal-polyfill`. Only Lit elements import `@lit-labs/signals`. | Biome restricted imports; a lockfile check that exactly one `signal-polyfill` version exists; a graph check that its code sits in exactly one main-thread chunk |
+-| Only `ui/wa/**` imports `@awesome.me/webawesome`. `wa-*` tags appear only in lazy write/settings views. | Biome; graph check (no Web Awesome in the guest closure) |
+-| Only `features/files/write/**` and `composition/writer-session.ts` import SDK wallet/submission subpaths. | Biome; graph check |
+-| No `import()` with a non-literal specifier anywhere in `src/` (no remote or assembled module URLs). | `tools/build/check-graph.ts` source scan |
+-| Module evaluation does no I/O. Importing any `src/` module (other than `boot/main.ts`) must not call `fetch`, `indexedDB`, `navigator.serviceWorker`, `customElements.define`, `window.ethereum` or `localStorage`. | Vitest "module purity" test that imports every module with those globals trapped |
+-| Custom elements are defined only in the entry that owns them (`views/define.ts` per slice). | Purity test above |
++| Only `ui/wa/**` imports `@awesome.me/webawesome`. `wa-*` tags appear only in lazy write/settings views. | Biome; graph check (no Web Awesome in the guest startup set) |
++| Only `features/files/write/**` and `composition/writer-session.ts` import `@efs/sdk/actions` and the journal. | Biome; provenance check |
++| No `import()` with a non-literal specifier anywhere in `src/` (no remote or assembled module URLs). | `tools/build/check-graph.ts` source scan, plus Rolldown's own dynamic-import records in the provenance output |
++| **Module evaluation does no I/O.** Apart from the two entries and the registration modules below, importing any `src/` module must not call `fetch`, `indexedDB`, `navigator.serviceWorker`, `navigator.locks`, `customElements.define`, `window.ethereum` or `localStorage`. The two entries are `boot/main.ts` and `features/files/write/entry.ts`. | Vitest "module purity" test: imports every non-exempt module with those globals trapped, and fails on any call |
++| **Element registration is explicit and narrow.** Only files named `define.ts` may call `customElements.define`, and they may do nothing else at evaluation time. Each `define.ts` may be imported only by an entry module. | Purity test (in `define.ts` it permits only `customElements.define` of `efs-*` names and traps everything else); Biome restricted-import override so `**/define.ts` is importable only from the entry files |
+ | Persisted records, worker messages and receipts are plain versioned data. No Signals, element instances, Lit or Web Awesome types in `platform/storage/**` or in `features/*/model`. | Biome restricted imports on those paths; review |
+@@ -173,3 +195,3 @@ None of these enter guest startup. Each has a named seam from day one, and no im
+ 
+-  A factory receives explicit handles from its caller's session. It never gets a global. The graph check proves that no loader target is in the guest closure.
++  A factory receives explicit handles from its caller's session. It never gets a global. The graph check proves that no loader target is in the guest startup set.
+ - **Replaceable first-party modules** are `FeatureEntry` objects (§2.4). Swapping one is a composition change. That is enough until an independently released module needs a versioned interface. At that point the existing entry/lifecycle seam is extracted into a package with a runtime binding, and installation never inherits first-party host privileges.
+@@ -203,3 +225,5 @@ else {
+ 
+-The reader verifies the configuration against the chain before it trusts it: chain ID, genesis hash, and deployment code hashes through the contracts `describe()` view. A mismatch is a visible error. There is no fallback to another network. The prototype's lesson applies directly: "chain ID alone does not distinguish two Anvil instances", so every cache and journal key includes `(chainId, genesisHash, deploymentId)`.
++The reader verifies the configuration against the chain before it trusts it, using the SDK's `verifyDeployment`: chain ID, deployment code hashes and proxy slots through the contracts `describe()` view, and the Realm identity. A mismatch is a visible error. There is no fallback to another network.
++
++The prototype's lesson applies directly: "chain ID alone does not distinguish two Anvil instances". So every cache and journal key includes `(chainId, realmId, deploymentId)`. The genesis hash is recorded as a **diagnostic, not an identity**, because an Anvil started with identical genesis parameters can reproduce it. What distinguishes a reset instance is the **per-deployment realm salt and the chain-ID rotation in §5.8**.
+ 
+@@ -258,3 +282,3 @@ A submitted transaction is not undone by disposal. Its journal entry survives, a
+ 
+-The client owns routes, browser adapters, presentation, consent and the IndexedDB implementation of SDK storage ports. The SDK owns IDs, codecs, verification, Files resolution, pagination and continuations, action planning, authorization verification, submission adapters and reconciliation.
++The client owns routes, browser adapters (wallet discovery, locale, lifecycle), presentation, consent and cross-tab **UX**. The SDK owns IDs, codecs, verification, Files resolution, pagination and continuations, action planning, authorization verification, submission adapters, reconciliation, and the reference browser journal with its durability and per-attempt locking.
+ 
+@@ -262,8 +286,8 @@ The client **never** decodes records, computes IDs, walks pages itself, or decid
+ 
+-What the client needs from the SDK's first vertical (stage B in [[repository-and-distribution-plan]]). These are the cross-repo items in §10:
++This section is aligned with the [[../2026-09-26-sdk-v2-initialization-plan/README|sdk-v2 initialization plan]] in revision 1. That plan uses one `@efs/sdk` package with subpaths and takes EIP-1193 as the chain boundary, with no separate EVM adapter package. What the client needs from the SDK's first verticals, the cross-repo items in §10:
+ 
+-1. **Guest-safe subpaths:** reader + Files facade; EVM **read** transport (EIP-1193-free RPC reads); and separately EVM **account/submission**. Each has `sideEffects: false` and no top-level work. Without the read/account split, the guest graph gate can't hold.
++1. **Guest-safe subpaths:** `.` (`createEfs`, `httpRpc`, `verifyDeployment`) and `./files` for guest reads; `./actions` for plan/authorize/submit/reconcile. Each has `sideEffects: false` and no top-level work. `./web` currently mixes guest-useful stream helpers with the IndexedDB journal. The provenance check will show whether tree-shaking keeps the journal out of the guest startup set. If it doesn't, the ask is a separate `./web/journal` subpath.
+ 2. **Operation-specific result families** that carry basis, coverage and unknowns: exact read, scoped page with bound continuation, verified bytes, planned/prepared/submitted write, canonical read-back. The client renders `PARTIAL` / `UNKNOWN` / `ABSENT_PROVEN` / `CONFLICT` distinctly. A provider failure never looks like an empty folder.
+-3. **A journal port** for plans and attempts. The client provides the IndexedDB adapter.
+-4. **A deployment-manifest validator** usable in both Node (`tools`) and the browser (`efs.config.json`).
++3. **The journal:** the SDK's `indexedDbJournal` with its port conformance suite, which the client consumes (§6.4). The client adds only a namespacing wrapper if needed, and any substitute must pass the same conformance suite.
++4. **`verifyDeployment(manifest, rpc)`** from the SDK root, usable in both Node (`tools`) and the browser (`efs.config.json`), and **`guestProbe`** from `@efs/sdk/testing`, used by `tools` only for `files-ready`.
+ 5. **`protocol-inputs.json` in the package**, naming the contracts release digest it was built against.
+@@ -271,3 +295,3 @@ What the client needs from the SDK's first vertical (stage B in [[repository-and
+ 
+-Until SDK stage B exists, client UI work renders the SDK's published result *types* using recorded result JSON from the SDK conformance corpus, on static component pages. It never uses a client-side fake reader. The PM proposal's "no divergent protocol implementation" rule applies to test doubles as well.
++Until the SDK's Files vertical exists, client UI work renders the SDK's published result *types* on static component pages. It uses the real, schema-valid result JSON that the SDK plan commits to writing to `conformance/results/` from its S1. It never uses a client-side fake reader. The PM proposal's "no divergent protocol implementation" rule applies to test doubles as well.
+ 
+@@ -286,3 +310,3 @@ Versions below were checked in the npm registry on 2026-09-26. Every one is exac
+ | TypeScript | 7.0.x (`tsc --noEmit` only) | The native compiler: faster typechecks on every agent loop. TS 7.0 has no stable programmatic API. Nothing in this stack needs one: Vite/Oxc strips types, Biome parses on its own, and Playwright transforms tests itself. Fallback if a needed tool requires the TS API: `@typescript/typescript6`. This rules out TS-API tools such as TypeDoc and ts-lit-plugin for now, which we don't need. |
+-| Vite | 8.3.x (Rolldown + Oxc) | Current. Zero plugins at C0. |
++| Vite | 8.3.x (Rolldown + Oxc) | Current. One plugin at C0: our own build-only provenance recorder (§4.4). No third-party plugins. |
+ | Biome | 2.5.x | Format and lint in one binary; per-path import restrictions and cycle detection. No ESLint unless a type-aware gap is demonstrated. |
+@@ -296,4 +320,5 @@ Versions below were checked in the npm registry on 2026-09-26. Every one is exac
+ | `@axe-core/playwright` | current at C0 | Accessibility smoke only, never acceptance. |
++| `messageformat` | 4.0.0 (Unicode MF2 reference implementation) | Parses and validates message catalogs at build time. It is also the default runtime formatter unless its guest-closure cost is measured too high (§8.5). |
+ 
+-viem is **not** a direct client dependency. It reaches the client through the SDK EVM adapter. The only exception is the test-only controlled wallet (§6.2), which uses the version the SDK resolves.
++viem is **not** a direct client dependency. The SDK uses it internally and exposes an EIP-1193 boundary. The test-only controlled wallet (§6.2) prefers the SDK's `./testing` EIP-1193 wallet if the SDK exports one; otherwise it uses the viem version the SDK resolves.
+ 
+@@ -335,10 +360,24 @@ viem is **not** a direct client dependency. It reaches the client through the SD
+ 
++**Module provenance.** Vite's `.vite/manifest.json` describes output *chunks* and their chunk-level imports. It does not list every source module or package that contributed code to a chunk, so it can't prove a forbidden package is absent. The build therefore adds one small build-only plugin, `tools/build/provenance.ts`, referenced from `vite.config.ts`. In `generateBundle` it writes `provenance.json` containing, for every output chunk:
++- its file name;
++- its contributing module IDs (the bundler's per-chunk module list);
++- its static and dynamic chunk imports;
++- whether it is an entry.
++
++Module IDs resolve to packages by their `node_modules/.pnpm/<name>@<version>/node_modules/<name>/` path, and to first-party files by their `apps/web/src/` path. The exact Rolldown field names are verified at C0.
++
++Two cross-checks keep the plugin honest:
++- every chunk's source-map `sources` must be a subset of its recorded module IDs;
++- every emitted JS file must appear in `provenance.json`.
++
+ `pnpm build` runs `vite build`, then four checks over the output. **Each check fails the build.**
+ 
+-1. **`check-graph`.** Walks `.vite/manifest.json` from `index.html` through static imports only, to get the **guest closure**.
+-   - Fails if the closure contains Lit, Web Awesome, `signal-polyfill` more than once, SDK account/submission modules, `features/*/write`, `shell/action-review`, or `node:*`.
+-   - Fails on a non-literal `import()` anywhere.
+-   - Records the guest closure's brotli bytes and module count as a trend line (§4.6).
++1. **`check-graph`.**
++   - Computes the **startup set**: the entry chunk, its static imports transitively, and every `<link rel="modulepreload">`/`<script>` in the emitted `index.html`. Lazy chunks are reached only through a dynamic import that runs later.
++   - Fails if any module contributing to the startup set comes from a forbidden package or path: Lit, Web Awesome and its dependencies, `@efs/sdk/actions`, the SDK journal, `features/*/write`, `shell/action-review`, `platform/storage`, `tools/`, or any `node:` / Node builtin.
++   - Fails if `signal-polyfill` contributes to more than one main-thread chunk.
++   - Fails on a non-literal `import()` in source or output.
++   - Records the startup set's brotli bytes and module count as a trend line (§4.6).
+ 2. **`scan-leaks`.** Greps every emitted file for Anvil's default mnemonic and its default private keys, `anvil_`/`evm_`/`hardhat_` method names, `127.0.0.1:854`, `EFS_DEV`, and the fixture package's name.
+-3. **`licenses`.** Maps bundled modules (from source-map `sources`) to packages. It emits `THIRD_PARTY_LICENSES.txt` into the output and fails on an unknown or unallowlisted license. Initial allowlist: MIT, ISC, BSD-2/3, Apache-2.0, 0BSD; OFL for fonts. Legal comments are preserved, with the exact Rolldown/Oxc option verified at C0.
++3. **`licenses`.** Maps bundled modules (from `provenance.json`) to packages. It emits `THIRD_PARTY_LICENSES.txt` into the output and fails on an unknown or unallowlisted license. Initial allowlist: MIT, ISC, BSD-2/3, Apache-2.0, 0BSD; OFL for fonts. Legal comments are preserved, with the exact Rolldown/Oxc option verified at C0.
+ 4. **`release-manifest`.** Writes `release.json` (§7.4).
+@@ -366,3 +405,3 @@ Explicitly experimental or forward, each behind an adapter with named fallback b
+ | Popover / `CloseWatcher` | used in the write slice with a fixture; `<dialog>` fallback |
+-| Web Locks / BroadcastChannel | stage R multi-tab ownership |
++| Web Locks / BroadcastChannel | C3: per-attempt locking inside the SDK journal plus client "in progress in another tab" UX; wider private-state ownership in stage R. Where Web Locks are absent, writes are **disabled with an explanation**, never run uncoordinated. |
+ | OPFS / Storage Buckets | later |
+@@ -373,3 +412,3 @@ Explicitly experimental or forward, each behind an adapter with named fallback b
+ From C2 on, CI records the following as trend lines:
+-- guest-closure brotli bytes and module count;
++- guest startup-set brotli bytes and module count;
+ - request count to first qualified row;
+@@ -378,3 +417,3 @@ From C2 on, CI records the following as trend lines:
+ 
+-Budgets become failing gates at C4, set from the first reference-device measurement. The only failing performance gate before C4 is the graph rule: no forbidden module in the guest closure.
++Budgets become failing gates at C4, set from the first reference-device measurement. The only failing performance gate before C4 is the graph rule: no forbidden module in the guest startup set.
+ 
+@@ -390,8 +429,8 @@ Budgets become failing gates at C4, set from the first reference-device measurem
+ | `pnpm doctor [--json]` | Checks tools, the registry directory's writability, sibling artifact compatibility (SDK protocol inputs == fixture release digest), sticky port availability, and any stale leases. It prints fixes and changes nothing. |
+-| `pnpm dev` | Starts or resumes this worktree's **private** chain + gateway + UI. Prints the URLs and a one-line `{"event":"ready",…}`. Foreground by default; Ctrl-C stops the UI and gateway and stops the chain **with its state dumped**. `--detach` runs the same supervisor in the background with a log file, for agents. |
++| `pnpm dev` | Starts or resumes this worktree's **private** chain + gateway + UI. Prints the URLs and one JSON line per readiness level reached: `{"event":"infra-ready",…}`, then `{"event":"files-ready",…}` when the pinned artifacts support it (§5.2). Foreground by default; Ctrl-C stops the UI and gateway and stops the chain **with its state dumped**. `--detach` runs the same supervisor in the background with a log file, for agents. |
+ | `pnpm dev --attach <chain>` | UI instance only, on an existing named chain. Never deploys, resets or stops that chain. It registers the UI origin with the chain's gateway. |
+ | `pnpm dev:chain --name <chain>` | A shared chain + gateway under their own owner. Survives any UI. Stopped only by `dev:stop --name <chain>`. |
+-| `pnpm dev:status [--json] [--wait ready --timeout 120]` | Every instance this OS user runs: endpoints, generation, artifact identities, owner and state. |
++| `pnpm dev:status [--json] [--wait infra\|files --timeout 120]` | Every instance this OS user runs: endpoints, generation, readiness level, artifact identities, owner and state. `--wait files` fails fast with exit `4` and reason `FILES_UNSUPPORTED_BY_PINNED_ARTIFACTS` when the pinned fixture declares no Files seed, instead of timing out. |
+ | `pnpm dev:stop [--name X]` | Stops only the leases this command can prove it owns (§5.5). With no name, stops this worktree's own. |
+-| `pnpm dev:reset --name X` | An explicit destructive reset: new chain, generation+1, redeploy and reseed. Warns every attached UI and prints wallet recovery steps. |
++| `pnpm dev:reset --name X [--same-chain-id]` | An explicit destructive reset: new chain, generation+1, **new chain ID and new realm salt by default**, redeploy and reseed (§5.8). `--same-chain-id` keeps the wallet network but marks the instance `replay-unsafe` everywhere it is displayed. Warns every attached UI and prints wallet recovery steps. |
+ | `pnpm dev:fund --name X <address> [eth]`, `pnpm dev:actors --name X` | Funds a real wallet address; lists fixture actors. Keys stay in the private record. |
+@@ -408,11 +447,13 @@ Budgets become failing gates at C4, set from the first reference-device measurem
+ 2. Take the registry lock. Allocate on first run only (§5.3), write the lease as `starting`, and release the lock.
+-3. Call the fixture package to start the chain: `up --name <wt>-chain --host 127.0.0.1 --port <anvilPort> --chain-id <chainId> --state-dir <instance dir> --load-state`. Its `verify --json` must confirm the chain ID, code hashes, proxy slots, `describe()` and the seed witnesses.
++3. Call the fixture package to start the chain: `up --name <wt>-chain --host 127.0.0.1 --port <anvilPort> --chain-id <chainId> --state-dir <instance dir> --load-state --no-unlocked-accounts` (the flag name is the fixture's; §5.4). Its `verify --json` must confirm the chain ID, code hashes, proxy slots, `describe()` and the seed witnesses its bundle declares.
+ 4. Start the **gateway** in-process on `127.0.0.1:<rpcPort>` (§5.4).
+-5. Start **Vite in-process** with `strictPort` on `127.0.0.1:<uiPort>`. Inject the dev plugin that serves `efs.config.json` projected from the public instance manifest.
+-6. **Readiness:**
+-   - A Node SDK guest read through the gateway returns the seeded root folder with `COMPLETE` coverage.
+-   - The gateway rejects `anvil_setBalance` from a browser origin.
+-   - `GET /efs.config.json` returns the current generation.
++5. Start **Vite in-process** with `strictPort` on `127.0.0.1:<uiPort>`. Inject the dev plugin that serves `efs.config.json` projected from the public instance manifest. That manifest embeds the contracts deployment manifest **by digest**, as the contracts plan specifies.
++6. **Readiness has two levels.** Each is published as a JSON event and recorded in the lease. A startup frame may show progress earlier.
++
++   | Level | Checks | Needs |
++   |---|---|---|
++   | `infra-ready` | Fixture `verify` passed. SDK `verifyDeployment(manifest, gatewayUrl)` passed from Node **through the gateway**. The gateway answers `eth_chainId` and **refuses** `anvil_setBalance`, `eth_sendTransaction` and `eth_accounts`. `GET /efs.config.json` returns the current generation and manifest digest. | contracts bundle with `describe()` + fixture CLI; SDK `verifyDeployment` |
++   | `files-ready` | Everything above, plus SDK `guestProbe` through the gateway lists the seeded Files root with `COMPLETE` coverage and opens one seeded file with verified bytes. | contracts Files profile + Files seed; SDK Files reader |
+ 
+-   Only then is the lease `ready` and the JSON line printed. A startup frame may show progress earlier.
++   `--wait` defaults to the highest level the pinned fixture **declares** in its manifest capabilities. A missing capability is reported as unsupported, never as a timeout or a pass.
+ 7. The supervisor polls the chain head every few seconds and records the last-seen block, so crash recovery can say what was lost.
+@@ -428,4 +469,4 @@ These are the PM proposal's five identities, made concrete:
+ | Worktree | `<worktree>/.efs-dev/workspace.json` (gitignored) holding a random ID, created by `setup`. A moved checkout keeps it. A **copied** checkout is detected when the registry sees one ID at two live paths, and the newer copy is re-registered. |
+-| Devnet + generation | Instance name + `generation` integer + genesis block hash. The genesis hash changes on any fresh Anvil, so it is the natural reset detector for caches. |
+-| EVM chain + deployment | `chainId` + deployment ID from the fixture's manifest, verified live. |
++| Devnet + generation | Instance name + `generation` integer, in the lease. This fences cooperating tools only. The genesis hash is recorded as a diagnostic but is **not** treated as unique: identical Anvil genesis parameters can reproduce it. |
++| EVM chain + deployment | `chainId` + `realmId` + deployment ID from the fixture's manifest, verified live. After a reset they differ through the new chain ID and the per-deployment realm salt (§5.8), not through the genesis hash. |
+ | Client origin | `http://127.0.0.1:<uiPort>`. Always `127.0.0.1`, never `localhost`: they are different origins, and loopback IP is a secure context. |
+@@ -447,4 +488,9 @@ Every write is atomic (write, then rename). Sandboxed agents that can't write `~
+ - **Later worktrees:** the next free triple from bounded ranges. The proposal is UI `5174–5199`, RPC `8546–8599`, and chain ID `3133701–3133799`, checked against chainlist at C1. Values are recorded as **sticky**.
+-- **Sticky means stable.** If a worktree's sticky port is later held by an unknown process, `pnpm dev` **fails with a diagnosis** instead of silently moving. Moving would change the origin (losing browser state) and the wallet network. `--reallocate` is the explicit escape.
+-- **Probing.** Sequential `::` then `0.0.0.0` then `127.0.0.1` bind probes (the v1 IPv6 lesson). **The child's actual bind is authoritative:** on `EADDRINUSE`, reallocate within bounds, regenerate the whole configuration, and only then report ready. Two concurrent `pnpm dev` runs can never both publish ready for one port.
++- **An assignment is either tentative or published.** A *tentative* assignment was chosen during a first allocation. It has never been written to the worktree registration and never been printed or reported ready. A *published* assignment has been written to the registration or reported to anyone.
++- **Only tentative assignments may be reallocated automatically.** A published (sticky) assignment never moves silently. If an unknown process holds a sticky port, `pnpm dev` **fails with exit `3` and a diagnosis**: who holds it, if knowable, and the `--reallocate` command. Moving would change the origin (losing browser state) and the wallet network, so only an explicit `--reallocate` does it. That command then publishes a new assignment and says so.
++- **Probing.** Sequential `::` then `0.0.0.0` then `127.0.0.1` bind probes (the v1 IPv6 lesson). **The child's actual bind is authoritative.**
++  - During a first allocation, `EADDRINUSE` from a child leads to another tentative choice within bounds and a full configuration rebuild, before anything is published.
++  - For a published assignment it leads to the exit-`3` failure above.
++
++  Two concurrent `pnpm dev` runs can never both publish ready for one port.
+ - **Explicit `--port`** conflicts fail. Nothing ever attaches to a listener just because it answers.
+@@ -453,3 +499,21 @@ Every write is atomic (write, then rename). Sandboxed agents that can't write `~
+ 
+-A small in-process Node HTTP server of roughly 200 lines. It is the **only browser- and wallet-facing RPC endpoint** in development. Anvil binds its own private port, and only the supervisor and fixture tooling use it.
++A small in-process Node HTTP server of roughly 200 lines. It is the **only browser- and wallet-facing RPC endpoint** in development. Anvil binds its own unadvertised loopback port, and only the supervisor and fixture tooling use it.
++
++**The allowlist is an exact method list, not a namespace prefix.** A prefix like `eth_*` would admit `eth_sendTransaction`, `eth_sign`, `eth_signTransaction` and `eth_signTypedData_v4`. Against a node with unlocked accounts, those let any page or QA script act as a funded account **without the wallet**, which is precisely the authority the client must never bypass.
++
++Initial allowlist, reviewed at C1 against the SDK's actual calls and the gateway's own metering log:
++
++| Group | Methods |
++|---|---|
++| Identity | `eth_chainId`, `net_version` |
++| Reads | `eth_blockNumber`, `eth_getBlockByNumber`, `eth_getBlockByHash`, `eth_call`, `eth_getCode`, `eth_getStorageAt`, `eth_getBalance`, `eth_getTransactionCount`, `eth_getLogs`, `eth_getProof` (only if the SDK uses it) |
++| Transactions and fees | `eth_getTransactionByHash`, `eth_getTransactionReceipt`, `eth_estimateGas`, `eth_gasPrice`, `eth_maxPriorityFeePerGas`, `eth_feeHistory` |
++| Broadcast | `eth_sendRawTransaction`: an **already signed** transaction only |
++
++**Everything else is refused** with JSON-RPC error `-32601` and the method name. That includes every signing and unlocked-account method (`eth_sendTransaction`, `eth_sign*`, `personal_*`), `eth_accounts` and `eth_coinbase`, filter and subscription methods, and `debug_*`, `trace_*`, `txpool_*`, `anvil_*`, `evm_*` and `hardhat_*`. A batch is refused whole if any element is refused. Adding a method is a reviewed change with a stated consumer.
++
++**The upstream Anvil endpoint is qualified, not called private.** A second loopback port is not a security boundary. Here is what is actually guaranteed:
++- **No unlocked accounts.** The fixture starts Anvil without dev accounts (or with them removed) and signs its own deploys and seeds locally. An unlocked-account transaction therefore fails even upstream. If the pinned Anvil can't run without unlocked accounts, the fixture must say so in its manifest capabilities, and `doctor` reports the upstream as **signer-capable**.
++- **CORS is restricted.** The upstream `--allow-origin` is set to a value no page has. C1 tests that a page on another origin cannot cause a state change on the upstream port, with both a preflighted JSON request and a "simple" `text/plain` POST. If the simple POST gets through, that is recorded, and the qualification below is widened to say so.
++- **Remaining exposure, stated plainly.** Any process running as the same OS user can call Anvil's admin methods. This is accepted for single-user local development, is documented in `docs/dev-environment.md`, and is shown by `dev:status`. The cross-user/LAN profile needs authentication and is out of scope.
+ 
+@@ -457,3 +521,3 @@ A small in-process Node HTTP server of roughly 200 lines. It is the **only brows
+ |---|---|
+-| Method allowlist: standard `eth_*`/`net_*`/`web3_*` only; batches containing anything else are rejected | The client can't come to depend on Anvil-only methods. Drive-by pages can't reset QA state. This is the PM's "private admin path", made concrete. |
++| The exact method allowlist above | The client can't come to depend on Anvil-only methods. QA can't bypass wallet authority through unlocked accounts. Drive-by pages can't reset QA state through the advertised endpoint. |
+ | Per-origin CORS for registered UI origins | Anvil accepts a single `--allow-origin`. A shared chain with Alice's and Bob's separate UI instances has several origins. |
+@@ -477,3 +541,4 @@ This is not the "hidden Vite RPC proxy" the PM proposal rules out. It is a separ
+ | Supervisor SIGKILLed, Anvil orphaned | The next `pnpm dev` in that worktree finds a live, verifiable chain lease with a dead owner. It **adopts** the chain after `verify`, and reports the adoption. |
+-| Anvil killed | Restart from the last periodic dump (`--state-interval`). Report "restored to block N; the chain had reached block M" using the supervisor's recorded head. **Never** silently re-seed a fresh fixture. |
++| Anvil stopped cleanly (state dumped at `down`) | Resume from the dump, verify, and continue. There was no rollback. |
++| Anvil killed | The last periodic dump (`--state-interval`) may be older than the chain's head. Compare the dump's block with the supervisor's recorded head.<br>• **Equal:** resume.<br>• **Older (a lossy restore):** a *rollback*, which reopens replay (§5.8). **Refuse to resume automatically.** Report "the dump is at block N; the chain had reached block M". Offer `dev:reset` (new chain ID + realm salt, the default) or `--accept-rollback`, which keeps the chain ID, bumps the generation and marks the instance `replay-unsafe`. **Never** silently re-seed a fresh fixture. |
+ | Unreadable state | Refuse. Offer `dev:reset`. |
+@@ -486,5 +551,7 @@ This is not the "hidden Vite RPC proxy" the PM proposal rules out. It is a separ
+ 
+-The contracts plan already specifies `efs-contracts-fixture up/seed/verify/status/down` with `--name` and `--port`, a deployment manifest and a private supervisor record. That is the right owner for the chain. The client adds UI and gateway leases in the **same** registry, through the **same** library. The SDK's `pnpm test:integration` uses the same fixture package and registry, and adds no launcher of its own.
++The contracts plan (current text) specifies `efs-contracts-fixture up/seed/verify/status/down`, shipped inside the bundle and on npm. It adds a deployment manifest, a private supervisor record, and a Solidity-`Seeder` seed with signed-author seeds left to the SDK's fixture layer. That is the right owner for the chain. The SDK plan adopts the same package, the shared registry, a `reset` command and `guestProbe` readiness (its §7.2).
+ 
+-The result is one chain launcher (contracts), one registry (contracts' library), one manifest validator (SDK) and one contributor command (client).
++The client adds UI and gateway leases in the **same** registry, through the **same** library. The SDK's integration harness uses the same fixture package and registry, and injects its own faults at the EIP-1193 port, so it needs no gateway.
++
++The result is one chain launcher (contracts), one registry (contracts' library), one manifest validator (SDK) and one contributor command (client). The contracts plan does not yet name the registry library or unlocked-account removal (§10 X1).
+ 
+@@ -494,2 +561,24 @@ The result is one chain launcher (contracts), one registry (contracts' library),
+ 
++### 5.8 Reset, rollback and replay: the actual guarantee
++
++A generation label or a changed genesis hash **does not invalidate anything already signed.** Two replay domains matter, and a reset has to change each one explicitly.
++
++| Signed thing | What binds it | What a same-chain-ID reset or rollback does |
++|---|---|---|
++| Ethereum transaction: the direct-EOA writes in the first proof | EIP-155 chain ID + sender nonce | Nonces return to earlier values, so **every transaction that account signed after that point becomes valid again** on the reset chain, as long as the account is funded there. |
++| EFS signed intent: the later EIP-712 lanes | The contracts plan's domain is deliberately **name + version only, with no chain ID or verifying contract**, so publications stay importable elsewhere. Replay is bounded by the Realm's principal nonces, deadline and execution set. | CREATE2 makes addresses and the execution set **identical after a redeploy**, and nonces restart. An old signed intent is valid again **unless the Realm identity it binds differs.** |
++
++**Default guarantee for development.** `dev:reset` and any lossy restore produce a **new replay domain**:
++1. **New chain ID** from the worktree's bounded range. A shared chain's range is recorded in its lease. This invalidates old EIP-155 transactions. The cost is that the wallet sees a new network, which `dev:reset` prints the exact fields for.
++2. **New per-deployment realm salt**, passed by the fixture at deploy time. The ask to contracts is that `realmId` includes a caller-supplied salt and that signed intents bind `realmId` (§10 X7). This invalidates old EFS signed intents, which the chain ID alone does not bind.
++
++**`--same-chain-id` / `--accept-rollback`** are for QA sessions that want to keep one wallet network. They keep the chain ID, still rotate the realm salt, and mark the instance `replay-unsafe` in the lease, `dev:status`, the UI's dev banner and every test report. This is a qualification, not a guarantee.
++
++**Tested, not asserted** (§9.1 item 4):
++- Capture a raw signed transaction and a signed EFS intent in generation N.
++- Reset with defaults, then submit both through the gateway: the transaction must fail on chain ID and the intent must be refused on Realm identity.
++- Repeat with `--same-chain-id`: the test **records** that the transaction is accepted if the account is funded, confirming the `replay-unsafe` label is truthful. The intent is still refused.
++
++The generation integer and genesis-hash diagnostic only fence cooperating tools and caches. They are never presented as a replay guard.
++
+ ---
+@@ -503,3 +592,3 @@ The result is one chain launcher (contracts), one registry (contracts' library),
+ | Alice and Bob collaborate | One shared chain (`dev:chain --name team`). Two Playwright BrowserContexts, or two `qa:browser` profiles. Distinct fixture actors leased from the registry, so no two writers share a nonce stream. | controlled provider |
+-| One user in two tabs | One context, two pages. Duplicate-submit prevention and reload. | controlled provider |
++| One user in two tabs | One context, two pages. The SDK journal's per-attempt Web Lock plus client UX: one prompt, one attempt, the other tab shows "in progress in another tab" and then the reconciled result. Also covers closing the prompting tab and reloading. | controlled provider |
+ | Independent developers | Two worktrees, two `pnpm dev`: separate chains, chain IDs, origins, registry entries and processes. | supervisor tests |
+@@ -509,3 +598,5 @@ The result is one chain launcher (contracts), one registry (contracts' library),
+ 
+-**Auth profile for the first proof.** The first proof writes with a **direct EOA transaction**: one wallet prompt per plan, as allowed by the 2026-09-03 prompt-budget ruling as the direct fallback. The ruling's normal path for an EOA is one EIP-712 signature through a relayer, but the static, no-backend client has no relayer. That path needs an optional relayer profile. It is not part of the repository-foundation proof (§11 Q5).
++**Auth profile for the first proof.** The first proof writes with a **direct EOA transaction**: one wallet prompt per plan, as allowed by the 2026-09-03 prompt-budget ruling as the direct fallback. The ruling's normal path for an EOA is one EIP-712 signature through a relayer, but the static, no-backend client has no relayer. That path needs an optional relayer profile (§11 Q5).
++
++**This is a foundation slice, not a reduced MVP.** The first proof establishes the repository, dev environment and write pipeline. It does not narrow the Files MVP, which the 2026-09-08 ruling defines to include Lenses, tags, filters, rename/move/delete and the relayed-signature and delegated-session authorization profiles. Each of those remains required and gets its own vertical after C4. Nothing in this plan's acceptance may be cited as MVP completion.
+ 
+@@ -522,3 +613,8 @@ The result is one chain launcher (contracts), one registry (contracts' library),
+ - **Lost submission response.** `dev:fault drop-next-send-response`: the transaction is mined but the client never receives the hash. After a reload, the journal plus SDK reconciliation find the effect, show it `COMMITTED` after canonical read-back, and **do not resubmit**.
+-- **Wallet nonce history after a reset.** `dev:reset` prints the targeted wallet recovery step (MetaMask: clear activity/nonce data for that network). The client detects the genesis change and discards basis-bound caches and plans. Signed-but-unsent plans are dead because the deployment identity changed. A JSON field is not relied on as a replay guard.
++- **Wallet nonce history after a reset.** A default `dev:reset` rotates the chain ID, so the wallet sees a new network and its old nonce history no longer applies. `dev:reset` prints the exact network fields. With `--same-chain-id`, it also prints the targeted recovery step (MetaMask: clear activity/nonce data for that network).
++  - The client detects the changed `(chainId, realmId)` and discards basis-bound caches and plans.
++  - Old signed material is refused by the replay-domain change, **proven by the §5.8 test**. It is not assumed from a JSON field or a genesis hash.
++- **Two tabs, one attempt.** Tab A reaches the wallet prompt. Tab B requests the same action and gets no second prompt and no second attempt: the SDK journal's per-attempt lock is held. Tab B shows "in progress in another tab" and then the reconciled result.
++  - Closing tab A mid-prompt releases the lock. The attempt stays `UNKNOWN` until reconciliation, and never becomes "failed" by assumption.
++  - BroadcastChannel messages are **UX hints only**. Correctness rests on the lock and the journal, never on a message saying another tab stopped.
+ - **Canonical read-back.** Every write is confirmed only by an SDK read-back. A second guest context then independently re-opens the result.
+@@ -527,8 +623,17 @@ The result is one chain launcher (contracts), one registry (contracts' library),
+ 
+-This is an IndexedDB database named `efs-journal-v1`. Records are keyed by `(chainId, genesisHash, deploymentId, account)` and hold the SDK's plain plan/attempt records plus a schema version.
++**The client consumes the SDK's reference `indexedDbJournal`** (`@efs/sdk/web`) and does not build a competing store. The SDK plan (its §5.3) specifies what makes it correct:
++- a `readwrite` transaction with `durability: "strict"` that resolves only after `complete`;
++- a Web Lock per attempt, so two tabs can't submit the same plan;
++- a versioned JSON Schema record that preserves unknown future fields.
+ 
+-- It is owned by the SDK journal port. The client provides only the adapter.
+-- `pnpm qa:browser` profiles make it persist across manual QA.
+-- Export is a JSON download (with its future version in the export file) from a diagnostics panel. Storage versioning and migration seams therefore exist before the first irreversible local data.
+-- Cross-tab single-writer ownership (Web Locks + fencing) is **not** built in C3. Two tabs rely on the SDK's plan preconditions and reconciliation, and the stage R storage vertical adds ownership.
++The SDK also ships the **port conformance suite**. The client runs it in CI against whatever journal it wires, so a wrapper or substitute is held to the same bar.
++
++What the client adds:
++- **The database namespace.** One database per deployment, `efs:<chainId>:<realmId>:<deploymentId>`, matching the SDK plan's example. No shared database straddles a reset.
++- **Cross-tab UX.** Lock status comes from `navigator.locks.query`, and BroadcastChannel hints update other tabs. There is one prompt per attempt, whichever tab initiated it.
++- **Unresolved-attempt handling.** On load, the write slice lists `journal.unresolved()` and runs reconciliation before offering any new action on the same subject.
++- **Export.** A JSON download from a diagnostics panel, carrying the SDK's export schema version. Storage versioning and migration seams therefore exist before the first irreversible local data.
++- **No Web Locks, no writes.** A browser without Web Locks gets writes disabled with an explanation, because uncoordinated attempts are not an acceptable fallback.
++
++`pnpm qa:browser` profiles make the journal persist across manual QA. Stage R broadens ownership to drafts, grants and other private state. The submission journal's coordination is **C3 scope**.
+ 
+@@ -548,3 +653,6 @@ This is an IndexedDB database named `efs-journal-v1`. Records are keyed by `(cha
+ - **SDK:** exact version dependency. Until it is on npm, this is a GitHub Release tarball URL whose integrity pnpm records in the lockfile.
+-- **Fixture package** (contracts-owned; carries the CLI, the registry library, the pinned Anvil and **its contracts release bundle**): exact dev dependency, same mechanism.
++- **Fixture package**: exact dev dependency, same mechanism.
++  - It is contracts-owned. The contracts plan's working name is `efs-contracts-fixture`; the SDK plan uses `@efs/contracts-fixture`, pending the npm-scope decision.
++  - It carries the CLI, the registry library, the pinned Anvil and **its contracts release bundle**.
++  - The contracts and SDK plans' fallback is a self-contained CLI file inside the bundle (`fixture/efs-fixture.mjs`). The client accepts that fallback, with the bundle fetched and verified through the `integration.lock.json` fallback below.
+ - **Compatibility check:** `doctor`, readiness and CI assert that `@efs/sdk/protocol-inputs.json` names the same contracts release digest as the fixture package. A mismatched set fails before any test runs.
+@@ -563,3 +671,3 @@ All jobs pin actions by commit, use frozen installs, and need **no secrets**. Fo
+ | `build` | every PR, ubuntu | `pnpm build` **twice**, comparing file hashes (the cheap reproducibility tripwire); graph, leak and license checks; `release.json`; uploads `dist/` + `release.json` + source maps as the run's single artifact. |
+-| `e2e` | every PR, needs `build` | Downloads **that** artifact. A per-worker fixture from the pinned fixture package, then Playwright: guest journeys on Chromium, Firefox and WebKit; write/two-user/recovery scenarios on Chromium (controlled provider); a static-prefix run through `tools/serve` at `/ipfs/<fake-cid>/`; one run against raw Anvil without the gateway; axe smoke; one narrow + RTL pseudo-locale layout pass. Traces are kept on failure. |
++| `e2e` | every PR, needs `build` | Downloads **that** artifact. A per-worker fixture from the pinned fixture package, then Playwright: guest journeys on Chromium, Firefox and WebKit; write/two-user/two-tab/recovery scenarios on Chromium (controlled provider); the SDK journal port conformance suite, run in a real browser against the wired journal; the §5.8 replay test after a reset; the gateway allowlist test, which checks that refused methods are refused and upstream CORS blocks a foreign-origin state change; a static-prefix run through `tools/serve` at `/ipfs/<fake-cid>/`; one run against raw Anvil without the gateway; axe smoke; one narrow + RTL pseudo-locale layout pass. Traces are kept on failure. |
+ | `dev` | PRs touching `tools/**` + nightly, ubuntu + macOS | Supervisor tests with fake children (group kill, ppid death, bind race, stale lease/lock, adopt-orphan). Then the real thing: two concurrent `pnpm dev --detach` in two temp worktrees, one `dev:chain` + two attaches, `kill -9` recovery, and a check that `dev:stop` leaves no owned pid alive. |
+@@ -660,4 +768,5 @@ CI parses the lock and policy files. Reviewers enforce the trace. A per-path rec
+ **i18n**
+-- Message IDs live in `ui/messages/en.json`, written in a documented MF2 subset: `{$var}`, `:number`, `:datetime`, and `.match` for plurals.
+-- `tools/build/messages.ts` (≈150 lines, client-owned) compiles them into typed functions. `messageformat@4` is a **devDependency oracle** in tests only. No MF2 runtime becomes an interface.
++- Message IDs live in `ui/messages/en.json`. Each is an MF2 message restricted to a documented narrow contract: `{$var}`, `:number`, `:datetime`, and `.match` for plurals. The contract is ours; the parser is not.
++- **Parsing and validation use the existing MF2 implementation**, `messageformat@4`, the Unicode MessageFormat 2 reference. `tools/build/check-messages.ts` runs its parser and data-model validation over every catalog, then does a short walk of the parsed model. The walk rejects anything outside the narrow contract and checks that each locale's variables match `en`. It adds no parser, grammar or compiler of our own.
++- **Runtime formatting also uses `messageformat` by default**, backed by `Intl`. If C2's measurement shows its cost in the guest startup set is too high, the fallback is to precompile from its parsed data model at build time. That is decided by the measurement and recorded in an ADR, not assumed. Either way the catalog source and message IDs are the durable contract, and no MF2 library type appears in a public or persistent interface.
+ - Pseudo-locales `en-XA` (accents + expansion) and `ar-XB` (RTL) are generated.
+@@ -680,5 +789,5 @@ Every stage ends on observable acceptance, not on a green unit suite.
+ | **C0 — bootstrap** (≈2–3 days) | Root config, `apps/web` with boot/profile/route, an "EFS" static frame with the unsupported fallback, tokens/messages/locale, `tools/build` + `tools/serve`, `check` + `build` jobs, AGENTS.md, docs skeleton | Fresh clone → `pnpm install && pnpm setup && pnpm build` green on macOS and Linux. Output passes graph, leak and license checks and produces a `release.json` whose two builds match. `preview:static --prefix /x/y/` renders at depth. The module purity test runs. | G0 authorization only |
+-| **C1 — dev environment** (≈4–5 days) | Supervisor, registry adoption, gateway, in-process Vite, readiness, status/stop/reset/fund/fault, `dev` job | Two worktrees run `pnpm dev` concurrently with distinct stable URLs and chain IDs. A `kill -9` of the supervisor is followed by a clean adopt. `dev:stop` leaves no owned pids. A bind race never produces two ready manifests. | **Fixture package with `up/verify/down` + registry library from contracts S1** (§10). The seed may still be minimal. |
+-| **C2 — guest read vertical** | `ReaderSession`, viewer frame, Files folder/file views, outcome display, recorded-result component pages, `e2e` job, native-vs-Lit measurement | From the built artifact under a prefix: a cold guest opens a nested folder and a verified small file with **zero** wallet or provider access (a throwing provider stub proves it) and no write/OS modules loaded; PARTIAL/UNKNOWN render distinctly; RPC-to-first-row is recorded | SDK stage B reader; contracts S3 Files seed |
+-| **C3 — write vertical** | Write slice (Lit + Web Awesome), EIP-6963 connect, `WriterSession`, action descriptors, conserved review, IndexedDB journal + export, controlled wallet, `qa:browser` | Alice creates a folder and file and publishes a revision, each confirmed by canonical read-back. Bob sees them independently on the shared chain. The stale plan, network/account change and lost response + reload cases in §6.3 all pass. One manual real-wallet run is recorded separately. | SDK stage B plan/submit/reconcile |
++| **C1 — dev environment** (≈4–5 days) | Supervisor, registry adoption, gateway with the exact allowlist, in-process Vite, `infra-ready`, status/stop/reset/fund/fault, `dev` job | Two worktrees run `pnpm dev` concurrently, each reaching **`infra-ready`**, with distinct stable URLs and chain IDs. A `kill -9` of the supervisor is followed by a clean adopt. A lossy restore is refused without `--accept-rollback`. `dev:stop` leaves no owned pids. A bind race never produces two ready events. The gateway allowlist test and the upstream CORS test pass, or their qualification is recorded. `--wait files` reports "unsupported by pinned artifacts" rather than timing out. | **J1** (§9.2) |
++| **C2 — guest read vertical** | `ReaderSession`, viewer frame, Files folder/file views, outcome display, recorded-result component pages, `e2e` job, native-vs-Lit and `messageformat` runtime measurements | **`files-ready`** reached. From the built artifact under a prefix: a cold guest opens a nested folder and a verified small file with **zero** wallet or provider access (a throwing provider stub proves it) and no write/OS modules in the startup set. PARTIAL/UNKNOWN render distinctly. RPC-to-first-row is recorded. | **J2** |
++| **C3 — write vertical** | Write slice (Lit + Web Awesome), EIP-6963 connect, `WriterSession`, action descriptors, conserved review, the SDK `indexedDbJournal` wired and namespaced + export, cross-tab UX, controlled wallet, `qa:browser` | Alice creates a folder and file and publishes a revision, each confirmed by canonical read-back. Bob sees them independently on the shared chain. Every §6.3 case passes: stale plan, network/account change, lost response + reload, two tabs/one attempt, reset. The journal conformance suite passes in a real browser, and so does the §5.8 replay test. One manual real-wallet run is recorded separately. | **J3**; X7 for the EFS-intent half of the replay test |
+ | **C4 — first-proof closeout** | Run §9.1 end to end. Set performance budgets from a reference device. `release` job rehearsal to a draft GitHub Release. ADR on Lit placement. | All §9.1 checks pass and their evidence is recorded in a planning `Reviews/` note | — |
+@@ -688,2 +797,25 @@ Parallel work while C2/C3 wait on the siblings: shell layout, a11y/i18n foundati
+ 
++### 9.2 Reconciling milestones across the three plans, by artifact
++
++The three plans number their stages independently, and as written they do not line up. This table keys the client's needs to **artifacts**. It proposes three joint checkpoints (J1–J3) for the PMs to schedule, instead of mapping stage numbers onto each other.
++
++| Artifact the client needs | Client use | Contracts plan (current text) | SDK plan (current text) | Status |
++|---|---|---|---|---|
++| Release bundle with deploy plan + minimal `describe()` | J1 → C1 `infra-ready` | S1 ("minimal `phase()` and `describe()`") | S1 consumes the contracts S1 RC bundle | Aligned |
++| Fixture CLI (`up/verify/status/down`, plus `reset`), shared registry library, no unlocked accounts | J1 → C1 | CLI ships "inside the bundle and on npm", but its table lists "fixture CLI" under **S3**. No registry library, no `reset`, no unlocked-account statement. | Its S1 integration lane already runs `fixture up/seed/verify` from the S1 bundle; it adopts the registry and `reset` (§7.2) | **Conflict.** Both consumers need it with S1. Ask contracts to move it (X1). |
++| SDK `verifyDeployment` | J1 → C1 | — | S1 | Aligned |
++| Files/Directory/Name (ASCII) profiles + a Files seed | J2 → C2 `files-ready` | **S3** | Its S2 Files vertical "depends on contracts **S2** (Files profile, upgrade fixture)" | **Conflict.** The SDK expects Files profiles one stage earlier than contracts schedules them. |
++| SDK Files reader, `guestProbe`, recorded results | J2 → C2 | — | S2 (recorded results from S1) | Depends on the row above |
++| Direct-EOA write whose author is the EOA, with a Files precondition that refuses a stale revision | J3 → C3 | S1 native lane (`msg.sender` is the author; binds `expectedExecutionSet`, "no read sets yet"). Stale Files refusal is in S3's acceptance ("stale atomic move refused"). | S2 plan/authorize/submit/reconcile | **To confirm with contracts:** that an EOA calling `execute` directly is a supported native author, and that the Files profile's precondition works without S2 read sets. |
++| SDK `./actions`, `indexedDbJournal`, journal conformance suite | J3 → C3 | — | S2 | Aligned |
++| Per-deployment realm salt; signed intents bind `realmId` | C3 replay test (EFS-intent half) | Not specified. The domain is name + version; realm id is set by the initializer. | — | **New ask** (X7) |
++| EIP-712 signed lane, ERC-1271 | Not needed for the first proof | S2 | S2 | — |
++
++**Recommendation for the PMs.**
++- **J1** = contracts S1 bundle + fixture CLI + registry, with SDK S1.
++- **J2** = contracts Files profiles + Files seed on the **native lane**, delivered right after S1 (an "S1b" ahead of the signed lanes, since neither the SDK's Files vertical nor the client's first proof needs the signed lane first), with SDK S2's reader.
++- **J3** = SDK S2's actions and journal.
++
++The contracts PM may prefer another order. The point is that J2 is the critical path for all three repos, and today it is scheduled differently in two of the plans.
++
+ ### 9.1 First proof: measurable acceptance
+@@ -692,4 +824,4 @@ Each check has a command, and its pass/fail is machine-checkable unless marked m
+ 
+-1. **Two worktrees.** `pnpm dev --detach` in worktrees A and B. `dev:status --json` shows two `ready` instances with distinct `uiPort`/`rpcPort`/`chainId`/genesis hash, both SDK reads `COMPLETE`, and A keeps `5173`/`8545`/`31337`. Restarting A keeps the same URLs.
+-2. **Guest static read.** Serve the `build` artifact through `preview:static --prefix /ipfs/bafy…/`, with no Vite. A cold Playwright context opens `…/#/<nested folder>` and a small file whose bytes verify. The wallet stub records zero calls. The network log shows only files in the guest closure plus RPC calls to the configured endpoint. It passes again with the gateway removed (raw Anvil).
++1. **Two worktrees.** `pnpm dev --detach` in worktrees A and B. `dev:status --json` shows two instances at **`files-ready`**, with distinct `uiPort`/`rpcPort`/`chainId`/`realmId` and both guest probes `COMPLETE`. A keeps `5173`/`8545`/`31337`. Restarting A keeps the same URLs. (Before J2, the same check at `infra-ready` is C1's exit.)
++2. **Guest static read.** Serve the `build` artifact through `preview:static --prefix /ipfs/bafy…/`, with no Vite. A cold Playwright context opens `…/#/<nested folder>` and a small file whose bytes verify. The wallet stub records zero calls. The network log shows only files in the guest startup set plus RPC calls to the configured endpoint. It passes again with the gateway removed (raw Anvil).
+ 3. **Two users, one chain.** `dev:chain --name team`, then two `--attach team` UI instances from A and B. Alice (controlled provider) creates a folder and a file and publishes a revision. Each step reaches `COMMITTED` only after read-back. Bob's separate context sees all three through his own read. A stale Alice plan after Bob's conflicting write is refused and shown.
+@@ -700,8 +832,14 @@ Each check has a command, and its pass/fail is machine-checkable unless marked m
+    - `dev:fault drop-next-send-response` during Alice's submit, then a reload: reconciled to `COMMITTED` with exactly one onchain effect.
++   - **Lossy restore.** Kill Anvil after writes newer than its last dump. `pnpm dev` refuses to resume and names the lost block range. `--accept-rollback` resumes, marked `replay-unsafe`.
++   - **Replay after reset** (§5.8). Before resetting B, capture one raw signed transaction and one signed EFS intent. After a default `dev:reset` on B, both are refused through the gateway: the transaction on chain ID, the intent on Realm identity. With `--same-chain-id`, the transaction's acceptance is recorded and the `replay-unsafe` label is displayed.
+    - `dev:reset` on B changes nothing observable in A or in `team`.
+-5. **Stale manifest refusal.** Edit a public manifest's deployment code hash, or point it at a chain with a different genesis. Readiness exits `5`, and the client shows a visible configuration mismatch instead of loading data.
+-6. **Owned-process cleanup.** Stopping A's supervisor ends every pid in A's leases. `team`'s chain and gateway stay up and still serve B. Two simultaneous `pnpm dev` runs contending for one sticky port produce exactly one `ready` and one exit `3`.
+-7. **Shipped-artifact hygiene.** The `check-graph` guest closure contains no Lit, Web Awesome, wallet/account SDK code, action review, storage or `node:*`. `scan-leaks` is clean. `THIRD_PARTY_LICENSES.txt` is present. Two builds are byte-identical.
+-8. **Pattern and disposal.** One new small feature is added by following `docs/architecture.md` (for example a "copy link" action descriptor). Navigating away disposes its scope: the Playwright test asserts no live effects or subscriptions via a dev-only scope counter exposed by the test build profile.
+-9. **Manual.** James (or a maintainer) completes item 3 with a real extension wallet. The result is recorded separately as `extension:<name>@<version>`.
++5. **Stale manifest refusal.** Edit a public manifest's deployment code hash, or its `realmId`, or point it at a chain with a different chain ID. Readiness exits `5`, and the client shows a visible configuration mismatch instead of loading data.
++6. **Owned-process cleanup.** Stopping A's supervisor ends every pid in A's leases. `team`'s chain and gateway stay up and still serve B. Two simultaneous `pnpm dev` runs contending for one **published** sticky port produce exactly one ready event and one exit `3`. Two first-time runs contending for one **tentative** assignment both become ready, on different ports.
++7. **Shipped-artifact hygiene.** The `check-graph` startup set, computed from module provenance, contains no Lit, Web Awesome, `@efs/sdk/actions`, SDK journal, action review, storage, `tools/` or Node-builtin modules. `scan-leaks` is clean. `THIRD_PARTY_LICENSES.txt` is present. Two builds are byte-identical. The module-purity test passes, including the `define.ts` restrictions.
++8. **Gateway authority.** Through the gateway, `eth_sendTransaction`, `eth_sign`, `eth_accounts` and `anvil_setBalance` are refused, and a batch mixing an allowed with a refused method is refused whole. A foreign-origin page cannot change upstream state. If the pinned Anvil can't drop unlocked accounts, `dev:status` shows the upstream as signer-capable.
++9. **Two tabs, one attempt.** The §6.3 case: exactly one wallet prompt and one onchain effect, and the second tab shows the reconciled result.
++10. **Pattern and disposal.** One new small feature is added by following `docs/architecture.md` (for example a "copy link" action descriptor). Navigating away disposes its scope: the Playwright test asserts no live effects or subscriptions via a dev-only scope counter exposed by the test build profile.
++11. **Manual.** James (or a maintainer) completes item 3 with a real extension wallet. The result is recorded separately as `extension:<name>@<version>`.
++
++Passing all of these proves the **foundation slice** (§6.1). It is not Files MVP completion.
+ 
+@@ -713,8 +851,10 @@ Each check has a command, and its pass/fail is machine-checkable unless marked m
+ |---|---|---|
+-| X1 | **Fixture package** (`efs-contracts-fixture`): the CLI (`up/seed/verify/status/down`, explicit `--host/--port/--chain-id/--state-dir/--load-state/--dump-state`, JSON output, stable exit codes), the **registry/lease library** (§5.3, with `chain`/`gateway`/`ui` kinds), the pinned `@foundry-rs/anvil`, and **its release bundle**. Installable from a GitHub Release tarball. | Contracts. **Ship it with the S1 bundle, not S3**, so the client's C1 isn't blocked. The Files seed follows in S3. |
++| X1 | **Fixture package** (`efs-contracts-fixture` / `@efs/contracts-fixture`) containing:<br>• the CLI: `up/seed/verify/status/down/reset`; explicit `--host/--port/--chain-id/--state-dir/--load-state/--dump-state`; a realm-salt input; JSON output; stable exit codes; manifest **capabilities**, including whether a Files seed is present;<br>• the **registry/lease library** (§5.3, with `chain`/`gateway`/`ui` kinds);<br>• the pinned `@foundry-rs/anvil`;<br>• Anvil started with **no unlocked accounts** (or declared signer-capable), with deploys and seeds signed locally;<br>• **its release bundle**.<br>Installable from a GitHub Release tarball, with the in-bundle single-file CLI as the fallback. | Contracts. **Ship it with the S1 bundle, not S3** (J1). The SDK plan already assumes this in its S1. |
+ | X2 | Public deployment manifest + `describe()` as the readiness truth; named fixture actors with distinct keys (alice, bob, carol, …) in the private record only | Contracts (schema); SDK (validator) |
+-| X3 | SDK subpaths: guest reader/Files; EVM read-only transport; EVM account/submission separately; `sideEffects: false`; journal port; name-profile verdict; `protocol-inputs.json` | SDK |
++| X3 | SDK surfaces, per the SDK plan: `.` (`createEfs`, `httpRpc`, `verifyDeployment`) and `./files` guest-safe; `./actions`; `indexedDbJournal` with its port conformance suite in `./web` (or `./web/journal` if the provenance check shows the journal leaking into the guest startup set); `guestProbe` in `./testing`; name-profile verdict; `protocol-inputs.json`; `sideEffects: false` | SDK |
+ | X4 | One compatible-set rule: the SDK's protocol-inputs digest == the fixture's release digest, checked by the client's `doctor` and CI and by the SDK's own integration tests | All three |
+-| X5 | One pnpm major (12) and Node 24 LTS across the three repos; move to Node 26 together after its LTS date | All three; the contracts plan currently says pnpm 10 |
+-| X6 | SDK `test:integration` uses X1 and the registry rather than its own launcher; the gateway stays client-owned unless the SDK needs it too, in which case it moves into X1 | SDK, client |
++| X5 | One pnpm major (12) and Node 24 LTS across the three repos; move to Node 26 together after its LTS date | All three. The contracts plan still says pnpm 10. |
++| X6 | SDK integration uses X1 and the registry rather than its own launcher. The SDK injects faults at its EIP-1193 port, as its plan says, and the gateway stays client-owned. | SDK, client (agreed in the SDK plan §7.2) |
++| X7 | **Reset replay domain.** `realmId` includes a caller-supplied per-deployment salt, and signed EFS intents bind `realmId`, because the EIP-712 domain is deliberately name + version only. The fixture passes a fresh salt on every `up` of a new chain and every `reset`. Confirm, with a test, that a signed intent from the previous generation is refused. | Contracts (binding), fixture (salt); client and SDK test it |
++| X8 | **Joint checkpoints J1–J3** (§9.2): schedule them by artifact. In particular, resolve whether Files profiles + seed land in contracts S2 (the SDK plan's assumption) or S3 (the contracts plan's), and confirm that direct-EOA native authorship plus the Files stale-revision precondition work before the S2 read sets. | Contracts PM + SDK PM, with the client PM |
+ 
+@@ -728,3 +868,3 @@ Each check has a command, and its pass/fail is machine-checkable unless marked m
+ 4. **Toolchain alignment.** TypeScript 7 (typecheck only) and pnpm 12 in all three repos. **Recommendation:** yes. The fallbacks are named in §4.1.
+-5. **First-proof write profile.** Direct EOA, one transaction prompt, no relayer. The relayed one-signature path is a separate optional-relayer profile. **Recommendation:** yes. Otherwise the "static, no backend" proof would need a backend.
++5. **First-proof write profile.** Direct EOA, one transaction prompt, no relayer, explicitly as a **foundation slice**. The relayed one-signature path, delegated sessions, and the rest of the 2026-09-08 Files MVP (Lenses, tags, filters, rename/move/delete) remain required and are not reduced by this proof. **Recommendation:** yes. Otherwise the "static, no backend" proof would need a backend.
+ 6. **Windows.** `pnpm dev` is unsupported on native Windows until a process-tree test exists; WSL2 is documented. **Recommendation:** yes.
+@@ -741,6 +881,9 @@ Each check has a command, and its pass/fail is machine-checkable unless marked m
+ - **Rescue.** Placement differs between [[architecture-and-modules]] (off-origin, retained) and the PM proposal (`apps/rescue` from the start). §1.3 defers it to stage R.
+-- **Contracts plan, stale facts.**
+-  - Its Q3 says `sdk-v2` and `client-v2` don't exist. Both were created on 2026-09-26, and `contracts-v2`'s description has since been corrected.
+-  - It pins pnpm 10.
+-  - It schedules the fixture CLI for S3.
++- **Contracts plan, against its current text.**
++  - Q3 now acknowledges that `sdk-v2` and `client-v2` exist.
++  - It still pins pnpm 10.
++  - It lists the fixture CLI under S3 while also shipping it in the bundle.
++  - It schedules Files profiles for S3, whereas the SDK plan expects them in contracts S2 (§9.2).
++  - Its name-and-version-only EIP-712 domain makes realm identity the only thing separating a reset instance for signed intents (§5.8, X7).
++- **This plan's own revision 0.** It treated the genesis hash as a reliable reset identity, allowlisted `eth_*` by prefix, deferred cross-tab coordination to stage R, and claimed workspace membership made Node modules unresolvable. Revision 1 corrects all four (§14).
+ - **MVP scope drift.** [[mvp0-acceptance]] excludes rename/move/delete, but the 2026-09-08 ruling puts them, plus Lenses, tags and filters, in the MVP. M0-06 assumes a relayer. None of this changes the repository foundation, but the MVP acceptance overlay needs a refresh before C3 scope is fixed.
+@@ -760 +903,19 @@ Version numbers are dated observations to be locked at C0, not locks.
+ Vault bookkeeping not done in this pass: no `Daily Notes/agent-status.md` line, no Kanban card and no commit. This draft is left uncommitted for the planned second-model pass and PM forwarding. Whoever publishes it should add the status line and commit with `Agent: web-client-dev`.
++
++---
++
++## 14. Revision log
++
++**Revision 1 (2026-09-26): the Web Client/OS PM's first review.** Bounded corrections only; the architecture is unchanged.
++
++| PM finding | Resolution | Sections |
++|---|---|---|
++| 1. The gateway's `eth_*` allowlist admits signing and unlocked-account methods; a second loopback port is not private | Exact method allowlist, everything else refused (including batches), `eth_accounts` refused. Fixture Anvil has no unlocked accounts (or is declared signer-capable). The upstream is explicitly qualified: CORS-restricted and tested against foreign-origin state changes, and reachable by same-user local processes, which is accepted and documented. | §5.2, §5.4, §9.1 (8), X1 |
++| 2. The genesis hash is not a reliable reset identity and does not invalidate signed transactions; sticky ports | New §5.8. A default reset or lossy restore rotates the chain ID (EIP-155) and the realm salt (EFS intents, X7). Same-chain-ID options are labelled `replay-unsafe`. Old signed material is tested against the reset instance. Lossy restores are no longer silently resumed. Automatic reallocation is limited to tentative, never-published assignments. | §2.1, §5.1, §5.3, §5.5, §5.8, §6.3, §9.1 (4–6), X7 |
++| 3. Cross-tab write coordination can't wait for stage R | C3 consumes the SDK's `indexedDbJournal` (strict durability, per-attempt Web Lock) and runs its conformance suite. The client adds namespacing, cross-tab UX and unresolved-attempt handling. Writes are disabled without Web Locks. A two-tab case is added to acceptance. | §3, §4.5, §6.1, §6.3, §6.4, §9, §9.1 (9) |
++| 4. Enforcement claims exceed their mechanisms | Environment separation is now three layered mechanisms, with no resolvability claim. A build-only provenance plugin records per-chunk contributing modules, and `check-graph` uses that plus the emitted `index.html` preloads, not the Vite manifest alone. The purity rule exempts the entries and narrowly constrained `define.ts` registration modules. | §1.1, §1.4, §4.1, §4.4, §9.1 (7) |
++| 5. C1 readiness depends on later capabilities | Readiness is split into `infra-ready` (C1) and `files-ready` (C2), and the fixture declares its capabilities. New §9.2 reconciles the three plans by artifact into joint checkpoints J1–J3 and names the two scheduling conflicts. | §5.1, §5.2, §9, §9.2, X8 |
++| MessageFormat: don't write our own compiler | `messageformat@4` parses and validates catalogs; a short walk enforces our narrow subset; the runtime is `messageformat` unless measurement says precompile from its data model. | §1.1, §4.1, §8.5 |
++| Direct-wallet proof must stay a foundation slice | Stated explicitly; the Files MVP scope and later authorization profiles are unchanged. | §6.1, §9.1, Q5 |
++
++Revision 1 also aligns the SDK surface names with the sdk-v2 initialization plan: one `@efs/sdk` with subpaths, EIP-1193 as the boundary, and no EVM adapter package (§1.2, §3, §4.1, X3).
