@@ -4,11 +4,25 @@
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[../efsv2/README]], [[../efsv2/system-constitution]], [[../efsv2/core-architecture-candidate]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/README]], [[../web-client-os/type-data-abi-boundary-pressure]]
 **Inputs:** the existing `sdk/` repository and older SDK designs as historical evidence only; exact K10/storage/Fable reconciliation snapshot `aae282df72f214d791963aeac1cf3c38d162c56e` documented in [[files-integration-pressure]]; Data Explorer's initial draft input was `08bb5f2906191f0d87624d9a6ecc6788a8b2754d`; its fuller design set is now reconciled on main at [[../data-explorer/README]]
-**Last touched:** 2026-09-10
+**Last touched:** 2026-09-26
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/read-path #topic/onchain
 
 ## Read this on a phone
+
+**September 26 — SDK repository planning:** [[repository-and-distribution-plan]]
+is the current SDK-specific input to Claude's initialization plan, with a
+[[sdk-repository-planning-prompt|copyable developer assignment]]. It recommends
+one repository with independently consumable TypeScript and Solidity artifacts,
+shared vectors, and optional Node/native/CLI/MCP/HTTP adapters. It covers builds,
+packed-consumer tests, publishing, compatibility and exact-release recovery.
+It is a proposal for review, not repository creation or package publication.
+
+For implementation sequencing and current prototype capability, use
+[[../efsv2/prototype-delivery-checklist]] and the September 24–25 closeout.
+The September 10 integration snapshot below remains historical. A reversible
+upgradeable MVP and permanent protocol/conformance freeze have different gates;
+the older freeze language must not block an explicitly authorized MVP.
 
 **Verdict:** experiment with a hybrid SDK, not a production API.
 
@@ -168,6 +182,8 @@ constitution/candidates, then older evidence. This set cannot override Core.
 | Document | Owns |
 |---|---|
 | `README.md` | Phone checkpoint, authority map, current recommendation, and routing |
+| [[repository-and-distribution-plan]] | Current SDK repo proposal: independent TS/Solidity/native-agent consumption, build/generation, artifacts, MCP/OpenAPI, publishing and staged acceptance |
+| [[sdk-repository-planning-prompt]] | Copyable assignment for Claude's concrete initialization plan and SDK PM review |
 | [[research-precedents]] | Official-source SDK, schema, codegen, Ethereum, and negotiation precedents; evidence only |
 | [[ethereum-standards-census]] | Exact dated EIP/ERC registry snapshot, integration classifications, requirements, falsifiers, exit paths, and cross-PM routing |
 | [[developer-journeys]] | Exact developer flows and their non-loss invariants |
