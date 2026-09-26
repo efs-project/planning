@@ -10,6 +10,8 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**September26 — contracts repository design input:** [[contracts-repository-and-development|Module boundaries, toolchain decision, release artifacts and development workflow]] turns the prototype's caller-context, required-index, upgrade, storage and build-identity lessons into a concrete clean-repo proposal. Hardhat 3 versus Foundry remains an initialization choice to validate; no product repository or permanent protocol is selected by this draft.
+
 **September24 — one living delivery queue:** [[prototype-delivery-checklist|What is done, what remains, and the next dispatch]] is now the execution-status entry point. [[prototype-implementation-plan|Packet instructions and bounded agent workflow]] separate the remaining discriminators from real MVP implementation and permanent-freeze work. Earlier reports below remain dated evidence, not competing next-task queues. The recommendation is to begin the real upgradeable vertical once its environment is authorized; this planning update creates no product repository or deployment.
 
 **September17 — the Files journey now runs on the compact v2 core:**

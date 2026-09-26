@@ -6,6 +6,9 @@ kanban-plugin: board
 
 ## Backlog
 
+- [ ] Draft: [[Designs/efsv2/contracts-repository-and-development|contracts repository and release foundation]] — source-grounded module/upgrade design, Hardhat 3 versus Foundry decision criteria, immutable release artifacts, consumer APIs, CI and shared fixture workflow for Claude's initialization plan. No product creation or deployment. #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client
+  — @v2-pm (harness codex, session contracts-repo-design-20260926), started 2026-09-26; next: review Claude's concrete module/toolchain/initialization plan against the prototype lessons and proposed release gates
+
 - [ ] Draft: [[Designs/sdkv2/repository-and-distribution-plan|SDK repository and distribution foundation]] — SDK-specific input for Claude: independently consumable TypeScript and Solidity, shared evidence/vectors, native/CLI/MCP/HTTP adapters, builds, packed-consumer tests, publishing and exact-build recovery. [[Designs/sdkv2/sdk-repository-planning-prompt|Developer planning prompt]]. No repository creation or implementation. #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client
   — @sdk-pm (harness codex, session sdk-repo-design-20260926), started 2026-09-26; next: review Claude's plan and reconcile the single Contracts/SDK/client artifact and dev-fixture contract
 - [ ] Draft: [[Designs/web-client-os/client-repository-and-development|client repository and concurrent development foundation]] — review input for Claude's initialization plan: standards-based SPA workspace, route/worker build boundaries, explicit SDK artifacts, automatic owned port/devnet allocation, shared-chain multi-user QA, static/PWA CI and agent workflow. No repository creation or implementation. #kind/design #repo/planning #repo/client #repo/sdk #repo/contracts
