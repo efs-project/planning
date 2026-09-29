@@ -4,6 +4,10 @@ Active agents append once per work-session. One line per active card. Newest at 
 
 Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
+## 2026-09-29
+
+- @pm (harness codex, session weekly-pm-20260929): checked current repo visibility, narrow private correspondence and official near-term opportunities; recorded public-safe checkpoint, private-follow-up pointer and NLnet/Arbitrum verification boundaries. No specialist files staged, implementation edits, sends, submissions or deployments. Next: James handles private organizer action; owning agents reconcile unpublished review material and client publication gate.
+
 ## 2026-09-23
 
 - @pm (harness codex, session weekly-pm-retry-20260923): Retried weekly landscape review with independent read-only engineering/funding checks. Fresh fetch verified planning/main `80fe5a1` and prototype `44db867` remote-visible, with no tracked dirt before this housekeeping; untracked `.codex-*message` scratch files were preserved. Reconciled the completed Files card and owner-approved temporary successor repo naming; corrected legacy SDK merge status in the repo map. Updated Devcon follow-ups and Arbitrum deadline timezone from primary sources; no implementation or protocol decisions. / next: James checks private Devcon visa-support documents, settles the bounded Arbitrum go/no-go, and reviews the existing prototype-to-real-code handoff. September 29 PM run should recheck these gates before September 30 NLnet office hour and October 4 Arbitrum submission.

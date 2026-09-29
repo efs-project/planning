@@ -3,7 +3,17 @@
 Personal attendance and EFS participation follow-ups for Devcon 8, November
 3–6, 2026 at Jio World Centre in BKC, Mumbai.
 
-**Status (2026-09-23):** James's talk is accepted, participation is confirmed,
+**September 29 private follow-up:** the read-only inbox check now finds new
+organizer correspondence requiring James's attention. The earlier absence
+report below is historical, not the current visa-support state. Review the
+private PM conversation and encrypted organizer thread; correspondence content
+and personal documents must stay outside this public repository. Completion
+of the latest requested step, visa issuance, flights and accommodation remains
+unconfirmed. No new Impact or ticket-refund reply was found in the narrowly
+searched support-address routes. Next check: after James handles the private
+request, rather than waiting for the next weekly review.
+
+**Earlier status (2026-09-23):** James's talk is accepted, participation is confirmed,
 and he already has a ticket. The Impact Booth application is submitted. A
 read-only connected-Gmail check found no Impact response and no new official
 speaker, visa, ticket, or support message in the narrowly searched official

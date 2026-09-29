@@ -15,6 +15,34 @@ Rows touched:
 Next check:
 ```
 
+## 2026-09-29 - NLnet timing and Arbitrum verification gap
+
+- [NLnet office hour](https://nlnet.nl/events/20260930/office-hour/) freshly
+  confirms September 30 16:00 CEST / 09:00 CDT, a one-hour Matrix text chat;
+  questions can be added ahead of time through the linked CryptPad. No
+  question was posted. Ask about US-applicant eligibility/European dimension
+  and the actual human/AI contribution split before preparing a proposal.
+- [The current call](https://nlnet.nl/news/2026/20260903-call.html) still gives
+  November 3 12:00 CET / 05:00 CST and advises LLM-using applicants to wait for
+  the revised policy. The [policy page](https://nlnet.nl/foundation/policies/generativeAI/)
+  still labels January 26 version 1.1 as current. Do not infer eligibility
+  from MIT licensing or human review alone. Next check: office-hour answer
+  and policy revision, before application work.
+- Arbitrum's official portal timed out in this run; the controlling
+  [terms PDF](https://openhouse.arbitrum.io/singapore_version_open_house_buildathon_terms___conditions.pdf)
+  was blocked by a server challenge (HTTP 429). The September 23 portal
+  observation below remains dated evidence, not a fresh confirmation.
+  A [third-party participant's terms review](https://github.com/zedili/Signal402-Arbitrum-Singapore/blob/main/docs/terms-risk-review.md)
+  reports a conflict: October 1 23:59 SGT in terms versus October 4 23:59 SGT
+  on the portal. This is an **unverified lead**, not authority for a new date.
+  October 1 23:59 SGT would be October 1 10:59 CDT. Next: inspect the official
+  terms in-browser or obtain organizer clarification before relying on the
+  later cutoff; keep any entry bounded and separate from v2.
+
+No submission, registration, contact, deadline acceptance or implementation
+was performed. Proposal-status rows remain unchanged: James is registered for
+Arbitrum, while project submission is unconfirmed.
+
 ## 2026-09-23 - Near-term funding date check
 
 Trigger: weekly PM retry; bounded independent read-only verification, not a
