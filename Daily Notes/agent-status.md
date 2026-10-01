@@ -4,6 +4,10 @@ Active agents append once per work-session. One line per active card. Newest at 
 
 Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
+## 2026-10-01
+
+- @web-client-os-pm (harness codex, session ui-skill-shortlist-20261001): Screened James's ten UI-skill links and selected author sources; recorded a task-specific shortlist in [[Designs/web-client-os/technology-foundation#UI design skill shortlist (2026-10-01)]], including framework, telemetry and WCAG-source cautions. No skills installed, client edits, C0 acceptance changes or implementation authorization. / next: consult selected, rechecked references during the next authorized UI design pass.
+
 ## 2026-09-29
 
 - @pm (harness codex, session weekly-pm-20260929): checked current repo visibility, narrow private correspondence and official near-term opportunities; recorded public-safe checkpoint, private-follow-up pointer and NLnet/Arbitrum verification boundaries. No specialist files staged, implementation edits, sends, submissions or deployments. Next: James handles private organizer action; owning agents reconcile unpublished review material and client publication gate.

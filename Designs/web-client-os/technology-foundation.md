@@ -5,7 +5,7 @@
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/product-constitution-and-roadmap]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/web-client-os/privacy-and-agents]], [[Designs/web-client-os/ethereum-standards-and-interop]]
 **Standards profile:** [[Designs/web-client-os/web-platform-standards-and-forward-profile]]
 **Reviewers:** @web-platform-standards (2026-08-14), @historical-client-architecture (2026-08-14), @current-v2-read-path (2026-08-14)
-**Last touched:** 2026-09-24
+**Last touched:** 2026-10-01
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/web-platform #topic/pwa #topic/i18n #topic/accessibility #topic/performance #topic/wasm #topic/wasi
 
@@ -224,6 +224,48 @@ known gaps—EFS exact generations, IPFS/static-host profiles, Unicode/bidi/IME,
 typed authority and `UNKNOWN`, reproducible closures, WIT budgets and real
 assistive-technology/mobile behavior—remain EFS-owned requirements even when a
 guide has no matching rule.
+
+### UI design skill shortlist (2026-10-01)
+
+James supplied [Kailash's ten-skill list](https://x.com/kail_designs/status/2102265246325047711)
+for the upcoming EFS UI work, without requesting installation. The post was
+read through a public mirror after X refused the fetch; its linked catalog
+entries and selected author sources were inspected. This is a dated shortlist,
+not an installed, pinned or adopted guidance closure. No client code or C0
+acceptance/authorization changes follow from it.
+
+| Candidate / source | Useful EFS application | Disposition and constraint |
+|---|---|---|
+| Addy Osmani: [accessibility](https://github.com/addyosmani/web-quality-skills/blob/main/skills/accessibility/SKILL.md) | Keyboard/focus, semantic controls, live status, assistive-technology and zoom review of Files and action dialogs | High-priority review reference; pair with W3C requirements and actual browser/AT evidence, not a Lighthouse score alone. |
+| Paul Bakaus: [adapt / Impeccable](https://github.com/pbakaus/impeccable) | Reconsider panes, density, controls and input for mobile, desktop and resized installed windows | High-priority adaptation reference; prefer content/container/input constraints over fixed device categories. Do not inherit blanket font bans or an entire design system. |
+| Emil Kowalski: [emil-design-eng](https://github.com/emilkowalski/skills/blob/main/skills/emil-design-eng/SKILL.md) | Responsive-feeling controls, interruption, repeated-action speed and purposeful motion | Strong craft reference; translate examples to native CSS/Web Animations/Web Components, not automatic React or Motion dependencies. Test its absolute aesthetic rules against the actual task. |
+| Jakub Krehel: [better-interface](https://github.com/jakubkrehel/skills/blob/main/skills/better-interface/SKILL.md) | A ranked review across layout, writing, type, color, accessibility and polish | Strong review candidate; it orchestrates other `better-*` skills, so select the needed references rather than assuming this one file is self-contained or authorizes agent fan-out. |
+| Anthropic: [frontend-design](https://www.ui-skills.com/skills/anthropics/frontend-design) | Deliberate visual identity and comparison of alternative EFS screen treatments | Useful art-direction reference. A data-first working OS is not a marketing hero page; visual novelty must not delay linked data or reduce clarity. |
+| Emil Kowalski: [apple-design](https://github.com/emilkowalski/skills/blob/main/skills/apple-design/SKILL.md) | Spatial consistency, gesture feedback, interruption and restraint | Selective inspiration, not an Apple clone or Apple-only interaction policy. Preserve keyboard, pointer, touch, reduced motion and cross-platform behavior. |
+| MengTo: [beautiful-shadows](https://www.ui-skills.com/skills/mengto/beautiful-shadows) | Small elevation/token experiments once the design language exists | Optional polish. The supplied recipes assume Tailwind; translate useful values into EFS CSS tokens without adding Tailwind or relying on shadows for meaning. |
+| wshobson: [interaction-design](https://github.com/wshobson/agents/blob/main/plugins/ui-design/skills/interaction-design/SKILL.md) | Loading/empty/error feedback, transitions and drag alternatives | Useful pattern reference; framework examples do not select our stack. Never turn a pending EFS write into a success indication for visual smoothness. |
+| Superfuture: [design-review](https://github.com/Superfuture/design-review) | Short, prioritized visual critique of a rendered view | Checklist-only candidate for now: the author's README and skill include a default usage ping. Do not execute that workflow unchanged or send EFS screenshots/content to an external service. |
+| shadcn: [shadcn](https://www.ui-skills.com/skills/shadcn-ui/shadcn) | Comparison material for control ergonomics | Not selected for EFS implementation: its React/primitive-library/Tailwind workflow does not match the native/Web Components direction. It does not displace the release-matched Web Awesome skills. |
+
+Source quality still needs judgment. The inspected `accessibility` source labels
+large-text contrast thresholds as 18px / 14px bold, whereas
+[WCAG's definition](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)
+uses 18pt / 14pt bold (24 / approximately 18.67 CSS px). Use the primary
+standard, not that table. Likewise, aesthetic preferences such as banning
+system fonts, requiring springs or changing every button on press are not EFS
+requirements. Sources linked to a moving branch above must be rechecked and
+version-pinned, with license and network behavior reviewed, before any later
+installation, retention or workflow adoption.
+
+For the next authorized UI design pass, the recommendation is to start with
+the exact Web Awesome guidance where applicable, then consult one relevant
+craft source plus accessibility/adaptation references. Compare the same real
+Files/action surface across desktop/mobile, long international names, RTL,
+keyboard, zoom, forced colors and reduced motion. Keep provenance,
+`UNKNOWN`/`PARTIAL`, transaction progress and signing authority legible; a
+generic "polish" pass cannot hide them. Evaluate actual screens with James;
+do not load all ten packs or add a new runtime/tool dependency just for this
+shortlist. Existing standards and contribution gates above remain controlling.
 
 ### Required contribution trace
 
