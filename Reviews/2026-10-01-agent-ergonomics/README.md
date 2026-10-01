@@ -151,3 +151,30 @@ The v2 PM acknowledged no collision and is not editing shared files. It agrees
 the error-detail, nonce-reconciliation and restart findings warrant review, but
 has not verified whether they are already resolved. That acknowledgement is
 coordination evidence, not adoption or an instruction to start implementation.
+
+### Owning design follow-through — October 1
+
+James subsequently authorized bounded planning/design reconciliation by the
+owning Codex PMs. General PM dispatched separate scopes and took responsibility
+for the shared dated status lines to avoid parallel appends. This supersedes
+the earlier receipt-only handoff, not its evidence or implementation limits.
+
+- **Client/OS completed:** `2d90734`, two owned draft design files. Adds
+  [[../../Designs/web-client-os/mvp-and-acceptance#Human-facing diagnostics and recovery|human-facing diagnostic/recovery presentation]]
+  and repository requirements routing. Browser evidence remains outstanding;
+  no new SDK wrapper/enum, C0/C1/C2 permission or nine-test MVP0 change.
+- **SDK completed:** `2fefdde`, four owned design/review files. Adds
+  [[../../Designs/sdkv2/experiment-program#October 1 ergonomics delta acceptance matrix|E1–E9 delta acceptance scenarios]],
+  qualified recovery refinements and S0/follow-up routing. Exact Core
+  exclusion rules and separately authorized public-API assertion execution
+  remain evidence obligations. No product tests or implementation performed.
+- **Core/contracts reconciliation pending:** general PM requested an explicit
+  scoped completion/no-change rationale. Do not substitute the earlier
+  Unicode discussion or a receipt acknowledgement for this handoff. SDK's
+  nonce/deadline exclusion assertions remain conditional on exact Core rules.
+
+General PM freshly fetched, confirmed both completed commits were ancestors
+of origin/main and reviewed their exact diffs. The two reported completion
+lines are recorded in [[../../Daily Notes/agent-status|agent status]] on the
+owners' behalf. These draft acceptance refinements do not claim that the
+prototype or production system already satisfies them.

@@ -6,6 +6,12 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-10-01
 
+- @pm (harness codex, session ergonomics-handoff-verification-20261001): Verified Client/OS commit `2d90734` and SDK commit `2fefdde` are on planning/main and fetched origin/main, reviewed their exact six-file documentation diffs, and recorded their coordinated status lines on behalf of the owners. No product suites rerun, implementation or owner-gate changes. / next: receive the v2 PM's bounded Core proof-obligation/design reconciliation; do not treat an older Unicode reply as this pass's completion.
+
+- @web-client-os-pm (harness codex, session client-ergonomics-20261001; status recorded by @pm): Reconciled qualified ergonomics evidence into human-facing read/error/recovery UX and future browser acceptance; pushed planning/main `2d90734`; no implementation or gate change. / next: exercise SDK E1–E9 presentation in a separately authorized client slice.
+
+- @sdk-pm (harness codex, session sdk-ergonomics-delta-20261001; status recorded by @pm): Reconciled qualified ergonomics packet `440bb61` into SDK-owned E1–E9 acceptance deltas and recovery/S0 routing; planning/main `2fefdde` committed and pushed (remote verified). Documentation checks reported passed; no product tests or implementation. / next: exact Core exclusion-rule evidence and separately authorized public-API conformance runs; no new James choice.
+
 - @pm (harness codex, session agent-ergonomics-capture-20261001): Captured James's two completed Claude v1/v2 reviews, full reports, original observation probes and retained v2 logs in [[Reviews/2026-10-01-agent-ergonomics/README|agent-ergonomics evidence packet]]. Added PM corrections for availability, strict verification, provider rejection, retry evidence, qualification and authority; routed evidence to the v2 PM without changing designs or implementation scope. / next: owning SDK/M2 lane reconciles candidate scenarios against the current plan; v1 maintenance only for a named current consumer.
 
 - @web-client-os-pm (harness codex, session ui-skill-shortlist-20261001): Screened James's ten UI-skill links and selected author sources; recorded a task-specific shortlist in [[Designs/web-client-os/technology-foundation#UI design skill shortlist (2026-10-01)]], including framework, telemetry and WCAG-source cautions. No skills installed, client edits, C0 acceptance changes or implementation authorization. / next: consult selected, rechecked references during the next authorized UI design pass.
