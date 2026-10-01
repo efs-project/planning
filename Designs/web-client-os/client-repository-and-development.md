@@ -3,7 +3,7 @@
 **Status:** draft — client PM input to Claude's repository initialization and architecture plans
 **Target repos:** planning, client, sdk, contracts
 **Depends on:** [[README]], [[technology-foundation]], [[architecture-and-modules]], [[app-runtime-and-direct-launch]], [[system-profiles-and-generations]], [[../sdkv2/web-client-os-boundary-pressure]], [[../efsv2/prototype-implementation-plan]]
-**Last touched:** 2026-09-26
+**Last touched:** 2026-10-01
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #repo/contracts #topic/cypherpunk-os #topic/web-platform #topic/performance
 
@@ -231,9 +231,9 @@ Each task gets its own worktree/run ID, bounded logs and exact evidence path. To
 | International use | Message IDs, locale negotiation, `Intl`, logical CSS, IME-safe inputs, bidi-safe identifiers, UTC/domain time separation and NFC-aware display/validation boundaries from the first Files form. Translation packs load independently. The public filename profile remains Core/Files-owned. |
 | Accessibility | Semantic controls and keyboard/focus behavior through routing and dialogs; reduced motion, zoom/reflow, touch targets, live status and correct focus return. A component library does not complete accessibility acceptance. |
 | Input and viewport | Container-based layouts, dynamic viewport/safe areas, virtual keyboard, coarse/fine pointer changes, installed-window mode and mobile back navigation. Test touch devices, not only a narrow desktop window. |
-| Draft and task survival | Refresh, offline transition, rejected wallet prompt, route change and background-tab suspension have explicit states. Autosave is private until publication is authorized; an upload that succeeded before a transaction failed is recoverable. |
+| Draft and task survival | Refresh, offline transition, rejected wallet prompt, route change and background-tab suspension have explicit states. Autosave is private until publication is authorized; an upload that succeeded before a transaction failed is recoverable. Retained operation references support reconciliation, not automatic resend or restored live authority; account/network changes never retarget an existing attempt. See [[mvp-and-acceptance#Human-facing diagnostics and recovery]]. |
 | Hostile data and load | Limit name/text/range/decode/preview work, reject active content in trusted origin, preserve raw inspection/download and paginate/stream with backpressure. No remote metadata automatically loads a module, font or URL. |
-| Web3 diagnostics | Display chain, Realm, app/build and operation status in a development inspector; distinguish SDK basis, wallet network, RPC endpoint and contract version. Provider success does not imply canonical effect. |
+| Web3 diagnostics | Display chain, Realm, app/build and operation status in a development inspector; distinguish SDK basis, wallet network, RPC endpoint and contract version. Ordinary UI also needs localized contextual causes and safe next actions over the SDK's operation-specific results; the Inspector cannot substitute for them. Provider success does not imply canonical effect, and rejection does not prove non-effect. Preserve unknown causes and redact diagnostic export; use the [[mvp-and-acceptance#Human-facing diagnostics and recovery|2026-10-01 presentation acceptance]] without creating another SDK verdict or result wrapper. |
 | Testing clock and randomness | Explicit injectable time/random/network boundaries in tools and adapters; retain deterministic seeds and fixture IDs. Never let test clocks/signers reach product entries. |
 | Extensions | Reserve versioned descriptors, execution lane, capability requests, verified closure and disposable instance scope. Exercise one small confined app later before freezing public plugin interfaces; defer a universal DI/service framework. |
 | Exit and support | Export exact diagnostics/evidence and user-owned data with privacy review. Release/version/capability information must be inspectable without a wallet. Preserve independent rescue when settings or optional modules fail. |

@@ -4,7 +4,7 @@
 **Target repos:** planning, client, sdk
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/technology-foundation]], [[Designs/web-client-os/web-platform-standards-and-forward-profile]], [[Designs/web-client-os/ethereum-standards-and-interop]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/core-architecture-candidate]]
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14)
-**Last touched:** 2026-09-03
+**Last touched:** 2026-10-01
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/read-path #topic/files #topic/actions #topic/performance
 
@@ -289,6 +289,66 @@ an MVP assumption.
 | User creates file | local preview, storage/publication disclosure, plan, receipt | exact byte commitment, carriers, Records/Bindings, cost, read-back | URL treated as identity, hidden upload, silent content replacement |
 | User publishes revision | old and new immutable revision labels, explicit current selection | exact predecessor/new revision, signer basis, Binding transition | mutation of old bytes or silent “latest” substitution |
 | Authorized agent performs same write | structured plan request, trusted ceremony/delegated checkpoint, progress, receipt | same ActionPlan digest and effect ladder as UI | hidden agent endpoint, weaker prompt, ambient signing |
+
+### Human-facing diagnostics and recovery
+
+**2026-10-01 reconciliation.** Source: the qualified
+[[Reviews/2026-10-01-agent-ergonomics/README|agent-ergonomics packet]] at
+`440bb61`, including its preserved v1/v2 reports. Those reports supply failure
+examples, not API law. The v2 human-UI observations came from static source
+inspection; browser launch was blocked. This section adds future presentation
+and browser acceptance detail, not a passed test, implementation dispatch,
+change to the nine-test [[mvp0-acceptance]] overlay, or C0/C1/C2 authorization.
+
+Qualified reads, strict byte verification, canonical effect read-back and
+stale-plan fencing are already required above. The delta is making their
+consequences understandable and actionable at the last hop. SDK owns the
+operation-specific result families, semantic recovery rules and acceptance
+matrix in [[../sdkv2/experiment-program#October 1 ergonomics delta acceptance matrix|its E1–E9 scenarios]]; the client translates those results
+without computing a competing verdict, parsing raw error text or imposing a
+universal wrapper/new result enum. Earlier candidate labels in this catalog
+are not a requirement to freeze the lab's vocabulary. Recovery may remain
+unknown while sufficient canonical evidence is unavailable; elapsed time or
+user frustration cannot make that evidence complete. Conversely, present a
+supported conclusive SDK result once established rather than keeping an old
+transport-ambiguity message indefinitely.
+
+Every failure/status view answers **what operation and resource this concerns,
+what is established or still unknown, and what the user can do next**. Show a
+short localized explanation first, with the exact operation, chain/Realm,
+policy/basis, relevant cause and evidence available in the Inspector. A
+suggested next action is advice, never a grant or permission to sign/resubmit;
+it still passes the normal authority, precondition and consent checks. Preserve
+unknown error codes and bounded raw causes in inspectable diagnostics instead
+of inventing a reason or retry category. Decoded provider/revert details retain
+their source and qualification; decoding alone does not authenticate a claim.
+Diagnostic export is explicit and
+redacted by default; credentials, signatures and private drafts must not leak
+through a generic “copy error” or support upload.
+
+| Evidence / situation | Required ordinary UI and safe next action | Misleading outcome to reject |
+|---|---|---|
+| Partial directory page, failed continuation, or a complete result under one selected policy | Keep established rows; explain what could not be checked and offer a supported scoped continuation/recheck. An empty-state claim names its view/basis and requires complete authoritative coverage. Inspect or explicitly change the reader policy without silently widening it. | “Empty folder,” global non-existence, EOF or a negative cache from timeout/partial evidence; claiming unseen authors exist without evidence. |
+| Established File/selected revision but content not fetched, no eligible locator in the inspected scope, unavailable content, or failed verification | Keep File identity and metadata visible with separate content availability/integrity text. Offer inspection and eligible verified-source recovery, not an unverified normal preview. Reject a corrupt carrier and allow another eligible carrier for the same commitment. | Listed means readable; “the author never published bytes”; unavailable means absent; a useful overview silently weakening verification. |
+| Stale read-set/CAS or invalid user input | Explain the affected field/resource and active-profile rule when the SDK establishes it. Keep the draft; offer comparison with a qualified fresh view and explicit preparation/review of a new plan. Unknown details stay unknown. Name feedback follows the selected Files profile, not the lab's ASCII examples. | Raw `COMPACT_*` as the only explanation; automatically re-signing/retrying against a new head; silently normalizing signed bytes or promoting lab ASCII restrictions into public Unicode policy. |
+| Controlled attempt-local proof that a send callback did not send, versus provider-reported rejection such as `4001` | State the narrow fact proved about that attempt. Keep any earlier signed authorization and other attempts visible. A wallet rejection alone cannot promise no submission/effect; reconcile where required. Present a new send/replacement only through the SDK-supported explicit consent path. | “Nothing was sent” inferred from a provider error; treating attempt-local non-send as revocation of an existing authorization; automatic resend. |
+| Pending submission, timeout, dropped/lost response or ambiguous effect | Show the stage actually established and “outcome not yet known” where appropriate, linked to the retained operation. Offer read-only status reconciliation and let the user leave the view. Reopening it rejoins that operation rather than silently starting another. | Endless success-looking progress, false failure/success, a generic “Retry” that broadcasts again, or leaving/cancelling the view described as transaction rollback. |
+| Expiry, same-EFS-nonce replacement or nonce-exclusion evidence | Explain the exact operation's SDK-qualified result with canonical basis/finality and related attempts. Distinguish EFS intent nonce from wallet transaction nonce. Replacement does not itself revoke old consent or guarantee no additional gas; wall-clock countdowns are advisory. | Terminal non-admission inferred locally from a timer, transaction replacement or bare nonce count; ignoring later unavailable/reorged evidence that requires requalification. |
+| Restart, account/network change, disconnect or provider replacement | Retain supported private drafts and operation references; explain that live SDK contexts/plans must be reacquired and revalidated. Fence stale sign/submit controls; inspect/reconcile the original operation in its original context. Any new action gets fresh review and authority checks. | JSON-restoring an authority handle; retargeting an old intent to the newly selected chain/account; deleting the journal to clear an error or assuming reload cancelled a write. |
+
+**Evidence still required:** within the future authorized client write/read
+slice, render the SDK's asserted semantic scenarios through the actual public
+API and browser UI. Check the table's copy, enabled/disabled actions, draft and
+operation identity, accessible announcements/focus, Inspector qualifications,
+and provider-call log—not merely the presence of result fields. In particular,
+exercise a stale concurrent edit, controlled non-send and ambiguous rejection,
+pending/expired/replaced outcomes, restart, account/network change, reorg or
+unavailable reconciliation evidence, partial listings and corrupt-source
+fallback. Count sign/send calls to prove presentation and read-only recovery
+do not trigger them. Use mocked results only as labelled component evidence;
+they do not prove SDK convergence, real-wallet behavior or browser integration.
+Keep the same qualified outcome available to agents without scraping UI copy.
+No new owner choice is needed for this reconciliation.
 
 ## Provisional performance budgets
 
