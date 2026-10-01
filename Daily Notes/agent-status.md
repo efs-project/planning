@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-10-01
 
+- @pm (harness codex, session agent-ergonomics-capture-20261001): Captured James's two completed Claude v1/v2 reviews, full reports, original observation probes and retained v2 logs in [[Reviews/2026-10-01-agent-ergonomics/README|agent-ergonomics evidence packet]]. Added PM corrections for availability, strict verification, provider rejection, retry evidence, qualification and authority; routed evidence to the v2 PM without changing designs or implementation scope. / next: owning SDK/M2 lane reconciles candidate scenarios against the current plan; v1 maintenance only for a named current consumer.
+
 - @web-client-os-pm (harness codex, session ui-skill-shortlist-20261001): Screened James's ten UI-skill links and selected author sources; recorded a task-specific shortlist in [[Designs/web-client-os/technology-foundation#UI design skill shortlist (2026-10-01)]], including framework, telemetry and WCAG-source cautions. No skills installed, client edits, C0 acceptance changes or implementation authorization. / next: consult selected, rechecked references during the next authorized UI design pass.
 
 ## 2026-09-29

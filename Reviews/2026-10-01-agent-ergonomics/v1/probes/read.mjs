@@ -1,0 +1,25 @@
+import { createEfsClient, lens, SYSTEM_LENS } from '../dist/index.js'
+import { createPublicClient, http } from 'viem'
+import { sepolia } from 'viem/chains'
+const publicClient = createPublicClient({ chain: sepolia, transport: http('https://ethereum-sepolia-rpc.publicnode.com') })
+const efs = createEfsClient({ publicClient })
+const J = (x) => efs.toJSON(x)
+const C = lens(['0x11CbE1b619bb9fe79e2F4C22c9A62412b3E79912'])
+const A = lens(['0x4F1a606508cA075F8cFBE06aC30a7C7aA023e89D'])
+const both = lens(['0x4F1a606508cA075F8cFBE06aC30a7C7aA023e89D','0x11CbE1b619bb9fe79e2F4C22c9A62412b3E79912','0xaCf4C2950107eF9b1C37faA1F9a866C8F0da88b9'])
+async function tryit(label, f) { const t=Date.now(); try { const r = await f(); console.log('OK ', label, `${Date.now()-t}ms`, typeof r === 'string' ? JSON.stringify(r.slice(0,160)) : J(r).slice(0,600)) } catch (e) { console.log('ERR', label, `${Date.now()-t}ms`, e.name, e.code ?? '', '::', e.message.slice(0,400)) } }
+console.log('SYSTEM_LENS =', J(SYSTEM_LENS))
+await tryit('readText /README.md no lens', () => efs.fs.readText('/README.md'))
+await tryit('readText /README.md lens C', () => efs.fs.readText('/README.md', { lens: C }))
+await tryit('read /README.md lens C (trust)', async () => { const r = await efs.fs.read('/README.md', { lens: C }); return { verification: r.verification, trust: r.trust, resolvedBy: r.resolvedBy, data: r.data, size: r.bytes?.length } })
+await tryit('info /README.md lens C expand', () => efs.fs.info('/README.md', { lens: C, expand: ['attestations'] }))
+await tryit('list /agents lens A', async () => { const o=[]; for await (const e of efs.fs.list('/agents', { lens: A })) o.push(e); return o })
+await tryit('list /games lens C', async () => { const o=[]; for await (const e of efs.fs.list('/games', { lens: C })) o.push(e.kind+':'+e.name); return o })
+await tryit('list /cypherpunk lens C', async () => { const o=[]; for await (const e of efs.fs.list('/cypherpunk', { lens: C })) o.push(e.kind+':'+e.name); return o })
+await tryit('overview / lens C', () => efs.fs.overview('/', { lens: C }))
+await tryit('readText /nope lens C', () => efs.fs.readText('/nope.txt', { lens: C }))
+await tryit('readText /games (a dir) lens C', () => efs.fs.readText('/games', { lens: C }))
+await tryit('exists /README.md multi-lens', () => efs.fs.exists('/README.md', { lens: both }))
+await tryit('locate /README.md multi-lens', () => efs.fs.locate('/README.md', { lens: both }))
+await tryit('read path w/o leading slash', () => efs.fs.readText('README.md', { lens: C }))
+await tryit('read trailing slash dir', () => efs.fs.readText('/games/', { lens: C }))

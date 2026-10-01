@@ -1,0 +1,192 @@
+{
+  "capabilities": {
+    "protocol": "compact-guarded-v2",
+    "guardedWrites": true,
+    "explicitPrincipalHistory": true,
+    "legacyReading": false,
+    "guardedImport": false,
+    "guardedArchive": "SIGNED_CLAIMS_WITH_EXPLICIT_CLOSURE",
+    "addressConvenience": "authors-at-pinned-basis",
+    "evidence": "RPC_OBSERVED",
+    "typedDirectories": true,
+    "globalTree": false
+  },
+  "manifestTypeNames": [
+    "root",
+    "child",
+    "name",
+    "directory",
+    "bytes",
+    "content",
+    "carrierRoot",
+    "carrierChild",
+    "concept"
+  ],
+  "pinCost": {
+    "n": 95,
+    "methods": {
+      "eth_getBlockByNumber": 3,
+      "eth_chainId": 1,
+      "eth_call": 73,
+      "eth_getCode": 18
+    }
+  },
+  "typeDescriptorSample": {
+    "basis": {
+      "chainId": "31337",
+      "blockHash": "0x30e33db49f792b5bcfa457e504e90137e6863f5044068fcf539391d5ec918b44",
+      "blockNumber": "30",
+      "timestamp": "1790883970",
+      "core": "0xb9213e916041e26079e3fe676c4bee3139d3c4d2735a4dd889242cd485f0c1e5",
+      "ledger": "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
+      "index": "0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1",
+      "grade": "RPC_OBSERVED",
+      "admission": "2",
+      "generation": "0",
+      "epoch": "9",
+      "bindingLifecycleProfile": "0x1901a3595e5dd8733ebea7a78a570f5c713794a6b6566d49186d24dc75868b71",
+      "protocol": "compact-guarded-v2",
+      "origin": "0x5f57247c6eeb5cefd11a0dca9567d9449266ad9fab1228eb2eaf4ef1b92c6a96",
+      "executionSet": "0x42d8530eb5468c796713b8c7b39afd73b3cd9193fa6209e6fe827c2c01ff94ca",
+      "execution": {
+        "origin": "0x5f57247c6eeb5cefd11a0dca9567d9449266ad9fab1228eb2eaf4ef1b92c6a96",
+        "revision": "2",
+        "shellCodeHash": "0xb9213e916041e26079e3fe676c4bee3139d3c4d2735a4dd889242cd485f0c1e5",
+        "implementation": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        "implementationCodeHash": "0x0b6a6b461b5c17103c4903745cf1fb5951e5650a8048a05b775a5f9a2c8c6484",
+        "registryAddress": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+        "registryCodeHash": "0x21f1872365c37bf5c3357b45081858ae1b2e5dfd986dc7e23e77768f4c2318d9",
+        "indexAddress": "0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1",
+        "indexCodeHash": "0x8598909879770a091761956a4bc544b78e3001661899293f648eb4cc8354a8d8",
+        "indexGeneration": "0"
+      }
+    },
+    "knowledge": "OPAQUE_LEGACY",
+    "coverage": "PARTIAL",
+    "value": null
+  },
+  "emptyRootShape": {
+    "keys": [
+      "basis",
+      "knowledge",
+      "coverage",
+      "value",
+      "nameCoverage",
+      "kindCoverage",
+      "scanned",
+      "rawTotal"
+    ],
+    "knowledge": "ABSENT",
+    "coverage": "COMPLETE"
+  },
+  "createLifecycle": {
+    "submitStatus": "SUBMITTED",
+    "reconcileStatus": "EFFECTS_VERIFIED",
+    "knowledge": "VERIFIED",
+    "rpcCalls": 142,
+    "planKeys": [
+      "id",
+      "operation",
+      "file",
+      "newRevision",
+      "authors",
+      "basis",
+      "intent",
+      "actions",
+      "bodies",
+      "actionsHash",
+      "protocol",
+      "principalId",
+      "readSet",
+      "digest",
+      "publicationId",
+      "authorizationContext",
+      "guards",
+      "snapshots",
+      "startingHeads",
+      "expectedHeads",
+      "selectionDependencies"
+    ]
+  },
+  "raceWinner": "EFFECTS_VERIFIED",
+  "raceLoser": {
+    "thrown": "COMPACT_READSET_DRIFT",
+    "ownKeys": [],
+    "hasCause": false
+  },
+  "rawRevert": {
+    "message": "RPC eth_call failed (3)",
+    "data": "0xb4fabc9800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "decodedWithLedgerAbi": {
+      "name": "E_READSET_STALE",
+      "args": [
+        "0",
+        "0"
+      ]
+    }
+  },
+  "badNames": {
+    "Notes.TXT": "COMPACT_NAME_GRAMMAR",
+    "../escape": "COMPACT_NAME_GRAMMAR",
+    "aaaaaaaaaaaaaaaaaaaa": "COMPACT_NAME_GRAMMAR",
+    "café.txt": "COMPACT_NAME_GRAMMAR"
+  },
+  "readPath": {
+    "pinCalls": 95,
+    "placementCalls": 11,
+    "contentCalls": 7,
+    "placementKnowledge": "PRESENT",
+    "placementKeys": [
+      "basis",
+      "knowledge",
+      "coverage",
+      "value"
+    ],
+    "contentState": "AVAILABLE_VERIFIED",
+    "text": "edit by agent A",
+    "contentKeys": [
+      "basis",
+      "file",
+      "recordId",
+      "selection",
+      "state",
+      "bytes",
+      "plaintextVerified",
+      "profile"
+    ]
+  },
+  "missingName": {
+    "knowledge": "ABSENT",
+    "coverage": "COMPLETE"
+  },
+  "contextPortable": "COMPACT_CONTEXT",
+  "serializedContextAccepted": "COMPACT_CONTEXT",
+  "history": {
+    "knowledge": "PRESENT",
+    "coverage": "COMPLETE",
+    "n": 2,
+    "sample": {
+      "recordId": "0xfba6169efcbdfc0c01c68c797f35fb7718593b74391c4de91a2dc8830f3fdfe4",
+      "typeId": "0xf393367bc68fd306556b71ca525e425a7c7e6857c12af6491de88cdaa7808c64",
+      "file": "0xf1f3d585b698a614c8f0ff6b6f058b632e21fd20e14b40fd0a85ad6e8e9ef7e7",
+      "parent": "0x42bf601c9f793e3f4aaf5d58bd8244ced5dad77c5fff839a6a7dbb565f61279c",
+      "document": "0x65646974206279206167656e742041",
+      "documentHash": "0x65a29c49fa838b0864c91a52b722ecd3ebeb0cdecd2b84f1ce8a970c85b0287d",
+      "profile": "legacy-inline",
+      "publication": "3",
+      "publicationContext": {
+        "principalId": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+        "executionSet": "0x42d8530eb5468c796713b8c7b39afd73b3cd9193fa6209e6fe827c2c01ff94ca",
+        "readSetHash": "0xceec4339a08855001f4dd17ac2b87d6e5edc667d0a7585d2e76171b695fd3b42",
+        "intentDigest": "0x63633e426e29660642733e9492e9f4df5ae29b00150b4980d7be69b50a746787",
+        "principalKind": "1",
+        "authorizationProfile": "2",
+        "intentFormat": "2"
+      },
+      "firstAdmission": "8",
+      "occurrences": "1",
+      "maintenance": "RETAINED_OCCURRENCE_COUNT",
+      "validity": "NOT_ASSESSED"
+    }
+  }
+}

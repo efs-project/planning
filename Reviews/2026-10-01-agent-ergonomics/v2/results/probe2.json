@@ -1,0 +1,18 @@
+{
+  "rejectedSubmit": {
+    "status": "BROADCAST_UNKNOWN",
+    "error": "User rejected the request."
+  },
+  "rejectedReconcile": "BROADCAST_UNKNOWN",
+  "retrySameSigned": {
+    "status": "BROADCAST_UNKNOWN",
+    "actuallySent": 0
+  },
+  "samePublicationNonce": true,
+  "freshReconcile": "EFFECTS_VERIFIED",
+  "abandonedAfterFresh": {
+    "status": "BROADCAST_UNKNOWN",
+    "knowledge": "UNKNOWN"
+  },
+  "staleBroadcast": "stale\n+ actual - expected\n\n+ 'REVERTED'\n- 'SUCCESS'\n"
+}

@@ -1,0 +1,2 @@
+Ran 65 test suites in 399.38ms (3.71s CPU time): 816 tests passed, 0 failed, 0 skipped (816 total tests)
+forge test --offline  2.80s user 0.25s system 433% cpu 0.705 total

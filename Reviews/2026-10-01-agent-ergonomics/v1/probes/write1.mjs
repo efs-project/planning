@@ -1,0 +1,20 @@
+import { mk, pc, account } from './local.mjs'
+const efs = mk()
+const J = (x) => efs.toJSON(x)
+const enc = (s) => new TextEncoder().encode(s)
+async function tryit(label, f) { const t=Date.now(); const b0 = await pc.getBlockNumber(); try { const r = await f(); console.log('OK ', label, `${Date.now()-t}ms blocks+${(await pc.getBlockNumber())-b0}`, typeof r === 'string' ? JSON.stringify(r.slice(0,200)) : J(r).slice(0,900)) ; return r} catch (e) { console.log('ERR', label, `${Date.now()-t}ms blocks+${(await pc.getBlockNumber())-b0}`, e.name, e.code ?? '', '::', (e.message||'').slice(0,500)); return e } }
+const progress = []
+const rc = await tryit('write /agent-probe/notes/hello.txt', () => efs.fs.write('/agent-probe/notes/hello.txt', enc('gm from an agent'), { contentType: 'text/plain', onProgress: p => progress.push(`${p.step}/${p.total}:${p.phase}`) }))
+console.log('progress', progress.join(' | '))
+await tryit('readText back (default lens = me?)', () => efs.fs.readText('/agent-probe/notes/hello.txt'))
+await tryit('read back with explicit address lens', async () => { const r = await efs.fs.read('/agent-probe/notes/hello.txt', { lens: account.address }); return { v: r.verification, resolvedBy: r.resolvedBy } })
+await tryit('info', () => efs.fs.info('/agent-probe/notes/hello.txt', { lens: account.address }))
+await tryit('list /agent-probe/notes', async () => { const o=[]; for await (const e of efs.fs.list('/agent-probe/notes', { lens: account.address })) o.push(e.kind+':'+e.name); return o })
+await tryit('list / under SYSTEM default (read-only client view)', async () => { const o=[]; for await (const e of efs.fs.list('/')) o.push(e.kind+':'+e.name); return o })
+const rc2 = await tryit('overwrite same path, new bytes', () => efs.fs.write('/agent-probe/notes/hello.txt', enc('gm v2'), { contentType: 'text/plain' }))
+await tryit('readText after overwrite', () => efs.fs.readText('/agent-probe/notes/hello.txt', { lens: account.address }))
+await tryit('identical rewrite (idempotent?)', () => efs.fs.write('/agent-probe/notes/hello.txt', enc('gm v2'), { contentType: 'text/plain' }))
+await tryit('write where a folder exists (/agent-probe/notes)', () => efs.fs.write('/agent-probe/notes', enc('x')))
+await tryit('write invalid name', () => efs.fs.write('/agent-probe/../x.txt', enc('x')))
+await tryit('write 20KB auto', () => efs.fs.write('/agent-probe/big.bin', new Uint8Array(20000)))
+await tryit('tag file', () => efs.graph.tags.add ? efs.graph.tags.add('/agent-probe/notes/hello.txt', 'draft') : Object.keys(efs.graph.tags))

@@ -1,0 +1,182 @@
+{
+  "captured": "2026-10-01",
+  "standing": "Claude-reported evidence; PM archive verified, experiments not independently rerun",
+  "files": [
+    {
+      "path": "v1/report.md",
+      "sourceSha256": "40117a82eac37c87854b105b9e5cc1a88a4a96121568cefb963ea6cc14bb4aeb",
+      "archivedSha256": "40117a82eac37c87854b105b9e5cc1a88a4a96121568cefb963ea6cc14bb4aeb",
+      "sourceBytes": 27082,
+      "archivedBytes": 27082,
+      "normalization": "none"
+    },
+    {
+      "path": "v2/report.md",
+      "sourceSha256": "93da90e7c630e91fc32e282fcd260323ca45397ae3a491a950b34ddb019479fb",
+      "archivedSha256": "93da90e7c630e91fc32e282fcd260323ca45397ae3a491a950b34ddb019479fb",
+      "sourceBytes": 18021,
+      "archivedBytes": 18021,
+      "normalization": "none"
+    },
+    {
+      "path": "v1/probes/collide.mjs",
+      "sourceSha256": "aa3e22edb080540bf0b0a825a3a3f9fdefface6d819fddcf32f2cfa097f91105",
+      "archivedSha256": "aa3e22edb080540bf0b0a825a3a3f9fdefface6d819fddcf32f2cfa097f91105",
+      "sourceBytes": 655,
+      "archivedBytes": 655,
+      "normalization": "none"
+    },
+    {
+      "path": "v1/probes/discover.mjs",
+      "sourceSha256": "f9a5cc0e8723bb0d0114c3902d15d4fa581757297fc2eff22553737e103cfc4b",
+      "archivedSha256": "f9a5cc0e8723bb0d0114c3902d15d4fa581757297fc2eff22553737e103cfc4b",
+      "sourceBytes": 1860,
+      "archivedBytes": 1860,
+      "normalization": "none"
+    },
+    {
+      "path": "v1/probes/discover2.mjs",
+      "sourceSha256": "3b1ff98d67d641ac771034344a7372fcfb5286c92f4e2f808408f1ae3097cfd9",
+      "archivedSha256": "3b1ff98d67d641ac771034344a7372fcfb5286c92f4e2f808408f1ae3097cfd9",
+      "sourceBytes": 1067,
+      "archivedBytes": 1067,
+      "normalization": "none"
+    },
+    {
+      "path": "v1/probes/explore.mjs",
+      "sourceSha256": "9ac576d89408e51823f34cddcf521b411569c39df39d43dc2dbb2ff82a3c2256",
+      "archivedSha256": "9ac576d89408e51823f34cddcf521b411569c39df39d43dc2dbb2ff82a3c2256",
+      "sourceBytes": 1108,
+      "archivedBytes": 1108,
+      "normalization": "none"
+    },
+    {
+      "path": "v1/probes/gas.mjs",
+      "sourceSha256": "ceeccf313e16412252ed9f05adb93ddf04291a1075790258c8357b8c4842eb4a",
+      "archivedSha256": "ceeccf313e16412252ed9f05adb93ddf04291a1075790258c8357b8c4842eb4a",
+      "sourceBytes": 1321,
+      "archivedBytes": 1321,
+      "normalization": "none"
+    },
+    {
+      "path": "v1/probes/gas2.mjs",
+      "sourceSha256": "fac73681c611270e1190b6656246c844c6ba9512c2fa98cdfcee36e589b59cd2",
+      "archivedSha256": "fac73681c611270e1190b6656246c844c6ba9512c2fa98cdfcee36e589b59cd2",
+      "sourceBytes": 610,
+      "archivedBytes": 610,
+      "normalization": "none"
+    },
+    {
+      "path": "v1/probes/interrupt.mjs",
+      "sourceSha256": "5ac13d05a44fc03f50b6bd1ae7102bd9e40372e911129fec7fe14f8de422f801",
+      "archivedSha256": "5ac13d05a44fc03f50b6bd1ae7102bd9e40372e911129fec7fe14f8de422f801",
+      "sourceBytes": 2047,
+      "archivedBytes": 2047,
+      "normalization": "none"
+    },
+    {
+      "path": "v1/probes/local.mjs",
+      "sourceSha256": "5e5e21554cdae95a811e03cd20e53ba1514ba171c37a422ba75671f28cad4ce2",
+      "archivedSha256": "5e5e21554cdae95a811e03cd20e53ba1514ba171c37a422ba75671f28cad4ce2",
+      "sourceBytes": 2624,
+      "archivedBytes": 2624,
+      "normalization": "none"
+    },
+    {
+      "path": "v1/probes/read.mjs",
+      "sourceSha256": "66ed09f7db08b635968e3d35cafcfd3d4fd0107760dadeafebe7d6f8cefaa658",
+      "archivedSha256": "66ed09f7db08b635968e3d35cafcfd3d4fd0107760dadeafebe7d6f8cefaa658",
+      "sourceBytes": 2618,
+      "archivedBytes": 2618,
+      "normalization": "none"
+    },
+    {
+      "path": "v1/probes/read2.mjs",
+      "sourceSha256": "df9b97c452faffd84bdd4a26e27bfabc141eebe883ec2c5c3e0c9d043f865e13",
+      "archivedSha256": "df9b97c452faffd84bdd4a26e27bfabc141eebe883ec2c5c3e0c9d043f865e13",
+      "sourceBytes": 1931,
+      "archivedBytes": 1931,
+      "normalization": "none"
+    },
+    {
+      "path": "v1/probes/read3.mjs",
+      "sourceSha256": "42416cf9cf7ed214f4d2e224d10a1cf6cfc38b24823be1209ba9c2d57eda8ff4",
+      "archivedSha256": "42416cf9cf7ed214f4d2e224d10a1cf6cfc38b24823be1209ba9c2d57eda8ff4",
+      "sourceBytes": 1295,
+      "archivedBytes": 1295,
+      "normalization": "none"
+    },
+    {
+      "path": "v1/probes/router.mjs",
+      "sourceSha256": "7090b787ec4c234a924197c6c4be390aa9511dfaadb40e0c30dbec26bbfa258b",
+      "archivedSha256": "7090b787ec4c234a924197c6c4be390aa9511dfaadb40e0c30dbec26bbfa258b",
+      "sourceBytes": 975,
+      "archivedBytes": 975,
+      "normalization": "none"
+    },
+    {
+      "path": "v1/probes/write1.mjs",
+      "sourceSha256": "60b7ecb7e670c015ccce569c829dd5e719710332b9888da795d8ad03258f7bfb",
+      "archivedSha256": "60b7ecb7e670c015ccce569c829dd5e719710332b9888da795d8ad03258f7bfb",
+      "sourceBytes": 2550,
+      "archivedBytes": 2550,
+      "normalization": "none"
+    },
+    {
+      "path": "v2/probes/zz-agent-probe.test.mjs",
+      "sourceSha256": "60f82eaf631770314093642af33aa18dd26311d1ac38fc617f82d5f83443290d",
+      "archivedSha256": "60f82eaf631770314093642af33aa18dd26311d1ac38fc617f82d5f83443290d",
+      "sourceBytes": 6665,
+      "archivedBytes": 6665,
+      "normalization": "none"
+    },
+    {
+      "path": "v2/probes/zz-agent-probe2.test.mjs",
+      "sourceSha256": "bdbbfc88e83d3979c8374c506dfe034a6179dcaeaf8b6335ef5c859271c0df62",
+      "archivedSha256": "bdbbfc88e83d3979c8374c506dfe034a6179dcaeaf8b6335ef5c859271c0df62",
+      "sourceBytes": 2285,
+      "archivedBytes": 2285,
+      "normalization": "none"
+    },
+    {
+      "path": "v2/results/forge-build-time.txt",
+      "sourceSha256": "67689ec14c4fa4dea7a6745d0b0ecdbde11da64c1d92d5aeb66c3ecd79d9fe47",
+      "archivedSha256": "67689ec14c4fa4dea7a6745d0b0ecdbde11da64c1d92d5aeb66c3ecd79d9fe47",
+      "sourceBytes": 72,
+      "archivedBytes": 72,
+      "normalization": "none"
+    },
+    {
+      "path": "v2/results/forge-test-summary.txt",
+      "sourceSha256": "764cf1d5684b81abf0e020ebfb0e1bf7825d89536483b2d95e0a43c5ee8ce06d",
+      "archivedSha256": "764cf1d5684b81abf0e020ebfb0e1bf7825d89536483b2d95e0a43c5ee8ce06d",
+      "sourceBytes": 172,
+      "archivedBytes": 172,
+      "normalization": "none"
+    },
+    {
+      "path": "v2/results/node-suite-summary.txt",
+      "sourceSha256": "11093928fc050dadeddcd6072abbc4d75fc15425671c1acfd868750bf031e663",
+      "archivedSha256": "11093928fc050dadeddcd6072abbc4d75fc15425671c1acfd868750bf031e663",
+      "sourceBytes": 2717,
+      "archivedBytes": 2717,
+      "normalization": "none"
+    },
+    {
+      "path": "v2/results/probe.json",
+      "sourceSha256": "1b2e33fc8aa53595d7052a4dd73db465831006ffe2494c9be7c0ecdcd9a0ffe6",
+      "archivedSha256": "f0a71629cf954e37cad87117d1d5c60d4e47258f308eda7140ec3cc3af2ca8dd",
+      "sourceBytes": 5861,
+      "archivedBytes": 5862,
+      "normalization": "added terminal LF"
+    },
+    {
+      "path": "v2/results/probe2.json",
+      "sourceSha256": "832f5285db2820392664559809d3ae89369dca56336d970faa433b28b678e1b6",
+      "archivedSha256": "32b92bbe140305676dd2892636dc9913e276afa1afd98c9bc0c8611cc5ec0a3c",
+      "sourceBytes": 482,
+      "archivedBytes": 483,
+      "normalization": "added terminal LF"
+    }
+  ]
+}

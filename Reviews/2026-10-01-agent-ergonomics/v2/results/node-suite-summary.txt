@@ -1,0 +1,39 @@
+✖ browser/described-type-archive.test.mjs (79.66725ms)
+✖ exact stances use the normal journal, ordered Lens and selected HEAD guards (464.409916ms)
+✖ matched workbench copies exact external locators while live providers remain link-only (330.980333ms)
+✖ disposable Anvil payer carries one portable wallet intent without wallet tx approval or author funds (411.37875ms)
+✖ distinct Note Types: mandatory refusal, qualified exact projections and paid reads (0.590458ms)
+✖ explicit operations construct exact stance targets and ordinary CAS (344.97825ms)
+✖ new Concept is published before its first ASSERT in the same guarded action (0.336667ms)
+✖ supplied revision is explicit and claimed File mismatch refuses before signing (0.038916ms)
+✖ selected revision guards HEAD and coordinate; changed HEAD rejects before signature (0.020958ms)
+✖ wrong exact Concept and missing profile never plan a publication (0.032083ms)
+✖ the signed whole publication is admitted and read back semantically (0.017042ms)
+✖ ordered acceptance deploys normally and commits or rolls back real application transactions (470.042458ms)
+✖ script/required-query-audit.test.mjs (99.84325ms)
+✖ script/required-query-state.test.mjs (59.301167ms)
+✖ script/required-query.test.mjs (64.573042ms)
+ℹ tests 358
+ℹ suites 0
+ℹ pass 342
+ℹ fail 15
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 55477.4025
+✖ failing tests:
+✖ browser/described-type-archive.test.mjs (79.66725ms)
+✖ exact stances use the normal journal, ordered Lens and selected HEAD guards (464.409916ms)
+✖ matched workbench copies exact external locators while live providers remain link-only (330.980333ms)
+✖ disposable Anvil payer carries one portable wallet intent without wallet tx approval or author funds (411.37875ms)
+✖ distinct Note Types: mandatory refusal, qualified exact projections and paid reads (0.590458ms)
+✖ explicit operations construct exact stance targets and ordinary CAS (344.97825ms)
+✖ new Concept is published before its first ASSERT in the same guarded action (0.336667ms)
+✖ supplied revision is explicit and claimed File mismatch refuses before signing (0.038916ms)
+✖ selected revision guards HEAD and coordinate; changed HEAD rejects before signature (0.020958ms)
+✖ wrong exact Concept and missing profile never plan a publication (0.032083ms)
+✖ the signed whole publication is admitted and read back semantically (0.017042ms)
+✖ ordered acceptance deploys normally and commits or rolls back real application transactions (470.042458ms)
+✖ script/required-query-audit.test.mjs (99.84325ms)
+✖ script/required-query-state.test.mjs (59.301167ms)
+✖ script/required-query.test.mjs (64.573042ms)
