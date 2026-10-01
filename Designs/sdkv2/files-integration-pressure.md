@@ -4,11 +4,16 @@
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[README]], [[architecture-candidate]], [[developer-journeys]], [[experiment-program]], [[exp-c0-mvp-packet]], [[web-client-os-boundary-pressure]]
 **Inputs:** exact planning commit `aae282df72f214d791963aeac1cf3c38d162c56e` on `codex/mvp-c0-coherence`, including its prototype-branch `Designs/sdkv2/mvp-interface.md`; exact SDK-lab commit `57d04f85ae2687ee8ea63d945378df5a9a6492a5`; the Fable pin named by the planning source is historical pressure only
-**Last touched:** 2026-09-10
+**Last touched:** 2026-10-01
 
 #status/reference #kind/review #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/read-path
 
 ## Phone disposition
+
+**October 1 addendum:** the September snapshot below remains dated evidence.
+The [[experiment-program#October 1 ergonomics delta acceptance matrix|ergonomics delta matrix]]
+adds future assertions for structured diagnostics and qualified recovery; it
+does not report an integrated run or replace the original source pins.
 
 The browser lane and SDK lab are separately Core-grounded but **not connected
 to each other**.
@@ -228,6 +233,38 @@ claim or emulate atomic move. A multi-item product job may contain several
 plans; its summary can be partial, but every item retains its own submission
 and canonical effect state. “Three of five committed” must not mutate the
 remaining two from `UNKNOWN` into failure or replay them blindly.
+
+### October 1 recovery and diagnostic refinement
+
+The [[../../Reviews/2026-10-01-agent-ergonomics/README|qualified ergonomics packet]]
+at planning `440bb6197c897da5dac1bad9df31fc8233b7b5c3` exposes a narrower
+ergonomic gap, not a reason to weaken this contract. A controlled callback may
+establish that **one attempt made no submission handoff**. A provider's `4001`
+does not establish the same fact; neither alone proves the plan was never
+admitted. Already-issued plan signatures may remain usable bearer authorization
+material, subject to the applicable rules. Direct wallet approval can submit in
+the same interaction.
+
+Reconciliation needs both safety and liveness. When exact publication,
+full-domain nonce and canonical/finality-qualified evidence prove commitment
+or exclusion under the accepted execution/profile rules, return that supported
+conclusion with its basis. If another publication irreversibly consumes the
+same EFS nonce, exclusion need not await expiry **only if Core's exact rules
+prove that implication**. Deadline-based exclusion requires contract enforcement
+and a canonical-time basis, not a local timer. Missing facts remain unknown;
+reorg or rule/profile drift requires requalification. Same-nonce replacement
+is not cancellation of an existing authorization or a no-gas-loss guarantee.
+
+Diagnostics should expose known target/precondition and expected/observed
+context, cause provenance and a safe suggested next step alongside the raw or
+opaque evidence handle. Redaction must not manufacture assurance or silently
+discard the retained cause. Unknown errors remain inspectable without requiring
+apps to parse messages or freezing all prototype strings as a permanent ABI.
+Advice such as refresh or re-plan is not consent, authorization or permission
+to retry. Keep this projection bound to the original operation and its
+operation-specific facts; do not introduce a universal success/error wrapper.
+Exact future assertions and evidence obligations live in the matrix, not in a
+second client- or agent-specific state machine.
 
 ## Smallest SDK-owned handoff to Fable
 

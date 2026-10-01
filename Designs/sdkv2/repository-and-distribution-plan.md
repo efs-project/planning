@@ -4,7 +4,7 @@
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[README]], [[architecture-candidate]], [[owner-rulings]], [[../efsv2/prototype-implementation-plan]], [[../web-client-os/client-repository-and-development]]
 **Inputs:** planning `909f7da75bf3a39d6d5ddcb578fa6e79e81344a0`; September 24–25 prototype closeout; official sources checked 2026-09-26
-**Last touched:** 2026-09-26
+**Last touched:** 2026-10-01
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/onchain #topic/developer-experience
 
@@ -13,6 +13,14 @@
 The successor SDK repository must make EFS practical for a static browser, an ordinary server or script, a consuming Solidity contract, a native drive, and an AI harness. Each consumer should install and build only what it needs. They must agree on exact evidence, identity, authority and qualified results even when their available operations differ.
 
 James requested this planning input before Claude drafts initialization plans for PM review. This document recommends repository and distribution choices; it creates no repository, package, deployment or protocol commitment. The copyable developer assignment is [[sdk-repository-planning-prompt]]. Package names below are responsibility labels, not reserved npm names. The temporary repository name is `sdk-v2` under [[Onboarding/repo-map]].
+
+**October 1 scope clarification:** this remains the September architecture
+proposal, not the setup-only S0 checklist. Its Stage A includes substantive
+protocol/codegen work that the later initialization proposal defers to Fable's
+F1–F14 follow-ups. The locally inspected initialization draft remains untracked;
+this note neither publishes nor changes it. Repository scaffolding is not SDK
+behavior, and the ergonomics assertions below do not expand S0 or authorize
+those follow-ups.
 
 **Recommendation:** one repository with a small pnpm workspace, an independently usable Foundry source package, one portable TypeScript implementation, and optional native/agent adapters. Share protocol inputs, vectors and acceptance cases. Share implementation wherever the execution environment permits it. Add another language implementation when a measured consumer requirement warrants its maintenance.
 
@@ -165,6 +173,16 @@ One conformance corpus carries canonical input bytes and expected identities, va
 | Browser/server packages | Tarball installs; JS and TS use; no ambient Node/wallet in guest/Worker; supported browser/Node matrix; backpressure and retained memory |
 | Native/agent | Another-language client; crash/restart; authorized write parity; invalid skill/archive paths; no execution on fetch; cancellation still permits reconciliation; unsupported protocol version |
 | Preservation | Stop source services; reconstruct from exact released closure; unknown builds fail honestly; upgrade does not reinterpret old evidence |
+
+The [[experiment-program#October 1 ergonomics delta acceptance matrix|October 1 delta matrix]]
+maps the qualified review packet at `440bb6197c897da5dac1bad9df31fc8233b7b5c3`
+to these existing lanes. It adds observable assertions for concurrent-edit
+diagnostics, never-sent versus ambiguous attempts, same-EFS-nonce exclusion,
+enforced deadlines, restart/reorg and unavailable evidence. In the local
+initialization proposal these belong to F3 conformance, F4 result/diagnostic
+surface, F5 basis verification, F8 reads and F9 actions/journals; not setup S0.
+Keep operation-specific results and lossless evidence, and adapt the scenarios
+to the real public API rather than copying observation probes as tests.
 
 Fast PR jobs run relevant pure/type/format/package checks. Cross-profile or generated changes also run shared vectors and Foundry. Browser/Node/Windows/macOS consumer smoke is needed where those runtimes are claimed. The full pack-and-consume matrix, joined fixture and source-off drill gate a release. Product mounted-filesystem acceptance remains in the drive repo; SDK tests the supplied headless contract. Do not fork a public network or operate paid services in default CI.
 

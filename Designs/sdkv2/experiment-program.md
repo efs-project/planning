@@ -4,7 +4,7 @@
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[README]], [[architecture-candidate]], [[developer-journeys]], [[exp-c0-mvp-packet]], [[ethereum-standards-census]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/mvp-and-acceptance]]
 **Reviewers:** @offchain-precedents (2026-08-22), @onchain-precedents (2026-08-22), @local-authority (2026-08-22)
-**Last touched:** 2026-09-10
+**Last touched:** 2026-10-01
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/onchain #topic/read-path
 
@@ -89,6 +89,70 @@ At the retained pin, only S17's guest metadata-list stage has executable
 browser evidence. Verified File content, browser planning/submission, qualified
 effect recovery, restart-after-write and an independent consumer implementation
 remain unevidenced future stages.
+
+## October 1 ergonomics delta acceptance matrix
+
+**Basis:** the qualification layer and retained v1/v2 reports/probes/results in
+[[../../Reviews/2026-10-01-agent-ergonomics/README|the ergonomics packet]], at
+planning commit `440bb6197c897da5dac1bad9df31fc8233b7b5c3`. Runtime observations
+remain Claude-reported, principally against v2 lab `4fbea63`, not the new SDK
+scaffold. No probe, product test or suite was rerun for this reconciliation.
+Probe 2 logs the abandoned attempt remaining `BROADCAST_UNKNOWN` after a
+different publication consumes the same nonce; it does **not** assert the
+desired replacement behavior. It is reproduction evidence, not a regression
+gate. The retained JS suite is not all green; see the packet's qualifications.
+
+This is a delta within S3/S4/S6/S10/S17, not another SDK, roadmap, result wrapper
+or protocol ruling. The existing [[files-integration-pressure#Write, restart and retry contract|write/restart contract]]
+already requires exact plans, journal-before-authority, no automatic retry and
+qualified per-effect read-back. The locally inspected, still-untracked
+`Reviews/2026-09-26-sdk-v2-initialization-plan/README.md` §5.2 already proposes
+publication/nonce/deadline reconciliation and same-EFS-nonce replacement. That
+proposal is coverage evidence, not a published or approved API. The missing
+work is assertion-based public-API evidence, with the following refinements.
+Row labels are local to this matrix, not additional delivery stages.
+One proposed correction is explicit: the local draft's blanket unknown outcome
+without an enforced deadline is too broad **if** Core can independently prove
+irreversible nonce-based exclusion. E4 and E5 are separate conditional proof
+paths; neither is established by the retained observation probe alone.
+
+| Case | Already covered | Missing assertion / expected observable behavior |
+|---|---|---|
+| **E1 — concurrent edit and diagnosis** | S6 preconditions; S17 per-effect read-back | Prepare two edits against one expected head/read-set, admit one, then attempt the stale one. The stale plan cannot produce its prohibited effects. The SDK exposes the applicable precondition/target, expected versus observed basis/value **where obtainable**, operation/plan identity, and qualified cause; it does not require parsing an English message. Unavailable fields stay unknown. Explain refresh/re-plan as advice; do not mutate the reviewed plan, reauthorize or resubmit. A changed plan needs fresh consent. |
+| **E2 — controlled never-sent attempt** | S6 separates authorization/submission; S17 counts prompts | Instrument a callback that exits before any external submission handoff and assert zero send calls for that attempt. Preserve that attempt-local fact without claiming global non-admission. In the signed profile the bearer signature may already exist or have been submitted elsewhere; in the direct profile a provider rejection alone cannot establish this fact. Restoring/reconciling does not send or prompt. |
+| **E3 — dishonest or ambiguous provider** | S10 liar providers; S17 lost response | Compare true pre-send rejection with broadcast-then-`4001`, timeout/disconnect after handoff, and lost direct-wallet response. The same provider error must not force the same canonical result. Preserve raw provider evidence and unknown effect until qualified reconciliation resolves it; never automatically resend. Count actual prompts, signatures, external handoffs and chain effects separately. |
+| **E4 — same-EFS-nonce competing plans** | Initialization §5.2 replacement rule; S6 replay separation | Race two different exact publications in the same full author/nonce domain, not merely the same Ethereum transaction nonce. Assert at most one admission **only under Core rules that enforce it**; either may win. For the loser, sufficient canonical/finality-qualified publication and competing-nonce evidence plus irreversible exclusion under the exact execution/profile rules must produce a bounded, explained exclusion result, rather than remain unknown forever. No expiry wait is needed only if those rules independently prove exclusion. Replacement itself does not revoke consent, prove the winner, or promise no reverted-transaction gas. |
+| **E5 — enforced deadline** | Initialization §5.2 deadline/publication/nonce conjunction | Test before, at and after the exact contract deadline boundary, including a publication admitted before expiry but discovered afterward. Exclusion requires the enforced predicate, pinned canonical block/time and finality policy, proved non-admission and sufficient nonce-domain evidence under the applicable rules. Local wall-clock passage, missing publication lookup or unenforced expiry leaves the claim unknown/unsupported as appropriate. A matching admitted publication still requires effect verification; it is not rewritten as expired. |
+| **E6 — restart at each boundary** | S3 checked restore; S17 restart/reconcile | Interrupt before durable journaling, around authorization, around external submission and before retaining read-back. Restore in a fresh process and reconcile the original exact operation, including after account/network changes. Assert zero new prompts/sends during restore/reconciliation, retained raw unknown fields and per-effect facts, and rejection of tampered/mixed-profile imports. Missing/corrupt journals do not authorize reconstruction-and-resend. Keep bearer signatures private and out of logs/export. |
+| **E7 — reorg and execution drift** | S4 pinned basis; S6 profile/code drift | Remove a provisional admission, competing nonce consumption or post-deadline basis in a reorg. Retain the old observation as historical/orphaned evidence, but do not present it as current canonical commitment or exclusion. Reconcile on the newly declared basis/finality policy. Execution/profile/replay-domain drift invalidates reuse unless exact compatibility is proved; it never silently authorizes another send. |
+| **E8 — missing evidence and bounded convergence** | S4 unknown/partial; S17 independently qualified effects | Withhold publication, nonce, canonicality/finality and required historical evidence separately. Return the named missing/refuting facts, not false absence or failure. Restore sufficient evidence at a fixed basis: a bounded reconciliation must return the supported commitment/exclusion facts instead of indefinitely retaining transport ambiguity. Record requests, elapsed work and budget exhaustion; choose fixture budgets before execution, not universal SDK limits. Unknown may legitimately persist when evidence remains unavailable. |
+| **E9 — readable errors and read qualifications** | S4/S10 non-loss and unknown errors; existing claim assessment | Exercise known profile-specific invalid names, stale-read diagnostics, unknown/forged/malformed reverts, a selected File whose bytes disappear or fail integrity, and a partial page with positive rows. Explain the applicable claim/rule and safe next step while retaining independent integrity, authority, currentness, availability, coverage and basis plus bounded raw/opaque error evidence or a lossless evidence handle. A decoded revert is not authenticated truth. No error hint grants authority; unavailable is not absent, partial is not EOF, and unverified content never becomes executable. Do not freeze lab error strings or turn its ASCII grammar into a public Unicode rule. |
+
+### Evidence needed before calling these cases passed
+
+Each future run pins the contracts and public SDK artifacts, accepted
+execution/profile and code commitments, chain/Realm/author and full EFS nonce
+domain, exact plan/publication identity, deadline predicate, and block-hash
+basis with canonicality/finality policy. Retain fault-injection placement,
+prompt/handoff counters, checked journal transitions, raw and decoded causes,
+per-effect expected versus observed facts, and resource measurements. Keep
+sensitive authority material outside the shareable evidence packet.
+
+Core owns the proof obligations for publication lookup, nonce consumption and
+deadline enforcement: their scope, atomicity, irreversible exclusion conditions,
+upgrade/reset behavior and read completeness. Required capabilities are not
+claims that today's profile implements them. SDK owns the qualified recovery
+and diagnostic projection; Web Client/OS owns human wording/display and later
+browser acceptance. Native/agent bindings reuse applicable assertions when
+implemented; this does not advance MCP or other adapters ahead of their lane.
+
+Use the actual public API and an isolated, owned fixture. Keep semantic
+assertions independent of lab modules, enum spelling and physical index layout.
+Show that the negative case detects the intended violation before treating it
+as a regression gate. No production implementation, S0 scaffold repair, new
+test execution, Core/API freeze, owner-queue reopening or v1 repair follows
+from this design update. No new James choice is needed; the remaining work is
+Core rule evidence and separately authorized public-API conformance execution.
 
 ## Solidity-specific attack corpus
 

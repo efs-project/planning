@@ -4,11 +4,20 @@
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[../efsv2/README]], [[../efsv2/system-constitution]], [[../efsv2/core-architecture-candidate]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/README]], [[../web-client-os/type-data-abi-boundary-pressure]]
 **Inputs:** the existing `sdk/` repository and older SDK designs as historical evidence only; exact K10/storage/Fable reconciliation snapshot `aae282df72f214d791963aeac1cf3c38d162c56e` documented in [[files-integration-pressure]]; Data Explorer's initial draft input was `08bb5f2906191f0d87624d9a6ecc6788a8b2754d`; its fuller design set is now reconciled on main at [[../data-explorer/README]]
-**Last touched:** 2026-09-26
+**Last touched:** 2026-10-01
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/read-path #topic/onchain
 
 ## Read this on a phone
+
+**October 1 — ergonomics reconciliation:** the
+[[experiment-program#October 1 ergonomics delta acceptance matrix|delta-only acceptance matrix]]
+separates existing coverage from missing diagnostic/recovery assertions. It
+uses the qualified review packet at `440bb6197c897da5dac1bad9df31fc8233b7b5c3`,
+not new test results. [[files-integration-pressure#October 1 recovery and diagnostic refinement|Recovery refinements]]
+preserve attempt-local versus canonical facts, exact nonce/deadline/finality
+evidence and no automatic resend. This is future public-API conformance work,
+not additional S0 setup, a v1 repair or a new owner decision.
 
 **September 26 — SDK repository planning:** [[repository-and-distribution-plan]]
 is the current SDK-specific input to Claude's initialization plan, with a
