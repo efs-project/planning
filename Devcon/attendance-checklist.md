@@ -3,6 +3,15 @@
 Personal attendance and EFS participation follow-ups for Devcon 8, November
 3–6, 2026 at Jio World Centre in BKC, Mumbai.
 
+**October 6 current check:** new speaker-ticket and presentation administration
+requires personal action; see the private PM briefing and organizer messages.
+An encrypted reply to the latest visa-support request is recorded as sent,
+not as received/decrypted or as visa approval. Ticket redemption, refund,
+visa issuance, accommodation and flight booking remain unconfirmed. No Impact
+response was found in the narrowly searched official support routes. Earlier
+absence reports below are historical. Keep all private links, vouchers,
+documents, itineraries and correspondence outside Git.
+
 **September 29 private follow-up:** the read-only inbox check now finds new
 organizer correspondence requiring James's attention. The earlier absence
 report below is historical, not the current visa-support state. Review the
@@ -27,11 +36,11 @@ private portal rather than treating the older public-page observation as current
 Do not put passport numbers, scans, visa application IDs, ticket/order numbers,
 booking references, or a private itinerary in this repository.
 
-**Current PM priority:** clear the visa-document gate and reserve refundable
-accommodation before working outward into lower-risk travel details. In
-parallel, request the speaker-ticket refund and the overdue Impact application
-status; neither sent request was found in the narrowly searched support-address
-routes on 2026-09-23, so completion remains unconfirmed.
+**Current PM priority:** handle the new speaker administration, confirm the
+visa-support reply was usable and obtain the documents needed to apply, and
+reserve refundable accommodation. The presentation task has a travel shortlist;
+its prices and terms must be refreshed before purchase. Do not restart travel
+research or assume any candidate is booked.
 
 ## Speaker conference visa - act now
 
@@ -83,6 +92,9 @@ Official references: [U.S. State Department India entry requirements](https://tr
 
 - [x] Ticket secured.
 - [x] Talk accepted and participation confirmed 2026-09-02.
+- [ ] Claim the free speaker ticket personally through the private organizer
+  voucher. Redemption is separate from the previously purchased ticket and
+  does not establish that its refund has been requested or processed.
 - [ ] Request the accepted-speaker refund through
   [support@devcon.org](mailto:support@devcon.org). The official FAQ says an
   accepted speaker may request a refund for an already-purchased ticket and
@@ -92,6 +104,17 @@ Official references: [U.S. State Department India entry requirements](https://tr
   [Speaker Guidelines](https://devcon.org/Devcon8-Speaker-Guidelines-2026.pdf).
 - [ ] Keep November 3-6 available until the exact session date and time are
   assigned; record later presentation and AV deadlines when announced.
+- [ ] Review title, description, headshot and biography in the private speaker
+  portal; completion remains unconfirmed.
+- [ ] Decide whether to attend the speakers dinner and RSVP by **October 12**.
+  The organizer requests arrival in Mumbai by **November 2** for dinner.
+  No exact RSVP cutoff time/timezone was supplied; act before the last day.
+- [ ] Finalize slides **at least one week before Devcon: October 27**.
+  The organizer accepts the private presentation link or James's own laptop,
+  not other submission methods. Bring a backup; live coding needs a recorded
+  fallback. This is an organizer requirement, distinct from the internal
+  rehearsal targets below. Source: private organizer instructions checked
+  October 6; no private URL or message contents reproduced here.
 - [x] Apply to the [Devcon Impact Program](https://devcon.org/en/supporters/)
   for a free Impact Booth as a FOSS/public-infrastructure project — submitted
   2026-08-11.
@@ -126,6 +149,9 @@ open-source or privacy hub later is the better path.
 These are adjustable PM guardrails against a last-minute talk, not organizer
 deadlines and not EFS product milestones. Replace them if Devcon publishes
 earlier requirements.
+
+The October 27 slide-finalization requirement above is now independently an
+organizer requirement. Other dates below remain internal preparation targets.
 
 - [ ] By **2026-09-22**, write the one-page story spine and a source-backed
   inventory of every EFS claim or demonstration the talk may use.
