@@ -6,7 +6,9 @@ Personal attendance and EFS participation follow-ups for Devcon 8, November
 **October 6 current check:** new speaker-ticket and presentation administration
 requires personal action; see the private PM briefing and organizer messages.
 An encrypted reply to the latest visa-support request is recorded as sent,
-not as received/decrypted or as visa approval. Ticket redemption, refund,
+not as received/decrypted or as visa approval. James confirms the ticket-only
+refund request was sent October 6; processing and retained add-ons remain
+unconfirmed. Ticket redemption,
 visa issuance, accommodation and flight booking remain unconfirmed. No Impact
 response was found in the narrowly searched official support routes. Earlier
 absence reports below are historical. Keep all private links, vouchers,
@@ -95,11 +97,14 @@ Official references: [U.S. State Department India entry requirements](https://tr
 - [ ] Claim the free speaker ticket personally through the private organizer
   voucher. Redemption is separate from the previously purchased ticket and
   does not establish that its refund has been requested or processed.
-- [ ] Request the accepted-speaker refund through
+- [x] Request the accepted-speaker refund — James confirmed **2026-10-06** that
+  he replied to the original order email asking for a refund. The route is
   [support@devcon.org](mailto:support@devcon.org). The official FAQ says an
   accepted speaker may request a refund for an already-purchased ticket and
   directs partial-order cancellation to support; use that route so only the
   ticket is addressed. Do not store order details here.
+- [ ] Receive support confirmation that only admission is refunded and all
+  wanted add-ons remain available. Request sent does not mean refund processed.
 - [ ] James personally reviews and follows the
   [Speaker Guidelines](https://devcon.org/Devcon8-Speaker-Guidelines-2026.pdf).
 - [ ] Keep November 3-6 available until the exact session date and time are
