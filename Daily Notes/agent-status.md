@@ -4,6 +4,14 @@ Active agents append once per work-session. One line per active card. Newest at 
 
 Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
+## 2026-10-12
+
+- @pm (harness codex, session devcon-compatibility-and-slot-20261012): Added the sourced, optional proof-system compatibility example within the existing talk timing; read organizer schedule and presentation emails, verified the supplied deck is readable template content, and reconciled the talk README/milestone/preparation notes. Preserved personalized deck links outside EFS and the unresolved email/calendar timezone discrepancy. No deck editing, rehearsal, demo rerun, calendar change or organizer contact. / next: James practices the story and chooses the presentation method; populate the supplied template after visual inspection.
+
+## 2026-10-06
+
+- @codex (harness codex, session devcon-practice-ready-20261006): Prepared October 6-7 outline rehearsal cues in [[Devcon/preparation-plan]] from the September 14 story and example bank; verified the four preparation files are readable and found no deck or rehearsal recording in planning/content/hackathon. Added planned timing and an explicitly unverified demo placeholder; routed personal administration to the Personal tracker. Changes remain local and uncommitted. / next: James records the opening or rough run; assess only the take or observations actually supplied.
+
 ## 2026-10-01
 
 - @pm (harness codex, session ergonomics-handoff-verification-20261001): Verified Client/OS commit `2d90734` and SDK commit `2fefdde` are on planning/main and fetched origin/main, reviewed their exact six-file documentation diffs, and recorded their coordinated status lines on behalf of the owners. No product suites rerun, implementation or owner-gate changes. / next: receive the v2 PM's bounded Core proof-obligation/design reconciliation; do not treat an older Unicode reply as this pass's completion.

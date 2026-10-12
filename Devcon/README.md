@@ -4,9 +4,11 @@ Application record and delivery control center for James's Devcon 8 talk. This
 folder is a conference-planning surface, not an EFS design ruling or a promise
 to ship v2 by Devcon.
 
-**Status (2026-09-02):** proposal accepted; James confirmed participation; the
-public session page is live. Talk delivery, scheduling, visa, and travel
-follow-ups remain open.
+**Status (2026-10-12):** proposal accepted and participation confirmed. The
+organizer assigned **November 5, 15:30-15:55, Lotus 3**, subject to change.
+The scheduling email leaves the timezone unstated. The supplied Google Slides
+deck contains usable template content, not a finished talk. Delivery and
+verification work remain open; see [[preparation-plan]].
 
 **Session:** [Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test](https://devcon.org/en/schedule/devcon8/SPVJV8/)
 
@@ -41,9 +43,10 @@ The submitted answers are in [[application-draft]]. Research and provenance are
 in [[speaker-application-research]]. Alternatives and the reasoning behind this
 choice are in [[talk-concepts]]. The next-conference date watch is in
 [[ethdenver-2027-watch]] and remains separate from this proposal.
-Ticket, visa, travel, and EFS participation follow-ups are in
-[[attendance-checklist]]. Keep sensitive travel and identity details out of this
-repository.
+Personal speaker administration, ticket, visa and travel follow-ups now belong
+in the [Personal Devcon tracker](../../../Personal/devcon-2026/README.md).
+[[attendance-checklist]] retains earlier records and internal talk targets.
+Keep sensitive travel details and personalized presentation links out of EFS.
 
 ## Presentation preparation
 
@@ -104,12 +107,13 @@ were not publicly listed during the research pass.
 
 ## After acceptance
 
-- The exact session date, time, room, and presentation logistics have not been
-  announced. Keep November 3-6 available and record official updates when they
-  arrive.
-- Follow [[attendance-checklist]] now. The private confirmed-speaker portal
-  supersedes the pre-acceptance visa inquiry. Its confidential support intake was
-  completed on **2026-09-02**, before the 2026-09-29 deadline.
+- The October 9 scheduling email assigns the slot recorded above. Arrive at the
+  room at least 20 minutes early. Timezone confirmation and stage-manager
+  contact remain open in the Personal tracker; keep November 3-6 available.
+- The supplied deck and templates are recorded in [[preparation-plan]].
+  The organizer accepts that Google Slides workflow or the speaker's laptop.
+  Slides must be finalized by October 27; presentation-method notification
+  has the earlier October 15 planning target recorded in Personal.
 - Keep the session educational and non-promotional. EFS remains the concrete
   case study for a generally useful walk-away test.
 - Build the talk around preverified records and an offline recording. Never make

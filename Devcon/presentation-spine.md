@@ -86,6 +86,13 @@ brief contrasts. Swap in Graph Node, Git or Chainlink where they explain a
 point better. The selection remains adjustable and the full bank can accompany
 the talk. Sources and limits are in [[presentation-examples]].
 
+October 12 addition: the proof-system compatibility example in
+[[presentation-examples#Immutable programs and changing proof systems]] can
+replace 20-30 seconds of generic explanation in the blockchain beat. Its
+lesson is that fixed application rules still need usable computation and
+maintained compatibility. Keep the ISA debate in supporting notes; the EFS
+file journey and demonstration remain the same.
+
 | Time | Beat and suggested headline | What the audience sees or hears |
 | --- | --- | --- |
 | 0:00-1:15 | If I'm gone tomorrow | One person returning to their work. Ask both questions: absence and hostile control. State the human stakes before naming technologies. |

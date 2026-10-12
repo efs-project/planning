@@ -3,7 +3,15 @@
 Personal attendance and EFS participation follow-ups for Devcon 8, November
 3–6, 2026 at Jio World Centre in BKC, Mumbai.
 
-**October 6 current check:** new speaker-ticket and presentation administration
+**Ownership update, October 12:** personal speaker administration, dinner,
+ticket, visa and travel state now belong in the
+[Personal Devcon tracker](../../../Personal/devcon-2026/README.md). Earlier
+administrative entries below are historical and may have been resolved there;
+do not infer a new owner action from an unchecked historical box. Current talk
+schedule and supplied-template status are in [[preparation-plan]]. This file
+still carries the internal presentation targets at the bottom.
+
+**October 6 check (historical):** new speaker-ticket and presentation administration
 requires personal action; see the private PM briefing and organizer messages.
 An encrypted reply to the latest visa-support request is recorded as sent,
 not as received/decrypted or as visa approval. James confirms the ticket-only

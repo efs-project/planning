@@ -87,6 +87,15 @@ reasonable convenience. Loss of the only decryption key or authority to
 withdraw has different consequences. Defend, accept explicitly, or investigate
 each material risk based on user harm rather than a project score.
 
+**Long-term compatibility, added October 12:** for required computation, retain
+the program, its inputs and the rules that interpret it. Check whether another
+operator can still execute or prove it as tools change. The exploratory
+[proof-system and ISA discussion](https://ethresear.ch/t/exposing-an-isa-for-post-quantum-proofs-on-ethereum/26136)
+provides a non-EFS example; [[presentation-examples]] records its scope and
+Draft EIP status. Preserve a usable compatibility or migration path and account
+for its maintenance cost. This adds a dependency question, not a claim that the
+EFS retrieval verifier uses that mechanism or a change to the demonstration.
+
 For EFS's default `.eth.limo` route, separate "no project-owned web server"
 from "no servers or gateways anywhere." A conventional browser still crosses
 a gateway. A replacement path is something to demonstrate, not a property

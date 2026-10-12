@@ -1,8 +1,9 @@
 # Devcon presentation preparation
 
 Started 2026-09-14. The accepted slot is 20 minutes plus 5 minutes of Q&A.
-This plan prepares a talk, not a product launch. Exact session logistics and
-personal organizer requirements remain in [[attendance-checklist]].
+This plan prepares a talk, not a product launch. Personal speaker and travel
+administration now belongs in the [Personal Devcon tracker](../../../Personal/devcon-2026/README.md).
+The EFS attendance checklist retains earlier preparation targets and history.
 
 ## Where we stand
 
@@ -17,9 +18,106 @@ personal organizer requirements remain in [[attendance-checklist]].
   drafting session. The most important risk is now whether the story works
   aloud and fits the time, not whether we can add more subjects.
 
-## Next action: record the opening
+## October 12 delivery update
 
-On the first Tuesday check-in, **September 15**, record a two-minute phone take:
+The October 9 organizer email, read October 12, assigns **November 5,
+15:30-15:55, Lotus 3**, subject to change. It requires arrival at least 20
+minutes early: **15:10** on the same clock. The email does not explicitly
+state a timezone. Mumbai local time is the working interpretation; the
+Personal tracker records a conflicting calendar import that needs checking.
+Do not convert or correct that event from this note alone.
+
+The October 1 organizer email supplies a unique Google Slides presentation
+link containing Devcon templates. Its redirect, Drive metadata and readable
+deck content were checked October 12. The supplied deck contains template
+titles and filler text; a completed talk deck is not established. No slides
+were edited in this check, and no rehearsal or fresh demo result was supplied.
+Find the personalized deck through the source email or private task context;
+keep its URL and file identifier outside EFS Git.
+
+Recommended next deck step: use the supplied templates for the existing story
+beats. Verify their visual layouts before authoring, keep the audience exercise
+readable, and prepare the recorded demo and recovery copies. A deck preview is
+still needed before choosing template layouts.
+
+Official slide finalization remains **October 27**, one week before the
+conference starts. The Personal tracker carries the previously verified
+**October 15** presentation-method notification target and its source-wording
+conflict. These organizer actions are separate from the internal rehearsal
+targets below. The guidelines and public session page could not be fetched
+in this October 12 check; the email is the fresh schedule source.
+
+## Practice cues prepared October 6
+
+**Checked October 6, 2026:** the current story is the September 14 draft in
+[[presentation-spine]], with the expanded outside example bank from the same
+day. All four preparation files were readable. No slide deck or rehearsal
+recording was found in the searched planning, content or hackathon folders.
+This is an outline rehearsal. There is no measured delivery time yet, and
+the historical demo has not been freshly rerun or recorded for this talk.
+
+**First instruction:** start a two-minute timer and explain why you want
+people's work to outlive you, what Ethereum File System does, and what changes
+when the maintainer disappears or loses control of their keys. Say it in your
+own words. The proposed opening in [[presentation-spine]] is a prompt.
+
+Before starting:
+
+- Open this cue sheet and set a timer. Use a recorder if convenient.
+- Choose the two-minute opening or a rough full run. Either is useful today.
+- Keep moving when a sentence comes out awkwardly; note it after the take.
+- Keep any raw recording outside Git worktrees. Bring the actual recording,
+  transcript or your observations back to this task for feedback.
+
+### Cues for a rough full run
+
+These are planned elapsed times, not measured timings. Aim for 19 minutes
+plus one minute of margin; the five-minute Q&A is separate.
+
+| Elapsed time | Speaking cue |
+| --- | --- |
+| 0:00-2:30 | Why I care. Someone returns to their archive after its builder is gone. Introduce EFS and ask whether users can continue without me or refuse someone using my keys. |
+| 2:30-5:15 | Can they open the app they trusted? Use the brief Uniswap interface/protocol comparison, then naming, retained app builds and runtime dependencies. Ledger Connect Kit supplies the release-security contrast. |
+| 5:15-7:15 | Can they find, retrieve and check their work? Storage, gateways, RPCs and indexes. Include stale or incomplete results, recovery of private data and keys, and who operates and pays for alternatives. |
+| 7:15-9:00 | Who can change the rules or stop necessary work? Contract powers, account recovery, offchain services and inherited protocols. Use Safe briefly to explain authority beyond the visible signer threshold. |
+| 9:00-11:30 | What does the app inherit from its network and chain? Peers, clients, validators, inclusion, finality and history. Use the OP Stack example to ask what a sequencer fallback requires of the actual user. |
+| 11:30-15:00 | Demo placeholder: explain the planned file verification sequence below. Reserve the full 3 minutes 30 seconds. |
+| 15:00-16:30 | A valid hash can accompany a hostile authorized change. What accepted reference can users retain, and what shared state can still change underneath it? |
+| 16:30-19:00 | Give developers the exercise: choose one essential task, remove the team's help, test hostile authority, and record a recovery path, its cost and assumptions. Close by returning to the archive and its user. |
+| 19:00-20:00 | Margin for pauses and transitions. |
+
+For each taught failure, give one practical improvement and say what it still
+costs or depends on. Use the outside comparisons already sourced in
+[[presentation-examples]] briefly, then return to the same EFS user. The
+detailed coverage inventory stays in [[presentation-evidence]].
+
+### Honest demo placeholder
+
+Say: "This is the planned demonstration sequence. I haven't rerun and recorded
+it for this talk yet."
+
+Then narrate the intended checks: establish the accepted public reference,
+retrieve through IPFS, switch the selected retrieval path to Arweave, reject
+deliberately changed bytes, and distinguish a failed retrieval from a mismatch.
+Describe expected outcomes as planned checks. Do not invent outputs or claim
+this practice verified the deployment. The exact checks and dependencies are
+in [[presentation-evidence#Bounded demonstration runbook]].
+
+If the narration takes less than 3 minutes 30 seconds, note its actual length
+and leave the rest of that slot empty before continuing. A shorter placeholder
+does not establish that the final demonstration fits.
+
+### What to bring back
+
+Return with the take or its elapsed time and one spot where you got stuck.
+Feedback starts with whether the opening sounds like James, whether a listener
+can explain EFS and the two tests, and where the user journey becomes hard to
+follow. Fix the largest issue first, then do another take. A full run can also
+test transitions and timing; delivery feedback requires the actual recording.
+
+## Opening practice
+
+For the next practice, record a two-minute phone take:
 why James cares, what EFS is, and the two questions about absence and hostile
 control. No slides and no memorization. Listen once for phrases that do not
 sound like James. Replace those phrases, not the whole premise.
@@ -33,8 +131,9 @@ say what EFS does, the project explanation needs another sentence.
 
 The dated target checklist in
 [[attendance-checklist#Presentation preparation - internal planning targets]]
-is the schedule of record. Its dates are internal targets, not organizer
-deadlines. Keep it current instead of maintaining competing calendars here.
+holds the internal targets. The October 6 organizer update also records an
+October 27 slide-finalization requirement. Personal organizer actions now
+belong in the Personal Devcon tracker linked above.
 
 Preparation order:
 

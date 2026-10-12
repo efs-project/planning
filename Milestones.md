@@ -14,8 +14,11 @@ honest, but must not invent dates, requirements, or launch commitments.
 
 ## Devcon presentation (2026-11)
 
-**Status:** talk accepted and participation confirmed 2026-09-02; exact session
-date, time, room, and presentation logistics remain pending.
+**Status:** talk accepted and participation confirmed 2026-09-02. October 9
+organizer email assigns November 5, 15:30-15:55, Lotus 3, subject to change;
+read October 12. Email timezone remains unstated. [[Devcon/preparation-plan]]
+records the schedule and supplied slide templates; personal administration
+and timezone confirmation belong in the Personal tracker linked there.
 
 The presentation should describe and demonstrate whatever is genuinely coherent
 by Devcon. It must not turn an unfinished v2 design into a launch promise.
@@ -49,7 +52,7 @@ by Devcon. It must not turn an unfinished v2 design into a launch promise.
   **Permissionless Networks** track unless Devcon requests a program change.
 - Keep the session educational and non-promotional, with EFS used as a working
   case study rather than a sales pitch.
-- Keep November 3-6 available until the exact session slot is assigned.
+- Keep November 3-6 available; the assigned slot remains subject to change.
 - Show only claims and demonstrations that remain accurate at presentation
   time, with a preverified offline fallback for the live demonstration.
 - Do not turn Devcon into a v2 implementation or mainnet launch deadline.

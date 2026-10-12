@@ -169,6 +169,36 @@ costs resources and operational effort.
 Cloudflare traffic stopped or a current architecture assessment. Best fit:
 shared dependencies and recovery costs, or a reserve Q&A example.
 
+## Immutable programs and changing proof systems
+
+**Source checked October 12, 2026:** [Exposing an ISA for post-quantum proofs
+on Ethereum](https://ethresear.ch/t/exposing-an-isa-for-post-quantum-proofs-on-ethereum/26136).
+The underlying [EIP-8288](https://eips.ethereum.org/EIPS/eip-8288) is Draft.
+
+**Fact:** The post describes how permanently pinning a proof-system verification
+key could break an immutable privacy pool when proving technology changes.
+It proposes identifying the program and its versioned execution rules instead,
+so the prover can evolve while preserving the program's meaning. Continued
+compatibility still requires maintained provers and support for older rules.
+
+**Teaching use:** Removing an application's administrator does not remove the
+software and compatibility work needed to keep using it. Ask whether someone
+can still perform each required computation after the original builder leaves.
+
+**Improvement and tradeoff:** Preserve executable programs and specify their
+interpretation. Test replacement tooling and examine migration or compatibility
+paths. Keeping old behavior usable costs maintenance and may cost more compute.
+This is a design question for the audience, not an implemented EFS capability.
+
+**Limit:** Exploratory research, not an activated Ethereum feature or a claim
+that EFS file-hash verification uses a zkVM. Keep ISA choices and benchmarks
+in supporting notes or Q&A. Optional 20-30 seconds inside the existing
+blockchain section, replacing generic explanation rather than adding time.
+
+Suggested spoken line: "Removing your admin key doesn't remove every
+dependency. If your users need a proof to act, someone must still be able to
+produce it when the original builder is gone and the tools have changed."
+
 ## Related building blocks already in the EFS journey
 
 [ENS](https://docs.ens.domains/dweb/intro/) separates the name's content
