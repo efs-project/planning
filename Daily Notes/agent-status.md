@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-10-12
 
+- @pm (harness codex, session ethdenver-watch-20261012): James reaffirmed an EFS presentation goal for ETHDenver 2027. Refreshed [[Devcon/ethdenver-2027-watch]] from official event/support surfaces; no 2027 CFP, deadline or event dates verified. Adding this opportunity explicitly to the existing weekly PM review, preserving its Tuesday cadence and other duties. No application, organizer contact, booking, product deadline or design change. / next: October 13 official-source check, then alert for an opening/deadline or needed owner action.
+
 - @pm (harness codex, session devcon-compatibility-and-slot-20261012): Added the sourced, optional proof-system compatibility example within the existing talk timing; read organizer schedule and presentation emails, verified the supplied deck is readable template content, and reconciled the talk README/milestone/preparation notes. Preserved personalized deck links outside EFS and the unresolved email/calendar timezone discrepancy. No deck editing, rehearsal, demo rerun, calendar change or organizer contact. / next: James practices the story and chooses the presentation method; populate the supplied template after visual inspection.
 
 ## 2026-10-06

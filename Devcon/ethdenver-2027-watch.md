@@ -1,12 +1,34 @@
 # ETHDenver 2027 speaker watch
 
-**Checked:** 2026-08-05
-**Status:** ETHDenver has not published official 2027 event or speaker-application
-dates on its current website or speaker-support pages.
+**Checked:** 2026-10-12 (America/Chicago)
+**Status:** monitoring. No official 2027 speaker form, submission deadline or
+event dates verified in this check. The homepage still describes ETHDenver 2026;
+the official Speakers & Content section and deadline article still cover 2026.
 
-James intends to pursue an **EFS-focused ETHDenver talk** after the current
-Devcon submission. This file is a watch item, not a dated project milestone or a
-locked talk concept.
+James reaffirmed on 2026-10-12: **he wants to present EFS at ETHDenver 2027**.
+This file is the canonical speaking-opportunity watch, not a submitted
+application, acceptance, dated delivery milestone or locked talk concept.
+
+## Current action and monitoring
+
+- **Owner: PM.** Included explicitly in the existing Tuesday 08:30
+  America/Chicago project-management review; next check 2026-10-13. Check official
+  event, speaker-support and organizer-announcement surfaces, plus narrowly
+  relevant email when available. Avoid a separate duplicate reminder.
+- **Nothing to submit yet on the verified public surfaces.** Notify James when
+  an official 2027 CFP/form opens, a deadline is announced/changes, or his action
+  is needed. Do not treat an old 2026 form as a 2027 application.
+- **When it opens:** record the exact application URL, tracks/formats, required
+  fields/materials, opening and closing dates, original timezone (UNKNOWN if
+  omitted), Chicago conversion, speaker/attendance application relationship,
+  review/decision timing, and submission-confirmation mechanism. Recommend an
+  early submission if the current rules support it; never submit for James
+  without fresh authorization.
+- **After submission:** retain public-safe status and follow up on confirmation,
+  decision, acceptance obligations and preparation deadlines. Keep private
+  portal links, correspondence, travel and identity documents outside Git.
+- Third-party February 2027 dates surfaced in discovery but are not adopted as
+  organizer-confirmed dates or a basis for travel bookings.
 
 ## Most recent official cycle — planning signal only
 
@@ -25,25 +47,32 @@ ETHDenver's official 2026 speaker process used three application waves:
 These dates are historical evidence, **not confirmed 2027 dates**. The 2026
 guidance said to apply early; a fourth wave was possible only if spots remained.
 
-## Safe internal watch dates — not organizer deadlines
+## Historical watch triggers — not organizer deadlines
 
 - **2026-09-15:** begin checking the official ETHDenver site and speaker-support
   section weekly for the 2027 announcement.
 - **2026-10-01:** treat this as the earliest plausible application-risk window
   because the prior cycle opened on October 1. Do not present it as confirmed.
-- **When the 2027 CFP opens:** prioritize the first wave and record the exact
-  form, requirements, event dates, deadline timezone, and confirmation process.
+
+Both internal triggers have now passed; ongoing monitoring is active. They are
+not missed 2027 application deadlines. The 2026 homepage also shows a November
+18 applications-live milestone, unlike the support article's October 1 speaker
+opening; historical surfaces alone cannot settle the next cycle.
 
 ## Early strategy note
 
 Keep the conference roles distinct:
 
 - **Devcon:** problem-first talk using EFS as the working case study.
-- **ETHDenver:** explicit EFS-focused talk—what EFS enables, how it works, a live
-  demonstration, use cases, lessons from v1, and the honest current direction.
+- **ETHDenver:** an EFS-focused talk about shared public information, everyone
+  being able to contribute, and developers reusing data/configuration and
+  building hyperstructures. Choose a concrete, evidence-backed demonstration
+  and audience takeaway when the format is known. A v1-to-v2 story or the Devcon
+  walk-away framing is not mandatory and must not define EFS by default.
 
-Do not develop that application until the 2027 ETHDenver format and tracks are
-public.
+Final topic, title and proposal are not decided. Reuse accurate Devcon material
+where useful, but adapt to the actual 2027 audience and rules rather than
+promising a release or assuming the Devcon proposal should be resubmitted.
 
 ## Official sources
 
