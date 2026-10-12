@@ -14,9 +14,51 @@ The EFS attendance checklist retains earlier preparation targets and history.
 - [[presentation-examples]] supplies non-EFS comparisons across the stack.
   Use them where they teach a different failure or improvement. EFS remains
   the main journey, rather than the only system the audience learns from.
-- No slide deck, new demo recording or spoken rehearsal completed by this
-  drafting session. The most important risk is now whether the story works
-  aloud and fits the time, not whether we can add more subjects.
+- A native Google Slides rehearsal copy was built and visually reviewed on
+  October 12 using Devcon's supplied template. It has 20 main slides, timed
+  speaker notes, a resource slide and six skipped technical Q&A slides.
+  [[rehearsal-script]] preserves the speaking draft and public sources.
+- No fresh demo recording or spoken rehearsal has been completed in this task.
+  Slides 14-16 are explicitly planned checks. The biggest remaining risks are
+  whether the story works aloud and whether fresh demonstration outputs
+  support the claims. More subjects are not the next priority.
+
+## October 12 rehearsal deck
+
+The working copy is titled `Who Can Turn Off Your Ethereum App? | Devcon
+rehearsal draft` in Google Drive. Find its link in this Codex task; private
+presentation links and file identifiers stay outside EFS Git. The original
+organizer-supplied deck remains unchanged. This copy is not a submission or
+an organizer-ready final deck.
+
+The story starts with someone trying to recover their archive after its
+builder disappears or loses control of their keys. EFS carries that task
+through app, data, authority, network and blockchain dependencies. Brief
+comparisons use Uniswap, Ledger Connect Kit, Graph Node, Safe, Chainlink,
+OP Stack and Git bundles. Sources are in the speaker notes and script. The
+ISA discussion supplies only a short compatibility question and Q&A context,
+not an activated feature or an EFS mechanism.
+
+All 27 slides were rendered and checked, with a cover alignment and column
+heading repair. Native readback confirmed slide order, speaking text, public
+source links and skipped Q&A reserves. This checks deck construction, not
+spoken timing or deployment behavior. Planned main material totals **19
+minutes**, leaving one minute of margin. Slides 14-16 retain **3:30** for the
+demo walkthrough; replace it with freshly verified offline footage before
+the stage version.
+
+For the first practice:
+
+1. Open Presenter view and set a 20-minute timer. Use the notes as prompts,
+   not words you must memorize. Deliver slides 1-20 without stopping to edit.
+2. Narrate the planned checks on slides 14-16 honestly. Preserve the entire
+   3:30 allocation even if that narration is shorter.
+3. Bring back the total runtime and the section where the story felt least
+   clear. A recording is useful but optional; raw recordings stay outside Git.
+
+Slide 21 is the resource/Q&A landing page. Slides 22-27 are skipped in normal
+slideshow mode and can be selected manually for questions. No rehearsal is
+credited until James supplies a take or reports that it happened.
 
 ## October 12 delivery update
 
@@ -29,16 +71,16 @@ Do not convert or correct that event from this note alone.
 
 The October 1 organizer email supplies a unique Google Slides presentation
 link containing Devcon templates. Its redirect, Drive metadata and readable
-deck content were checked October 12. The supplied deck contains template
-titles and filler text; a completed talk deck is not established. No slides
-were edited in this check, and no rehearsal or fresh demo result was supplied.
+deck content were checked October 12. The supplied deck contained template
+titles and filler text when first checked. That initial check did not edit
+slides. The later rehearsal copy is recorded above; no spoken rehearsal or
+fresh demo result was supplied.
 Find the personalized deck through the source email or private task context;
 keep its URL and file identifier outside EFS Git.
 
-Recommended next deck step: use the supplied templates for the existing story
-beats. Verify their visual layouts before authoring, keep the audience exercise
-readable, and prepare the recorded demo and recovery copies. A deck preview is
-still needed before choosing template layouts.
+The template families have since been previewed and used for the rehearsal
+copy. Next delivery steps are the spoken run, verified demonstration footage
+and offline recovery copies, not another expansion of the layer inventory.
 
 Official slide finalization remains **October 27**, one week before the
 conference starts. The Personal tracker carries the previously verified

@@ -7,8 +7,10 @@ to ship v2 by Devcon.
 **Status (2026-10-12):** proposal accepted and participation confirmed. The
 organizer assigned **November 5, 15:30-15:55, Lotus 3**, subject to change.
 The scheduling email leaves the timezone unstated. The supplied Google Slides
-deck contains usable template content, not a finished talk. Delivery and
-verification work remain open; see [[preparation-plan]].
+deck remains unchanged. A separate native rehearsal copy now has 20 main
+slides, timed notes and Q&A material, built from those templates. Spoken
+timing, a fresh recorded demo and final delivery remain open; see
+[[preparation-plan]] and [[rehearsal-script]].
 
 **Session:** [Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test](https://devcon.org/en/schedule/devcon8/SPVJV8/)
 
@@ -62,6 +64,9 @@ First working draft created **2026-09-14**:
   each layer, with narrow claims and limits rather than whole-project ratings.
 - [[preparation-plan]]: early speaking practice, delivery checkpoints and the
   active Tuesday 9:00 a.m. America/Chicago preparation reminder.
+- [[rehearsal-script]]: October 12 speaking draft matching the native rehearsal
+  deck, with planned timing and public sources. Demo narration remains a
+  planned walkthrough until freshly verified footage replaces it.
 
 The two questions are whether users can continue without the maintainer and
 whether they can refuse someone using the maintainer's compromised authority.
@@ -69,7 +74,9 @@ James's direction is to help developers recognize failures and decide which
 ones their own apps should defend against. Coverage includes usable recovery,
 build dependencies and the people and budgets behind apparently separate
 services, as well as the app, network and blockchain.
-The next step is a two-minute spoken opening, not another application rewrite.
+The next step is a full spoken pass through the rehearsal deck. Use Presenter
+view, reserve the full demo slot, and return with the elapsed time and one
+section that needs work. Do not count planned timing as a measured rehearsal.
 
 ## Acceptance completed
 
