@@ -27,6 +27,55 @@ date and the export page only for the documented URL-versus-content limit.
 Google's controller page also has stale updater deadlines; the supported
 teaching claim is the historical recovery design, not current tool availability.
 
+## ENS gateways: two addresses can share an operator
+
+**Fact, checked October 13:** the eth.limo team's
+[migration report](https://discuss.ens.domains/t/eth-limo-update/19707)
+states that eth.link moved from Cloudflare onto the eth.limo service on
+September 19, 2024. ENS [contenthash documentation](https://docs.ens.domains/dweb/intro/)
+separates the name's content reference from its storage and gateway path.
+
+**Teaching use:** show the convenience of reaching a content-addressed app
+through familiar HTTPS URLs, then reveal the shared operator. Do not present
+`.eth.link` and `.eth.limo` as independent infrastructure or freedom from DNS.
+
+**Improvement and tradeoff:** retain the accepted app release and test a
+separately operated retrieval path. The team's February 2026
+[local gateway announcement](https://discuss.ens.domains/t/run-your-own-local-ens-gateway-the-easy-way/21890)
+offers a concrete option. Local operation shifts setup and infrastructure
+work to the user or replacement operator. Inspect its ENS/RPC and retrieval
+dependencies; do not assume that installing it removes all trust or hosting
+dependencies. The reference's authority and availability of bytes remain.
+
+**Limit:** these are source-supported architectural examples, not a fresh EFS
+alternate-path test. Resolve and exercise the exact app release before using
+screenshots as evidence. Best fit: the first chapter's entry-path sequence.
+
+## Light clients: checking an answer is different from obtaining it
+
+**Fact, checked October 13:** Ethereum's
+[light-client explanation](https://ethereum.org/developers/docs/nodes-and-clients/light-clients/)
+describes requesting data from providers and validating it against a chain
+basis. [Helios](https://github.com/a16z/helios) is a concrete light-client
+example that exposes an RPC interface with verification for supported data.
+Its supported methods and checkpoint assumptions matter.
+
+**Teaching use:** distinguish another available RPC, evidence supporting a
+particular answer, and somebody retaining the file bytes. Multiple providers
+can improve access without establishing correctness. A light client does not
+make withheld data appear or automatically prove freshness or completeness
+of arbitrary indexer queries.
+
+**Improvement and tradeoff:** make providers replaceable and validate the
+claims needed for the user's task where supported. Retain an appropriate
+verification basis and handle missing or stale responses explicitly. This
+adds verification and integration work while leaving provider availability
+and data retention as separate responsibilities.
+
+**Limit:** no EFS light-client integration or multiple-RPC failover was
+verified in this revision. Present them as design options, not shipped EFS
+features. Best fit: a small contrast in the second chapter, not another demo.
+
 ## Uniswap: interface and protocol access
 
 **Fact:** Uniswap Labs' [interface policy](https://support.uniswap.org/hc/en-us/articles/18783694078989-Unsupported-Token-Policy)

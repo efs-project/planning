@@ -33,7 +33,7 @@ The EFS attendance checklist retains earlier preparation targets and history.
 
 The first read establishes that the existing words are speakable in roughly
 17 minutes at James's reading pace. It does not establish stage timing for
-the rewrite, recorded demonstration, transitions or pauses. Preserve that
+the rewrite, visual sequences, transitions or pauses. Preserve that
 result as a baseline rather than discarding it or treating it as a final run.
 
 James wants the audience to understand the harm of shutdown or takeover,
@@ -42,15 +42,16 @@ stack and leave with improvements they can make. The new working map has
 eight functional layers, taught in three chapters. EFS is a relevant example
 throughout preparation, without requiring a mention at every layer.
 
-The earlier 3:30 demo allocation is under review. The recommendation is the
-supplied Google Slides workflow with 60-90 seconds of freshly captured proof
-results inside the data/state chapter. Screenshots are sufficient if they
-teach the checks clearly. See [[presentation-revision]] for alternatives,
-the accepted-description commitment and the organizer-method decision.
-Neither a final delivery method nor removal of the demonstration is recorded
-as James's decision.
+James's follow-up sets the working direction: the organizer's laptop with
+screenshots and multi-step explanations inside the three chapters, without a
+standalone or live demo. The earlier 3:30 allocation is retired for the next
+revision. No required video or browser/terminal switching. The promised
+retrieval and verification lesson can use freshly captured screenshots in
+the data/state chapter. [[presentation-revision]] records the proposed visual
+sequences and technical distinctions. Method notification to organizers is
+not confirmed; the supplied original Slides deck is still unchanged.
 
-Next: discuss the opening and map, then rewrite the deck and speaker notes.
+Next: settle the opening and chapter visuals, then rewrite the deck and notes.
 Make audience narration distinct from practice instructions. Capture another
 Git snapshot before the next rehearsal. A two- or three-minute recording of
 the opening will be useful before a complete second run.
@@ -111,8 +112,9 @@ Find the personalized deck through the source email or private task context;
 keep its URL and file identifier outside EFS Git.
 
 The template families have since been previewed and used for the rehearsal
-copy. Next delivery steps are the spoken run, verified demonstration footage
-and offline recovery copies, not another expansion of the layer inventory.
+copy. The October 13 update supersedes the earlier footage plan: prepare
+verified evidence screenshots, the revised spoken run and offline recovery
+copies, without expanding the layer inventory again.
 
 Official slide finalization remains **October 27**, one week before the
 conference starts. The Personal tracker carries the previously verified
@@ -210,8 +212,8 @@ October 27 slide-finalization requirement. Personal organizer actions now
 belong in the Personal Devcon tracker linked above.
 
 The original dated sequence below is retained as planning history. The
-October 13 revision above is the current next action. The proposed reduction
-in demo scope is not a new requirement to build tooling.
+October 13 revision above is the current next action. The presentation-only
+direction is not a new requirement to build tooling.
 
 Original preparation order:
 

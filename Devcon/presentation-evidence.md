@@ -8,16 +8,36 @@ should describe the actual deployment shown without EFS version labels.
 
 **October 13 revision:** James has completed a 17-minute read of the notes.
 This does not establish a fresh demonstration result. [[stack-map]] now groups
-the inspection questions for teaching, and [[presentation-revision]] proposes
-reducing the earlier 3:30 sequence to 60-90 seconds of captured results. The
-runbook below remains the full candidate check sequence, not a required live
-stage performance. No new proof execution was performed for this revision.
+the inspection questions for teaching. James's follow-up favors presentation
+on the organizer's laptop with screenshots and staged explanations inside
+the chapters, not a standalone or live demo. [[presentation-revision]] now
+contains the proposed visual sequences. The runbook below remains the full
+candidate check sequence for capturing evidence, not a required performance
+or recording. No new proof execution was performed for this revision.
+
+Before capturing the new visuals:
+
+- **Entry path:** record the ENS reference and exact app release, then test
+  an independent retrieval path. `.eth.link` and `.eth.limo` share the eth.limo
+  service, so they are not evidence of independent gateway operators. Inspect
+  runtime requests as well as whether the page opens.
+- **Records and files:** keep the public record, chain basis, expected digest
+  and captured IPFS/Arweave outcomes connected. RPC redundancy, supported
+  light-client verification and file retention are three distinct mechanisms.
+  EFS failover and light-client integration are not established by this plan.
+- **Authority:** inspect the exact deployment before claiming an EFS power
+  has been removed. Label hypothetical key compromise and immutable versus
+  upgradeable alternatives as explanatory diagrams, not observed incidents.
+
+Sources for the gateway operator and light-client distinctions are in
+[[presentation-examples]]. These checks do not expand the task into product
+implementation or require a live stage demonstration.
 
 | Candidate claim or demonstration | Evidence available | What remains before using it on stage |
 | --- | --- | --- |
 | EFS publishes paths, provenance and mirror records on Sepolia | Accepted [[application-draft]] and the fixed-commit proof package below contain the publication records and transaction references. | Re-read the exact records at a recorded chain basis; retain the output and transaction references with the talk assets. |
 | The public EFS web client uses ENS and IPFS | Submitted application records this architecture; the public app URL is https://app.efs.eth.limo/. | Resolve the current name and release, save the bundle reference, inspect runtime requests and exercise an alternative access path. This drafting session did not retest the live client. |
-| The same artifact can be retrieved through IPFS and Arweave and verified | The archived proof README names the two carriers, manifest, receipts, verifier checks and expected outcomes. Its source was inspected on 2026-09-14. | Reproduce retrieval and verification from a clean environment using the fixed source. Save a dated recording and outputs. Do not describe source inspection as a successful rerun. |
+| The same artifact can be retrieved through IPFS and Arweave and verified | The archived proof README names the two carriers, manifest, receipts, verifier checks and expected outcomes. Its source was inspected on 2026-09-14. | Reproduce retrieval and verification from a clean environment using the fixed source. Save dated screenshots and outputs. Do not describe source inspection as a successful rerun. |
 | Invalid content differs from retrieval failure | Archived verifier documents VERIFIED, INVALID and UNAVAILABLE. Application notes record prior positive and negative test results. | Reproduce deliberate bad-byte and unavailable-source cases. Check which failures each result actually covers. Unavailability is not proof that data is gone everywhere. |
 | Users can recover without the EFS web client | The archived verifier is separate from the client. It requires Node.js, an RPC endpoint and an IPFS or Arweave gateway. | Have another person run the retained instructions without James's accounts. State the remaining RPC and gateway dependencies; do not call this independent chain verification unless that is separately demonstrated. |
 | Users can reject a hostile authorized change | This is a threat analysis and design requirement in the story, not established by the artifact hash test. | Inventory actual authorities. Test the retained release/reference path if presenting it as an implemented EFS capability. A compromised record can point at new, internally consistent bytes. |
@@ -143,9 +163,12 @@ within the existing time blocks. The full source bank need not all be spoken.
 
 ## Bounded demonstration runbook
 
-Budget: 3 minutes 30 seconds. Prepare as a short recording first; decide later
-whether a live run adds enough value to justify the risk. Never require a new
-transaction, a faucet, a project login or stage Wi-Fi to finish the talk.
+Historical budget: 3 minutes 30 seconds. The October 13 direction retires this
+standalone stage segment. Keep the checks below as a capture runbook; their
+old speaking allocations are not requirements for the next deck. Use the
+chapter's screenshots instead of a live run or required recording. Never
+require a new transaction, a faucet, a project login or stage Wi-Fi to finish
+the talk.
 
 1. **Establish the reference, 40 seconds.** Show one file's identity and the
    public records used to check it. State which reference and authority were
@@ -173,10 +196,11 @@ If an upgrade changes shared contract behavior, an old frontend alone cannot
 undo it. Do not turn this diagram into a claim of a completed EFS takeover test.
 
 Save the exact source commit, runtime/dependency versions, chain and block
-basis, input references, operator assumptions, outputs, video and failure
-fixtures together. Test the retained instructions on a second machine. The
-fallback is a locally stored video plus screenshots and readable results,
-clearly identified as a recording, not a live network response.
+basis, input references, operator assumptions, outputs, screenshots and failure
+fixtures together. Test the retained instructions on a second machine. Export
+the screenshot sequence with the rest of the deck so it remains usable
+offline. Label captured results and simulated failures accurately; neither
+is a live stage response.
 
 ## Primary sources for notes and later slide citations
 

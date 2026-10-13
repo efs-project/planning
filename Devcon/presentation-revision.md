@@ -1,6 +1,6 @@
 # Presentation revision after the first read-through
 
-Draft for discussion, October 13, 2026. James read the current speaker notes in
+Working revision, October 13, 2026. James read the current speaker notes in
 17 minutes. He wants a clearer problem, an inspiring cypherpunk vision, a
 formal map of the software stack, and improvements developers can make in
 their own apps. EFS should appear where it directly teaches something useful.
@@ -100,7 +100,7 @@ These are proposed allocations, not measured timings for a finished rewrite.
 | 0:00-3:00 | What users lose, one real incident, the future James wants and the two tests. |
 | 3:00-4:00 | Show the eight-layer map and choose one task to follow. Introduce EFS briefly where it helps explain that task. |
 | 4:00-7:30 | Entering the app: naming, software, identity and recovery. Use Ledger as a brief takeover example. |
-| 7:30-11:30 | Continuing the work: data, state and computation. Include the promised IPFS/Arweave verification sequence as 60-90 seconds of captured results. |
+| 7:30-11:30 | Continuing the work: data, state and computation. Use a short screenshot sequence to explain the promised IPFS/Arweave verification checks, within this chapter rather than as a standalone demo. |
 | 11:30-15:30 | Keeping the rules: contract/governance powers and network/L1/L2 assumptions, including a usable escape route. |
 | 15:30-18:30 | A test the audience can run this week, shared operators/funding/documentation, and a concrete improvement with its tradeoff. |
 | 18:30-19:00 | Return to the user's work and the vision of infrastructure others can inherit and build upon. |
@@ -120,29 +120,93 @@ fixture and open reproduction work are in [[presentation-evidence]]. This
 tests one retrieval and integrity path; it does not establish the entire
 app's survival or resistance to every authorized change.
 
-**Recommendation for discussion:** use the organizer's supplied Google Slides
-workflow, with 60-90 seconds of actual captured results inside the data/state
-chapter. Three or four screenshots can show the sequence without a live
-terminal or video dependency. If a short recording teaches it more clearly,
-embed a tested clip and retain the same screenshots as fallback. A live demo
-adds little to the present argument and increases switching and rehearsal
-work.
+**James's working direction, October 13:** presentation on the organizer's
+laptop, using screenshots and multi-step visual explanations inside the three
+chapters. No standalone or live demo, required video, browser switching or
+terminal performance. EFS supplies concrete examples where they teach a useful
+choice. It does not need to be presented as a finished solution to every layer.
 
-Possible frames: the identified public EFS record and its chain basis linked
-visibly to the expected digest and IPFS result; failure of that selected path
-followed by matching Arweave bytes; a deliberately altered copy failing
-verification alongside the distinct unavailable outcome. Show what the user
-recovers. Put detailed commands and identifiers in the notes. The public-record
-connection must be visible, rather than substituting an unexplained hardcoded
-checksum. State the remaining RPC trust once; this sequence does not by itself
-independently validate the RPC view. Capture fresh results before calling the
-frames demonstrated evidence.
+Use a repeated visual rhythm: a failure, a usable alternative, then the
+dependency that still remains. The following is a proposed storyboard, not
+newly tested EFS behavior or an implemented slide revision.
 
-A talk with diagrams and examples alone can teach the stack. However, the
-accepted public description explicitly promises the IPFS/Arweave verification
-sequence. Dropping it completely would require reconciling the public
-description with what James intends to deliver. No proposal change or
-organizer contact is authorized by this planning note or performed here.
+### Chapter 1: Can I still enter the app?
+
+Start with the familiar EFS web client and a small path diagram: name,
+gateway, app release. Cross out the chosen gateway path, then reveal access
+to the same retained release through an independently operated path. Capture
+the actual alternative before showing a success screenshot. Finish with
+three remaining requirements: name control, retained bytes and a trusted
+release. Opening a retained release still needs its runtime dependencies.
+
+ENS separates the name's content reference from a particular web host.
+However, `.eth.link` and `.eth.limo` are conventional DNS/HTTPS gateways, not
+independent operators: the eth.limo team reports moving eth.link onto its
+service in September 2024. Two addresses make a useful reveal of a shared
+dependency. A local ENS gateway or independently retrieved IPFS release is
+a candidate improvement, not an EFS recovery path verified in this session.
+See the sourced gateway example in [[presentation-examples]].
+
+Suggested line: "I want the website to be a convenient entrance, not the only
+way to use the app." Do not claim ENS removes all domain, controller, browser
+or networking dependencies. Briefly connect Ledger's runtime-code incident
+to why a retained release must include the code it actually executes.
+
+### Chapter 2: Can I still do the work?
+
+Keep one file and its accepted public EFS reference visible. Show an IPFS
+retrieval, loss of that selected path, and matching bytes retrieved from
+Arweave. Then contrast altered bytes with an unavailable response. Use
+freshly captured results, with the record's chain basis and expected digest
+visibly connected to the result; detailed commands belong in speaker notes.
+An unavailable source does not mean the file is missing everywhere.
+
+A small adjacent diagram separates three jobs: another RPC can answer;
+supported chain proofs can help validate that answer; retained copies supply
+the actual file. Multiple RPCs improve access but provider agreement is not
+independent verification. Light clients such as Helios illustrate validation,
+not guaranteed file retention, freshness or complete indexer results. They
+still need available providers and a valid verification basis. Neither EFS
+RPC failover nor EFS light-client integration has been verified here; describe
+these as options until tested. Sources and limits are in
+[[presentation-examples]].
+
+This chapter preserves the accepted description's retrieval and verification
+lesson without reserving a separate demo segment. No change to the accepted
+proposal is being made.
+
+### Chapter 3: Can I keep the rules I accepted?
+
+Show one specific authority arrow, such as the power to change a release
+pointer or upgrade a contract. Move the same authorized key from maintainer
+to attacker. Then show what the user can refuse or retain. Keeping an old
+interface can preserve its code; it cannot undo an upgrade to shared contract
+state. Use EFS's actual deployed powers only after inspecting them, with
+immutable and upgradeable designs as a clearly labeled comparison.
+
+Finish by revealing inherited chain controls and the user's recovery route.
+The documented OP Stack example can distinguish forced inclusion from
+withdrawal without promising a universal L2 escape hatch. The question is
+whether this user, with this account and available inputs, can actually use
+the route. Keep extra authority details in notes or Q&A.
+
+### How to build the visual sequences
+
+Use consecutive slides with the same layout and one meaningful change per
+click. These staged builds also make sense as static PDF pages. Prefer this
+to timing-dependent animations or autoplay. Native appear effects are an
+optional refinement only after testing in the supplied presentation workflow.
+Do not make understanding depend on an effect surviving export.
+
+Each frame should have one large screenshot or simple diagram, one highlighted
+path and a short conclusion. Use the template's established colors and at
+least 24 pt body text. Distinguish captured evidence from explanatory diagrams
+and proposed improvements. Capture dates and technical identifiers belong in
+notes. Do not manufacture an outage screenshot to look like an observed event.
+
+The native rehearsal copy and archived first read-through remain unchanged
+while this storyboard is discussed. Keep the next deck revision, notes and
+PDF/PPTX exports in the version history described in [[Devcon/presentation/README]].
 
 Recorded organizer instructions permit the supplied unique Google Slides
 deck or James's laptop. The rehearsal copy is separate, so choosing the
@@ -155,7 +219,9 @@ Use the recorded **October 15** presentation-method notification target and
 conflict already documented in Personal. The public guideline PDF could not
 be freshly retrieved October 13. The source record and personal completion
 state belong in the [Personal tracker](../../../Personal/devcon-2026/README.md).
-No method has been selected or reported to organizers by this note.
+The organizer-laptop direction is recorded above. Notification to organizers
+has not been confirmed or sent in this task; keep that personal step separate
+from the deck work.
 
 ## Editorial feedback and next rehearsal
 

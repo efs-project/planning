@@ -12,9 +12,11 @@ slides, timed notes and Q&A material, built from those templates. James reports
 a first read of its speaker notes in **17 minutes**. That revision is now saved
 as PDF, editable PowerPoint and readable notes in [[Devcon/presentation/README]].
 The next revision strengthens the problem and vision and organizes the talk
-around [[stack-map]]. See [[presentation-revision]] for the discussion draft,
-including a shorter demonstration and delivery-method recommendation. The
-live deck has not yet been rewritten; fresh demo evidence remains open.
+around [[stack-map]]. James's working direction is the organizer's laptop,
+with screenshots and click-through explanations inside the chapters, not a
+standalone or live demo. [[presentation-revision]] contains the storyboard.
+The live deck has not yet been rewritten; fresh screenshot evidence and
+organizer method notification remain open.
 
 **Session:** [Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test](https://devcon.org/en/schedule/devcon8/SPVJV8/)
 
@@ -69,9 +71,9 @@ First working draft created **2026-09-14**:
 - [[preparation-plan]]: early speaking practice, delivery checkpoints and the
   active Tuesday 9:00 a.m. America/Chicago preparation reminder.
 - [[rehearsal-script]]: October 12 speaking draft matching the native rehearsal
-  deck, with planned timing and public sources. Demo narration remains a
-  planned walkthrough until freshly verified footage replaces it.
-- [[presentation-revision]]: October 13 story, timing and demonstration options
+  deck, with planned timing and public sources. Its old demo narration is a
+  historical walkthrough, not evidence of a completed run or the new format.
+- [[presentation-revision]]: October 13 story, timing and chapter visual plan
   after James's first read-through. EFS appears where it directly teaches a
   useful mechanism, while the audience's own apps drive the structure.
 - [[stack-map]]: eight functional layers, with controls, operators, funding,
@@ -84,8 +86,8 @@ James's direction is to help developers recognize failures and decide which
 ones their own apps should defend against. Coverage includes usable recovery,
 build dependencies and the people and budgets behind apparently separate
 services, as well as the app, network and blockchain.
-The next step is to settle the revised opening, layer structure and short
-demonstration format with James, then build and rehearse that revision. The
+The next step is to settle the revised opening and chapter visuals with
+James, then build and rehearse that revision. The
 17-minute read is recorded without assuming its demo timing or assessing
 delivery that has not been heard. A short recording of the new opening will
 help test clarity before another full run.
@@ -135,9 +137,9 @@ were not publicly listed during the research pass.
   has the earlier October 15 planning target recorded in Personal.
 - Keep the session educational. Use EFS where it explains a mechanism and
   leave developers with checks and improvements for their own apps.
-- Use verified results for any demonstration. The October 13 recommendation
-  is a short sequence of captured results in the supplied Slides workflow;
-  live operation, recorded media and complete omission remain discussion
-  choices. The accepted description still promises the retrieval sequence.
+- Use verified results for evidence screenshots. James's October 13 direction
+  is presentation-only on the organizer's laptop, with staged explanations
+  inside the chapters. The accepted retrieval sequence fits within the
+  data/state chapter without a standalone demo. Notification is not confirmed.
 - Preserve the boundary: v1 is live Sepolia evidence; v2 and the cypherpunk OS
   remain active design work unless their status changes before the talk.

@@ -9,13 +9,15 @@ preparation, not a change to the accepted proposal or an EFS release deadline.
 After a 17-minute read of the speaker notes, James asked to lead with a
 clearer problem and inspiring vision, formalize the stack, and teach checks
 and improvements for the audience's own apps. EFS belongs where it is
-directly useful. [[presentation-revision]] proposes the new story and shorter
-demonstration options; [[stack-map]] defines the eight functional layers.
+directly useful. [[presentation-revision]] proposes the new story and chapter
+visuals; [[stack-map]] defines the eight functional layers.
 
 The earlier story below and its live slides are preserved for comparison in
 [[Devcon/presentation/README]]. The new outline has not yet been implemented
-in the deck. The proposed presentation method and demonstration scope remain
-open for discussion with James.
+in the deck. James's follow-up favors the organizer's laptop, screenshots and
+click-through explanations across the chapters, with no standalone or live
+demo. The earlier demo allocations below are historical. Organizer method
+notification remains unconfirmed.
 
 ## Earlier working direction
 
