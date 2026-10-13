@@ -22,7 +22,7 @@ The EFS attendance checklist retains earlier preparation targets and history.
 - James reports a **17-minute read-through of the speaker notes on October 13**.
   No recording was supplied. Whether he reserved the full planned demo slot
   is unknown. No fresh demo recording has been completed in this task.
-- Both the first-read deck and the new content-first revision are preserved
+- The first-read deck and subsequent content and opening revisions are preserved
   in [[Devcon/presentation/README]]. [[presentation-spine]] records the
   implemented story and timing. The largest talk risk is whether the chapters
   feel like one useful argument rather than a catalogue of dependencies.
@@ -59,6 +59,14 @@ required video or fresh screenshots. Next: review whether the opening makes
 the stakes clear, the chapters connect, and the wording sounds like James.
 Then revise what matters before adding evidence visuals. A two- or three-minute
 recording of the opening would be useful before a complete second run.
+
+James has since approved the problem-to-vision introduction and made the aim
+explicit: CROPS apps and hyperstructures that people can trust with important
+data and other developers can build on. The latest snapshot is
+[[Devcon/presentation/2026-10-13-opening-vision/README]]. The first planned
+minute gives the argument and audience promise; Pocket follows as evidence.
+Next: read slides 1-5 aloud, then check that the layer walkthrough and closing
+fulfill the promise. No additional animation work is needed for that check.
 
 ## October 12 rehearsal deck (preserved baseline)
 

@@ -12,6 +12,32 @@ deployment configuration before using it on stage.
 
 ## October 13 opening and vision additions
 
+### CROPS and hyperstructures
+
+**Checked October 13:** [Devcon's ecosystem program](https://devcon.org/en/ecosystem-program/)
+expands CROPS as Censorship Resistance, Open Source, Privacy and Security.
+The [Ethereum Foundation Mandate](https://ethereum.org/foundation/mandate)
+connects those values with a walkaway goal for Ethereum's protocol and core
+application layers. It also emphasizes reusable infrastructure and protection
+against unwanted disclosure.
+
+[Jacob Horne's original Hyperstructures essay](https://jacob.energy/hyperstructures.html)
+describes entirely onchain protocols designed to continue on the underlying
+blockchain without an indispensable operator. Permissionless use lets other
+builders rely on their functionality. The full definition includes properties
+beyond durability, including its fee and incentive model. Do not label an
+entire application, or EFS, a completed hyperstructure based on one surviving
+contract or retrieval path.
+
+**Talk framing approved by James:** reliable apps people can trust with their
+most important data and that future developers can build upon. Explain this
+benefit first, name CROPS and hyperstructures afterward, then use the stack to
+test the promise. Important-data trust includes confidentiality and appropriate
+access. The vision is not a recommendation to publish sensitive data onchain.
+The aspiration supplies direction, not a certification that all examples meet it.
+
+### Harm and recovery examples
+
 James now wants the problem and the positive future to carry more of the
 talk. [[presentation-revision#Evidence for the stakes and vision]] records
 fresh primary-source checks for Pocket's shutdown, Ledger Connect Kit's

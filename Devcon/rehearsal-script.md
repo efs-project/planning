@@ -3,11 +3,16 @@
 ## Current script, October 13
 
 The current speaking draft is
-[[Devcon/presentation/2026-10-13-content-flow/slides-and-notes|the content-first deck's native slide text and speaker notes]].
+[[Devcon/presentation/2026-10-13-opening-vision/slides-and-notes|the latest deck's native slide text and speaker notes]].
 It has 18 main slides and one resource/Q&A page. Nineteen minutes are planned,
 but this revision has not been rehearsed. The notes contain spoken narration
 followed by public sources. The verification sequence is explanatory, not a
 fresh runtime result. There is no live demo or animation in this draft.
+
+The latest opening states the whole argument in its first planned minute,
+then connects reliable, composable apps to CROPS and hyperstructures. Pocket
+is a short supporting example after the vision. The closing returns to what
+users and future builders gain.
 
 James's 17-minute first read applies to the earlier version preserved below.
 Review the new opening, chapter connections and voice before visual polish.

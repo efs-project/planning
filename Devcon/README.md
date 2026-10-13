@@ -9,10 +9,11 @@ organizer assigned **November 5, 15:30-15:55, Lotus 3**, subject to change.
 The scheduling email leaves the timezone unstated. The supplied Google Slides
 deck remains unchanged. The separate native rehearsal copy now has **18 main
 slides and one resource/Q&A page**, with readable type and spoken notes.
-The revised story starts with user harm and a cypherpunk vision, then teaches
-the eight layers in [[stack-map]] through three chapters. Nineteen minutes
+The revised introduction leads with harm to users and builders, then a vision
+of reliable CROPS apps and hyperstructures others can build on. The talk
+teaches the eight layers in [[stack-map]] through three chapters. Nineteen minutes
 are planned; this version has not been rehearsed. James's **17-minute** first
-read belongs to the prior deck. Both versions are saved as PDF, editable
+read belongs to the first deck. All three versions are saved as PDF, editable
 PowerPoint and native text/notes in [[Devcon/presentation/README]].
 James wants to settle content and flow before animations or visual polish.
 The current draft is static, with no live demo. The working direction remains

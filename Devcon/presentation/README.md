@@ -13,7 +13,8 @@ stay outside this repository.
 
 | Snapshot | What it records | Practice |
 | --- | --- | --- |
-| [October 13 content-first revision](2026-10-13-content-flow/README.md) | Current rehearsal deck: stronger problem and vision, eight layers in three chapters, 18 main slides plus a resource page, readable type and spoken notes. Static content only. | 19 minutes planned; not yet rehearsed. |
+| [October 13 opening and vision](2026-10-13-opening-vision/README.md) | Current rehearsal deck: the introduction states the user and builder problem, durable-app vision and method. CROPS and hyperstructures make the ambition explicit. Same 18 main slides plus a resource page. | 19 minutes planned; not yet rehearsed. |
+| [October 13 content-first revision](2026-10-13-content-flow/README.md) | First rewrite around the problem and vision, eight layers in three chapters, 18 main slides plus a resource page, readable type and spoken notes. Static content only. | 19 minutes planned; not rehearsed before the opening revision. |
 | [October 13 first read-through](2026-10-13-first-readthrough/README.md) | October 12 template deck after the color pass, before the proposed story/stack revision. 27 slides with speaker notes. | James reports reading the notes in 17 minutes. |
 
 Each snapshot contains:

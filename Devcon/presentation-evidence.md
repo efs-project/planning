@@ -6,8 +6,8 @@ should describe the actual deployment shown without EFS version labels.
 
 ## Evidence status
 
-**Current content-first deck:** the October 13 rewrite is saved in
-[[Devcon/presentation/2026-10-13-content-flow/README]]. Its file-verification
+**Current content-first deck:** the October 13 opening revision is saved in
+[[Devcon/presentation/2026-10-13-opening-vision/README]]. Its file-verification
 slide explains the check sequence, without presenting newly observed outcomes.
 No fresh EFS runtime test or evidence screenshot was produced. Settle the
 story and flow with James before building the proposed visual sequences below.

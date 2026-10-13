@@ -11,8 +11,11 @@ clearer problem and inspiring vision, formalize the stack, and teach checks
 and improvements for the audience's own apps. EFS belongs where it is
 directly useful. His latest instruction is to settle content and flow before
 animations or other polish. That revision is now implemented in the native
-rehearsal copy and saved in
-[[Devcon/presentation/2026-10-13-content-flow/README]]. It has 18 main slides,
+rehearsal copy. James then approved a sharper introduction: the problem is
+fragile apps that strand users and make other apps fragile. The positive
+vision is CROPS apps and hyperstructures that people can trust with important
+data and future builders can rely on. The latest version is saved in
+[[Devcon/presentation/2026-10-13-opening-vision/README]]. It has 18 main slides,
 one resource/Q&A page and spoken notes, with 19 minutes planned but no measured
 run yet. [[stack-map]] defines the eight functional layers.
 
@@ -23,18 +26,26 @@ remains unconfirmed; the organizer's original deck has not been changed.
 
 ### The current argument
 
-Users put years of work into applications. A shutdown can turn that work into
-a rushed recovery project. A takeover can leave the app online while changing
-what it does to its users. Developers who build on these services inherit
-those dependencies too.
+Build apps that people and other apps can depend on beyond the lifetime of
+their original teams. Users put years of work into applications that can
+disappear, break or change their rules. Users can lose access to their data
+and workflows. Every application built on that service inherits its risk.
 
-The positive goal is software people can inherit. A community can keep its
-archive useful, an organization can retain its history, and another developer
-can build on shared public records without a permanent relationship with the
-original team. Infrastructure still needs maintenance. Its design should let
-the maintainers change without taking the users' choices away.
+The positive goal is reliable software people can trust with their most
+important work, and useful capabilities other developers can build into their
+own apps. Each durable capability gives the next builder something to use.
+New applications extend the value of the shared foundation. Progress compounds.
 
-Test that goal through one important user task and two conditions: the team
+James explicitly wants CROPS apps and hyperstructures. CROPS names censorship
+resistance, open source, privacy and security. The hyperstructure ambition is
+permanent, permissionless infrastructure that continues on its underlying
+blockchain. The talk brings that ambition to the complete user-facing app.
+Keeping important data useful includes protecting access and privacy; it does
+not mean making sensitive records public. Sources and the distinction between
+the ambition and the original protocol definition are in [[presentation-examples]].
+
+The walk-away test is the method for examining that promise. Test one
+important user task under two conditions: the team
 is absent, or its authority is hostile. The chapters follow what the task
 needs: a way into trusted software, data and computation that remain useful,
 and rules and settlement the user can still rely on. Shared operators,
@@ -52,13 +63,15 @@ five-minute Q&A. They are not a measured rehearsal result.
 
 | Time | Slides | Story purpose |
 | --- | --- | --- |
-| 0:00-3:15 | 1-4 | Introduce James, show the harm through Pocket, paint the cypherpunk vision, distinguish absence from hostile control. |
+| 0:00-1:00 | 1-2 | State the problem, harm to users and builders, the durable-app ambition and what the talk will teach. |
+| 1:00-2:15 | 3 | Make the vision concrete: important work, reusable capabilities, CROPS and the ambition of hyperstructures. |
+| 2:15-3:15 | 4 | Introduce absence and hostile control, with Pocket as a brief example after the central argument. |
 | 3:15-4:00 | 5 | Map eight jobs into three chapters and introduce the EFS file task. |
 | 4:00-7:30 | 6-8 | Entering the app: naming and access, runnable releases and build inputs, accounts and recovery. |
 | 7:30-11:30 | 9-12 | Continuing the work: retained data, file verification, trustworthy and complete state, offchain computation. |
 | 11:30-15:30 | 13-14 | Keeping the rules: contract and governance powers, inherited protocols, network/L1/L2 dependencies and usable recovery routes. |
 | 15:30-18:30 | 15-17 | Shared operators and funding, an exit someone can use, and a safe test developers can run on one task in their own app. |
-| 18:30-19:00 | 18 | Return to the user's work and the future other people can build on it. |
+| 18:30-19:00 | 18 | Return to trustworthy apps and shared capabilities whose usefulness can grow beyond their creators. |
 | After the talk | 19 | Questions and EFS resources. |
 
 The EFS verification sequence is explanatory, not a claim of newly observed

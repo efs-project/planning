@@ -1,0 +1,75 @@
+{
+  "snapshot": "2026-10-13-opening-vision",
+  "captured_date": "2026-10-13",
+  "source_title": "Who Can Turn Off Your Ethereum App? | Devcon rehearsal draft",
+  "slide_count": 19,
+  "main_slides": 18,
+  "resource_slide": 19,
+  "skipped_slides": [],
+  "speaker_note_count": 19,
+  "planned_main_seconds": 1140,
+  "spoken_words": 2305,
+  "main_spoken_words": 2277,
+  "rehearsal": {
+    "completed": false,
+    "prior_17_minute_read_applies_to": "2026-10-13-first-readthrough"
+  },
+  "verification": {
+    "native_text_and_notes_match_authoring_content": true,
+    "pdf_pages": 19,
+    "pdf_page_size_points": [
+      720,
+      405
+    ],
+    "native_content_fonts_minimum_points": 24,
+    "visual_review": {
+      "all_pages_rendered": 19,
+      "visually_changed_pages_inspected": [
+        2,
+        3
+      ],
+      "unchanged_page_pixels_match_previously_reviewed_source": [
+        1,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "repair": "Restored slide 2 bullet indentation to its original template style; rendered and inspected the repaired page.",
+      "remaining_visual_defects": []
+    },
+    "fresh_efs_runtime_check": false,
+    "pptx_zip_integrity": "passed",
+    "pptx_note_text_matches_native_after_whitespace_normalization": true,
+    "private_reference_scan": "passed"
+  },
+  "files": [
+    {
+      "name": "presentation.pdf",
+      "bytes": 1100040,
+      "sha256": "169ca4ed6872152d7be3dedd24c5cb591c974fb54ffa38d1010c7546bf46a6a9"
+    },
+    {
+      "name": "presentation.pptx",
+      "bytes": 3367384,
+      "sha256": "4bdf6b482d2b5a31bcaf007c5fb880efcee0ebf5563f92a5488bef01c50d9c52"
+    },
+    {
+      "name": "slides-and-notes.md",
+      "bytes": 20605,
+      "sha256": "5180710c23ea885fceaa02afb60b452e9a621864cca62000920d76baf71ee21d"
+    }
+  ]
+}

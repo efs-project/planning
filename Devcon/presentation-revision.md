@@ -1,6 +1,6 @@
 # Presentation revision after the first read-through
 
-Working revision, October 13, 2026. James read the current speaker notes in
+Working revision, October 13, 2026. James read the first deck's speaker notes in
 17 minutes. He wants a clearer problem, an inspiring cypherpunk vision, a
 formal map of the software stack, and improvements developers can make in
 their own apps. EFS should appear where it directly teaches something useful.
@@ -12,6 +12,14 @@ other polish. The current deck has 18 main slides and a resource/Q&A page,
 with static text and audience-facing speaker notes. [[presentation-spine]]
 records its implemented timing. It has not been rehearsed. The visual
 storyboards below remain later options, not a requirement for this review.
+
+**Approved opening refinement:** James wants a clear problem, harm, solution
+and audience promise at the start, followed by the details. The latest deck
+implements this in [[Devcon/presentation/2026-10-13-opening-vision/README]].
+Reliable apps protect users' important work and give other apps lasting
+capabilities to build on. CROPS and hyperstructures express the ambition;
+the walk-away test examines the whole stack needed to deliver it. The earlier
+opening candidate below is retained as drafting history.
 
 ## The argument
 
