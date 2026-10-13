@@ -1,9 +1,21 @@
 # ETHDenver 2027 speaker watch
 
-**Checked:** 2026-10-12 (America/Chicago)
+**Checked:** 2026-10-13 (America/Chicago)
 **Status:** monitoring. No official 2027 speaker form, submission deadline or
-event dates verified in this check. The homepage still describes ETHDenver 2026;
-the official Speakers & Content section and deadline article still cover 2026.
+event dates verified in this check. The freshly fetched homepage still describes
+ETHDenver 2026. The official Speakers & Content section was inaccessible in
+this run; its prior-cycle evidence below was checked October 12, not freshly
+reconfirmed today. Targeted official-domain searches found no 2027 CFP. This is
+a bounded coverage result, not proof that no announcement exists elsewhere.
+
+**Unverified announcement lead:** a secondary event directory links an
+[organizer-account post](https://x.com/EthereumDenver/status/2105164333122789789)
+and reports more 2027 details expected in October plus a warning about
+unofficial ticket offers. Direct access to that post returned 403; neither
+its wording nor a CFP is verified here. Retain the source pointer for the next
+official-announcement check, not as adopted event dates or instructions.
+Narrow relevant Gmail search found no 2027 application message; this is not
+exhaustive mailbox coverage.
 
 James reaffirmed on 2026-10-12: **he wants to present EFS at ETHDenver 2027**.
 This file is the canonical speaking-opportunity watch, not a submitted
@@ -12,7 +24,7 @@ application, acceptance, dated delivery milestone or locked talk concept.
 ## Current action and monitoring
 
 - **Owner: PM.** Included explicitly in the existing Tuesday 08:30
-  America/Chicago project-management review; next check 2026-10-13. Check official
+  America/Chicago project-management review; next check 2026-10-20. Check official
   event, speaker-support and organizer-announcement surfaces, plus narrowly
   relevant email when available. Avoid a separate duplicate reminder.
 - **Nothing to submit yet on the verified public surfaces.** Notify James when

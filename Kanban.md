@@ -43,7 +43,7 @@ kanban-plugin: board
 ## In Flight
 
 - [ ] **Grants — research + tracker + submissions** (@grants) — funder-landscape research + a lightweight operational tracker in `Grants/` (README/programs/proposals/packet/research-log), + preparing James's actual submissions. First external anchor = the [EFS KarmaHQ page](https://www.karmahq.xyz/project/ethereum-file-system/about); first proposal row = Octant (rejected, competitive — keep the row + feedback). Tracking detail lives in `Grants/proposals.md` (not mirrored here); this card is just the swarm-visible pointer to the active work. James-actionable items (Karma cleanup: no team listed, funds raised = 0, bare "Path to Success"; program picks; submission sign-offs) route to [[Owner-Inbox]] only when they're real forks/deadlines. #repo/planning #kind/ops
-  — @pm monitoring (harness codex, session weekly-pm-retry-20260923); no active specialist worker verified. Current step: owner go/no-go on the bounded Arbitrum submission due October 4, and NLnet September 30 eligibility/GenAI questions. September 11 broad refresh and September 14 registration update are landed; this is not a claim that a newer broad funding pass ran.
+  — @pm monitoring (harness codex, session weekly-pm-20261013); bounded October 13 verification is recorded in [[Grants/research-log]]. Arbitrum's submission window has closed; resolve submission/outcome evidence without restarting deployment. NLnet remains eligibility/GenAI-gated, and Emergent Ventures requires a human-authored application. Current dates and next actions belong only in [[Grants/proposals]]; this was not a new broad funding sweep.
 
 ## Blocked
 

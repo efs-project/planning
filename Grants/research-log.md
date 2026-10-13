@@ -15,6 +15,51 @@ Rows touched:
 Next check:
 ```
 
+## 2026-10-13 - Funding eligibility and ended-event verification
+
+Trigger: weekly PM review with bounded independent verification; not a broad
+landscape refresh, application draft or adopted funding strategy.
+
+- [NLnet call](https://nlnet.nl/news/2026/20260903-call.html) still closes
+  **November 3, 12:00 CET / 05:00 Chicago CST**. The
+  [published policy](https://nlnet.nl/foundation/policies/generativeAI/) still
+  displays January 26 version 1.1. Mostly LLM-generated work is excluded, and
+  the call advises LLM users to await its revision. Disclosure, MIT licensing
+  or human review alone do not prove eligibility.
+- [Restack](https://nlnet.nl/restack/eligibility/) and
+  [CodeSupply](https://nlnet.nl/codesupply/eligibility/) require a strong European
+  dimension. Their straightforward route allocates at least 60% of funds to
+  eligible-country team members; exceptional-quality outside proposals with
+  unique expertise can be considered. Neither automatic US exclusion nor
+  automatic EFS eligibility follows. Any September 30 eligibility answer and
+  EFS's actual human/AI contribution picture remain unresolved inputs.
+- New [October 28 office hour](https://nlnet.nl/events/20261028/office-hour/):
+  official wording says 16:00 CEST and Amsterdam/Brussels time. **CONFLICT:**
+  literal CEST gives 09:00 Chicago CDT; 16:00 Amsterdam on that date is CET,
+  giving 10:00 CDT. Verify intended time before scheduling. Questions may be
+  added ahead through its linked pad; this is not application pre-review. No
+  question, attendance commitment or calendar event was created.
+- [Arbitrum online event](https://www.hackquest.io/hackathons/Arbitrum-Open-House-Singapore-Online-Buildathon)
+  now says **Ended**, superseding October 6's In Voting observation. The reward
+  announcement is listed October 12, 06:00, without an identifiable displayed
+  timezone. This proves neither an EFS submission nor an award. Preserve the
+  registered-but-final-submission-unconfirmed row; do not resume signing.
+  The separate [Founder House](https://luma.com/openhouse-singapore) remains
+  October 23-25; organizer text explains screening despite Event Full/Waitlist
+  labels. Selection is rolling, no closing date shown, subsidy unverified.
+- [Emergent Ventures application](https://mercatus.tfaforms.net/5099527) remains
+  open with no fixed deadline. **New substantive gate:** AI-written submissions
+  are rejected; AI is allowed only for proofreading. James must author the
+  narrative; agents must not generate its outline or answers. Maximum 1,500
+  words, project-specific budget, global applicants age 13+. The earlier
+  one-week response estimate is not promised in the current form.
+
+Rows touched: NLnet, Arbitrum and Emergent in [[proposals]] and [[programs]];
+retired expired next actions in [[../Kanban]]. Other rows retain their earlier
+checks. Next check: October 20 for NLnet revision/eligibility and any supplied
+Arbitrum outcome; confirm October 28 office-hour timezone before use. No
+submission, contact, registration, deployment, spending or signing performed.
+
 ## 2026-09-29 - NLnet timing and Arbitrum verification gap
 
 - [NLnet office hour](https://nlnet.nl/events/20260930/office-hour/) freshly

@@ -46,11 +46,11 @@ private portal rather than treating the older public-page observation as current
 Do not put passport numbers, scans, visa application IDs, ticket/order numbers,
 booking references, or a private itinerary in this repository.
 
-**Current PM priority:** handle the new speaker administration, confirm the
-visa-support reply was usable and obtain the documents needed to apply, and
-reserve refundable accommodation. The presentation task has a travel shortlist;
-its prices and terms must be refreshed before purchase. Do not restart travel
-research or assume any candidate is booked.
+**Current PM routing, October 13:** use the private Personal tracker for actual
+administrative completion and next steps; the historical travel shortlist and
+unchecked boxes here must not recreate completed tasks. Use
+[[preparation-plan]] for the rehearsal draft and presentation targets. Do not
+restart travel research, bookings or ticket actions from this historical list.
 
 ## Speaker conference visa - act now
 
