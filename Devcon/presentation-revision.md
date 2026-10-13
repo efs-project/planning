@@ -4,8 +4,14 @@ Working revision, October 13, 2026. James read the current speaker notes in
 17 minutes. He wants a clearer problem, an inspiring cypherpunk vision, a
 formal map of the software stack, and improvements developers can make in
 their own apps. EFS should appear where it directly teaches something useful.
-The live slides and [[rehearsal-script]] still preserve the earlier draft.
-Their Git snapshot is indexed in [[Devcon/presentation/README]].
+The content-first revision is now implemented in the native rehearsal copy.
+Its snapshot and the earlier draft are indexed in [[Devcon/presentation/README]].
+
+**Latest direction:** settle the spine and spoken flow before animations or
+other polish. The current deck has 18 main slides and a resource/Q&A page,
+with static text and audience-facing speaker notes. [[presentation-spine]]
+records its implemented timing. It has not been rehearsed. The visual
+storyboards below remain later options, not a requirement for this review.
 
 ## The argument
 

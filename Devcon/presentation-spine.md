@@ -9,15 +9,65 @@ preparation, not a change to the accepted proposal or an EFS release deadline.
 After a 17-minute read of the speaker notes, James asked to lead with a
 clearer problem and inspiring vision, formalize the stack, and teach checks
 and improvements for the audience's own apps. EFS belongs where it is
-directly useful. [[presentation-revision]] proposes the new story and chapter
-visuals; [[stack-map]] defines the eight functional layers.
+directly useful. His latest instruction is to settle content and flow before
+animations or other polish. That revision is now implemented in the native
+rehearsal copy and saved in
+[[Devcon/presentation/2026-10-13-content-flow/README]]. It has 18 main slides,
+one resource/Q&A page and spoken notes, with 19 minutes planned but no measured
+run yet. [[stack-map]] defines the eight functional layers.
 
-The earlier story below and its live slides are preserved for comparison in
-[[Devcon/presentation/README]]. The new outline has not yet been implemented
-in the deck. James's follow-up favors the organizer's laptop, screenshots and
-click-through explanations across the chapters, with no standalone or live
-demo. The earlier demo allocations below are historical. Organizer method
-notification remains unconfirmed.
+The working delivery direction remains the organizer's laptop, without a
+standalone or live demo. This draft uses static text. Evidence screenshots and
+staged explanations can follow content review. Organizer method notification
+remains unconfirmed; the organizer's original deck has not been changed.
+
+### The current argument
+
+Users put years of work into applications. A shutdown can turn that work into
+a rushed recovery project. A takeover can leave the app online while changing
+what it does to its users. Developers who build on these services inherit
+those dependencies too.
+
+The positive goal is software people can inherit. A community can keep its
+archive useful, an organization can retain its history, and another developer
+can build on shared public records without a permanent relationship with the
+original team. Infrastructure still needs maintenance. Its design should let
+the maintainers change without taking the users' choices away.
+
+Test that goal through one important user task and two conditions: the team
+is absent, or its authority is hostile. The chapters follow what the task
+needs: a way into trusted software, data and computation that remain useful,
+and rules and settlement the user can still rely on. Shared operators,
+funding, documentation and a usable exit connect all eight layers.
+
+EFS makes naming, retained software and file verification concrete. Pocket,
+Ledger Connect Kit, Safe, Graph Node, Chainlink, Uniswap, OP Stack and Git
+supply short contrasts where their details sharpen the lesson. They are
+examples of mechanisms, not whole-project decentralization ratings.
+
+### Implemented flow
+
+These allocations total 19 minutes, with a minute of margin and the separate
+five-minute Q&A. They are not a measured rehearsal result.
+
+| Time | Slides | Story purpose |
+| --- | --- | --- |
+| 0:00-3:15 | 1-4 | Introduce James, show the harm through Pocket, paint the cypherpunk vision, distinguish absence from hostile control. |
+| 3:15-4:00 | 5 | Map eight jobs into three chapters and introduce the EFS file task. |
+| 4:00-7:30 | 6-8 | Entering the app: naming and access, runnable releases and build inputs, accounts and recovery. |
+| 7:30-11:30 | 9-12 | Continuing the work: retained data, file verification, trustworthy and complete state, offchain computation. |
+| 11:30-15:30 | 13-14 | Keeping the rules: contract and governance powers, inherited protocols, network/L1/L2 dependencies and usable recovery routes. |
+| 15:30-18:30 | 15-17 | Shared operators and funding, an exit someone can use, and a safe test developers can run on one task in their own app. |
+| 18:30-19:00 | 18 | Return to the user's work and the future other people can build on it. |
+| After the talk | 19 | Questions and EFS resources. |
+
+The EFS verification sequence is explanatory, not a claim of newly observed
+retrieval results. Fresh captures remain in [[presentation-evidence]]. The
+current spoken text is preserved with the snapshot. Next, James reviews the
+opening, the connections between chapters and anything that is not in his voice.
+
+Everything below is the earlier working spine, retained for comparison. Its
+demo timing and stage instructions do not govern the current revision.
 
 ## Earlier working direction
 

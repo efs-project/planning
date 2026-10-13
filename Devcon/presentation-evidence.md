@@ -6,6 +6,12 @@ should describe the actual deployment shown without EFS version labels.
 
 ## Evidence status
 
+**Current content-first deck:** the October 13 rewrite is saved in
+[[Devcon/presentation/2026-10-13-content-flow/README]]. Its file-verification
+slide explains the check sequence, without presenting newly observed outcomes.
+No fresh EFS runtime test or evidence screenshot was produced. Settle the
+story and flow with James before building the proposed visual sequences below.
+
 **October 13 revision:** James has completed a 17-minute read of the notes.
 This does not establish a fresh demonstration result. [[stack-map]] now groups
 the inspection questions for teaching. James's follow-up favors presentation

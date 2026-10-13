@@ -7,16 +7,17 @@ to ship v2 by Devcon.
 **Status (2026-10-13):** proposal accepted and participation confirmed. The
 organizer assigned **November 5, 15:30-15:55, Lotus 3**, subject to change.
 The scheduling email leaves the timezone unstated. The supplied Google Slides
-deck remains unchanged. A separate native rehearsal copy now has 20 main
-slides, timed notes and Q&A material, built from those templates. James reports
-a first read of its speaker notes in **17 minutes**. That revision is now saved
-as PDF, editable PowerPoint and readable notes in [[Devcon/presentation/README]].
-The next revision strengthens the problem and vision and organizes the talk
-around [[stack-map]]. James's working direction is the organizer's laptop,
-with screenshots and click-through explanations inside the chapters, not a
-standalone or live demo. [[presentation-revision]] contains the storyboard.
-The live deck has not yet been rewritten; fresh screenshot evidence and
-organizer method notification remain open.
+deck remains unchanged. The separate native rehearsal copy now has **18 main
+slides and one resource/Q&A page**, with readable type and spoken notes.
+The revised story starts with user harm and a cypherpunk vision, then teaches
+the eight layers in [[stack-map]] through three chapters. Nineteen minutes
+are planned; this version has not been rehearsed. James's **17-minute** first
+read belongs to the prior deck. Both versions are saved as PDF, editable
+PowerPoint and native text/notes in [[Devcon/presentation/README]].
+James wants to settle content and flow before animations or visual polish.
+The current draft is static, with no live demo. The working direction remains
+the organizer's laptop; fresh evidence captures and organizer method
+notification remain open.
 
 **Session:** [Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test](https://devcon.org/en/schedule/devcon8/SPVJV8/)
 
@@ -70,9 +71,9 @@ First working draft created **2026-09-14**:
   each layer, with narrow claims and limits rather than whole-project ratings.
 - [[preparation-plan]]: early speaking practice, delivery checkpoints and the
   active Tuesday 9:00 a.m. America/Chicago preparation reminder.
-- [[rehearsal-script]]: October 12 speaking draft matching the native rehearsal
-  deck, with planned timing and public sources. Its old demo narration is a
-  historical walkthrough, not evidence of a completed run or the new format.
+- [[rehearsal-script]]: pointer to the current native speaking draft, with
+  the October 12 script preserved as history. Neither planned checks nor
+  explanatory narration establish a fresh EFS runtime result.
 - [[presentation-revision]]: October 13 story, timing and chapter visual plan
   after James's first read-through. EFS appears where it directly teaches a
   useful mechanism, while the audience's own apps drive the structure.
@@ -86,10 +87,10 @@ James's direction is to help developers recognize failures and decide which
 ones their own apps should defend against. Coverage includes usable recovery,
 build dependencies and the people and budgets behind apparently separate
 services, as well as the app, network and blockchain.
-The next step is to settle the revised opening and chapter visuals with
-James, then build and rehearse that revision. The
-17-minute read is recorded without assuming its demo timing or assessing
-delivery that has not been heard. A short recording of the new opening will
+The next step is James's review of the new opening, chapter connections and
+spoken voice. Visual sequences can wait until the content works. The
+17-minute prior read is recorded without assuming its demo timing or assessing
+delivery that has not been heard. A short recording of the new opening would
 help test clarity before another full run.
 
 ## Acceptance completed

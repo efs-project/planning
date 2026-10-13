@@ -15,19 +15,20 @@ The EFS attendance checklist retains earlier preparation targets and history.
   Use them where they teach a different failure or improvement. James's
   October 13 direction prioritizes the user problem and stack, with EFS where
   it directly helps explain a mechanism.
-- A native Google Slides rehearsal copy was built and visually reviewed on
-  October 12 using Devcon's supplied template. It has 20 main slides, timed
-  speaker notes, a resource slide and six skipped technical Q&A slides.
-  [[rehearsal-script]] preserves the speaking draft and public sources.
+- A native Google Slides rehearsal copy was rebuilt and visually reviewed on
+  October 13 using Devcon's supplied template. It has 18 main slides and one
+  resource/Q&A page, with 19 minutes of planned material. [[rehearsal-script]]
+  points to the new spoken notes and public sources. It is not yet rehearsed.
 - James reports a **17-minute read-through of the speaker notes on October 13**.
   No recording was supplied. Whether he reserved the full planned demo slot
   is unknown. No fresh demo recording has been completed in this task.
-- The current deck is preserved in [[Devcon/presentation/README]].
-  [[presentation-revision]] and [[stack-map]] now guide discussion of a
-  stronger opening and a clearer structure. The largest talk risk is whether
-  the audience understands why the work matters before the technical inventory.
-- Body text still needs recomposition at the organizer's recorded minimum of
-  24 pt. The color repair did not enlarge inherited 12-13 pt body styles.
+- Both the first-read deck and the new content-first revision are preserved
+  in [[Devcon/presentation/README]]. [[presentation-spine]] records the
+  implemented story and timing. The largest talk risk is whether the chapters
+  feel like one useful argument rather than a catalogue of dependencies.
+- Body text has been recomposed at 24 pt using the template's colors. All 19
+  pages were rendered and inspected, with wrapping titles repaired. This
+  construction check is not a spoken rehearsal or final organizer submission.
 
 ## October 13 practice and revision
 
@@ -51,10 +52,13 @@ the data/state chapter. [[presentation-revision]] records the proposed visual
 sequences and technical distinctions. Method notification to organizers is
 not confirmed; the supplied original Slides deck is still unchanged.
 
-Next: settle the opening and chapter visuals, then rewrite the deck and notes.
-Make audience narration distinct from practice instructions. Capture another
-Git snapshot before the next rehearsal. A two- or three-minute recording of
-the opening will be useful before a complete second run.
+James's latest instruction is to settle the spine and content before
+animations or other polish. The rewritten deck is now ready for his review,
+with spoken narration and a new Git snapshot. It contains no animations,
+required video or fresh screenshots. Next: review whether the opening makes
+the stakes clear, the chapters connect, and the wording sounds like James.
+Then revise what matters before adding evidence visuals. A two- or three-minute
+recording of the opening would be useful before a complete second run.
 
 ## October 12 rehearsal deck (preserved baseline)
 

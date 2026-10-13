@@ -13,6 +13,7 @@ stay outside this repository.
 
 | Snapshot | What it records | Practice |
 | --- | --- | --- |
+| [October 13 content-first revision](2026-10-13-content-flow/README.md) | Current rehearsal deck: stronger problem and vision, eight layers in three chapters, 18 main slides plus a resource page, readable type and spoken notes. Static content only. | 19 minutes planned; not yet rehearsed. |
 | [October 13 first read-through](2026-10-13-first-readthrough/README.md) | October 12 template deck after the color pass, before the proposed story/stack revision. 27 slides with speaker notes. | James reports reading the notes in 17 minutes. |
 
 Each snapshot contains:
@@ -38,6 +39,7 @@ layout and notes after import because a format round trip can change them.
 Restoring a revision must not overwrite the organizer's delivery deck as an
 incidental part of looking at history.
 
-The speaking draft in [[Devcon/rehearsal-script]] follows the current saved
-deck. A proposed rewrite stays separately identified until it is implemented
-and rehearsed. Git history and the snapshot index record that transition.
+[[Devcon/rehearsal-script]] points to the current saved speaking draft and
+retains the older script as history. A rewrite can be implemented without
+having been rehearsed; keep those states distinct. Git history and this index
+record both transitions.

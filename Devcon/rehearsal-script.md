@@ -1,5 +1,19 @@
 # Rehearsal script
 
+## Current script, October 13
+
+The current speaking draft is
+[[Devcon/presentation/2026-10-13-content-flow/slides-and-notes|the content-first deck's native slide text and speaker notes]].
+It has 18 main slides and one resource/Q&A page. Nineteen minutes are planned,
+but this revision has not been rehearsed. The notes contain spoken narration
+followed by public sources. The verification sequence is explanatory, not a
+fresh runtime result. There is no live demo or animation in this draft.
+
+James's 17-minute first read applies to the earlier version preserved below.
+Review the new opening, chapter connections and voice before visual polish.
+
+## October 12 script, preserved for comparison
+
 Prepared October 12, 2026. This is the speaking draft for the native Google Slides rehearsal copy built from Devcon's supplied template. The organizer's original deck has not been changed. Find the working copy in this Codex task or Google Drive by its title, `Who Can Turn Off Your Ethereum App? | Devcon rehearsal draft`; private presentation links stay outside Git.
 
 Draft for 20 minutes plus five minutes Q&A. Twenty main slides carry 19 minutes of planned material and one minute margin. Timing has not been measured. Demo slides are a narrated walkthrough, not a fresh run. Keep the full 3:30 demo allocation. Seven appendix slides support Q&A.
