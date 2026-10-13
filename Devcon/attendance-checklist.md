@@ -178,6 +178,10 @@ organizer requirement. Other dates below remain internal preparation targets.
   with the live-vs-recorded demonstration decision explicit.
 - [ ] By **2026-10-13**, perform the first full timed run and cut material that
   cannot fit the accepted 20-minute slot.
+  **October 13 progress:** James reports a 17-minute read of the speaker
+  notes. Demo timing was not specified, and the story/stack revision is now
+  under discussion. This credits the first read without treating a complete
+  revised stage rehearsal as finished. See [[preparation-plan]].
 - [ ] By **2026-10-20**, stabilize the demonstration, record and verify its
   offline fallback, and test the presentation on a second computer.
 - [ ] By **2026-10-27**, freeze the travel copy, export redundant slide formats,
@@ -185,4 +189,5 @@ organizer requirement. Other dates below remain internal preparation targets.
 
 [[preparation-plan]] holds the rehearsal routine and next action. A separate
 Devcon preparation reminder runs Tuesdays at **09:00 America/Chicago** in the
-presentation task. Start short speaking practice now, before the deck exists.
+presentation task. The deck and first read now exist; follow the current
+revision and next practice in [[preparation-plan]].

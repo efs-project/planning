@@ -1,6 +1,6 @@
 # Outside examples for the Devcon talk
 
-Source bank checked **2026-09-14** for [[presentation-spine]]. James's direction
+Source bank initially checked **2026-09-14** for [[presentation-spine]]. James's direction
 is to use non-EFS examples wherever they sharpen a point or reveal another
 design choice. EFS remains the running user journey. This bank supports
 selection during drafting, not a promise to cover every project in 20 minutes.
@@ -9,6 +9,23 @@ For each example, separate the source-supported fact from our proposed lesson.
 None is a verdict on the whole project's decentralization or a claim that EFS
 solves the same problem. Refresh changing documentation and the relevant
 deployment configuration before using it on stage.
+
+## October 13 opening and vision additions
+
+James now wants the problem and the positive future to carry more of the
+talk. [[presentation-revision#Evidence for the stakes and vision]] records
+fresh primary-source checks for Pocket's shutdown, Ledger Connect Kit's
+runtime distribution compromise, Stadia controller recovery and the original
+Hyperstructures essay. Pocket and Ledger are the leading harm examples;
+Stadia, Git or a protocol with replaceable interfaces can supply a positive
+contrast. These are candidates, not extra mandatory project tours.
+
+Pocket's current shutdown FAQ names **November 12, 2025** as the export/API
+end date. Its separate export page still has an old October 8 line as well
+as the November 12 banner. Use the explicit shutdown FAQ for the historical
+date and the export page only for the documented URL-versus-content limit.
+Google's controller page also has stale updater deadlines; the supported
+teaching claim is the historical recovery design, not current tool availability.
 
 ## Uniswap: interface and protocol access
 

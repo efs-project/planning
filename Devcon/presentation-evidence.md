@@ -6,6 +6,13 @@ should describe the actual deployment shown without EFS version labels.
 
 ## Evidence status
 
+**October 13 revision:** James has completed a 17-minute read of the notes.
+This does not establish a fresh demonstration result. [[stack-map]] now groups
+the inspection questions for teaching, and [[presentation-revision]] proposes
+reducing the earlier 3:30 sequence to 60-90 seconds of captured results. The
+runbook below remains the full candidate check sequence, not a required live
+stage performance. No new proof execution was performed for this revision.
+
 | Candidate claim or demonstration | Evidence available | What remains before using it on stage |
 | --- | --- | --- |
 | EFS publishes paths, provenance and mirror records on Sepolia | Accepted [[application-draft]] and the fixed-commit proof package below contain the publication records and transaction references. | Re-read the exact records at a recorded chain basis; retain the output and transaction references with the talk assets. |

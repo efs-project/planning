@@ -4,7 +4,20 @@ Working story for **A Full-Stack Walk-Away Test**. Drafted 2026-09-14 for
 James's accepted 20-minute talk plus 5 minutes of Q&A. This is presentation
 preparation, not a change to the accepted proposal or an EFS release deadline.
 
-## Working direction
+## Current revision, October 13
+
+After a 17-minute read of the speaker notes, James asked to lead with a
+clearer problem and inspiring vision, formalize the stack, and teach checks
+and improvements for the audience's own apps. EFS belongs where it is
+directly useful. [[presentation-revision]] proposes the new story and shorter
+demonstration options; [[stack-map]] defines the eight functional layers.
+
+The earlier story below and its live slides are preserved for comparison in
+[[Devcon/presentation/README]]. The new outline has not yet been implemented
+in the deck. The proposed presentation method and demonstration scope remain
+open for discussion with James.
+
+## Earlier working direction
 
 James clarified on **2026-09-14**: EFS is the through line, and examples from
 other projects should appear wherever they clarify a failure, show another

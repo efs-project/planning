@@ -12,18 +12,50 @@ The EFS attendance checklist retains earlier preparation targets and history.
 - Sources, historical EFS proof and open verification work separated in
   [[presentation-evidence]].
 - [[presentation-examples]] supplies non-EFS comparisons across the stack.
-  Use them where they teach a different failure or improvement. EFS remains
-  the main journey, rather than the only system the audience learns from.
+  Use them where they teach a different failure or improvement. James's
+  October 13 direction prioritizes the user problem and stack, with EFS where
+  it directly helps explain a mechanism.
 - A native Google Slides rehearsal copy was built and visually reviewed on
   October 12 using Devcon's supplied template. It has 20 main slides, timed
   speaker notes, a resource slide and six skipped technical Q&A slides.
   [[rehearsal-script]] preserves the speaking draft and public sources.
-- No fresh demo recording or spoken rehearsal has been completed in this task.
-  Slides 14-16 are explicitly planned checks. The biggest remaining risks are
-  whether the story works aloud and whether fresh demonstration outputs
-  support the claims. More subjects are not the next priority.
+- James reports a **17-minute read-through of the speaker notes on October 13**.
+  No recording was supplied. Whether he reserved the full planned demo slot
+  is unknown. No fresh demo recording has been completed in this task.
+- The current deck is preserved in [[Devcon/presentation/README]].
+  [[presentation-revision]] and [[stack-map]] now guide discussion of a
+  stronger opening and a clearer structure. The largest talk risk is whether
+  the audience understands why the work matters before the technical inventory.
+- Body text still needs recomposition at the organizer's recorded minimum of
+  24 pt. The color repair did not enlarge inherited 12-13 pt body styles.
 
-## October 12 rehearsal deck
+## October 13 practice and revision
+
+The first read establishes that the existing words are speakable in roughly
+17 minutes at James's reading pace. It does not establish stage timing for
+the rewrite, recorded demonstration, transitions or pauses. Preserve that
+result as a baseline rather than discarding it or treating it as a final run.
+
+James wants the audience to understand the harm of shutdown or takeover,
+want a future of reliable apps that outlive their creators, understand the
+stack and leave with improvements they can make. The new working map has
+eight functional layers, taught in three chapters. EFS is a relevant example
+throughout preparation, without requiring a mention at every layer.
+
+The earlier 3:30 demo allocation is under review. The recommendation is the
+supplied Google Slides workflow with 60-90 seconds of freshly captured proof
+results inside the data/state chapter. Screenshots are sufficient if they
+teach the checks clearly. See [[presentation-revision]] for alternatives,
+the accepted-description commitment and the organizer-method decision.
+Neither a final delivery method nor removal of the demonstration is recorded
+as James's decision.
+
+Next: discuss the opening and map, then rewrite the deck and speaker notes.
+Make audience narration distinct from practice instructions. Capture another
+Git snapshot before the next rehearsal. A two- or three-minute recording of
+the opening will be useful before a complete second run.
+
+## October 12 rehearsal deck (preserved baseline)
 
 The working copy is titled `Who Can Turn Off Your Ethereum App? | Devcon
 rehearsal draft` in Google Drive. Find its link in this Codex task; private
@@ -57,8 +89,8 @@ For the first practice:
    clear. A recording is useful but optional; raw recordings stay outside Git.
 
 Slide 21 is the resource/Q&A landing page. Slides 22-27 are skipped in normal
-slideshow mode and can be selected manually for questions. No rehearsal is
-credited until James supplies a take or reports that it happened.
+slideshow mode and can be selected manually for questions. James has since
+reported the October 13 read-through recorded above.
 
 ## October 12 delivery update
 
@@ -177,7 +209,11 @@ holds the internal targets. The October 6 organizer update also records an
 October 27 slide-finalization requirement. Personal organizer actions now
 belong in the Personal Devcon tracker linked above.
 
-Preparation order:
+The original dated sequence below is retained as planning history. The
+October 13 revision above is the current next action. The proposed reduction
+in demo scope is not a new requirement to build tooling.
+
+Original preparation order:
 
 1. **Story before polish.** Review this draft by the September 22 target.
    Try an early rough spoken pass using only the beat headings, even if it is
@@ -228,7 +264,8 @@ reminder. This reminder is separate from the broader weekly EFS PM review.
 
 ## What we need before the final rehearsal
 
-- A clear explanation of EFS within the opening few minutes.
+- A clear user problem and positive vision before the technical details, with
+  a brief EFS explanation before its first substantive example.
 - One concrete user task connecting app, network, contracts and blockchain.
 - Useful outside comparisons, with sources and deployment/version boundaries
   checked before use. Each comparison must add a lesson rather than a logo.
@@ -237,7 +274,8 @@ reminder. This reminder is separate from the broader weekly EFS PM review.
   why, including cases where accepting a dependency is reasonable.
 - Both disappearance and compromised-authority cases, with the distinction
   between a failed hash check and a valid malicious update made clear.
-- A demonstration whose recorded outputs support exactly the claim spoken.
+- Any demonstration uses observed outputs supporting exactly the claim spoken.
+  Settle its scope against the accepted description before final delivery.
 - An independent person who can follow the recovery instructions.
 - A final resource slide with readable URL, optional QR, EFS overview video
   link and the short audience exercise. Creating the linked page is a later
