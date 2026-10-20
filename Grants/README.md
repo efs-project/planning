@@ -103,7 +103,7 @@ Post-decision pass, within 48 hours:
 
 ## Open grant-ops tasks
 
-- [ ] Review the 2026-09-11 sweep: timely Arbitrum Open House go/no-go, Emergent Ventures preparation, FUTO Fellows residency fit and one paid-work lead. Details in [[proposals]] and [[funding-income]].
+- [ ] Review the current eligibility and evidence gates in [[proposals]] before choosing another application. October 20 corrections retire the Arbitrum entry sprint and NLnet revision-pending advice; human-authorship restrictions also constrain agent help. Older broad research in [[funding-income]] is not a current submission queue.
 - [ ] Update the KarmaHQ page team section; it currently lists no team members.
 - [ ] Decide whether the KarmaHQ "Total Funds Raised" value should remain `0` until funds are received or include prior in-kind/self-funded work.
 - [ ] Replace the bare KarmaHQ "Path to Success" wording with a sharper sustainability path.

@@ -41,8 +41,10 @@ by Devcon. It must not turn an unfinished v2 design into a launch promise.
 
 - Identify centralized off switches across the full Ethereum app stack.
 - Use the public EFS Sepolia system as the working example.
-- Demonstrate independent retrieval and verification, including corruption and
-  unavailability.
+- Teach independent retrieval and verification, including corruption and
+  unavailability. James's October 13 delivery direction uses screenshots and
+  staged explanations inside the chapters, not a standalone or live demo;
+  [[Devcon/preparation-plan]] owns the current execution plan.
 - Give developers practical questions for testing their own applications.
 - Show only implementation details that remain accurate at presentation time.
 
@@ -53,8 +55,10 @@ by Devcon. It must not turn an unfinished v2 design into a launch promise.
 - Keep the session educational and non-promotional, with EFS used as a working
   case study rather than a sales pitch.
 - Keep November 3-6 available; the assigned slot remains subject to change.
-- Show only claims and demonstrations that remain accurate at presentation
-  time, with a preverified offline fallback for the live demonstration.
+- Show only claims and visuals that remain accurate at presentation time;
+  retain offline presentation copies. The current screenshot-based plan does
+  not require producing a live-demo video. Verify any newly captured evidence
+  rather than treating an explanatory sequence as a new execution result.
 - Do not turn Devcon into a v2 implementation or mainnet launch deadline.
 
 ---

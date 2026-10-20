@@ -15,6 +15,51 @@ Rows touched:
 Next check:
 ```
 
+## 2026-10-20 - NLnet v2.0 and bounded funding delta
+
+Trigger: weekly PM check; independent source verification, not an application
+or broad landscape refresh. October 13 observations remain historical below.
+
+- NLnet's [October 20 announcement](https://nlnet.nl/news/2026/20261020-AI-policy.html)
+  makes [GenAI policy v2.0](https://nlnet.nl/foundation/policies/generativeAI/2.0)
+  effective immediately, including November 3 Restack/CodeSupply. **Supersedes
+  v1.1/revision-pending guidance:** no AI proposal writing or interactive
+  evaluation answers, including idea generation, restructuring, shortening or
+  translation, except transparent accessibility assistance. Funded artefacts
+  including code, design and documentation must be human-produced; read-only
+  AI analysis/review is permitted, with human-written fixes. AI costs are not
+  reimbursable. Existing significant AI code must be disclosed; that is not an
+  express categorical exclusion of every pre-existing AI-assisted codebase.
+  High-level past/present AI-use transparency is mandatory; per-commit provenance
+  is recommended best practice, not a mandatory logging rule. The application
+  form's older AI-assistance/log language and September notice lag the new policy.
+- Deadline remains **November 3, 12:00 CET / 05:00 Chicago CST**. Strong European
+  dimension remains required: usual route allocates at least 60% to eligible-country
+  team members, with exceptional outside proposals considered. Eligibility is
+  not established. PM recommends deprioritizing under EFS's current workflow,
+  not creating a new grant scope, changing development practice or withdrawing
+  for James. No AI proposal outline/answers were generated.
+- [October 28 office hour](https://nlnet.nl/events/20261028/office-hour/) still
+  has the CEST/Amsterdam conflict recorded October 13: literal label gives
+  09:00 Chicago CDT, actual Amsterdam clock gives 10:00 CDT. Verify before use;
+  no scheduling or question posting performed.
+- [EF ESP RFPs](https://esp.ethereum.foundation/applicants/rfp) now lists no
+  active items, as do the checked [Open Rounds](https://esp.ethereum.foundation/applicants/open-rounds)
+  and [Wishlist](https://esp.ethereum.foundation/applicants/wishlist) surfaces.
+  Retire the live India-RFP claim. [Office Hours](https://esp.ethereum.foundation/applicants/office-hours)
+  remains a routing/advice option, not payment or a grant pitch.
+- [Filecoin PGF R&D](https://www.filpgf.io/rnd/) still says RFPs are coming soon.
+  Its customer-product focus excludes SDKs/adapters/gateways and unvalidated
+  demos; its AI focus requires customer-facing products rather than OSS alone.
+  Generic integration is insufficient. Keep watching without adopting a new
+  product scope; Foundation Open Grants is a distinct route.
+
+Rows touched: NLnet, ESP and Filecoin R&D in [[proposals]] / [[programs]]. Other
+rows retain their previous checks; Arbitrum outcome remains unconfirmed and
+Emergent's human-authorship gate is not rescinded. Next: October 27 call/watch
+check, without preparing NLnet application content. No contact, forms, account,
+code, chain, spending or calendar changes.
+
 ## 2026-10-13 - Funding eligibility and ended-event verification
 
 Trigger: weekly PM review with bounded independent verification; not a broad

@@ -8,26 +8,26 @@ private employment correspondence out of the public vault.
 
 ## Recommended order
 
-1. Make the Arbitrum Open House online go/no-go while there is time to build.
-   Existing-project entry is allowed, but a specific demo, event terms and
-   time budget must work for EFS. Overall prizes are milestone-conditional,
-   not immediate cash. Details and deadlines are in [[proposals]].
-2. Prepare an Emergent Ventures application around a bounded period of EFS
-   development and a tangible user outcome. It allows individual applicants
-   without requiring a new chain integration.
+1. Arbitrum online entry has ended. Reconcile any final submission/outcome
+   evidence when available; do not restart signing or build a late entry.
+   Current status belongs in [[proposals]], not this strategic options note.
+2. Emergent Ventures requires James-authored application content; agents may
+   proofread, not generate its narrative or outline. Pursuit remains optional,
+   without a new chain integration requirement.
 3. Assess FUTO Fellows residency feasibility. It could fund focused EFS work
    and living costs, but requires being in Austin. Coordinate any application
    with the already-pending microgrant rather than sending duplicate requests.
 4. Qualify one paid engineering engagement in parallel. A signed, funded
    milestone can provide a clearer payment path than waiting for grant awards.
-5. Keep NLnet's September 30 office hour and EF routing work moving. Treat
-   sponsorship as a supplementary funding channel until actual donors exist.
+5. Keep EF routing separate from a paid grant. PM recommends deprioritizing
+   NLnet under its new policy unless James independently chooses compliant
+   human-only funded work. Sponsorship remains supplementary until donors exist.
 
-NLnet is not yet a qualified application: its September call warns that mostly
-LLM-generated work is ineligible and advises waiting for the revised policy.
-EFS needs an honest contribution/provenance assessment and a substantiated
-European dimension, not just an AI-disclosure checkbox.
-[Current call](https://nlnet.nl/news/2026/20260903-call.html).
+**October 20 correction to the September research:** NLnet's revised
+[v2.0 policy](https://nlnet.nl/foundation/policies/generativeAI/2.0) is now in
+force: no AI proposal writing or generated funded artefacts; read-only review
+is allowed. European eligibility remains unresolved. See [[proposals]] and
+[[research-log]] before any effort, not the old September 30 action.
 
 ## Fellowships and individual support
 
@@ -39,10 +39,10 @@ payout schedule is promised. [Official program](https://futo.tech/grants/fellows
 
 **Emergent Ventures:** global individual applications, age 13+, no standard
 award range. Its form asks for a self-contained narrative of at most 1,500
-words and a basic budget; PDF attachments are not accepted. It says responses
-are typically within a week, which is not a promise of acceptance or payment.
-The strongest EFS hypothesis is a specific public-data exit/verification
-deliverable and the development time needed to ship it.
+words and a basic budget; PDF attachments are not accepted. The October 13
+form check found no response-time promise and rejects AI-written applications
+except proofreading. James must choose and write his own application; this
+note supplies no generated application scope or answers.
 [Application](https://mercatus.tfaforms.net/5099527).
 
 ## A concrete part-time lead

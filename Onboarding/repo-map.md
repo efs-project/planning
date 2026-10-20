@@ -30,6 +30,16 @@ production deployment/protocol freeze is authorized. The local successor
 directories were absent on 2026-09-23; remote-only existence was not checked.
 Coordinate repository creation and implementation scope with the owning PM.
 
+**October 20 visibility update:** successor repositories now exist, with accepted
+repository foundations on remote main: `contracts-v2` at `90ddbf5`, `sdk-v2`
+at `af11602`, and `client-v2` at `060c9fd`. Discover the accepted checkouts through
+the current owning handoff; older sibling bootstrap copies can be stale. These
+are tooling/package/client-shell foundations, not implemented EFS behavior or
+production authorization. The new contracts branch
+`fable/2026-10-13-core-contracts` has two local-only build/dependency-policy
+commits at `1deb068`, not a remotely published Core implementation. Keep this
+dated observation separate from future implementation permission.
+
 Fresh Git evidence on 2026-09-23: legacy SDK PR #1 is merged at `3147786`, and
 `origin/main` is `15314ce` after documentation PR #6. Older descriptions of it
 as unmerged are stale; merging v1 does not make its model the successor baseline.

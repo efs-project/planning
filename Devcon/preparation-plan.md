@@ -49,8 +49,10 @@ standalone or live demo. The earlier 3:30 allocation is retired for the next
 revision. No required video or browser/terminal switching. The promised
 retrieval and verification lesson can use freshly captured screenshots in
 the data/state chapter. [[presentation-revision]] records the proposed visual
-sequences and technical distinctions. Method notification to organizers is
-not confirmed; the supplied original Slides deck is still unchanged.
+sequences and technical distinctions. The Personal tracker owns current method
+notification and organizer follow-up; do not recreate that personal task from
+this planning note. Delivery of the finished deck through the supplied original
+Slides workflow is not established by the separate rehearsal copy.
 
 James's latest instruction is to settle the spine and content before
 animations or other polish. The rewritten deck is now ready for his review,
