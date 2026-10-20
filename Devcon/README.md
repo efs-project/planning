@@ -63,6 +63,9 @@ Keep sensitive travel details and personalized presentation links out of EFS.
 
 First working draft created **2026-09-14**:
 
+- [[presentation-compass]]: the stable message, values, audience feeling and
+  review questions. Read this before changing the story. It links James's
+  October 20 vision and consent clarification to [[vision-research]].
 - [[presentation-spine]]: the human story, full-stack speaking beats and the
   audience's practical exercise. EFS is the running example, with comparisons
   from other projects wherever they sharpen the lesson.
@@ -91,6 +94,9 @@ build dependencies and the people and budgets behind apparently separate
 services, as well as the app, network and blockchain.
 The next step is James's uninterrupted timed practice of the current deck.
 Bring back the duration, the least clear section and any unnatural wording.
+Also ask whether the talk makes the future worth building and leaves a
+developer feeling capable of improving one important user task. The October
+20 philosophy/research pass did not alter the rehearsal deck or its snapshot.
 The 17-minute prior read remains attached to the first deck. Screenshots and
 visual sequences are optional, not a prerequisite to today's run.
 

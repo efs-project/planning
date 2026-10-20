@@ -26,6 +26,7 @@ Conventions: [[brainstorm-system]].
 - 2026-05-26 [`2026-05-26-bs-system-design-perspectives-v1-contract-surface-from-n-angles`](./2026-05-26-bs-system-design-perspectives-v1-contract-surface-from-n-angles.md) — `raw` — 8 perspectives (L2 sequencer, indexer node, hardware wallet, search engine, privacy preserver, cross-chain bridge, archival node, lens curator). **Sharpest architectural ask: `EFSUploadGateway` wrapper** — single change addressing 8-prompt detonation + L2 amortization + AA bundling.
 
 ### Meta / cross-cutting
+- 2026-10-20 [[2026-10-20-pm-sovereign-software-vision]]: `reference`. James's original vision, user-chosen upgrades and shared-rule consent, existing EFS roots, open questions and the Devcon presentation compass.
 - 2026-07-29 [`2026-07-29-pm-nanda-neutral-agent-infrastructure-pressure`](./2026-07-29-pm-nanda-neutral-agent-infrastructure-pressure.md) — `reference` — Downstream NANDA-compatible platform pressure: neutral agent/skill releases, exact resolution, portable evidence, plural indexes, DataFacts, and a capability-safe consumer resolver without putting search, secrets, or execution on-chain.
 - 2026-07-29 [`2026-07-29-pm-credibly-neutral-git-forge-and-agent-artifacts`](./2026-07-29-pm-credibly-neutral-git-forge-and-agent-artifacts.md) — `reference` — Product-priority and research brief: neutral Git-host v1 floor, portable later-forge layer, explicit Git-backed EFS workspaces, and safe separation of public Agent Skills/knowledge from private memory/context.
 - 2026-05-26 [`2026-05-26-bs-divergent-usecases-v1-efs-use-cases-across-industries`](./2026-05-26-bs-divergent-usecases-v1-efs-use-cases-across-industries.md) — `raw` — 15 use cases. Upstream for many subsequent brainstorms.
@@ -53,6 +54,7 @@ entries are selective reference additions; see the warning at the top.
 *(none yet)*
 
 ### Reference (durable context)
+- 2026-10-20-pm-sovereign-software-vision
 - 2026-05-26-pm-client-os-architecture
 - 2026-07-29-pm-credibly-neutral-git-forge-and-agent-artifacts
 - 2026-07-29-pm-nanda-neutral-agent-infrastructure-pressure

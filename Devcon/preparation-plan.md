@@ -35,6 +35,14 @@ The EFS attendance checklist retains earlier preparation targets and history.
 
 ## October 20 practice and content freeze
 
+[[presentation-compass]] preserves the message and review questions from
+James's expanded vision. [[vision-research]] provides primary-source context;
+[[Brainstorms/2026-10-20-pm-sovereign-software-vision]] preserves his words and
+clarification that application upgrades should normally be user-chosen while
+shared systems also need agreed rule changes. Use this to refine the current
+story, not to add a philosophy chapter. That research pass left the deck
+unchanged while James reads it.
+
 James authorized a complete practice deck today. The current snapshot is
 [[Devcon/presentation/2026-10-20-practice/README]]. Preserve the opening,
 three chapters, practical audience exercise and hopeful closing. No live demo,
@@ -289,6 +297,12 @@ Each check-in reads these files and identifies:
 - The biggest remaining story, evidence or delivery risk.
 - One concrete action James can finish that week.
 - Any organizer requirement that needs James's attention.
+
+Read [[presentation-compass]] as well. When feedback can change the next
+revision, ask one focused question about the vision, human stakes, developer
+feeling or James's voice. Preserve his answer and distinguish it from editorial
+interpretation. Do not reopen settled choices or turn the philosophical question
+queue into extra homework before slide delivery.
 
 Also check whether the current draft teaches a useful choice at each layer:
 what can fail, how to notice it, what improvement is possible, and what it
