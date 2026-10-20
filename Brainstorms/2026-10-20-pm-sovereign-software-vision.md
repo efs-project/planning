@@ -44,6 +44,24 @@ release simultaneously. Keeping an old client does not preserve old shared
 contract rules after an upgrade. The remaining question is what meaningful
 refusal or exit each kind of change permits.
 
+### Clarification about whose story to tell
+
+Asked whether the person, community or developer should carry the opening and
+closing, James explained that all three matter. EFS focuses on a person keeping
+their life's work. His wider hyperstructure vision concerns communities
+building and governing bigger things together. This talk teaches developers
+to improve their stacks, so that vision should inspire them rather than become
+its main subject. He considered the developer story and ended tentatively:
+
+> So maybe my final answer is a user keeping their data intact as it's easy for the audience to connect with.
+
+Editorial recommendation: start with a person's ability to keep using their
+work, make developers the people who can protect that ability, and show
+community-scale cooperation as the reward. These are three roles in one
+argument, not three equal storylines. James's tentative preference does not
+settle the exact persona or anecdote, and the recommendation has not yet been
+applied to the slides.
+
 ## A coherent statement of the vision
 
 Build an open software commons that people can rely on without surrendering
@@ -102,8 +120,10 @@ others. These concerns already have roots in EFS planning.
 
 1. **The human story.** Which person should carry the opening and closing: an
    individual preserving their life's work, a community governing itself, or
-   a developer building on another team's work? A question is pending in chat.
-   These can connect, but one should be concrete enough to remember.
+   a developer building on another team's work? James's response above leans
+   toward the individual. The recommendation is a person-led opening, developer
+   action through the chapters, and the shared future at the close. Choose a
+   concrete task before adding a detailed persona or anecdote.
 2. **Consent under shared change.** Individual software choice and collective
    rule changes both matter, as James clarified. The boundary between them
    needs examples rather than a universal rubric invented for this talk.

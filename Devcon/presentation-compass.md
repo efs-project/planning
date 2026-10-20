@@ -60,8 +60,28 @@ Only then introduce the stack as the practical work needed to get there.
 
 Use one remembered user task throughout. The current deck imagines a community
 archive and uses recovering a file as the EFS example. James is considering
-which person or community should carry the story. Do not present an imagined
-archive as a deployed product or a user testimonial.
+the exact story; his October 20 response tentatively favors a person keeping
+their work because the audience can readily connect with that. Do not present
+an imagined archive as a deployed product or a user testimonial.
+
+### One story at three scales
+
+The recommended structure gives all three motivations a different job:
+
+- **The person supplies the stakes.** Years of useful work should not become
+  inaccessible when an app disappears or changes its terms.
+- **The developer supplies the agency.** Decisions at each layer can let that
+  person continue, switch tools, and benefit from someone else's improvements.
+- **The community supplies the horizon.** When many developers preserve these
+  freedoms, people can build shared workflows and institutions on the results.
+
+For example, imagine someone with years of research notes. The original app
+disappears, but they can open and use those notes in another compatible tool.
+Another developer can improve that tool without taking over their data. The
+same durable formats and accepted rules can support shared work where people
+choose to collaborate. This is an illustrative future, not a claimed EFS
+deployment. Start with the user's work and earn the larger vision through the
+technical chapters. Keeping bytes intact is necessary but not sufficient.
 
 | Chapter | The human promise | The engineering question |
 | --- | --- | --- |

@@ -42,6 +42,10 @@ clarification that application upgrades should normally be user-chosen while
 shared systems also need agreed rule changes. Use this to refine the current
 story, not to add a philosophy chapter. That research pass left the deck
 unchanged while James reads it.
+His subsequent story feedback tentatively favors a person keeping their work.
+The recommended arrangement is user stakes, developer action and a community
+horizon, rather than three competing storylines. Refine the exact task after
+his read-through; this is not yet a slide change.
 
 James authorized a complete practice deck today. The current snapshot is
 [[Devcon/presentation/2026-10-20-practice/README]]. Preserve the opening,
