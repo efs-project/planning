@@ -4,21 +4,22 @@ Application record and delivery control center for James's Devcon 8 talk. This
 folder is a conference-planning surface, not an EFS design ruling or a promise
 to ship v2 by Devcon.
 
-**Status (2026-10-13):** proposal accepted and participation confirmed. The
+**Status (2026-10-20):** proposal accepted and participation confirmed. The
 organizer assigned **November 5, 15:30-15:55, Lotus 3**, subject to change.
 The scheduling email leaves the timezone unstated. The supplied Google Slides
-deck remains unchanged. The separate native rehearsal copy now has **18 main
+deck remains unchanged. The separate native rehearsal copy has **18 main
 slides and one resource/Q&A page**, with readable type and spoken notes.
 The revised introduction leads with harm to users and builders, then a vision
 of reliable CROPS apps and hyperstructures others can build on. The talk
 teaches the eight layers in [[stack-map]] through three chapters. Nineteen minutes
 are planned; this version has not been rehearsed. James's **17-minute** first
-read belongs to the first deck. All three versions are saved as PDF, editable
+read belongs to the first deck. All four versions are saved as PDF, editable
 PowerPoint and native text/notes in [[Devcon/presentation/README]].
-James wants to settle content and flow before animations or visual polish.
-The current draft is static, with no live demo. The working direction remains
-the organizer's laptop; fresh evidence captures and organizer method
-notification remain open.
+The October 20 practice pass adds concrete recovery and continuation examples
+and shorter spoken alternatives for the two dense sections. James has asked
+for a complete deck to practice today. The draft is static, with no live demo.
+The working direction remains the organizer's laptop. The Personal tracker
+owns organizer method notification and final delivery.
 
 **Session:** [Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test](https://devcon.org/en/schedule/devcon8/SPVJV8/)
 
@@ -88,11 +89,10 @@ James's direction is to help developers recognize failures and decide which
 ones their own apps should defend against. Coverage includes usable recovery,
 build dependencies and the people and budgets behind apparently separate
 services, as well as the app, network and blockchain.
-The next step is James's review of the new opening, chapter connections and
-spoken voice. Visual sequences can wait until the content works. The
-17-minute prior read is recorded without assuming its demo timing or assessing
-delivery that has not been heard. A short recording of the new opening would
-help test clarity before another full run.
+The next step is James's uninterrupted timed practice of the current deck.
+Bring back the duration, the least clear section and any unnatural wording.
+The 17-minute prior read remains attached to the first deck. Screenshots and
+visual sequences are optional, not a prerequisite to today's run.
 
 ## Acceptance completed
 

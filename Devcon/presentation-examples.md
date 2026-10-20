@@ -10,6 +10,24 @@ None is a verdict on the whole project's decentralization or a claim that EFS
 solves the same problem. Refresh changing documentation and the relevant
 deployment configuration before using it on stage.
 
+## October 20 spoken selection
+
+The practice deck now uses the approved substitutions from the
+[private example research](../../../Personal/devcon-2026/web3-examples-2026-10-18.md).
+Safe 2-of-3 replaces generic account-recovery wording, PoolTogether claimers
+replace the generic worker list, Uniswap v2 makes the fixed-code claim precise,
+and Safe CLI replaces Git bundles as the continuation example. EFS remains
+the archive through line. Ledger and OP Stack remain brief contrasts.
+
+The snapshot's notes retain public primary sources and the limits of each
+claim. Decryption recovery is separate from signer recovery. Worker permission
+does not guarantee willing operators. Fixed v2 code retains fee authority and
+other dependencies. Changing interfaces alone does not repair compromised
+account configuration. No new recovery transaction or EFS retrieval occurred.
+Helios, Graph Node and oracle detail remain reference material rather than
+extra spoken project introductions. See
+[[Devcon/presentation/2026-10-20-practice/slides-and-notes]].
+
 ## October 13 opening and vision additions
 
 ### CROPS and hyperstructures

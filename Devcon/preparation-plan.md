@@ -15,20 +15,42 @@ The EFS attendance checklist retains earlier preparation targets and history.
   Use them where they teach a different failure or improvement. James's
   October 13 direction prioritizes the user problem and stack, with EFS where
   it directly helps explain a mechanism.
-- A native Google Slides rehearsal copy was rebuilt and visually reviewed on
-  October 13 using Devcon's supplied template. It has 18 main slides and one
+- A native Google Slides rehearsal copy was revised and visually reviewed on
+  October 20 using Devcon's supplied template. It has 18 main slides and one
   resource/Q&A page, with 19 minutes of planned material. [[rehearsal-script]]
   points to the new spoken notes and public sources. It is not yet rehearsed.
+  The main narration is 2,143 words, with shorter alternatives for slides 13
+  and 14. Safe recovery and CLI, PoolTogether claimers and Uniswap v2 now supply
+  specific improvement examples alongside EFS.
 - James reports a **17-minute read-through of the speaker notes on October 13**.
   No recording was supplied. Whether he reserved the full planned demo slot
   is unknown. No fresh demo recording has been completed in this task.
-- The first-read deck and subsequent content and opening revisions are preserved
+- The first-read deck and subsequent content, opening and practice revisions are preserved
   in [[Devcon/presentation/README]]. [[presentation-spine]] records the
   implemented story and timing. The largest talk risk is whether the chapters
   feel like one useful argument rather than a catalogue of dependencies.
 - Body text has been recomposed at 24 pt using the template's colors. All 19
   pages were rendered and inspected, with wrapping titles repaired. This
   construction check is not a spoken rehearsal or final organizer submission.
+
+## October 20 practice and content freeze
+
+James authorized a complete practice deck today. The current snapshot is
+[[Devcon/presentation/2026-10-20-practice/README]]. Preserve the opening,
+three chapters, practical audience exercise and hopeful closing. No live demo,
+new animation or required screenshot capture is needed for this version.
+
+The next action is one uninterrupted timed run through slides 1-18. Read the
+main narration, not the reference sections or both alternative routes. Bring
+back the duration and the least clear section. Later practice can adjust
+delivery and notes without changing the slides.
+
+**Internal target:** settle the core content on October 21, leaving the
+remaining limited preparation time for necessary corrections and delivery.
+This is a planning target, not an organizer requirement.
+**Organizer deadline:** the previously verified slide-finalization date is
+October 27. Personal administration and the actual submission remain in the
+Personal tracker. Updating the rehearsal copy does not submit the slides.
 
 ## October 13 practice and revision
 

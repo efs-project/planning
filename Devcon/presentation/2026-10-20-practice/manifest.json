@@ -1,0 +1,78 @@
+{
+  "snapshot": "2026-10-20-practice",
+  "captured_date": "2026-10-20",
+  "source_title": "Who Can Turn Off Your Ethereum App? | Devcon rehearsal draft",
+  "slide_count": 19,
+  "main_slides": 18,
+  "resource_slide": 19,
+  "skipped_slides": [],
+  "speaker_note_count": 19,
+  "planned_main_seconds": 1140,
+  "main_spoken_words": 2143,
+  "main_spoken_words_using_both_short_routes": 1908,
+  "rehearsal": {
+    "completed": false,
+    "prior_17_minute_read_applies_to": "2026-10-13-first-readthrough"
+  },
+  "verification": {
+    "native_text_and_notes_match_authoring_content": true,
+    "source_pdf_matches_prior_git_snapshot": true,
+    "automated_native_issue_count": 0,
+    "visual_review": {
+      "all_pages_rendered": 19,
+      "all_pages_inspected_in_initial_output": true,
+      "repaired_pages_inspected": [
+        8,
+        12,
+        15,
+        16,
+        17
+      ],
+      "unchanged_page_pixels_match_reviewed_output": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9,
+        10,
+        11,
+        13,
+        14,
+        18,
+        19
+      ],
+      "repair": "Use plain native paragraphs where the export inconsistently rendered bullet markers; shorten the Safe API line.",
+      "remaining_visual_defects": []
+    },
+    "fresh_efs_runtime_check": false,
+    "organizer_submission": false,
+    "pdf_pages": 19,
+    "pdf_page_size_points": [
+      720.0,
+      405.0
+    ],
+    "pptx_zip_integrity": "passed",
+    "pptx_note_text_matches_native_after_whitespace_normalization": true,
+    "private_reference_scan": "passed"
+  },
+  "files": [
+    {
+      "name": "presentation.pdf",
+      "bytes": 1100023,
+      "sha256": "b6910e03bbd4837374e83b2097cd02e28e4a5078017daf877116b58dfabb38c6"
+    },
+    {
+      "name": "presentation.pptx",
+      "bytes": 3370437,
+      "sha256": "f1f7435a7ae570120ac2c563097dc23c562cfcc1b9eab1eeb537f890279ff4ab"
+    },
+    {
+      "name": "slides-and-notes.md",
+      "bytes": 24316,
+      "sha256": "39d4a917e06ef494dbfd12497fe3645245012615fb19d1b1d3129f49a1a4cb99"
+    }
+  ]
+}

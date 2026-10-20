@@ -1,12 +1,15 @@
 # Rehearsal script
 
-## Current script, October 13
+## Current script, October 20
 
 The current speaking draft is
-[[Devcon/presentation/2026-10-13-opening-vision/slides-and-notes|the latest deck's native slide text and speaker notes]].
+[[Devcon/presentation/2026-10-20-practice/slides-and-notes|the latest deck's native slide text and speaker notes]].
 It has 18 main slides and one resource/Q&A page. Nineteen minutes are planned,
 but this revision has not been rehearsed. The notes contain spoken narration
-followed by public sources. The verification sequence is explanatory, not a
+followed by clearly separated reference notes and public sources. Slides 13
+and 14 have shorter alternatives to use instead of their main narration.
+The main route is 2,143 words, or 1,908 with both alternatives.
+The verification sequence is explanatory, not a
 fresh runtime result. There is no live demo or animation in this draft.
 
 The latest opening states the whole argument in its first planned minute,
@@ -15,7 +18,9 @@ is a short supporting example after the vision. The closing returns to what
 users and future builders gain.
 
 James's 17-minute first read applies to the earlier version preserved below.
-Review the new opening, chapter connections and voice before visual polish.
+For today's practice, speak through slides 1-18 without stopping to edit.
+Do not read both versions, reference notes or sources aloud. Report the time,
+the least clear section and wording that does not sound like James.
 
 ## October 12 script, preserved for comparison
 

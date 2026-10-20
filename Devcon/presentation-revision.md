@@ -13,6 +13,13 @@ with static text and audience-facing speaker notes. [[presentation-spine]]
 records its implemented timing. It has not been rehearsed. The visual
 storyboards below remain later options, not a requirement for this review.
 
+**October 20 implementation:** James authorized a complete practice deck.
+[[Devcon/presentation/2026-10-20-practice/README]] retains the agreed opening
+and chapters, with specific Safe, PoolTogether and Uniswap v2 improvement
+examples and optional shorter narration for slides 13 and 14. Screenshots and
+animations remain optional. The next check is a timed run, not more example
+research or demo engineering.
+
 **Approved opening refinement:** James wants a clear problem, harm, solution
 and audience promise at the start, followed by the details. The latest deck
 implements this in [[Devcon/presentation/2026-10-13-opening-vision/README]].

@@ -4,7 +4,7 @@ Working story for **A Full-Stack Walk-Away Test**. Drafted 2026-09-14 for
 James's accepted 20-minute talk plus 5 minutes of Q&A. This is presentation
 preparation, not a change to the accepted proposal or an EFS release deadline.
 
-## Current revision, October 13
+## Current revision, October 20
 
 After a 17-minute read of the speaker notes, James asked to lead with a
 clearer problem and inspiring vision, formalize the stack, and teach checks
@@ -15,14 +15,21 @@ rehearsal copy. James then approved a sharper introduction: the problem is
 fragile apps that strand users and make other apps fragile. The positive
 vision is CROPS apps and hyperstructures that people can trust with important
 data and future builders can rely on. The latest version is saved in
-[[Devcon/presentation/2026-10-13-opening-vision/README]]. It has 18 main slides,
+[[Devcon/presentation/2026-10-20-practice/README]]. It has 18 main slides,
 one resource/Q&A page and spoken notes, with 19 minutes planned but no measured
 run yet. [[stack-map]] defines the eight functional layers.
 
+The October 20 pass preserves that story and substitutes concrete improvement
+paths for generic explanations. Safe 2-of-3 signers illustrate account recovery,
+PoolTogether claimers illustrate replaceable work, Uniswap v2 core illustrates
+scoped fixed rules, and Safe CLI illustrates continued use through another
+interface. Supporting details move to reference notes. Slides 13 and 14 also
+have shorter spoken routes. The main route is 2,143 words.
+
 The working delivery direction remains the organizer's laptop, without a
-standalone or live demo. This draft uses static text. Evidence screenshots and
-staged explanations can follow content review. Organizer method notification
-remains unconfirmed; the organizer's original deck has not been changed.
+standalone or live demo. This draft uses static text. Screenshots are optional
+and do not block today's rehearsal. The Personal tracker owns organizer method
+notification and submission. The organizer's original deck has not been changed.
 
 ### The current argument
 
@@ -76,8 +83,8 @@ five-minute Q&A. They are not a measured rehearsal result.
 
 The EFS verification sequence is explanatory, not a claim of newly observed
 retrieval results. Fresh captures remain in [[presentation-evidence]]. The
-current spoken text is preserved with the snapshot. Next, James reviews the
-opening, the connections between chapters and anything that is not in his voice.
+current spoken text is preserved with the snapshot. Next, James does a timed
+run and identifies unclear transitions or wording that is not in his voice.
 
 Everything below is the earlier working spine, retained for comparison. Its
 demo timing and stage instructions do not govern the current revision.

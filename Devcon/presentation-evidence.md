@@ -6,11 +6,13 @@ should describe the actual deployment shown without EFS version labels.
 
 ## Evidence status
 
-**Current content-first deck:** the October 13 opening revision is saved in
-[[Devcon/presentation/2026-10-13-opening-vision/README]]. Its file-verification
+**Current practice deck:** the October 20 revision is saved in
+[[Devcon/presentation/2026-10-20-practice/README]]. Its file-verification
 slide explains the check sequence, without presenting newly observed outcomes.
-No fresh EFS runtime test or evidence screenshot was produced. Settle the
-story and flow with James before building the proposed visual sequences below.
+No fresh EFS runtime test or evidence screenshot was produced. Safe recovery
+and CLI, PoolTogether workers and scoped Uniswap v2 claims use primary-source
+research, not new transactions or outage drills. The current version is ready
+for a timed practice. The proposed visual sequences below remain optional.
 
 **October 13 revision:** James has completed a 17-minute read of the notes.
 This does not establish a fresh demonstration result. [[stack-map]] now groups
@@ -24,8 +26,9 @@ or recording. No new proof execution was performed for this revision.
 Before capturing the new visuals:
 
 - **Entry path:** record the ENS reference and exact app release, then test
-  an independent retrieval path. `.eth.link` and `.eth.limo` share the eth.limo
-  service, so they are not evidence of independent gateway operators. Inspect
+  an independent retrieval path. The September 2024 migration of `.eth.link`
+  to the eth.limo service shows why two names need not be independent operators.
+  That historical example is not a current topology audit. Inspect
   runtime requests as well as whether the page opens.
 - **Records and files:** keep the public record, chain basis, expected digest
   and captured IPFS/Arweave outcomes connected. RPC redundancy, supported
