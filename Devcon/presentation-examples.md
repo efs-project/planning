@@ -10,7 +10,18 @@ None is a verdict on the whole project's decentralization or a claim that EFS
 solves the same problem. Refresh changing documentation and the relevant
 deployment configuration before using it on stage.
 
-## October 20 spoken selection
+## October 20 integrated deck and fresh audit
+
+[[example-audit-2026-10-20]] records current primary-source checks, corrections
+and candidate substitutions. The integrated deck adds Teia's positive
+community-continuation story, labels PoolTogether V5 and uses canonical links,
+and separates Safe signer replacement from decryption and interface recovery.
+Uniswap's fee authority and OP Stack's inclusion route remain narrowly scoped.
+Helios and Graph Node each receive a brief spoken mechanism explanation.
+dYdX v3, Async Art and Liquity V1 remain reserves, not additional sections.
+The current snapshot is [[Devcon/presentation/2026-10-20-integrated-spine/README]].
+
+## Earlier October 20 practice selection
 
 The practice deck now uses the approved substitutions from the
 [private example research](../../../Personal/devcon-2026/web3-examples-2026-10-18.md).

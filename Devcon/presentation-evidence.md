@@ -7,12 +7,14 @@ should describe the actual deployment shown without EFS version labels.
 ## Evidence status
 
 **Current practice deck:** the October 20 revision is saved in
-[[Devcon/presentation/2026-10-20-practice/README]]. Its file-verification
+[[Devcon/presentation/2026-10-20-integrated-spine/README]]. Its file-verification
 slide explains the check sequence, without presenting newly observed outcomes.
 No fresh EFS runtime test or evidence screenshot was produced. Safe recovery
 and CLI, PoolTogether workers and scoped Uniswap v2 claims use primary-source
 research, not new transactions or outage drills. The current version is ready
-for a timed practice. The proposed visual sequences below remain optional.
+for a timed practice. [[example-audit-2026-10-20]] records the refreshed source
+checks and new Teia story, with dYdX, Async Art and Liquity held in reserve.
+The proposed visual sequences below remain optional.
 
 **October 13 revision:** James has completed a 17-minute read of the notes.
 This does not establish a fresh demonstration result. [[stack-map]] now groups

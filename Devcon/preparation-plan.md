@@ -19,9 +19,9 @@ The EFS attendance checklist retains earlier preparation targets and history.
   October 20 using Devcon's supplied template. It has 18 main slides and one
   resource/Q&A page, with 19 minutes of planned material. [[rehearsal-script]]
   points to the new spoken notes and public sources. It is not yet rehearsed.
-  The main narration is 2,143 words, with shorter alternatives for slides 13
-  and 14. Safe recovery and CLI, PoolTogether claimers and Uniswap v2 now supply
-  specific improvement examples alongside EFS.
+  The main narration is 2,089 words, with shorter alternatives for slides 13
+  and 14. Safe signer replacement and CLI, PoolTogether V5 claimers, Uniswap v2
+  and Teia supply specific improvement examples alongside EFS.
 - James reports a **17-minute read-through of the speaker notes on October 13**.
   No recording was supplied. Whether he reserved the full planned demo slot
   is unknown. No fresh demo recording has been completed in this task.
@@ -39,16 +39,15 @@ The EFS attendance checklist retains earlier preparation targets and history.
 James's expanded vision. [[vision-research]] provides primary-source context;
 [[Brainstorms/2026-10-20-pm-sovereign-software-vision]] preserves his words and
 clarification that application upgrades should normally be user-chosen while
-shared systems also need agreed rule changes. Use this to refine the current
-story, not to add a philosophy chapter. That research pass left the deck
-unchanged while James reads it.
-His subsequent story feedback tentatively favors a person keeping their work.
-The recommended arrangement is user stakes, developer action and a community
-horizon, rather than three competing storylines. Refine the exact task after
-his read-through; this is not yet a slide change.
+shared systems also need agreed rule changes. James approved combining this
+vision with the accepted title and technical layers. The new deck uses user
+stakes, developer action and a community horizon, without a separate philosophy
+chapter. The person keeping years of research notes is illustrative, not a
+claim about an EFS customer or deployed editor. The source checks and reserve
+examples are in [[example-audit-2026-10-20]].
 
 James authorized a complete practice deck today. The current snapshot is
-[[Devcon/presentation/2026-10-20-practice/README]]. Preserve the opening,
+[[Devcon/presentation/2026-10-20-integrated-spine/README]]. Preserve the opening,
 three chapters, practical audience exercise and hopeful closing. No live demo,
 new animation or required screenshot capture is needed for this version.
 

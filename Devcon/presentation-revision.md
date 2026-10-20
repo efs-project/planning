@@ -13,7 +13,14 @@ with static text and audience-facing speaker notes. [[presentation-spine]]
 records its implemented timing. It has not been rehearsed. The visual
 storyboards below remain later options, not a requirement for this review.
 
-**October 20 implementation:** James authorized a complete practice deck.
+**Latest October 20 implementation:** James approved the combined vision and
+walk-away spine. [[Devcon/presentation/2026-10-20-integrated-spine/README]]
+records the person-led opening, eight-job teaching sequence, consent
+distinction and hopeful closing. [[example-audit-2026-10-20]] records refreshed
+examples and the new Teia story. HTTP-hosted versus content-addressed delivery
+is the first candidate for the later visual pass. No live demo or animation.
+
+**Earlier October 20 implementation:** James authorized a complete practice deck.
 [[Devcon/presentation/2026-10-20-practice/README]] retains the agreed opening
 and chapters, with specific Safe, PoolTogether and Uniswap v2 improvement
 examples and optional shorter narration for slides 13 and 14. Screenshots and

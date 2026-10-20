@@ -1,0 +1,51 @@
+{
+  "snapshot": "2026-10-20-integrated-spine",
+  "captured_date": "2026-10-20",
+  "source_title": "Who Can Turn Off Your Ethereum App? | Devcon rehearsal draft",
+  "slide_count": 19,
+  "main_slides": 18,
+  "resource_slide": 19,
+  "skipped_slides": [],
+  "speaker_note_count": 19,
+  "planned_main_seconds": 1140,
+  "main_spoken_words": 2089,
+  "main_spoken_words_using_both_short_routes": 1825,
+  "rehearsal": {
+    "completed": false,
+    "prior_17_minute_read_applies_to": "2026-10-13-first-readthrough"
+  },
+  "verification": {
+    "native_text_and_notes_match_authoring_content": true,
+    "pre_edit_native_text_and_notes_match_prior_git_snapshot": true,
+    "source_pdf_binary_matches_prior_git_snapshot": false,
+    "automated_native_issue_count": 0,
+    "all_pages_rendered_and_visually_inspected": 19,
+    "final_notes_only_revision_preserves_all_rendered_page_elements": true,
+    "template_layouts_preserved": true,
+    "pptx_slide_count": 19,
+    "pptx_notes_match_final_native_count": 19,
+    "pdf_page_count": 19,
+    "file_hashes_rechecked": true,
+    "export_private_reference_scan_passed": true,
+    "source_audit": "../../example-audit-2026-10-20.md",
+    "fresh_efs_runtime_check": false,
+    "organizer_submission": false
+  },
+  "files": [
+    {
+      "name": "presentation.pdf",
+      "bytes": 1101103,
+      "sha256": "d04bb9bf21d66ef15d283c0af8d038e9e6f5b78feb7cb6b76bf33c4680989b8b"
+    },
+    {
+      "name": "presentation.pptx",
+      "bytes": 3362720,
+      "sha256": "51c0f1f9d4b648fc745f643337d28284660cf1680863e47d2b74114d79262e49"
+    },
+    {
+      "name": "slides-and-notes.md",
+      "bytes": 26582,
+      "sha256": "9da9fee52aa6366c4ad5cc1ba61b374be6b0f63a648170835c34fc07de90ea01"
+    }
+  ]
+}

@@ -58,11 +58,11 @@ build on them. A shutdown or hostile change can strand both. Then show the
 alternative: lasting capabilities that people can choose, improve and combine.
 Only then introduce the stack as the practical work needed to get there.
 
-Use one remembered user task throughout. The current deck imagines a community
-archive and uses recovering a file as the EFS example. James is considering
-the exact story; his October 20 response tentatively favors a person keeping
-their work because the audience can readily connect with that. Do not present
-an imagined archive as a deployed product or a user testimonial.
+Use one remembered user task throughout. The current deck imagines a person
+keeping years of research notes and uses file retrieval as the EFS example.
+James approved the person-led stakes, developer action and community horizon
+after considering all three motivations. The specific research-notes persona
+is illustrative, not an EFS customer testimonial or deployed editor.
 
 ### One story at three scales
 
@@ -107,11 +107,13 @@ choice. A successful replacement path is more useful than another project
 name. The newest research is primarily context and Q&A material, not a reason
 to expand the spoken example list.
 
-## Proposed refinements after the current read
+## Approved refinements implemented October 20
 
-The native rehearsal deck and its October 20 snapshot are unchanged by this
-research pass. Preserve 18 main slides, the three chapters and the planned
-19-minute route. Changes should replace existing words rather than accumulate.
+James approved the combined vision and technical spine and asked for the deck
+update and example audit. [[Devcon/presentation/2026-10-20-integrated-spine/README]]
+implements the refinements below within 18 main slides, three chapters and
+the planned 19-minute route. This is not a measured rehearsal. New examples
+replace generic exposition, with reserves in [[example-audit-2026-10-20]].
 
 1. **Slides 2 and 3:** sharpen the causal link. Fragile dependencies make users
    vulnerable and make it risky for others to build on our work. Dependable,

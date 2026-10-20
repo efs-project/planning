@@ -13,11 +13,13 @@ The revised introduction leads with harm to users and builders, then a vision
 of reliable CROPS apps and hyperstructures others can build on. The talk
 teaches the eight layers in [[stack-map]] through three chapters. Nineteen minutes
 are planned; this version has not been rehearsed. James's **17-minute** first
-read belongs to the first deck. All four versions are saved as PDF, editable
+read belongs to the first deck. All five versions are saved as PDF, editable
 PowerPoint and native text/notes in [[Devcon/presentation/README]].
-The October 20 practice pass adds concrete recovery and continuation examples
-and shorter spoken alternatives for the two dense sections. James has asked
-for a complete deck to practice today. The draft is static, with no live demo.
+The latest October 20 revision integrates the person-led vision with the
+walk-away test and eight functional jobs. It sharpens consent and recovery
+distinctions, checks the examples and adds Teia as a positive continuation
+story. The main narration is 2,089 words, with shorter alternatives for the
+two dense sections. The draft is static, with no live demo.
 The working direction remains the organizer's laptop. The Personal tracker
 owns organizer method notification and final delivery.
 
@@ -74,6 +76,8 @@ First working draft created **2026-09-14**:
   the stack. Historical results are not new rehearsal results.
 - [[presentation-examples]]: sourced non-EFS examples to select while shaping
   each layer, with narrow claims and limits rather than whole-project ratings.
+- [[example-audit-2026-10-20]]: current-deck source checks, corrections and
+  additional examples held in reserve.
 - [[preparation-plan]]: early speaking practice, delivery checkpoints and the
   active Tuesday 9:00 a.m. America/Chicago preparation reminder.
 - [[rehearsal-script]]: pointer to the current native speaking draft, with
@@ -95,8 +99,9 @@ services, as well as the app, network and blockchain.
 The next step is James's uninterrupted timed practice of the current deck.
 Bring back the duration, the least clear section and any unnatural wording.
 Also ask whether the talk makes the future worth building and leaves a
-developer feeling capable of improving one important user task. The October
-20 philosophy/research pass did not alter the rehearsal deck or its snapshot.
+developer feeling capable of improving one important user task. The approved
+October 20 synthesis is now implemented in the rehearsal deck and saved in
+[[Devcon/presentation/2026-10-20-integrated-spine/README]].
 The 17-minute prior read remains attached to the first deck. Screenshots and
 visual sequences are optional, not a prerequisite to today's run.
 

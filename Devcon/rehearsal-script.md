@@ -3,19 +3,20 @@
 ## Current script, October 20
 
 The current speaking draft is
-[[Devcon/presentation/2026-10-20-practice/slides-and-notes|the latest deck's native slide text and speaker notes]].
+[[Devcon/presentation/2026-10-20-integrated-spine/slides-and-notes|the latest deck's native slide text and speaker notes]].
 It has 18 main slides and one resource/Q&A page. Nineteen minutes are planned,
 but this revision has not been rehearsed. The notes contain spoken narration
 followed by clearly separated reference notes and public sources. Slides 13
 and 14 have shorter alternatives to use instead of their main narration.
-The main route is 2,143 words, or 1,908 with both alternatives.
+The main route is 2,089 words, or 1,825 with both alternatives.
 The verification sequence is explanatory, not a
 fresh runtime result. There is no live demo or animation in this draft.
 
-The latest opening states the whole argument in its first planned minute,
-then connects reliable, composable apps to CROPS and hyperstructures. Pocket
-is a short supporting example after the vision. The closing returns to what
-users and future builders gain.
+The opening follows a person keeping their work, then connects dependable
+capabilities to CROPS and hyperstructures. The title's two walk-away scenarios
+guide all three technical chapters. Pocket sits beside retention, and Teia
+supplies a positive continuity story. The closing returns to what the person,
+the next builder and a community can gain.
 
 James's 17-minute first read applies to the earlier version preserved below.
 For today's practice, speak through slides 1-18 without stopping to edit.

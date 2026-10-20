@@ -3,7 +3,15 @@
 Working teaching model, October 13, 2026. Prepared after James's first
 17-minute read-through. This formalizes the dependencies for the next talk
 draft; it does not declare a universal networking standard or an EFS design.
-The proposed story and timing are in [[presentation-revision]].
+The current implemented story and timing are in [[presentation-spine]].
+
+The October 20 integrated deck teaches these eight jobs through a person
+keeping their work. Each receives its function, recognizable failure, specific
+example, improvement/check and cost or remaining assumption. Shared operators
+and usable continuation are closing checks across the jobs, not layers nine
+and ten. A public EFS file read does not exercise every signing, worker or L2
+path, so the narration explicitly uses other tasks for those comparisons.
+Current example boundaries and reserves are in [[example-audit-2026-10-20]].
 
 ## What we are testing
 

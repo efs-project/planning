@@ -15,16 +15,18 @@ rehearsal copy. James then approved a sharper introduction: the problem is
 fragile apps that strand users and make other apps fragile. The positive
 vision is CROPS apps and hyperstructures that people can trust with important
 data and future builders can rely on. The latest version is saved in
-[[Devcon/presentation/2026-10-20-practice/README]]. It has 18 main slides,
+[[Devcon/presentation/2026-10-20-integrated-spine/README]]. It has 18 main slides,
 one resource/Q&A page and spoken notes, with 19 minutes planned but no measured
 run yet. [[stack-map]] defines the eight functional layers.
 
-The October 20 pass preserves that story and substitutes concrete improvement
-paths for generic explanations. Safe 2-of-3 signers illustrate account recovery,
-PoolTogether claimers illustrate replaceable work, Uniswap v2 core illustrates
-scoped fixed rules, and Safe CLI illustrates continued use through another
-interface. Supporting details move to reference notes. Slides 13 and 14 also
-have shorter spoken routes. The main route is 2,143 words.
+James then approved combining his expanded vision with the accepted title.
+The integrated revision makes one person's retained work the human stakes,
+developers the agents of improvement, and community-scale cooperation the
+horizon. The walk-away test supplies the method throughout, not a separate
+philosophy section. Every job connects a plain function, failure, example,
+improvement and remaining cost or assumption. [[presentation-compass]] carries
+the values and [[example-audit-2026-10-20]] records the example decisions.
+Slides 13 and 14 retain shorter routes. The main route is 2,089 words.
 
 The working delivery direction remains the organizer's laptop, without a
 standalone or live demo. This draft uses static text. Screenshots are optional
@@ -58,10 +60,12 @@ needs: a way into trusted software, data and computation that remain useful,
 and rules and settlement the user can still rely on. Shared operators,
 funding, documentation and a usable exit connect all eight layers.
 
-EFS makes naming, retained software and file verification concrete. Pocket,
-Ledger Connect Kit, Safe, Graph Node, Chainlink, Uniswap, OP Stack and Git
-supply short contrasts where their details sharpen the lesson. They are
-examples of mechanisms, not whole-project decentralization ratings.
+EFS makes naming, retained software and file verification concrete. Ledger,
+Safe, Pocket, Helios, Graph Node, PoolTogether V5, Uniswap v2, OP Stack and
+Teia supply brief comparisons. Pocket moves beside retention. Teia replaces
+generic community-takeover prose with a positive historical example, explicitly
+on Tezos. Chainlink, dYdX v3, Async Art and Liquity V1 remain reference or Q&A
+material. These are mechanisms and incidents, not whole-project ratings.
 
 ### Implemented flow
 
@@ -70,15 +74,13 @@ five-minute Q&A. They are not a measured rehearsal result.
 
 | Time | Slides | Story purpose |
 | --- | --- | --- |
-| 0:00-1:00 | 1-2 | State the problem, harm to users and builders, the durable-app ambition and what the talk will teach. |
-| 1:00-2:15 | 3 | Make the vision concrete: important work, reusable capabilities, CROPS and the ambition of hyperstructures. |
-| 2:15-3:15 | 4 | Introduce absence and hostile control, with Pocket as a brief example after the central argument. |
-| 3:15-4:00 | 5 | Map eight jobs into three chapters and introduce the EFS file task. |
-| 4:00-7:30 | 6-8 | Entering the app: naming and access, runnable releases and build inputs, accounts and recovery. |
-| 7:30-11:30 | 9-12 | Continuing the work: retained data, file verification, trustworthy and complete state, offchain computation. |
-| 11:30-15:30 | 13-14 | Keeping the rules: contract and governance powers, inherited protocols, network/L1/L2 dependencies and usable recovery routes. |
-| 15:30-18:30 | 15-17 | Shared operators and funding, an exit someone can use, and a safe test developers can run on one task in their own app. |
-| 18:30-19:00 | 18 | Return to trustworthy apps and shared capabilities whose usefulness can grow beyond their creators. |
+| 0:00-2:00 | 1-3 | A person loses the use of their work. Developers inherit fragile dependencies. Introduce the alternative, CROPS and the shared-foundation ambition. |
+| 2:00-3:00 | 4-5 | Define absence and hostile authority, map eight jobs into three chapters, introduce EFS on Sepolia. |
+| 3:00-7:00 | 6-8 | Entering the app: naming and access, runnable releases and build inputs, accounts and recovery. |
+| 7:00-11:00 | 9-12 | Continuing the work: retained data, file verification, trustworthy and complete state, required computation. |
+| 11:00-15:00 | 13-14 | Keeping the rules: chosen software versus shared authority, inherited protocols, network/L1/L2 dependencies and recovery. |
+| 15:00-18:00 | 15-17 | Synthesize across the eight jobs: community operators, a usable alternative and one audience action. These are not extra layers. |
+| 18:00-19:00 | 18 | Return to the person, the next developer and dependable foundations for shared work. |
 | After the talk | 19 | Questions and EFS resources. |
 
 The EFS verification sequence is explanatory, not a claim of newly observed
