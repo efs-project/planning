@@ -7,6 +7,13 @@ The EFS attendance checklist retains earlier preparation targets and history.
 
 ## Where we stand
 
+- October 26: James added official-theme transition and point slides. The
+  reviewed 27-slide version is [[Devcon/presentation/2026-10-26-theme-review/README]],
+  with 2,173 main spoken words and a 19:40 cue budget, not measured timing.
+  All original technical narration remains. The before-cleanup version is
+  retained too. Use its slide map and [[rehearsal-script]] for current practice;
+  the October 20 record below describes the prior 19-slide arrangement.
+
 - Accepted application preserved in [[application-draft]].
 - First written story and timed beats drafted in [[presentation-spine]].
 - Sources, historical EFS proof and open verification work separated in
@@ -15,7 +22,7 @@ The EFS attendance checklist retains earlier preparation targets and history.
   Use them where they teach a different failure or improvement. James's
   October 13 direction prioritizes the user problem and stack, with EFS where
   it directly helps explain a mechanism.
-- A native Google Slides rehearsal copy was revised and visually reviewed on
+- The prior native Google Slides rehearsal copy was revised and visually reviewed on
   October 20 using Devcon's supplied template. It has 18 main slides and one
   resource/Q&A page, with 19 minutes of planned material. [[rehearsal-script]]
   points to the new spoken notes and public sources. It is not yet rehearsed.

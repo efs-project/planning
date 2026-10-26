@@ -1,14 +1,16 @@
 # Rehearsal script
 
-## Current script, October 20
+## Current script, October 26
 
 The current speaking draft is
-[[Devcon/presentation/2026-10-20-integrated-spine/slides-and-notes|the latest deck's native slide text and speaker notes]].
-It has 18 main slides and one resource/Q&A page. Nineteen minutes are planned,
+[[Devcon/presentation/2026-10-26-theme-review/slides-and-notes|the latest deck's native slide text and speaker notes]].
+It has 26 main slides including transitions and one thank-you/Q&A page. The
+cue budget is 19:40,
 but this revision has not been rehearsed. The notes contain spoken narration
-followed by clearly separated reference notes and public sources. Slides 13
-and 14 have shorter alternatives to use instead of their main narration.
-The main route is 2,089 words, or 1,825 with both alternatives.
+followed by clearly separated reference notes and public sources. Slides 20
+and 21 have shorter alternatives to use instead of their main narration.
+The main route is 2,173 words, or 1,909 with both alternatives. Keep the
+divider/question pairs brief. The original technical narration is unchanged.
 The verification sequence is explanatory, not a
 fresh runtime result. There is no live demo or animation in this draft.
 
@@ -19,7 +21,7 @@ supplies a positive continuity story. The closing returns to what the person,
 the next builder and a community can gain.
 
 James's 17-minute first read applies to the earlier version preserved below.
-For today's practice, speak through slides 1-18 without stopping to edit.
+For today's practice, speak through slides 1-26 without stopping to edit.
 Do not read both versions, reference notes or sources aloud. Report the time,
 the least clear section and wording that does not sound like James.
 

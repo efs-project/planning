@@ -1,0 +1,66 @@
+{
+  "snapshot": "2026-10-26-theme-review",
+  "captured_date": "2026-10-26",
+  "slide_count": 27,
+  "main_slides": 26,
+  "closing_qa_slide": 27,
+  "planned_seconds": 1180,
+  "measured_rehearsal": false,
+  "main_spoken_words": 2173,
+  "baseline_note_words": 2089,
+  "all_pages_visually_inspected": 27,
+  "automated_native_issues": 0,
+  "verification": {
+    "before": {
+      "pptx_notes_match_native": 27,
+      "pdf_pages": 27,
+      "private_portal_and_native_deck_reference_scan": "passed"
+    },
+    "after": {
+      "pptx_notes_match_native": 27,
+      "pdf_pages": 27,
+      "private_portal_and_native_deck_reference_scan": "passed"
+    },
+    "preservation": {
+      "all_27_slide_ids": true,
+      "all_existing_narrative_notes_except_timestamps": true,
+      "all_masters_layouts_and_backgrounds": true,
+      "concurrent_owner_closing_edit": true
+    }
+  },
+  "owner_change_during_review": "Closing title changed from Their work can outlive us to Our work can outlive us during sequential capture. Before PDF and native text retain Their; before PowerPoint already has Our. Final files retain Our.",
+  "personal_contact_policy": "Only owner-added public speaker contact details retained; no private portal links or native deck identifiers.",
+  "organizer_submission": false,
+  "files": [
+    {
+      "name": "before-presentation.pdf",
+      "bytes": 1861969,
+      "sha256": "af530c4e9e70be447daaa751ed5c8971052baa65694535186f792a794d6cd556"
+    },
+    {
+      "name": "before-presentation.pptx",
+      "bytes": 3860224,
+      "sha256": "ddb19126fb2d791707bb8db737d0839bf3a0fe7cf5fa012fc1e868ca98a9a0d7"
+    },
+    {
+      "name": "before-slides-and-notes.md",
+      "bytes": 27521,
+      "sha256": "3f577a593d771c0f436d36b41855a8cf27136c17228a3cb715adea9c34d0993b"
+    },
+    {
+      "name": "presentation.pdf",
+      "bytes": 1844847,
+      "sha256": "ec14fcdb657fd178121ad2185b4c5f1447d72734bc6036f288fba94aa6909709"
+    },
+    {
+      "name": "presentation.pptx",
+      "bytes": 3862373,
+      "sha256": "04bdbec46ec8e3da7da5acbc7012ae3783b81cfab58dba13f61e02f5a8e5e83c"
+    },
+    {
+      "name": "slides-and-notes.md",
+      "bytes": 27574,
+      "sha256": "6afeaa1438b557b1a9a64138ca24d8e5f28f702d0e3de147674621e445bb62e7"
+    }
+  ]
+}

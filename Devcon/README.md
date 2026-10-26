@@ -4,22 +4,22 @@ Application record and delivery control center for James's Devcon 8 talk. This
 folder is a conference-planning surface, not an EFS design ruling or a promise
 to ship v2 by Devcon.
 
-**Status (2026-10-20):** proposal accepted and participation confirmed. The
+**Status (2026-10-26):** proposal accepted and participation confirmed. The
 organizer assigned **November 5, 15:30-15:55, Lotus 3**, subject to change.
 The scheduling email leaves the timezone unstated. The supplied Google Slides
-deck remains unchanged. The separate native rehearsal copy has **18 main
-slides and one resource/Q&A page**, with readable type and spoken notes.
+deck remains outside this editing pass. The separate native rehearsal copy has
+**26 main slides including transitions and one thank-you/Q&A page**.
 The revised introduction leads with harm to users and builders, then a vision
 of reliable CROPS apps and hyperstructures others can build on. The talk
-teaches the eight layers in [[stack-map]] through three chapters. Nineteen minutes
-are planned; this version has not been rehearsed. James's **17-minute** first
-read belongs to the first deck. All five versions are saved as PDF, editable
+teaches the eight layers in [[stack-map]] through three chapters. The current
+cue budget is **19:40**, not a measured rehearsal. James's **17-minute** first
+read belongs to the first deck. Versions are saved as PDF, editable
 PowerPoint and native text/notes in [[Devcon/presentation/README]].
-The latest October 20 revision integrates the person-led vision with the
-walk-away test and eight functional jobs. It sharpens consent and recovery
-distinctions, checks the examples and adds Teia as a positive continuation
-story. The main narration is 2,089 words, with shorter alternatives for the
-two dense sections. The draft is static, with no live demo.
+The October 26 cleanup preserves James's theme and transitions, fills template
+placeholders and aligns the chapter labels and placement. The main narration
+is 2,173 words, with shorter alternatives for the two dense sections. The
+October 20 content and example audit remain the basis. The draft is static,
+with no live demo.
 The working direction remains the organizer's laptop. The Personal tracker
 owns organizer method notification and final delivery.
 
@@ -101,7 +101,7 @@ Bring back the duration, the least clear section and any unnatural wording.
 Also ask whether the talk makes the future worth building and leaves a
 developer feeling capable of improving one important user task. The approved
 October 20 synthesis is now implemented in the rehearsal deck and saved in
-[[Devcon/presentation/2026-10-20-integrated-spine/README]].
+[[Devcon/presentation/2026-10-26-theme-review/README]].
 The 17-minute prior read remains attached to the first deck. Screenshots and
 visual sequences are optional, not a prerequisite to today's run.
 

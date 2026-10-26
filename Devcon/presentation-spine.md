@@ -4,7 +4,16 @@ Working story for **A Full-Stack Walk-Away Test**. Drafted 2026-09-14 for
 James's accepted 20-minute talk plus 5 minutes of Q&A. This is presentation
 preparation, not a change to the accepted proposal or an EFS release deadline.
 
-## Current revision, October 20
+## Current presentation, October 26
+
+[[Devcon/presentation/2026-10-26-theme-review/README]] preserves James's themed
+27-slide arrangement and its cleanup. The eight jobs and argument below remain
+unchanged. The current chapter ranges are 7-11, 12-17 and 18-21; slides 22-26
+join the lessons into practical action and the closing vision. The original
+technical narration is intact, with brief transition cues and a 19:40 budget
+that has not been rehearsed. Use the new snapshot for current slide numbers.
+
+## Content revision, October 20
 
 After a 17-minute read of the speaker notes, James asked to lead with a
 clearer problem and inspiring vision, formalize the stack, and teach checks
@@ -14,7 +23,7 @@ animations or other polish. That revision is now implemented in the native
 rehearsal copy. James then approved a sharper introduction: the problem is
 fragile apps that strand users and make other apps fragile. The positive
 vision is CROPS apps and hyperstructures that people can trust with important
-data and future builders can rely on. The latest version is saved in
+data and future builders can rely on. That version is saved in
 [[Devcon/presentation/2026-10-20-integrated-spine/README]]. It has 18 main slides,
 one resource/Q&A page and spoken notes, with 19 minutes planned but no measured
 run yet. [[stack-map]] defines the eight functional layers.
