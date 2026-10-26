@@ -1,0 +1,136 @@
+{
+  "snapshot": "2026-10-26-positive-vision",
+  "captured_date": "2026-10-26",
+  "native_title": "Who Can Turn Off Your Ethereum App? | Devcon rehearsal draft",
+  "before_slide_count": 28,
+  "slide_count": 29,
+  "main_slides": 28,
+  "closing_qa_slide": 29,
+  "planned_seconds": 1110,
+  "main_spoken_words": 1961,
+  "timing_basis": "Current design-plan.json; planned duration and narrative count, not a measured rehearsal.",
+  "measured_rehearsal": false,
+  "organizer_submission": false,
+  "visual_inspection_status": "Not asserted by the archive script; see the verification report for the checks actually recorded.",
+  "status_limitations": [
+    "This is a rehearsal snapshot, not a measured delivery or organizer submission.",
+    "The archive script verifies source fingerprints and structure; it does not visually inspect slides.",
+    "PPTX and PDF exports are preserved byte-for-byte. Native internal object names may remain in binary exports; generated text omits native identifiers and local paths."
+  ],
+  "verification": {
+    "status": "passed",
+    "checked_at": "2026-10-26T22:29:05.486141+00:00",
+    "before_count": 28,
+    "after_count": 29,
+    "visual_review": "separate manual responsibility",
+    "measured_rehearsal": false,
+    "organizer_submission": false,
+    "inputs_fingerprints": [
+      {
+        "name": "raw-before.json",
+        "bytes": 1302898,
+        "sha256": "275a99051ad1ca3e4fc96e853ad74193e093fa397defa589ff87d043cdabace5"
+      },
+      {
+        "name": "raw-after.json",
+        "bytes": 1543800,
+        "sha256": "ab6da979b5ee777062740200387059fd6c249af40a093c3b015855122e63cd34"
+      },
+      {
+        "name": "expected-notes.json",
+        "bytes": 21544,
+        "sha256": "0887e44866679bff94410ec73383bba104689a67213144158fcf0107c8384647"
+      },
+      {
+        "name": "order.json",
+        "bytes": 555,
+        "sha256": "1040881bdb53c746132b9e41903e71a9fd00cdea7f63adeaa742a0dba761f649"
+      },
+      {
+        "name": "design-plan.json",
+        "bytes": 5437,
+        "sha256": "4feef45411ef0a0eb5af89cdc993ff1459decefe914a5a2b3a9b2cb69327de8c"
+      },
+      {
+        "name": "before.pptx",
+        "bytes": 3858075,
+        "sha256": "d359ab91fc8331e642d1437c81e7e34a5633091a67259a84b48a9908f6250098"
+      },
+      {
+        "name": "after.pptx",
+        "bytes": 3871250,
+        "sha256": "a720255c4c4b97928b1733fe315de0317bcd158ea9b94239ecaf1ae1a4b86dc4"
+      },
+      {
+        "name": "renders/before/presentation.pdf",
+        "bytes": 1847240,
+        "sha256": "51f034ebbfb18ff6b5b84bc83c80c2492c1ac27631b7dfed05fe89b39746e0ab"
+      },
+      {
+        "name": "renders/after-final/presentation.pdf",
+        "bytes": 1851656,
+        "sha256": "c7b17064108f64de6680ef142219bcf142ec161707e9f442d7e3609b52b11e83"
+      }
+    ],
+    "native": {
+      "baseline_slide_ids_preserved": 28,
+      "final_order_matches": true,
+      "native_notes_match_expected": 29,
+      "masters_layouts_notes_master_and_page_size_unchanged": true,
+      "source_backgrounds_unchanged": 28,
+      "source_slide_local_images_unchanged": 1,
+      "content_url_changes_ignored_as_ephemeral": true,
+      "source_pptx_image_bytes_preserved": 1
+    },
+    "before": {
+      "pptx_zip_integrity": "passed",
+      "pptx_notes_match_native": 28,
+      "pdf_pages": 28,
+      "pdf_native_text_frames_present": 66,
+      "privacy_scan": "passed"
+    },
+    "after": {
+      "pptx_zip_integrity": "passed",
+      "pptx_notes_match_native": 29,
+      "pdf_pages": 29,
+      "pdf_native_text_frames_present": 98,
+      "privacy_scan": "passed"
+    },
+    "planned_seconds": 1110,
+    "narrative_word_count": 1961,
+    "after_pdf_source": "renders/after-final/presentation.pdf",
+    "privacy_boundary": "No private presentation identifiers, private native links, personalized portal links or local absolute paths; editable object names are allowed."
+  },
+  "files": [
+    {
+      "name": "before-presentation.pdf",
+      "bytes": 1847240,
+      "sha256": "51f034ebbfb18ff6b5b84bc83c80c2492c1ac27631b7dfed05fe89b39746e0ab"
+    },
+    {
+      "name": "before-presentation.pptx",
+      "bytes": 3858075,
+      "sha256": "d359ab91fc8331e642d1437c81e7e34a5633091a67259a84b48a9908f6250098"
+    },
+    {
+      "name": "before-slides-and-notes.md",
+      "bytes": 28549,
+      "sha256": "55fb347bd52acd1a2aeeb350f178fadcab513e3d789e27b5d0850c804dfb5eee"
+    },
+    {
+      "name": "presentation.pdf",
+      "bytes": 1851656,
+      "sha256": "c7b17064108f64de6680ef142219bcf142ec161707e9f442d7e3609b52b11e83"
+    },
+    {
+      "name": "presentation.pptx",
+      "bytes": 3871250,
+      "sha256": "a720255c4c4b97928b1733fe315de0317bcd158ea9b94239ecaf1ae1a4b86dc4"
+    },
+    {
+      "name": "slides-and-notes.md",
+      "bytes": 27147,
+      "sha256": "77a60f39ee59b07b3c0959301518270f7d04f235cf6e30de1f2972a415cc91bd"
+    }
+  ]
+}

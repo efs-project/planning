@@ -7,12 +7,14 @@ The EFS attendance checklist retains earlier preparation targets and history.
 
 ## Where we stand
 
-- October 26: James added official-theme transition and point slides. The
-  reviewed 27-slide version is [[Devcon/presentation/2026-10-26-theme-review/README]],
-  with 2,173 main spoken words and a 19:40 cue budget, not measured timing.
-  All original technical narration remains. The before-cleanup version is
-  retained too. Use its slide map and [[rehearsal-script]] for current practice;
-  the October 20 record below describes the prior 19-slide arrangement.
+- October 26: the current 29-slide revision is
+  [[Devcon/presentation/2026-10-26-positive-vision/README]], with an 18:30
+  planned route, not measured timing. It preserves James's official theme,
+  adds a visual hyperstructure explanation and shared-data examples, makes
+  immutable contracts explicit, and closes with eight practical checks.
+  Technical qualifications stay in optional notes. The 28-slide owner-edited
+  baseline is saved too. Use [[rehearsal-script]] for current practice; the
+  October 20 records below describe earlier arrangements.
 
 - Accepted application preserved in [[application-draft]].
 - First written story and timed beats drafted in [[presentation-spine]].

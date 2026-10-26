@@ -6,12 +6,29 @@ preparation, not a change to the accepted proposal or an EFS release deadline.
 
 ## Current presentation, October 26
 
-[[Devcon/presentation/2026-10-26-theme-review/README]] preserves James's themed
-27-slide arrangement and its cleanup. The eight jobs and argument below remain
-unchanged. The current chapter ranges are 7-11, 12-17 and 18-21; slides 22-26
-join the lessons into practical action and the closing vision. The original
-technical narration is intact, with brief transition cues and a 19:40 budget
-that has not been rehearsed. Use the new snapshot for current slide numbers.
+[[Devcon/presentation/2026-10-26-positive-vision/README]] is the current
+29-slide revision, including transitions and the thank-you/Q&A page. It keeps
+James's official theme and the accepted title while making the positive
+ambition, useful mechanisms and final checks clearer. Its 18:30 cue budget
+has not been rehearsed. The saved 28-slide before version includes James's
+edits after the earlier theme review.
+
+| Slides | Role |
+| --- | --- |
+| 1-7 | Human stakes, benefits, a hyperstructure diagram, two walk-away scenarios and eight jobs. |
+| 8-12 | Interface: alternative entrances, runnable releases and recoverable access. |
+| 13-20 | Data: shared structures, two compatible social apps, retained copies, EFS verification, chain views and background work. |
+| 21-25 | Rules: immutable core contracts, user-chosen change, network recovery and community operation. |
+| 26-28 | Concrete walk-away checklist, one developer action and the hopeful closing. |
+| 29 | Thank you and questions. |
+
+EAS, EFS and Nostr illustrate different shared-data jobs. Damus and Amethyst
+show the user benefit of compatible public social records. Uniswap v2 core
+supports the explicit recommendation to build immutable foundations. These
+examples do not imply an integrated product or new runtime tests. Detailed
+qualifications and sources are in optional notes, separate from the spoken
+route. [[presentation-positive-revision-2026-10-26]] records the editorial
+choices. The October 20 flow below is preserved as history.
 
 ## Content revision, October 20
 

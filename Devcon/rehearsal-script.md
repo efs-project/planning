@@ -3,26 +3,26 @@
 ## Current script, October 26
 
 The current speaking draft is
-[[Devcon/presentation/2026-10-26-theme-review/slides-and-notes|the latest deck's native slide text and speaker notes]].
-It has 26 main slides including transitions and one thank-you/Q&A page. The
-cue budget is 19:40,
-but this revision has not been rehearsed. The notes contain spoken narration
-followed by clearly separated reference notes and public sources. Slides 20
-and 21 have shorter alternatives to use instead of their main narration.
-The main route is 2,173 words, or 1,909 with both alternatives. Keep the
-divider/question pairs brief. The original technical narration is unchanged.
-The verification sequence is explanatory, not a
-fresh runtime result. There is no live demo or animation in this draft.
+[[Devcon/presentation/2026-10-26-positive-vision/slides-and-notes|the latest deck's native slide text and speaker notes]].
+It has 28 main slides including transitions and one thank-you/Q&A page. The
+cue budget is 18:30, but this revision has not been rehearsed. There is one
+spoken route. Read the opening narration in each note; the clearly marked
+optional detail and sources are for preparation and Q&A, not the timed route.
+Keep divider/question pairs brief and take time to explain the diagrams.
+The verification sequence is explanatory, not a fresh runtime result.
+There is no live demo or animation in this draft.
 
 The opening follows a person keeping their work, then connects dependable
 capabilities to CROPS and hyperstructures. The title's two walk-away scenarios
-guide all three technical chapters. Pocket sits beside retention, and Teia
-supplies a positive continuity story. The closing returns to what the person,
-the next builder and a community can gain.
+guide all three technical chapters. The data chapter explains shared records
+with EAS, EFS and Nostr, then makes the user benefit visible through Damus and
+Amethyst. Uniswap v2 core supports the immutable-contract recommendation.
+Teia supplies a community-continuation story. The closing checklist recaps
+eight concrete checks, then returns to what people and future builders gain.
 
 James's 17-minute first read applies to the earlier version preserved below.
-For today's practice, speak through slides 1-26 without stopping to edit.
-Do not read both versions, reference notes or sources aloud. Report the time,
+For today's practice, speak through slides 1-28 without stopping to edit.
+Do not read optional detail or sources aloud. Report the time,
 the least clear section and wording that does not sound like James.
 
 ## October 12 script, preserved for comparison

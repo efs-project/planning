@@ -8,18 +8,20 @@ to ship v2 by Devcon.
 organizer assigned **November 5, 15:30-15:55, Lotus 3**, subject to change.
 The scheduling email leaves the timezone unstated. The supplied Google Slides
 deck remains outside this editing pass. The separate native rehearsal copy has
-**26 main slides including transitions and one thank-you/Q&A page**.
+**28 main slides including transitions and one thank-you/Q&A page**.
 The revised introduction leads with harm to users and builders, then a vision
 of reliable CROPS apps and hyperstructures others can build on. The talk
 teaches the eight layers in [[stack-map]] through three chapters. The current
-cue budget is **19:40**, not a measured rehearsal. James's **17-minute** first
+cue budget is **18:30**, not a measured rehearsal. James's **17-minute** first
 read belongs to the first deck. Versions are saved as PDF, editable
 PowerPoint and native text/notes in [[Devcon/presentation/README]].
-The October 26 cleanup preserves James's theme and transitions, fills template
-placeholders and aligns the chapter labels and placement. The main narration
-is 2,173 words, with shorter alternatives for the two dense sections. The
-October 20 content and example audit remain the basis. The draft is static,
-with no live demo.
+The latest October 26 revision preserves James's theme and transitions. It
+makes the hyperstructure vision visual, shows shared data through EAS, EFS,
+Nostr and two social apps, explicitly encourages immutable core contracts,
+and ends with eight concrete checks. One spoken route keeps optional
+technical detail and sources separate. The draft uses editable explanatory
+diagrams, with no live demo. The revision and source choices are recorded in
+[[presentation-positive-revision-2026-10-26]].
 The working direction remains the organizer's laptop. The Personal tracker
 owns organizer method notification and final delivery.
 
@@ -99,9 +101,9 @@ services, as well as the app, network and blockchain.
 The next step is James's uninterrupted timed practice of the current deck.
 Bring back the duration, the least clear section and any unnatural wording.
 Also ask whether the talk makes the future worth building and leaves a
-developer feeling capable of improving one important user task. The approved
-October 20 synthesis is now implemented in the rehearsal deck and saved in
-[[Devcon/presentation/2026-10-26-theme-review/README]].
+developer feeling capable of improving one important user task. The current
+positive-teaching revision is saved in
+[[Devcon/presentation/2026-10-26-positive-vision/README]].
 The 17-minute prior read remains attached to the first deck. Screenshots and
 visual sequences are optional, not a prerequisite to today's run.
 

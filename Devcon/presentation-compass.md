@@ -1,6 +1,6 @@
 # Presentation compass
 
-Updated October 20, 2026. Keep this beside the deck when reviewing its message.
+Updated October 26, 2026. Keep this beside the deck when reviewing its message.
 James's original words and consent clarification are in
 [[Brainstorms/2026-10-20-pm-sovereign-software-vision]]. Supporting ideas and
 their limits are in [[vision-research]]. This is an editorial guide, not a
@@ -106,6 +106,32 @@ Keep the existing non-EFS examples where they expose a different failure or
 choice. A successful replacement path is more useful than another project
 name. The newest research is primarily context and Q&A material, not a reason
 to expand the spoken example list.
+
+## Positive teaching direction, October 26
+
+James asked for useful ideas on the slides, rather than lists of what each
+technology does not do. Lead with the freedom or improvement, explain a
+concrete mechanism, and give the developer a check. Keep qualifications in
+optional speaker notes unless they are essential to understanding that action.
+The notes must preserve accuracy without making the main story defensive.
+
+Give hyperstructures a plain-language introduction and a shared-foundation
+diagram. Explain why dependable protocols let different teams build useful
+tools that add to one another's work. The original definition remains in
+reference notes, not a new taxonomy the audience must memorize.
+
+EFS belongs mainly in the data chapter. Use EAS, EFS and Nostr as separate
+examples of documented records that other tools can understand. Damus and
+Amethyst make the value of shared public identity, posts and follows visible.
+The comparison is not an integration or a newly tested migration.
+
+Explicitly encourage immutable core contracts and voluntary migration to new
+deployments. Keep this distinct from user-chosen app updates and coordinated
+changes to shared network rules. Close with a concrete checklist that recaps
+the three chapters and an invitation to improve one important user task.
+
+The implementation record is [[presentation-positive-revision-2026-10-26]].
+The earlier refinements below remain history, not current slide numbering.
 
 ## Approved refinements implemented October 20
 
