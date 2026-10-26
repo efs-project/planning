@@ -10,6 +10,20 @@ None is a verdict on the whole project's decentralization or a claim that EFS
 solves the same problem. Refresh changing documentation and the relevant
 deployment configuration before using it on stage.
 
+## October 26 concrete-example selection
+
+[[presentation-concrete-revision-2026-10-26]] is the current selection record.
+James explicitly removed Nostr and requested Ethereum examples or invented
+records. The latest deck uses a clearly illustrative Garden DAO proposal to
+connect EAS/EFS shared records, two clients and the stack diagrams. Safe and
+Uniswap v2 remain real Ethereum examples. A public handoff diagram replaces
+the unfamiliar Hic et Nunc/Teia story. Earlier example research below remains
+history and reserve material, not a direction to restore those examples.
+
+The DNS/ENS diagram uses current lookup values, while the retained operators
+and Garden DAO are illustrative. No fictional integration or practice run is
+promoted into deployment evidence.
+
 ## October 20 integrated deck and fresh audit
 
 [[example-audit-2026-10-20]] records current primary-source checks, corrections

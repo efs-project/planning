@@ -7,14 +7,16 @@ The EFS attendance checklist retains earlier preparation targets and history.
 
 ## Where we stand
 
-- October 26: the current 29-slide revision is
-  [[Devcon/presentation/2026-10-26-positive-vision/README]], with an 18:30
-  planned route, not measured timing. It preserves James's official theme,
-  adds a visual hyperstructure explanation and shared-data examples, makes
-  immutable contracts explicit, and closes with eight practical checks.
-  Technical qualifications stay in optional notes. The 28-slide owner-edited
-  baseline is saved too. Use [[rehearsal-script]] for current practice; the
-  October 20 records below describe earlier arrangements.
+- October 26: the current 30-slide revision is
+  [[Devcon/presentation/2026-10-26-concrete-examples/README]], with an 18:40
+  planned route and 2,094 spoken words, not measured timing. It preserves
+  James's official theme and latest edits, explains composed modules, and
+  carries an illustrative Garden DAO proposal through concrete stack diagrams.
+  Shared EAS/EFS records replace Nostr; a handoff diagram replaces Teia. The
+  closing checklist now has a worked failure-and-repair example. Technical
+  qualifications stay in optional notes. The 29-slide owner-edited baseline
+  is saved too. Use [[rehearsal-script]] for current practice; the October 20
+  records below describe earlier arrangements.
 
 - Accepted application preserved in [[application-draft]].
 - First written story and timed beats drafted in [[presentation-spine]].

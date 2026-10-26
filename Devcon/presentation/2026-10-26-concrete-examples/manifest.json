@@ -1,0 +1,149 @@
+{
+  "snapshot": "2026-10-26-concrete-examples",
+  "captured_date": "2026-10-26",
+  "native_title": "Who Can Turn Off Your Ethereum App? | Devcon rehearsal draft",
+  "before_slide_count": 29,
+  "slide_count": 30,
+  "main_slides": 29,
+  "closing_qa_slide": 30,
+  "planned_seconds": 1120,
+  "main_spoken_words": 2094,
+  "timing_basis": "Current design-plan.json; planned duration and narrative count, not a measured rehearsal.",
+  "measured_rehearsal": false,
+  "organizer_submission": false,
+  "visual_inspection_status": "All 30 final PDF pages visually inspected after one consolidated repair pass. Native theme, backgrounds and existing media preserved.",
+  "status_limitations": [
+    "This is a rehearsal snapshot, not a measured delivery or organizer submission.",
+    "The archive script verifies source fingerprints and structure; it does not visually inspect slides.",
+    "PPTX and PDF exports are preserved byte-for-byte. Native internal object names may remain in binary exports; generated text omits native identifiers and local paths while retaining the illustrative EFS proposal path."
+  ],
+  "verification": {
+    "status": "passed",
+    "checked_at": "2026-10-26T23:10:18.193537+00:00",
+    "before_count": 29,
+    "after_count": 30,
+    "visual_review": "separate manual responsibility",
+    "notes_in_pdf": "PDF slide pages do not carry speaker notes; native and PPTX notes are checked",
+    "measured_rehearsal": false,
+    "organizer_submission": false,
+    "inputs_fingerprints": [
+      {
+        "name": "raw-before.json",
+        "bytes": 1543813,
+        "sha256": "a9d0985f13b8104c2b923744f8d4062b07cdae8211aca445c594fe168f51d983"
+      },
+      {
+        "name": "raw-after.json",
+        "bytes": 1812670,
+        "sha256": "0eba2fec6593552ea21c925fbdee23a5ba10c1f2c9d71d8a5042d516fde33c36"
+      },
+      {
+        "name": "expected-notes.json",
+        "bytes": 24383,
+        "sha256": "e2d4e985b26715a55de7ef3fdcaeae04752deba23a61c43c0d477a10634b1b6a"
+      },
+      {
+        "name": "order.json",
+        "bytes": 578,
+        "sha256": "e6214daf2014e2c4fe686978ffdead410bfee40b502b8b2d65b28e3465ffec16"
+      },
+      {
+        "name": "before.pptx",
+        "bytes": 3869473,
+        "sha256": "7d1b28f568e1dfd150d248549307d94b1f68b55f892f2d08e5454a283a181bda"
+      },
+      {
+        "name": "after.pptx",
+        "bytes": 3872025,
+        "sha256": "a4d618ade259a0a0780b83a2d216a02e174d07d1b9eb41aa045a4416eb6bf245"
+      },
+      {
+        "name": "before.pdf",
+        "bytes": 1851816,
+        "sha256": "64ab256ceca72675719922e845b88bc2ecde21076c398a6a4bbf76e3aac74ead"
+      },
+      {
+        "name": "after.pdf",
+        "bytes": 1859716,
+        "sha256": "550c38c1ca37282fe779c710a419da39a88190b4ca08078720508a5d1eb18a37"
+      },
+      {
+        "name": "design-plan.json",
+        "bytes": 5451,
+        "sha256": "dd4ea343a4bd25641a3035b684040aaae115316ddc26393df75634380b44d80b"
+      }
+    ],
+    "native": {
+      "baseline_slide_ids_preserved": 29,
+      "new_slide_ids": [
+        "[native identifier omitted]"
+      ],
+      "final_order_matches": true,
+      "native_notes_match_expected": 30,
+      "masters_layouts_notes_master_and_page_size_unchanged": true,
+      "source_backgrounds_unchanged": 29,
+      "source_slide_local_media_unchanged": 1,
+      "content_url_changes_ignored_as_ephemeral": true,
+      "removed_example_names_absent": true,
+      "source_pptx_embedded_media_bytes_preserved": 1
+    },
+    "before": {
+      "pptx_zip_integrity": "passed",
+      "pptx_slide_order_text_and_notes_match_native": 29,
+      "pptx_native_text_frames_matched": 98,
+      "pdf_pages": 29,
+      "pdf_native_text_frames_present_in_slide_order": 98,
+      "removed_example_scan": "baseline not restricted",
+      "privacy_scan": "passed"
+    },
+    "after": {
+      "pptx_zip_integrity": "passed",
+      "pptx_slide_order_text_and_notes_match_native": 30,
+      "pptx_native_text_frames_matched": 144,
+      "pdf_pages": 30,
+      "pdf_native_text_frames_present_in_slide_order": 144,
+      "removed_example_scan": "passed",
+      "privacy_scan": "passed"
+    },
+    "planned_seconds": 1120,
+    "narrative_word_count": 2094,
+    "privacy_boundary": "No private presentation identifiers, private native links, personalized portal links or local absolute paths; editable object names are allowed.",
+    "limits": [
+      "PDF checks extractable text rather than pixels.",
+      "PPTX text comparison ignores whitespace and common bullet glyphs.",
+      "Visual layout, clipping and raster-image text require visual review."
+    ]
+  },
+  "files": [
+    {
+      "name": "before-presentation.pdf",
+      "bytes": 1851816,
+      "sha256": "64ab256ceca72675719922e845b88bc2ecde21076c398a6a4bbf76e3aac74ead"
+    },
+    {
+      "name": "before-presentation.pptx",
+      "bytes": 3869473,
+      "sha256": "7d1b28f568e1dfd150d248549307d94b1f68b55f892f2d08e5454a283a181bda"
+    },
+    {
+      "name": "before-slides-and-notes.md",
+      "bytes": 27081,
+      "sha256": "fb27af199ea67c1341d127e57bad20eff00560cf72cc84d4a0b417b479fdb5ec"
+    },
+    {
+      "name": "presentation.pdf",
+      "bytes": 1859716,
+      "sha256": "550c38c1ca37282fe779c710a419da39a88190b4ca08078720508a5d1eb18a37"
+    },
+    {
+      "name": "presentation.pptx",
+      "bytes": 3872025,
+      "sha256": "a4d618ade259a0a0780b83a2d216a02e174d07d1b9eb41aa045a4416eb6bf245"
+    },
+    {
+      "name": "slides-and-notes.md",
+      "bytes": 31591,
+      "sha256": "89f22afff8f08dd81961250bef155a737bdc996d1f8a00c7b54ccb19a1344666"
+    }
+  ]
+}

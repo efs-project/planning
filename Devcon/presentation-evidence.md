@@ -6,7 +6,16 @@ should describe the actual deployment shown without EFS version labels.
 
 ## Evidence status
 
-**Current practice deck:** the October 20 revision is saved in
+**Current practice deck:** [[Devcon/presentation/2026-10-26-concrete-examples/README]]
+has 30 slides and a planned 18:40 route. Its Garden DAO architecture, shared
+EAS/EFS records and worked walk-away test are explicitly illustrative. The
+DNS/ENS values were freshly checked October 26; exact chain basis and source
+boundaries are in [[presentation-concrete-revision-2026-10-26]]. The public
+EFS verification explanation still rests on the historical proof package,
+not a fresh retrieval. All-page visual review and native/export consistency
+checks establish artifact quality, not runtime readiness or measured delivery.
+
+**Earlier October 20 practice deck:** the revision is saved in
 [[Devcon/presentation/2026-10-20-integrated-spine/README]]. Its file-verification
 slide explains the check sequence, without presenting newly observed outcomes.
 No fresh EFS runtime test or evidence screenshot was produced. Safe recovery

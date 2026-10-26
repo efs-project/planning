@@ -120,17 +120,26 @@ diagram. Explain why dependable protocols let different teams build useful
 tools that add to one another's work. The original definition remains in
 reference notes, not a new taxonomy the audience must memorize.
 
-EFS belongs mainly in the data chapter. Use EAS, EFS and Nostr as separate
-examples of documented records that other tools can understand. Damus and
-Amethyst make the value of shared public identity, posts and follows visible.
-The comparison is not an integration or a newly tested migration.
+EFS belongs mainly in the data chapter. James's later October 26 direction
+removes Nostr and requests Ethereum examples or clearly invented shared data.
+Use the illustrative Garden DAO proposal: an EAS statement refers to an EFS
+document revision and voting contract, and both a DAO portal and social app
+can use it. Label this as an illustrative design, not an existing integration.
+Reuse the proposal through the stack so mechanisms become easier to follow.
+
+Show actual composition in the hyperstructure vision: separate teams provide
+membership, voting and treasury; a DAO app combines them; a social app uses
+that DAO plus a moderation module. Give the checklist a worked example with
+a visible failure, repair and resumed user task. Preserve useful Ethereum
+comparisons without introducing a new unfamiliar project at every layer.
 
 Explicitly encourage immutable core contracts and voluntary migration to new
 deployments. Keep this distinct from user-chosen app updates and coordinated
 changes to shared network rules. Close with a concrete checklist that recaps
 the three chapters and an invitation to improve one important user task.
 
-The implementation record is [[presentation-positive-revision-2026-10-26]].
+The latest implementation record is [[presentation-concrete-revision-2026-10-26]].
+[[presentation-positive-revision-2026-10-26]] preserves the preceding revision.
 The earlier refinements below remain history, not current slide numbering.
 
 ## Approved refinements implemented October 20
