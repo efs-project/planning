@@ -7,6 +7,13 @@ The EFS attendance checklist retains earlier preparation targets and history.
 
 ## Where we stand
 
+- October 27 public schedule verification: the
+  [official Pretalx calendar export](https://cfp.devcon.org/devcon8/talk/SPVJV8.ics)
+  explicitly uses UTC+05:30 and confirms November 5, 15:30-15:55, Lotus Stage 3.
+  Earlier email-timezone uncertainty is resolved. Personal calendar correction
+  and newer organizer-delivery instructions remain personal administration;
+  do not infer them complete from a deck snapshot or an older deadline note.
+
 - October 26 read-through pass: the current rehearsal revision is saved in
   [[Devcon/presentation/2026-10-26-readthrough/README]]. It keeps 30 slides,
   three chapters and an 18:30 planned route, not measured timing. The planned
@@ -98,9 +105,11 @@ delivery and notes without changing the slides.
 **Internal target:** settle the core content on October 21, leaving the
 remaining limited preparation time for necessary corrections and delivery.
 This is a planning target, not an organizer requirement.
-**Organizer deadline:** the previously verified slide-finalization date is
-October 27. Personal administration and the actual submission remain in the
-Personal tracker. Updating the rehearsal copy does not submit the slides.
+**Earlier organizer target:** October 27 is the previously verified
+slide-finalization date. Reconcile newer organizer correspondence before
+declaring a missed deadline or treating that date as the only current wording.
+Personal administration and actual submission remain outside this public
+planning record. Updating the rehearsal copy does not submit the slides.
 
 ## October 13 practice and revision
 

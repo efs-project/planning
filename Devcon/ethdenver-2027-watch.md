@@ -1,6 +1,6 @@
 # ETHDenver 2027 speaker watch
 
-**Checked:** 2026-10-20 (America/Chicago)
+**Checked:** 2026-10-27 (America/Chicago)
 **Status:** monitoring. No official 2027 speaker form, submission deadline or
 event dates verified in this check. The freshly fetched homepage still describes
 ETHDenver 2026. The official Speakers & Content section was inaccessible in
@@ -25,7 +25,7 @@ application, acceptance, dated delivery milestone or locked talk concept.
 ## Current action and monitoring
 
 - **Owner: PM.** Included explicitly in the existing Tuesday 08:30
-  America/Chicago project-management review; next check 2026-10-27. Check official
+  America/Chicago project-management review; next check 2026-11-03. Check official
   event, speaker-support and organizer-announcement surfaces, plus narrowly
   relevant email when available. Avoid a separate duplicate reminder.
 - **Nothing to submit yet on the verified public surfaces.** Notify James when

@@ -15,6 +15,29 @@ Rows touched:
 Next check:
 ```
 
+## 2026-10-27 - Deadline and office-hour watch
+
+Bounded weekly primary-source check, not an application or a new funding sweep.
+[NLnet intake](https://nlnet.nl/propose/) still closes **November 3, 12:00 CET /
+05:00 Chicago CST**. [Policy v2.0](https://nlnet.nl/foundation/policies/generativeAI/2.0)
+and the [October 20 effective-date notice](https://nlnet.nl/news/2026/20261020-AI-policy.html)
+remain controlling; the poor-workflow-fit recommendation and unresolved European
+eligibility are unchanged. No proposal ideas, outline or answers were generated.
+
+Tomorrow's [October 28 office hour](https://nlnet.nl/events/20261028/office-hour/)
+now says **16:00 CET** in its introductory prose but **16:00 CEST** in the time
+bullet. The [recurring page](https://nlnet.nl/officehour/) uses Amsterdam/Brussels
+local time. **10:00 Chicago CDT is best supported** by the current prose and
+local clock; literal CEST would mean 09:00 CDT. Retain CONFLICT rather than
+silently scheduling. Attendance is optional, not a new James obligation.
+
+EF ESP's [RFPs](https://esp.ethereum.foundation/applicants/rfp),
+[Open Rounds](https://esp.ethereum.foundation/applicants/open-rounds) and
+[Wishlist](https://esp.ethereum.foundation/applicants/wishlist) still show no
+active opportunities. No new application or contact action. Proposal statuses
+remain in [[proposals]]; next check November 3 without creating a Devcon-day
+submission sprint.
+
 ## 2026-10-20 - NLnet v2.0 and bounded funding delta
 
 Trigger: weekly PM check; independent source verification, not an application

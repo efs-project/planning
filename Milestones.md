@@ -14,11 +14,14 @@ honest, but must not invent dates, requirements, or launch commitments.
 
 ## Devcon presentation (2026-11)
 
-**Status:** talk accepted and participation confirmed 2026-09-02. October 9
-organizer email assigns November 5, 15:30-15:55, Lotus 3, subject to change;
-read October 12. Email timezone remains unstated. [[Devcon/preparation-plan]]
-records the schedule and supplied slide templates; personal administration
-and timezone confirmation belong in the Personal tracker linked there.
+**Status:** talk accepted and participation confirmed 2026-09-02. The
+[official Pretalx calendar export](https://cfp.devcon.org/devcon8/talk/SPVJV8.ics),
+freshly read October 27, confirms **November 5, 15:30-15:55 Mumbai time
+(UTC+05:30), Lotus Stage 3**, subject to later schedule changes. Arrive by
+**15:10** under the recorded 20-minute check-in rule. This resolves the earlier
+source-timezone uncertainty; correcting personal calendar state remains a
+separate authorized action. [[Devcon/preparation-plan]] owns preparation;
+personal organizer administration belongs in the Personal tracker linked there.
 
 The presentation should describe and demonstrate whatever is genuinely coherent
 by Devcon. It must not turn an unfinished v2 design into a launch promise.
@@ -32,7 +35,11 @@ by Devcon. It must not turn an unfinished v2 design into a launch promise.
   what accumulated complexity, and why EFS is being redesigned.
 - The current v2 spine is
   [[Designs/efsv2/README|Designs/efsv2/README.md]]. It is
-  reconciliation-ready, not promotion- or implementation-ready.
+  separate from evidence of implementation or protocol promotion. October 27
+  Git inspection finds real contracts code on the published Fable branch;
+  [[Daily Notes/2026-10-27-pm-checkpoint]] records its exact revision and remaining
+  integrated-product gate. Code publication is not a protocol freeze or a
+  deployment/readiness claim.
 - The Client v2 design set is
   [[Designs/clientv2/README|Designs/clientv2/README.md]]. Its exact app lane,
   rendering ABI, and implementation target remain evidence-gated.

@@ -40,6 +40,16 @@ production authorization. The new contracts branch
 commits at `1deb068`, not a remotely published Core implementation. Keep this
 dated observation separate from future implementation permission.
 
+**October 27 superseding visibility update:** the contracts branch
+`fable/2026-10-13-core-contracts` is now remote-visible at `0d1bb80`, 47 commits
+ahead of unchanged contracts main. It contains actual Ledger, registry, index,
+control, reader, Files and fixture/release code; the October 20 source-empty /
+two-local-only-commits description is no longer current. SDK/client accepted
+mains remain `af11602` / `060c9fd` foundations. The owning contracts plan records
+remaining measurements and the packaged-SDK/static-client integrated acceptance
+gate. Publication does not establish test execution, integration, protocol
+promotion or deployment. See [[Daily Notes/2026-10-27-pm-checkpoint]].
+
 Fresh Git evidence on 2026-09-23: legacy SDK PR #1 is merged at `3147786`, and
 `origin/main` is `15314ce` after documentation PR #6. Older descriptions of it
 as unmerged are stale; merging v1 does not make its model the successor baseline.
