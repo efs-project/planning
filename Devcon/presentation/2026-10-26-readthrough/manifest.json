@@ -1,0 +1,156 @@
+{
+  "snapshot": "2026-10-26-readthrough",
+  "captured_date": "2026-10-26",
+  "native_title": "Who Can Turn Off Your Ethereum App? | Devcon rehearsal draft",
+  "before_slide_count": 30,
+  "slide_count": 30,
+  "main_slides": 29,
+  "closing_qa_slide": 30,
+  "planned_seconds": 1110,
+  "main_spoken_words": 2097,
+  "timing_basis": "Current design-plan.json; planned duration and narrative count, not a measured rehearsal.",
+  "measured_rehearsal": false,
+  "organizer_submission": false,
+  "visual_inspection_status": "Not asserted by the archive script; see the verification report for the checks actually recorded.",
+  "status_limitations": [
+    "This is a rehearsal snapshot, not a measured delivery or organizer submission.",
+    "The archive script verifies source fingerprints and structure; it does not visually inspect slides.",
+    "PPTX and PDF exports are preserved byte-for-byte. Native internal object names may remain in binary exports; generated text omits native identifiers and local paths while retaining the illustrative EFS file path."
+  ],
+  "verification": {
+    "status": "passed",
+    "checked_at": "2026-10-27T04:25:59.372805+00:00",
+    "before_count": 30,
+    "after_count": 30,
+    "visual_review": "separate manual responsibility",
+    "notes_in_pdf": "PDF slide pages do not carry speaker notes; native and PPTX notes are checked",
+    "measured_rehearsal": false,
+    "organizer_submission": false,
+    "inputs_fingerprints": [
+      {
+        "name": "raw-before.json",
+        "bytes": 1889963,
+        "sha256": "be97f8ddb924c214709fca018fbe642f20f9691f0189ba6e68be92348d3dadee"
+      },
+      {
+        "name": "raw-after.json",
+        "bytes": 1991224,
+        "sha256": "5de9263bee3b582e099287b02a927acc6ed4092fea08f8bafb941bdda3c2fdec"
+      },
+      {
+        "name": "expected-notes.json",
+        "bytes": 28024,
+        "sha256": "2a920cf128201737e75fde9a46abd8486e22f9b8cc54a25a65a43714155720d6"
+      },
+      {
+        "name": "order.json",
+        "bytes": 578,
+        "sha256": "e6214daf2014e2c4fe686978ffdead410bfee40b502b8b2d65b28e3465ffec16"
+      },
+      {
+        "name": "before.pptx",
+        "bytes": 3887556,
+        "sha256": "1041ac9889e69e10c05f04bf70a80fa00444ee15873469d5bee4002990fc7cac"
+      },
+      {
+        "name": "after.pptx",
+        "bytes": 3899588,
+        "sha256": "f5022ee0e9f3675f3dcfe28c7022d9e53add165608f199c52798e1531241f3f2"
+      },
+      {
+        "name": "before.pdf",
+        "bytes": 1897706,
+        "sha256": "cad2bac618dfd3a82cb2887791384ee768fb3c38a81f3bb4ca8964be0c734b14"
+      },
+      {
+        "name": "after.pdf",
+        "bytes": 1899081,
+        "sha256": "8602a91ab8258f5ed917a64bbbcff337c2114697b4cfd08ba11c70f5b55a2bf2"
+      },
+      {
+        "name": "design-plan.json",
+        "bytes": 7026,
+        "sha256": "f720188075c3cca0457e2ec7f9cb050bdf1c347212e33d57a4de832994502375"
+      }
+    ],
+    "native": {
+      "baseline_slide_ids_preserved": 30,
+      "new_slide_ids": [],
+      "baseline_slide_order_preserved": true,
+      "final_order_matches": true,
+      "native_notes_match_expected": 30,
+      "masters_layouts_notes_master_and_page_size_unchanged": true,
+      "source_backgrounds_unchanged": 30,
+      "source_slide_local_media_unchanged": 2,
+      "no_new_raster_or_embedded_media": true,
+      "content_url_changes_ignored_as_ephemeral": true,
+      "source_pptx_theme_parts_unchanged": true,
+      "source_pptx_theme_check_basis": "Theme bytes and effective consumer bindings unchanged; exporter theme part renumbering ignored.",
+      "source_pptx_embedded_media_bytes_preserved": 2
+    },
+    "before": {
+      "pptx_zip_integrity": "passed",
+      "pptx_slide_order_text_and_notes_match_native": 30,
+      "pptx_native_text_frames_matched": 155,
+      "pdf_pages": 30,
+      "pdf_native_text_frames_present_in_slide_order": 155,
+      "pdf_parser_warnings": [
+        "Object 2 0 not defined."
+      ],
+      "pdf_privacy_scan_scope": "Extracted page text and resolvable trailer object strings; unresolved-object warnings are retained above.",
+      "privacy_scan": "passed"
+    },
+    "after": {
+      "pptx_zip_integrity": "passed",
+      "pptx_slide_order_text_and_notes_match_native": 30,
+      "pptx_native_text_frames_matched": 174,
+      "pdf_pages": 30,
+      "pdf_native_text_frames_present_in_slide_order": 174,
+      "pdf_parser_warnings": [
+        "Object 2 0 not defined."
+      ],
+      "pdf_privacy_scan_scope": "Extracted page text and resolvable trailer object strings; unresolved-object warnings are retained above.",
+      "privacy_scan": "passed"
+    },
+    "planned_seconds": 1110,
+    "narrative_word_count": 2097,
+    "privacy_boundary": "No private presentation identifiers, private native links, personalized portal links or local absolute paths; editable object names are allowed.",
+    "limits": [
+      "PDF checks extractable text rather than pixels.",
+      "PPTX text comparison ignores whitespace and common bullet glyphs.",
+      "Visual layout, clipping and raster-image text require visual review."
+    ]
+  },
+  "files": [
+    {
+      "name": "before-presentation.pdf",
+      "bytes": 1897706,
+      "sha256": "cad2bac618dfd3a82cb2887791384ee768fb3c38a81f3bb4ca8964be0c734b14"
+    },
+    {
+      "name": "before-presentation.pptx",
+      "bytes": 3887556,
+      "sha256": "1041ac9889e69e10c05f04bf70a80fa00444ee15873469d5bee4002990fc7cac"
+    },
+    {
+      "name": "before-slides-and-notes.md",
+      "bytes": 33909,
+      "sha256": "f76cede82f10449065ca401d3d7720d0568acd96349296cb8c4d387a7ee98ec3"
+    },
+    {
+      "name": "presentation.pdf",
+      "bytes": 1899081,
+      "sha256": "8602a91ab8258f5ed917a64bbbcff337c2114697b4cfd08ba11c70f5b55a2bf2"
+    },
+    {
+      "name": "presentation.pptx",
+      "bytes": 3899588,
+      "sha256": "f5022ee0e9f3675f3dcfe28c7022d9e53add165608f199c52798e1531241f3f2"
+    },
+    {
+      "name": "slides-and-notes.md",
+      "bytes": 35407,
+      "sha256": "67f34fdb30e6b2153a7d885f79e332b6e17f9c3b695abb246c7dcc50a1c62aa6"
+    }
+  ]
+}

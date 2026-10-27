@@ -2,41 +2,49 @@
 
 ## Current script, October 26
 
-The current bounded-polish speaking draft is
-[[Devcon/presentation/2026-10-26-polish/slides-and-notes|the latest deck's native slide text and speaker notes]].
-The preceding draft is preserved in
+The current read-through speaking draft is
+[[Devcon/presentation/2026-10-26-readthrough/slides-and-notes|the latest deck's native slide text and speaker notes]].
+The preceding drafts are preserved in
+[[Devcon/presentation/2026-10-26-polish/slides-and-notes]] and
 [[Devcon/presentation/2026-10-26-concept-first/slides-and-notes]]. The current
 revision has 29 main slides including transitions and one thank-you/Q&A page.
-Main narration is 2,045 words; the 18:30 cue budget is planned, not measured.
+The 18:30 cue budget and 2,097-word main narration on slides 1-29 are planned,
+not a measured rehearsal.
 There is one spoken route. Read the opening narration in each note; the clearly
 marked optional detail and sources are for preparation and Q&A, not the timed route.
 Keep divider/question pairs brief and take time to explain the diagrams.
 The verification sequence is explanatory. Slide 18's July 29 EFS archive-results
 caption is historical evidence, not a screenshot or fresh retrieval.
 There is no live demo or animation in this draft. The organizer's deck stays
-outside this pass, and no public QR is added.
+outside this pass, and no public QR is added. James reports copying the prior
+version into the official deck; that is not independently verified delivery.
+This new working revision is not official, and James handles its later copy.
 
 The opening follows a person keeping their work, then connects dependable
 capabilities to CROPS and hyperstructures. The title's two walk-away scenarios
 guide all three technical chapters. The implied subject is the audience's
 existing app, not a fictional app under construction. Local examples explain
 release, recovery, portable formats, retention, EFS references, indexes,
-replaceable workers and handoff. Uniswap core supports the immutable-contract
-recommendation. After the checklist, slide 28 shows an unavailable list,
-the repair and a retry that restores the note and attachment. The closing
+replaceable workers and handoff. Uniswap v2 core supports the immutable-contract
+recommendation. After the checklist, slide 28 illustrates the failed index,
+retained records, rebuild, endpoint change and retry of the same note and
+attachment. Keep its hypothetical setup and conditional success explicit. The closing
 returns to what users and future builders gain.
 
-For this polish pass, ask listeners to choose their own task on slide 6.
-Carry slide 10's hostile name redirect through to the retained release and
-stable contracts on slide 23. Keep privacy and encryption-key recovery
-distinct on slide 12; the attachment revision and author agree across slides
-15-16. Name Ethereum full nodes on slide 17, funding in the slide 25 handoff,
-and actual administrator powers in the slide 27 checklist.
+For this read-through, name single points of failure and control on slide 6.
+Explain why the incomplete client fails to start on slide 11, and how access
+and recovery can work without company login on slide 12. On slide 16, the
+editor and feed show the same record, author and attachment. Keep slide 23's
+claim precisely about Uniswap v2 core; omit the Zerion API sentence. Follow
+public handoff through an independent operator to the replacement service on
+slide 25, then explain each step of the illustrative index drill on slide 28.
 
 James's 17-minute first read applies to the earlier version preserved below.
-For today's practice, speak through slides 1-29 without stopping to edit.
-Do not read optional detail or sources aloud. Report the time,
-the least clear section and wording that does not sound like James.
+For October 27 practice, read the main notes on slides 1-29 uninterrupted.
+Skip optional detail and source citations throughout. Slide 30 is Thank you/Q&A,
+outside the main route. Mark unclear points for later review rather than
+stopping to edit. Report the time and wording that does
+not sound like James before copying this revision into the official deck.
 
 ## October 12 script, preserved for comparison
 

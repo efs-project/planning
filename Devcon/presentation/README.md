@@ -9,11 +9,24 @@ each saved revision available independently of Google Slides revision history.
 Private organizer links, Google file identifiers and temporary download URLs
 stay outside this repository.
 
+## Current rehearsal and delivery state
+
+The saved [[Devcon/presentation/2026-10-26-readthrough/README]] retains 30 slides
+and three chapters. Main narration uses slides 1-29; Thank you/Q&A on slide 30
+is outside the timed route. Skip optional detail and source citations throughout.
+Main narration is planned at 2,097 words and 18:30; timing is not measured.
+Artifact checks are recorded in the snapshot.
+James reports copying the prior version into the official deck; this is not
+independently verified delivery, and the new working revision is not official.
+His later copy follows the uninterrupted October 27 timed read and any resulting
+corrections. Preserve all saved versions below.
+
 ## Saved versions
 
 | Snapshot | What it records | Practice |
 | --- | --- | --- |
-| [October 26 polish](2026-10-26-polish/README.md) | Current rehearsal deck. Bounded clarity pass on the same 30 slides and three chapters: the listener's own task, hostile-control callback, privacy/key recovery, consistent shared records, dated historical EFS evidence, funding handoff and admin powers. Preserves the owner theme and concept-first history. | 18:30 planned, not measured. Main narration is 2,045 words. |
+| [October 26 read-through](2026-10-26-readthrough/README.md) | Current rehearsal deck, separate from the official copy. Clarifies single points of failure/control, runnable clients, access without company login, editor/feed views of one record, Uniswap v2 core, independent handoff and an illustrative index rebuild/switch/retry. Preserves all 30 slides and the owner theme. | Main notes on slides 1-29: 2,097 words and 18:30 planned, not measured. Skip optional detail and source citations throughout; slide 30 is Thank you/Q&A. |
+| [October 26 polish](2026-10-26-polish/README.md) | Preceding saved rehearsal deck. Bounded clarity pass on the same 30 slides and three chapters: the listener's own task, hostile-control callback, privacy/key recovery, consistent shared records, dated historical EFS evidence, funding handoff and admin powers. Preserves the owner theme and concept-first history. | 18:30 planned, not measured. Main narration is 2,045 words. |
 | [October 26 concept-first](2026-10-26-concept-first/README.md) | Preceding saved rehearsal deck. Improves the audience's existing apps through layer concepts and local examples. Adds usable database exports, two-client mockups, clear storage/operator roles and one index repair/retry. Preserves the latest owner-edited 30-slide baseline. | 18:30 planned, not measured. Main narration is 1,991 words. |
 | [October 26 concrete examples](2026-10-26-concrete-examples/README.md) | Previous rehearsal deck. Garden DAO connects composed modules, portable EAS/EFS records, stack diagrams and a new worked walk-away drill. Preserves James's theme and latest 29-slide baseline; final version has 30 slides. | 18:40 planned, not measured. Main narration is 2,094 words. |
 | [October 26 positive vision](2026-10-26-positive-vision/README.md) | Previous rehearsal deck. Makes the hyperstructure vision visual, adds shared-data examples, explicitly encourages immutable contracts and finishes with eight practical checks. Preserves the official theme and the 28-slide owner-edited baseline. | 18:30 planned, not measured. One spoken route with optional technical detail kept separate. |

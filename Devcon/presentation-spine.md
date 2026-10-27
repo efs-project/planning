@@ -6,25 +6,27 @@ preparation, not a change to the accepted proposal or an EFS release deadline.
 
 ## Current presentation, October 26
 
-[[Devcon/presentation/2026-10-26-polish/README]] records the current
-bounded-polish revision in the same native rehearsal copy. Its 30
-slides include transitions and the thank-you/Q&A page. It keeps
+The current read-through revision of the native rehearsal copy is saved in
+[[Devcon/presentation/2026-10-26-readthrough/README]]. Its 30 slides retain
+main narration on 1-29 and Thank you/Q&A on 30 outside
+the timed route. Optional detail and source citations throughout are not part of
+the main narration. It keeps
 James's official theme, latest edits and accepted title. The audience's own
 existing app drives the story. Examples explain individual mechanisms rather
-than teach construction of a fictional DAO. Main narration is 2,045 words;
-the 18:30 cue budget is planned, not a measured rehearsal. The preceding
-concept-first version remains in
+than teach construction of a fictional DAO. The 2,097-word main narration and
+18:30 cue budget are planned, not a measured rehearsal. The preceding versions remain in
+[[Devcon/presentation/2026-10-26-polish/README]] and
 [[Devcon/presentation/2026-10-26-concept-first/README]]. Preserve the owner-edited
 cover, DNS slide and Data section label.
 
 | Slides | Role |
 | --- | --- |
-| 1-7 | Human stakes, benefits, a hyperstructure diagram, two walk-away scenarios, the listener's own user task and eight jobs. |
-| 8-12 | Interface: alternative entrances, hostile name redirection, runnable releases, privacy and separate account/encryption-key recovery. |
-| 13-20 | Data: documented formats, two compatible clients with consistent author and attachment revision, offchain retention versus Ethereum full-node state, EFS references and historical archive results, RPCs and indexes, replaceable submission services. |
-| 21-25 | Rules: immutable core contracts, a retained-release/stable-contract callback, user-chosen change, network recovery and community handoff including funding. |
-| 26-29 | Walk-away checklist with explicit admin powers, one visible index failure and repair/retry, one developer action and the hopeful closing. |
-| 30 | Thank you and questions. |
+| 1-7 | Human stakes, benefits, a hyperstructure diagram, two walk-away scenarios, the listener's own user task, explicit single points of failure/control and eight jobs. |
+| 8-12 | Interface: alternative entrances, hostile name redirection, incomplete versus complete runnable clients, access/recovery without company login, and separate encryption-key recovery. |
+| 13-20 | Data: documented formats, an editor and feed over the same shared record, offchain retention versus Ethereum full-node state, EFS references and historical archive results, RPCs and indexes, replaceable submission services. |
+| 21-25 | Rules: precisely scoped Uniswap v2 core, a retained-release/stable-contract callback, user-chosen change, network recovery and public handoff to an independent replacement operator. |
+| 26-29 | Walk-away checklist with explicit admin powers, failed index to retained records to rebuild and endpoint change, retry of the same note and attachment, one developer action and the hopeful closing. |
+| 30 | Thank you/Q&A; outside the main narrated route. |
 
 At every layer, reduce one operator's ability to stop the app or change its
 rules. Teach the job, failure, useful improvement and audience check. Existing
@@ -33,14 +35,19 @@ compatible readers. Shared ongoing writes need agreed authorization and sync.
 Safe, EAS, The Graph, Helios, Tornado Cash Classic and Uniswap each explain a
 specific mechanism. EFS remains the personal motivation and file-reference
 example. A generic composition diagram preserves the larger vision. The final
-illustrative task finds a note and opens its attachment after an index repair.
+illustrative task rebuilds an index from retained records, selects the new
+endpoint and retries the same note and attachment. It is not a fresh runtime test.
 Details and limits remain in optional notes. The DNS/ENS lookup basis remains
 the October 26 snapshot, not a new hosting test.
 Slide 18's EFS archive-results caption is dated July 29 and is neither a
 screenshot nor a fresh retrieval. No organizer changes, live demo or public QR
 are part of this pass. [[presentation-concept-revision-2026-10-26]] records the
-preceding concept-first choices; the bounded polish preserves that history. The
-October 20 flow below is preserved as history.
+preceding concept-first choices; the later revisions preserve that history.
+James reports copying the prior version into the official deck; delivery is
+not independently verified, and this new working revision is not official.
+Next: an uninterrupted timed read of main notes 1-29 on October 27, skipping
+optional detail and source citations throughout, and marking unclear points. James handles the later official
+copy. The October 20 flow below is preserved as history.
 
 ## Content revision, October 20
 

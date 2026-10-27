@@ -7,15 +7,19 @@ to ship v2 by Devcon.
 **Status (2026-10-26):** proposal accepted and participation confirmed. The
 organizer assigned **November 5, 15:30-15:55, Lotus 3**, subject to change.
 The scheduling email leaves the timezone unstated. The supplied Google Slides
-deck remains outside this editing pass. The separate native rehearsal copy has
-**29 main slides including transitions and one thank-you/Q&A page**.
+deck remains outside this editing pass. James reports copying the prior version
+into the official deck; that is an owner report, not independently verified
+delivery. This new working revision is not the official copy. The separate
+native rehearsal copy still has **30 slides**, with main narration on **1-29**
+and **Thank you/Q&A on 30** outside the timed route. Source citations remain
+in optional notes throughout the deck.
 The revised introduction leads with harm to users and builders, then a vision
 of reliable CROPS apps and hyperstructures others can build on. The talk
 teaches the eight layers in [[stack-map]] through three chapters. The current
 cue budget is **18:30**, not a measured rehearsal. James's **17-minute** first
 read belongs to the first deck. Versions are saved as PDF, editable
 PowerPoint and native text/notes in [[Devcon/presentation/README]].
-The current October 26 polish pass preserves James's theme and transitions. It
+The current October 26 read-through pass preserves James's theme and transitions. It
 shows a DAO composed of reusable modules and a social app built on that DAO.
 The audience's own app supplies the through line: reduce single points of
 failure and control. Local examples explain each layer, including portable
@@ -25,13 +29,17 @@ explicitly encourages immutable core contracts and closes with eight checks
 and a worked failure-and-repair example. One spoken route keeps optional
 technical detail and sources separate. The diagrams require no live demo.
 The concept-first revision and source choices remain recorded in
-[[presentation-concept-revision-2026-10-26]]. The bounded polish asks listeners
+[[presentation-concept-revision-2026-10-26]]. The preceding bounded polish asks listeners
 to choose their own user task, connects hostile name redirection to a retained
 release and stable contracts, and clarifies privacy, separate encryption-key
 recovery, funding handoff and administrator powers. The EFS archive-results
 caption is dated July 29: historical evidence, not a screenshot or fresh
 retrieval. The same native rehearsal copy remains the editing surface; no
-organizer deck change, live demo or public QR is part of this pass.
+organizer deck change, live demo or public QR is part of this pass. The new
+read-through revision makes single points of failure/control explicit and
+clarifies a complete runnable client, access without company login, two tools
+over the same record, independent service handoff and the index-rebuild drill.
+The Uniswap example is explicitly scoped to v2 core.
 The working direction remains the organizer's laptop. The Personal tracker
 owns organizer method notification and final delivery.
 
@@ -108,16 +116,19 @@ James's direction is to help developers recognize failures and decide which
 ones their own apps should defend against. Coverage includes usable recovery,
 build dependencies and the people and budgets behind apparently separate
 services, as well as the app, network and blockchain.
-The next step is James's uninterrupted timed practice of the current deck.
-Bring back the duration, the least clear section and any unnatural wording.
+The next step is James's uninterrupted timed read on October 27. Read the main
+notes on slides 1-29, skip optional detail and source citations throughout, and mark
+unclear points for review afterward. Bring back the duration and any unnatural wording.
 Also ask whether the talk makes the future worth building and leaves a
 developer feeling capable of improving one important user task. The current
-bounded-polish revision is saved in
-[[Devcon/presentation/2026-10-26-polish/README]], with 2,045 main spoken words.
-[[Devcon/presentation/2026-10-26-concept-first/README]] preserves the preceding
-revision.
+read-through revision is saved in [[Devcon/presentation/2026-10-26-readthrough/README]],
+with 2,097 words of planned main narration, not a measured rehearsal.
+The saved [[Devcon/presentation/2026-10-26-polish/README]] and
+[[Devcon/presentation/2026-10-26-concept-first/README]] preserve the preceding
+revisions. Copying this new working revision to the official deck is James's
+later action, not part of this pass.
 The 17-minute prior read remains attached to the first deck. Screenshots and
-visual sequences are optional, not a prerequisite to today's run.
+visual sequences are optional, not a prerequisite to the timed read.
 
 ## Acceptance completed
 

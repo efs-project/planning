@@ -7,7 +7,22 @@ The EFS attendance checklist retains earlier preparation targets and history.
 
 ## Where we stand
 
-- October 26 bounded polish: the current revision is saved in
+- October 26 read-through pass: the current rehearsal revision is saved in
+  [[Devcon/presentation/2026-10-26-readthrough/README]]. It keeps 30 slides,
+  three chapters and an 18:30 planned route, not measured timing. The planned
+  main narration is 2,097 words on slides 1-29; slide 30 is Thank you/Q&A,
+  outside that route. Skip optional detail and source citations throughout.
+  The pass clarifies single points of failure/control, a complete runnable
+  client, access/recovery without company login, editor/feed views of one
+  record, Uniswap v2 core, independent handoff and an illustrative index rebuild.
+  Artifact checks are recorded in the snapshot. James reports copying the
+  prior version into the official deck, but
+  delivery is not independently verified. This revision remains a separate
+  working deck; copying it to the official deck is James's later action.
+  Next: October 27 uninterrupted timed read of the main notes, skipping optional
+  detail and source citations throughout while marking unclear points for review afterward.
+
+- Earlier October 26 bounded polish is saved in
   [[Devcon/presentation/2026-10-26-polish/README]]. The same native rehearsal
   copy keeps 30 slides, three chapters and an 18:30 planned route, with 2,045
   main spoken words; timing is not measured. Preserve James's theme and edits.
@@ -17,7 +32,7 @@ The EFS attendance checklist retains earlier preparation targets and history.
   Slide 18 labels July 29 EFS archive results as historical evidence, not a
   screenshot or fresh retrieval. The snapshot records the artifact checks.
   No organizer changes, live demo or public QR are included.
-  Use [[rehearsal-script]] for the current route.
+  Use [[rehearsal-script]] for the newer read-through route.
 
 - Earlier October 26 concept-first revision:
   [[Devcon/presentation/2026-10-26-concept-first/README]], with an 18:30

@@ -6,7 +6,20 @@ should describe the actual deployment shown without EFS version labels.
 
 ## Evidence status
 
-**Current bounded-polish deck:**
+**Current read-through rehearsal deck:**
+[[Devcon/presentation/2026-10-26-readthrough/README]], with 30 slides and an
+18:30 planned route, not a measured rehearsal. The revised runnable-client,
+company-login, shared-record, service-handoff and index-rebuild diagrams are
+illustrative mechanisms, not newly observed runtime results. Slide 23's
+caption and main narration are scoped to Uniswap v2 core, without the Zerion
+API comparison. Slide 28's hypothetical setup and conditional success are not
+evidence of a performed recovery. Slide 18 retains the dated July 29 historical
+EFS result, not a new screenshot or retrieval. Artifact checks are recorded in
+the snapshot and do not establish official delivery. James reports copying the
+prior version to the official deck; that report is not independently verified,
+and this new working revision is not the official copy.
+
+**Preceding bounded-polish deck:**
 [[Devcon/presentation/2026-10-26-polish/README]], using the same native rehearsal
 copy with 30 slides, three chapters and an 18:30 planned route, not measured
 timing. Slide 18's dated caption summarizes July 29 EFS archive results. It is

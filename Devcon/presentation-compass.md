@@ -149,11 +149,37 @@ the retry. Keep technical limits in optional notes unless the action needs them.
 The concept-first basis is recorded in [[presentation-concept-revision-2026-10-26]].
 [[presentation-concrete-revision-2026-10-26]] and
 [[presentation-positive-revision-2026-10-26]] preserve the preceding revisions.
-The earlier refinements below remain history, not current slide numbering.
+The October 20 refinements below remain history, not current slide numbering.
 
-## Bounded polish, October 26
+## Current read-through revision, October 26
 
-The current revision is saved in
+The rehearsal revision is saved in [[Devcon/presentation/2026-10-26-readthrough/README]].
+Keep the same 30 slides, three chapters, owner theme and 18:30 planned route;
+this is not measured timing. The changes make the existing mechanisms easier
+to follow aloud rather than expand the talk.
+
+- Slide 6 names single points of failure and control. Slide 11 contrasts an
+  incomplete release with every file needed to start the client. Slide 12
+  separates user access and recovery from the company's login service.
+- Slide 16 shows a notes editor and community feed using the same shared
+  record. Keep author, text and attachment consistent across both views.
+- Slide 23 uses the precise caption "Uniswap v2 core: fixed code, shared
+  exchange logic". Keep that scope in the main narration and omit the Zerion
+  API sentence; optional qualifications remain outside the timed route.
+- Slide 25 follows public handoff to an independent operator to a replacement
+  service. Slide 28 follows the failed index, retained records, rebuild,
+  endpoint change and retry of the same note and attachment. This is an
+  illustrative test, not a newly observed outage or successful recovery.
+
+James reports copying the prior version to the official deck; this new working
+revision is not official, and delivery is not independently verified. On
+October 27, read main notes 1-29 without stopping, skip optional detail and
+source citations throughout, and mark unclear points. Slide 30 is Thank you/Q&A,
+outside the main route. James copies the revised deck later.
+
+## Earlier bounded polish, October 26
+
+The preceding revision is saved in
 [[Devcon/presentation/2026-10-26-polish/README]] from the same native rehearsal
 copy. Keep its 30 slides, three chapters, owner theme and 18:30 planned route;
 no measured rehearsal is established. This is a clarity pass, not a new story.
