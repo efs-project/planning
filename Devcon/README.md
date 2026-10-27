@@ -4,6 +4,23 @@ Application record and delivery control center for James's Devcon 8 talk. This
 folder is a conference-planning surface, not an EFS design ruling or a promise
 to ship v2 by Devcon.
 
+## Current deck, October 27
+
+[[Devcon/presentation/2026-10-27-test-pass/README]] is the current working
+revision. It retains the 30-slide theme and three chapters, adds 16 practical
+TEST/CHECK bands, improves the editable app mockups and replaces the final
+index drill with a saved-export import/fix/retry. The deck and notes use
+"walk away" and "full stack" without hyphens. Accepted proposal text and
+historical snapshots are unchanged.
+
+James's latest dry run was untimed and included edits. The revised deck has
+not been timed; 18:30 remains a cue budget only. Read main notes 1-29 without
+stopping, skip optional detail and sources, then approve any final corrections.
+The official deck was not edited. See [[preparation-plan]] for the latest
+schedule verification and the Personal tracker for organizer administration.
+
+## October 26 preparation record
+
 **Status (2026-10-26):** proposal accepted and participation confirmed. The
 organizer assigned **November 5, 15:30-15:55, Lotus 3**, subject to change.
 The scheduling email leaves the timezone unstated. The supplied Google Slides

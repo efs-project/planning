@@ -1,0 +1,319 @@
+{
+  "snapshot": "2026-10-27-test-pass",
+  "captured_date": "2026-10-27",
+  "native_title": "Who Can Turn Off Your Ethereum App? | Devcon rehearsal draft",
+  "before_slide_count": 30,
+  "slide_count": 30,
+  "main_slides": 29,
+  "closing_qa_slide": 30,
+  "planned_seconds": 1110,
+  "main_spoken_words": 2063,
+  "timing_basis": "Retained native cue budget; main narration counted from current notes before optional detail and sources. Not measured.",
+  "measured_rehearsal": false,
+  "organizer_submission": false,
+  "visual_inspection_status": "Not asserted by the archive script; see the verification report for the checks actually recorded.",
+  "status_limitations": [
+    "This is a rehearsal snapshot, not a measured delivery or organizer submission.",
+    "The archive script verifies source fingerprints and structure; it does not visually inspect slides.",
+    "PPTX and PDF exports are preserved byte-for-byte. Native internal object names may remain in binary exports; generated text omits native identifiers and local paths while retaining the illustrative EFS file path."
+  ],
+  "verification": {
+    "status": "passed",
+    "checked_at": "2026-10-27T22:17:18.892364+00:00",
+    "before_count": 30,
+    "after_count": 30,
+    "visual_review": "separate manual responsibility",
+    "measured_rehearsal": false,
+    "organizer_submission": false,
+    "inputs_fingerprints": [
+      {
+        "name": "before-native.json",
+        "bytes": 1986635,
+        "sha256": "eddf3c221ff1264f69e2ca4d41cbb65b554254d06ddb5173f9cf9e3b155fa778"
+      },
+      {
+        "name": "final-native.json",
+        "bytes": 2224221,
+        "sha256": "c6b82954e356db03ffd5d9d355aa5dc3a3cb1aec418fcfae5e48b78b6227688f"
+      },
+      {
+        "name": "expected-notes.json",
+        "bytes": 30109,
+        "sha256": "205f83f5b5a6d8f77ea0c0f969d8ac2e6d621f2f8e64caad85d46ac7ad0dc27a"
+      },
+      {
+        "name": "before.pptx",
+        "bytes": 3905887,
+        "sha256": "a0efed246fbfaf9d3c63df758bf0a8e9ee177b135e6474a1e9c34133c9994e88"
+      },
+      {
+        "name": "after.pptx",
+        "bytes": 3828757,
+        "sha256": "5074dcd5275c2e1eaa5dc1accd83928ab96a14114c4faaa4feb3a025236e0d5b"
+      },
+      {
+        "name": "before.pdf",
+        "bytes": 1898396,
+        "sha256": "ef7852fa86403eaec70e5ff7bcdb1931712234827d53cf7c1fdcf5879c09b1a4"
+      },
+      {
+        "name": "after.pdf",
+        "bytes": 1854349,
+        "sha256": "9580efe8ed98aab8382156ae08896fbe44cccb421292fa38757e1f85f3142e35"
+      }
+    ],
+    "native": {
+      "baseline_slide_ids_preserved": 30,
+      "baseline_slide_order_preserved": true,
+      "native_notes_match_expected": 30,
+      "masters_layouts_notes_master_and_page_size_unchanged": true,
+      "source_backgrounds_unchanged": 30,
+      "source_slide_local_media_preserved": 2,
+      "authorized_media_changes": [
+        "EAS icon transform on slide 15",
+        "Original EFS logo added on slide 18"
+      ],
+      "test_check_band_count": 16,
+      "test_check_band_slides": [
+        6,
+        10,
+        11,
+        12,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        22,
+        23,
+        24,
+        25,
+        27,
+        28
+      ],
+      "walk_away_full_stack_terminology": "passed; URLs exempt only in notes",
+      "source_pptx_theme_parts_unchanged": true,
+      "source_pptx_embedded_media_bytes_preserved": 2,
+      "added_efs_logo_sha256": "f50a3e1f804664b994f788b9a8e15f40e338a1c84d5eaa513d2c6e9a627de168"
+    },
+    "before": {
+      "pptx_zip_integrity": "passed",
+      "pptx_slide_order_text_and_notes_match_native": 30,
+      "pptx_native_text_frames_matched": 173,
+      "pdf_pages": 30,
+      "pdf_native_text_frames_present_in_slide_order": 173,
+      "pdf_parser_warnings": [
+        "Object 2 0 not defined."
+      ],
+      "pdf_privacy_scan_scope": "Extracted page text and resolvable trailer object strings; unresolved-object warnings are retained above.",
+      "privacy_scan": "passed",
+      "pdf_no_extra_normalized_text": true
+    },
+    "after": {
+      "pptx_zip_integrity": "passed",
+      "pptx_slide_order_text_and_notes_match_native": 30,
+      "pptx_native_text_frames_matched": 206,
+      "pdf_pages": 30,
+      "pdf_native_text_frames_present_in_slide_order": 206,
+      "pdf_parser_warnings": [
+        "Object 2 0 not defined."
+      ],
+      "pdf_privacy_scan_scope": "Extracted page text and resolvable trailer object strings; unresolved-object warnings are retained above.",
+      "privacy_scan": "passed",
+      "pdf_no_extra_normalized_text": true
+    },
+    "planned_seconds": 1110,
+    "narrative_word_count": 2063,
+    "narration_by_slide": [
+      {
+        "slide": 1,
+        "words": 33,
+        "planned_seconds": 15
+      },
+      {
+        "slide": 2,
+        "words": 14,
+        "planned_seconds": 5
+      },
+      {
+        "slide": 3,
+        "words": 84,
+        "planned_seconds": 45
+      },
+      {
+        "slide": 4,
+        "words": 74,
+        "planned_seconds": 35
+      },
+      {
+        "slide": 5,
+        "words": 89,
+        "planned_seconds": 55
+      },
+      {
+        "slide": 6,
+        "words": 85,
+        "planned_seconds": 35
+      },
+      {
+        "slide": 7,
+        "words": 44,
+        "planned_seconds": 20
+      },
+      {
+        "slide": 8,
+        "words": 12,
+        "planned_seconds": 5
+      },
+      {
+        "slide": 9,
+        "words": 27,
+        "planned_seconds": 10
+      },
+      {
+        "slide": 10,
+        "words": 120,
+        "planned_seconds": 70
+      },
+      {
+        "slide": 11,
+        "words": 102,
+        "planned_seconds": 45
+      },
+      {
+        "slide": 12,
+        "words": 95,
+        "planned_seconds": 45
+      },
+      {
+        "slide": 13,
+        "words": 11,
+        "planned_seconds": 5
+      },
+      {
+        "slide": 14,
+        "words": 19,
+        "planned_seconds": 10
+      },
+      {
+        "slide": 15,
+        "words": 96,
+        "planned_seconds": 60
+      },
+      {
+        "slide": 16,
+        "words": 97,
+        "planned_seconds": 50
+      },
+      {
+        "slide": 17,
+        "words": 102,
+        "planned_seconds": 55
+      },
+      {
+        "slide": 18,
+        "words": 115,
+        "planned_seconds": 65
+      },
+      {
+        "slide": 19,
+        "words": 103,
+        "planned_seconds": 70
+      },
+      {
+        "slide": 20,
+        "words": 98,
+        "planned_seconds": 55
+      },
+      {
+        "slide": 21,
+        "words": 11,
+        "planned_seconds": 5
+      },
+      {
+        "slide": 22,
+        "words": 41,
+        "planned_seconds": 10
+      },
+      {
+        "slide": 23,
+        "words": 129,
+        "planned_seconds": 85
+      },
+      {
+        "slide": 24,
+        "words": 97,
+        "planned_seconds": 60
+      },
+      {
+        "slide": 25,
+        "words": 92,
+        "planned_seconds": 40
+      },
+      {
+        "slide": 26,
+        "words": 11,
+        "planned_seconds": 5
+      },
+      {
+        "slide": 27,
+        "words": 78,
+        "planned_seconds": 45
+      },
+      {
+        "slide": 28,
+        "words": 101,
+        "planned_seconds": 60
+      },
+      {
+        "slide": 29,
+        "words": 83,
+        "planned_seconds": 45
+      }
+    ],
+    "timing_basis": "Derived from contiguous Planned cue intervals on slides 1-29; not measured.",
+    "narrative_word_count_basis": "Whitespace-separated words in slides 1-29 after removing Planned cue and truncating at Optional detail or Sources; slide 30 Q&A excluded.",
+    "notes_in_pdf": "PDF pages do not carry speaker notes; native/PPTX notes checked.",
+    "privacy_boundary": "Native text/notes, PPTX XML/relationships/text, PDF extractable text and resolvable metadata checked for private deck identifiers, private/signed links and local paths.",
+    "limits": [
+      "PDF checks extractable text, not pixels or raster text.",
+      "PPTX text comparison normalizes whitespace and common bullet glyphs.",
+      "Visual layout, clipping, overlap and raster text require separate visual inspection.",
+      "EAS image transformation was authorized; its image content and other properties remain checked.",
+      "Planned duration and narrative words are not a measured rehearsal or evidence of runtime recovery."
+    ]
+  },
+  "files": [
+    {
+      "name": "before-presentation.pdf",
+      "bytes": 1898396,
+      "sha256": "ef7852fa86403eaec70e5ff7bcdb1931712234827d53cf7c1fdcf5879c09b1a4"
+    },
+    {
+      "name": "before-presentation.pptx",
+      "bytes": 3905887,
+      "sha256": "a0efed246fbfaf9d3c63df758bf0a8e9ee177b135e6474a1e9c34133c9994e88"
+    },
+    {
+      "name": "before-slides-and-notes.md",
+      "bytes": 35316,
+      "sha256": "5d69913d73aeb5beba51b8cb5a08bfef8c03c34a88710492e3e4d706b6fce716"
+    },
+    {
+      "name": "presentation.pdf",
+      "bytes": 1854349,
+      "sha256": "9580efe8ed98aab8382156ae08896fbe44cccb421292fa38757e1f85f3142e35"
+    },
+    {
+      "name": "presentation.pptx",
+      "bytes": 3828757,
+      "sha256": "5074dcd5275c2e1eaa5dc1accd83928ab96a14114c4faaa4feb3a025236e0d5b"
+    },
+    {
+      "name": "slides-and-notes.md",
+      "bytes": 36888,
+      "sha256": "028b61b196e11e16594be6aa4a4c651c18fd4c3e41edc9bc2fe23e8b0c16508e"
+    }
+  ]
+}

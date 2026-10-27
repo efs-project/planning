@@ -1,10 +1,34 @@
 # Who Can Turn Off Your Ethereum App?
 
-Working story for **A Full-Stack Walk-Away Test**. Drafted 2026-09-14 for
+Working story for **A Full Stack Walk Away Test**. Drafted 2026-09-14 for
 James's accepted 20-minute talk plus 5 minutes of Q&A. This is presentation
 preparation, not a change to the accepted proposal or an EFS release deadline.
 
-## Current presentation, October 26
+## Current presentation, October 27
+
+The current working deck is saved in
+[[Devcon/presentation/2026-10-27-test-pass/README]]. James authorized this pass
+after an untimed editorial dry run. The three chapters and 30-slide order are
+unchanged. TEST/CHECK bands on 16 teaching slides connect each concept to an
+exercise for the listener's existing app. They are not a new maintained rubric
+or claims of completed runtime tests.
+
+Slide 11 checks client startup; 12 checks authorized access without the company.
+The editor and social feed on 16 show the same note and attachment. Storage
+options remain examples, EFS has its original logo, and RPC/index jobs use
+familiar wallet views. Slide 25 asks an outsider to complete a task using only
+the public handoff. Slide 27 recaps Interface, Data and Rules in plain language.
+Slide 28 now tests importing a saved export into another app: an attachment is
+missing, the developer reconnects and saves a complete export during practice,
+then repeats the outage successfully. It replaces the index-specific drill.
+
+"Walk away" and "full stack" have no hyphens in the active deck and notes.
+The accepted portal title and historical snapshots are unchanged. No live demo
+is required. The 18:30 cue budget is retained as a plan, not timing evidence;
+the revised deck needs an uninterrupted timed read. The official deck was not
+edited. James handles the later approved copy.
+
+## October 26 presentation, preserved for comparison
 
 The current read-through revision of the native rehearsal copy is saved in
 [[Devcon/presentation/2026-10-26-readthrough/README]]. Its 30 slides retain

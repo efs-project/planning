@@ -1,6 +1,26 @@
 # Rehearsal script
 
-## Current script, October 26
+## Current script, October 27
+
+Use [[Devcon/presentation/2026-10-27-test-pass/slides-and-notes|the current native slide text and speaker notes]].
+It preserves the three chapters and 30-slide order. Speak the main narration
+on slides 1-29. Skip optional detail and sources; slide 30 is Thank you/Q&A.
+The 18:30 cue budget is retained, not measured. James's latest editorial dry
+run was untimed. This revision still needs an uninterrupted timed run.
+
+The TEST/CHECK bands make each teaching slide actionable. Explain the concept,
+then point to its check; avoid reading the same sentence twice. On slide 16,
+show how the same note and attachment work in an editor and a feed. On slide 25,
+the outsider succeeds only after completing the user's task without private
+help. Slide 28 is a practice outage: import a saved export, find a missing
+attachment, reconnect to improve the export, then block the original app and
+retry. It is an illustration, not a performed recovery test.
+
+The deck and notes now use "walk away" and "full stack" without hyphens.
+The official deck and accepted proposal were not changed. James copies the
+approved revision later. The prior notes below remain for comparison.
+
+## October 26 script, preserved for comparison
 
 The current read-through speaking draft is
 [[Devcon/presentation/2026-10-26-readthrough/slides-and-notes|the latest deck's native slide text and speaker notes]].

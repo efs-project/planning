@@ -7,6 +7,18 @@ The EFS attendance checklist retains earlier preparation targets and history.
 
 ## Where we stand
 
+- October 27 test and visual polish pass: the current working deck is saved in
+  [[Devcon/presentation/2026-10-27-test-pass/README]]. It preserves 30 slides,
+  the three chapters and James's theme. Sixteen teaching slides now have a
+  concrete TEST or CHECK band. The editor/feed mockups, account-access example,
+  storage choices, EFS logo, RPC/index views, outsider handoff, chapter checklist
+  and illustrative import/fix/retry are ready for review. The deck and notes use
+  "walk away" and "full stack" without hyphens. James's latest dry run was
+  untimed and included changes; no measured time exists for this revision.
+  The retained 18:30 cue budget is only a plan. Next: read the main notes on
+  slides 1-29 uninterrupted, skipping optional detail and sources, and record
+  the time. The official copy and accepted proposal were not edited.
+
 - October 27 public schedule verification: the
   [official Pretalx calendar export](https://cfp.devcon.org/devcon8/talk/SPVJV8.ics)
   explicitly uses UTC+05:30 and confirms November 5, 15:30-15:55, Lotus Stage 3.
@@ -14,7 +26,7 @@ The EFS attendance checklist retains earlier preparation targets and history.
   and newer organizer-delivery instructions remain personal administration;
   do not infer them complete from a deck snapshot or an older deadline note.
 
-- October 26 read-through pass: the current rehearsal revision is saved in
+- Earlier October 26 read-through pass: that rehearsal revision is saved in
   [[Devcon/presentation/2026-10-26-readthrough/README]]. It keeps 30 slides,
   three chapters and an 18:30 planned route, not measured timing. The planned
   main narration is 2,097 words on slides 1-29; slide 30 is Thank you/Q&A,
