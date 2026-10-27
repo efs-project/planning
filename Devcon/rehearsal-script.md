@@ -3,9 +3,9 @@
 ## Current script, October 26
 
 The current speaking draft is
-[[Devcon/presentation/2026-10-26-concrete-examples/slides-and-notes|the latest deck's native slide text and speaker notes]].
+[[Devcon/presentation/2026-10-26-concept-first/slides-and-notes|the latest deck's native slide text and speaker notes]].
 It has 29 main slides including transitions and one thank-you/Q&A page. The
-cue budget is 18:40, but this revision has not been rehearsed. There is one
+cue budget is 18:30, but this revision has not been rehearsed. There is one
 spoken route. Read the opening narration in each note; the clearly marked
 optional detail and sources are for preparation and Q&A, not the timed route.
 Keep divider/question pairs brief and take time to explain the diagrams.
@@ -14,12 +14,13 @@ There is no live demo or animation in this draft.
 
 The opening follows a person keeping their work, then connects dependable
 capabilities to CROPS and hyperstructures. The title's two walk-away scenarios
-guide all three technical chapters. Garden DAO is illustrative: Maya wants to
-find a proposal, read its plan and cast a test vote. EAS/EFS records connect
-two compatible clients; diagrams show release, recovery, retention, metadata,
-indexing, background execution and handoff. Uniswap v2 core supports the
-immutable-contract recommendation. After the checklist, slide 28 walks through
-one failure and repair before returning to what users and future builders gain.
+guide all three technical chapters. The implied subject is the audience's
+existing app, not a fictional app under construction. Local examples explain
+release, recovery, portable formats, retention, EFS references, indexes,
+replaceable workers and handoff. Uniswap core supports the immutable-contract
+recommendation. After the checklist, slide 28 shows an unavailable list,
+the repair and a retry that restores the note and attachment. The closing
+returns to what users and future builders gain.
 
 James's 17-minute first read applies to the earlier version preserved below.
 For today's practice, speak through slides 1-29 without stopping to edit.

@@ -58,8 +58,9 @@ build on them. A shutdown or hostile change can strand both. Then show the
 alternative: lasting capabilities that people can choose, improve and combine.
 Only then introduce the stack as the practical work needed to get there.
 
-Use one remembered user task throughout. The current deck imagines a person
-keeping years of research notes and uses file retrieval as the EFS example.
+Keep the audience's own existing application as the implied subject. The
+opening imagines a person keeping years of useful work. Use local examples
+where a mechanism needs explanation, rather than a recurring fictional app.
 James approved the person-led stakes, developer action and community horizon
 after considering all three motivations. The specific research-notes persona
 is illustrative, not an EFS customer testimonial or deployed editor.
@@ -122,10 +123,12 @@ reference notes, not a new taxonomy the audience must memorize.
 
 EFS belongs mainly in the data chapter. James's later October 26 direction
 removes Nostr and requests Ethereum examples or clearly invented shared data.
-Use the illustrative Garden DAO proposal: an EAS statement refers to an EFS
-document revision and voting contract, and both a DAO portal and social app
-can use it. Label this as an illustrative design, not an existing integration.
-Reuse the proposal through the stack so mechanisms become easier to follow.
+His subsequent read-through found the recurring Garden DAO too close to a
+build tutorial. The approved concept-first revision teaches portable formats,
+meaning, permissions and compatible readers. EAS illustrates structured
+statements. EFS illustrates shared file references and verification. Neither
+is a required architecture. Include database exports and restore paths for
+existing apps. Two small mock interfaces show the benefit of shared data.
 
 Show actual composition in the hyperstructure vision: separate teams provide
 membership, voting and treasury; a DAO app combines them; a social app uses
@@ -138,8 +141,14 @@ deployments. Keep this distinct from user-chosen app updates and coordinated
 changes to shared network rules. Close with a concrete checklist that recaps
 the three chapters and an invitation to improve one important user task.
 
-The latest implementation record is [[presentation-concrete-revision-2026-10-26]].
-[[presentation-positive-revision-2026-10-26]] preserves the preceding revision.
+The through line is reducing single points of failure and control. Teach each
+layer's job, the dependency that can stop it, an improvement and a check.
+Use the one worked test at the end to show a failed attempt, the repair and
+the retry. Keep technical limits in optional notes unless the action needs them.
+
+The latest implementation record is [[presentation-concept-revision-2026-10-26]].
+[[presentation-concrete-revision-2026-10-26]] and
+[[presentation-positive-revision-2026-10-26]] preserve the preceding revisions.
 The earlier refinements below remain history, not current slide numbering.
 
 ## Approved refinements implemented October 20

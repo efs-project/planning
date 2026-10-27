@@ -6,11 +6,13 @@ should describe the actual deployment shown without EFS version labels.
 
 ## Evidence status
 
-**Current practice deck:** [[Devcon/presentation/2026-10-26-concrete-examples/README]]
-has 30 slides and a planned 18:40 route. Its Garden DAO architecture, shared
-EAS/EFS records and worked walk-away test are explicitly illustrative. The
-DNS/ENS values were freshly checked October 26; exact chain basis and source
-boundaries are in [[presentation-concrete-revision-2026-10-26]]. The public
+**Current practice deck:** [[Devcon/presentation/2026-10-26-concept-first/README]]
+has 30 slides and a planned 18:30 route. Its composition diagram, two-client
+mockups, storage operators and worked index test are illustrative. No deployed
+EAS/EFS integration is claimed. Primary-source checks for The Graph, Helios,
+Tornado Cash Classic, Uniswap and wallet reuse are in
+[[presentation-concept-revision-2026-10-26]]. The DNS/ENS values retain the
+October 26 basis in [[presentation-concrete-revision-2026-10-26]]. The public
 EFS verification explanation still rests on the historical proof package,
 not a fresh retrieval. All-page visual review and native/export consistency
 checks establish artifact quality, not runtime readiness or measured delivery.

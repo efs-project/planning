@@ -12,19 +12,20 @@ deck remains outside this editing pass. The separate native rehearsal copy has
 The revised introduction leads with harm to users and builders, then a vision
 of reliable CROPS apps and hyperstructures others can build on. The talk
 teaches the eight layers in [[stack-map]] through three chapters. The current
-cue budget is **18:40**, not a measured rehearsal. James's **17-minute** first
+cue budget is **18:30**, not a measured rehearsal. James's **17-minute** first
 read belongs to the first deck. Versions are saved as PDF, editable
 PowerPoint and native text/notes in [[Devcon/presentation/README]].
 The latest October 26 revision preserves James's theme and transitions. It
 shows a DAO composed of reusable modules and a social app built on that DAO.
-An illustrative Garden DAO proposal connects the release, recovery, portable
-EAS/EFS records, retained files, indexes, workers and community handoff.
+The audience's own app supplies the through line: reduce single points of
+failure and control. Local examples explain each layer, including portable
+database exports and compatible clients, without prescribing an EAS/EFS app.
 Ethereum examples replace the earlier Nostr and Teia comparisons. The talk
 explicitly encourages immutable core contracts and closes with eight checks
 and a worked failure-and-repair example. One spoken route keeps optional
 technical detail and sources separate. The diagrams require no live demo.
 The revision and source choices are recorded in
-[[presentation-concrete-revision-2026-10-26]].
+[[presentation-concept-revision-2026-10-26]].
 The working direction remains the organizer's laptop. The Personal tracker
 owns organizer method notification and final delivery.
 
@@ -105,8 +106,8 @@ The next step is James's uninterrupted timed practice of the current deck.
 Bring back the duration, the least clear section and any unnatural wording.
 Also ask whether the talk makes the future worth building and leaves a
 developer feeling capable of improving one important user task. The current
-concrete-example revision is saved in
-[[Devcon/presentation/2026-10-26-concrete-examples/README]].
+concept-first revision is saved in
+[[Devcon/presentation/2026-10-26-concept-first/README]].
 The 17-minute prior read remains attached to the first deck. Screenshots and
 visual sequences are optional, not a prerequisite to today's run.
 

@@ -8,13 +8,14 @@ The EFS attendance checklist retains earlier preparation targets and history.
 ## Where we stand
 
 - October 26: the current 30-slide revision is
-  [[Devcon/presentation/2026-10-26-concrete-examples/README]], with an 18:40
-  planned route and 2,094 spoken words, not measured timing. It preserves
+  [[Devcon/presentation/2026-10-26-concept-first/README]], with an 18:30
+  planned route and 1,991 spoken words, not measured timing. It preserves
   James's official theme and latest edits, explains composed modules, and
-  carries an illustrative Garden DAO proposal through concrete stack diagrams.
-  Shared EAS/EFS records replace Nostr; a handoff diagram replaces Teia. The
-  closing checklist now has a worked failure-and-repair example. Technical
-  qualifications stay in optional notes. The 29-slide owner-edited baseline
+  focuses on improving the audience's existing apps. Local examples replace
+  the recurring fictional DAO. Database export/restore paths and compatible
+  clients make the data chapter applicable without a rewrite. The checklist
+  ends in one visible index failure, repair and retry. Technical qualifications
+  stay in optional notes. The 30-slide owner-edited baseline
   is saved too. Use [[rehearsal-script]] for current practice; the October 20
   records below describe earlier arrangements.
 

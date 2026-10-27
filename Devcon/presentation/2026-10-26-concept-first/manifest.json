@@ -1,0 +1,158 @@
+{
+  "snapshot": "2026-10-26-concept-first",
+  "captured_date": "2026-10-26",
+  "native_title": "Who Can Turn Off Your Ethereum App? | Devcon rehearsal draft",
+  "before_slide_count": 30,
+  "slide_count": 30,
+  "main_slides": 29,
+  "closing_qa_slide": 30,
+  "planned_seconds": 1110,
+  "main_spoken_words": 1991,
+  "timing_basis": "Current design-plan.json; planned duration and narrative count, not a measured rehearsal.",
+  "measured_rehearsal": false,
+  "organizer_submission": false,
+  "visual_inspection_status": "Not asserted by the archive script; see the verification report for the checks actually recorded.",
+  "status_limitations": [
+    "This is a rehearsal snapshot, not a measured delivery or organizer submission.",
+    "The archive script verifies source fingerprints and structure; it does not visually inspect slides.",
+    "PPTX and PDF exports are preserved byte-for-byte. Native internal object names may remain in binary exports; generated text omits native identifiers and local paths while retaining the illustrative EFS file path."
+  ],
+  "verification": {
+    "status": "passed",
+    "checked_at": "2026-10-27T00:40:14.377128+00:00",
+    "before_count": 30,
+    "after_count": 30,
+    "visual_review": "separate manual responsibility",
+    "notes_in_pdf": "PDF slide pages do not carry speaker notes; native and PPTX notes are checked",
+    "measured_rehearsal": false,
+    "organizer_submission": false,
+    "inputs_fingerprints": [
+      {
+        "name": "raw-before.json",
+        "bytes": 1807916,
+        "sha256": "72fd76a96d21762e645af4f81921800222e48d2c8280a76782060cae347bd9c6"
+      },
+      {
+        "name": "raw-after.json",
+        "bytes": 1869247,
+        "sha256": "2ec71ddac4b77969a645fdd8bebf9c7bbaece817ee8bf1d89cf91770b9e8fce5"
+      },
+      {
+        "name": "expected-notes.json",
+        "bytes": 25292,
+        "sha256": "f6b5b1b9f124cd96a0e87a96389d6613732ee2c59498871317814f27a3f0e431"
+      },
+      {
+        "name": "order.json",
+        "bytes": 578,
+        "sha256": "e6214daf2014e2c4fe686978ffdead410bfee40b502b8b2d65b28e3465ffec16"
+      },
+      {
+        "name": "before.pptx",
+        "bytes": 3880277,
+        "sha256": "0b0a36882245769e36602f1a2f7e8fefdb000a5dd33dd808af4defbb9930f85a"
+      },
+      {
+        "name": "after.pptx",
+        "bytes": 3880550,
+        "sha256": "032ed283428ed3853ee31463cc2929ec0c3e791ac6224339d35f467b96ea7059"
+      },
+      {
+        "name": "before.pdf",
+        "bytes": 1859569,
+        "sha256": "9fc9e13a0c14ca3c95c1ddfa0cf7919b4057b21fc31b06ed4d1267f1d720abb1"
+      },
+      {
+        "name": "after.pdf",
+        "bytes": 1859677,
+        "sha256": "e96e5d7671b254a8e2db4edca5758de3c581fd33b60a0b43e1112c29c803753a"
+      },
+      {
+        "name": "design-plan.json",
+        "bytes": 17714,
+        "sha256": "3b08c2711156b693c46202e5459124a9fa8a963c7995a5d3e1d8988c21075463"
+      }
+    ],
+    "native": {
+      "baseline_slide_ids_preserved": 30,
+      "new_slide_ids": [],
+      "final_order_matches": true,
+      "native_notes_match_expected": 30,
+      "masters_layouts_notes_master_and_page_size_unchanged": true,
+      "source_backgrounds_unchanged": 30,
+      "source_slide_local_media_unchanged": 1,
+      "no_new_raster_or_embedded_media": true,
+      "content_url_changes_ignored_as_ephemeral": true,
+      "removed_example_names_absent": true,
+      "source_pptx_theme_parts_unchanged": true,
+      "source_pptx_theme_check_basis": "Theme bytes and effective consumer bindings unchanged; exporter theme part renumbering ignored.",
+      "source_pptx_embedded_media_bytes_preserved": 1
+    },
+    "before": {
+      "pptx_zip_integrity": "passed",
+      "pptx_slide_order_text_and_notes_match_native": 30,
+      "pptx_native_text_frames_matched": 143,
+      "pdf_pages": 30,
+      "pdf_native_text_frames_present_in_slide_order": 143,
+      "pdf_parser_warnings": [
+        "Object 2 0 not defined."
+      ],
+      "pdf_privacy_scan_scope": "Extracted page text and resolvable trailer object strings; unresolved-object warnings are retained above.",
+      "removed_example_scan": "baseline not restricted",
+      "privacy_scan": "passed"
+    },
+    "after": {
+      "pptx_zip_integrity": "passed",
+      "pptx_slide_order_text_and_notes_match_native": 30,
+      "pptx_native_text_frames_matched": 153,
+      "pdf_pages": 30,
+      "pdf_native_text_frames_present_in_slide_order": 153,
+      "pdf_parser_warnings": [
+        "Object 2 0 not defined."
+      ],
+      "pdf_privacy_scan_scope": "Extracted page text and resolvable trailer object strings; unresolved-object warnings are retained above.",
+      "removed_example_scan": "passed",
+      "privacy_scan": "passed"
+    },
+    "planned_seconds": 1110,
+    "narrative_word_count": 1991,
+    "privacy_boundary": "No private presentation identifiers, private native links, personalized portal links or local absolute paths; editable object names are allowed.",
+    "limits": [
+      "PDF checks extractable text rather than pixels.",
+      "PPTX text comparison ignores whitespace and common bullet glyphs.",
+      "Visual layout, clipping and raster-image text require visual review."
+    ]
+  },
+  "files": [
+    {
+      "name": "before-presentation.pdf",
+      "bytes": 1859569,
+      "sha256": "9fc9e13a0c14ca3c95c1ddfa0cf7919b4057b21fc31b06ed4d1267f1d720abb1"
+    },
+    {
+      "name": "before-presentation.pptx",
+      "bytes": 3880277,
+      "sha256": "0b0a36882245769e36602f1a2f7e8fefdb000a5dd33dd808af4defbb9930f85a"
+    },
+    {
+      "name": "before-slides-and-notes.md",
+      "bytes": 31427,
+      "sha256": "c9063fc571a6dec837edb91a74c767ee52d6e358d1ce04ce1e2bbfb6a12df4c9"
+    },
+    {
+      "name": "presentation.pdf",
+      "bytes": 1859677,
+      "sha256": "e96e5d7671b254a8e2db4edca5758de3c581fd33b60a0b43e1112c29c803753a"
+    },
+    {
+      "name": "presentation.pptx",
+      "bytes": 3880550,
+      "sha256": "032ed283428ed3853ee31463cc2929ec0c3e791ac6224339d35f467b96ea7059"
+    },
+    {
+      "name": "slides-and-notes.md",
+      "bytes": 32329,
+      "sha256": "4fd35a18743f503781e3274e63d648033d14d210422edd43ee2d8c6a5bae31d3"
+    }
+  ]
+}

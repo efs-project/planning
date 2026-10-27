@@ -6,30 +6,34 @@ preparation, not a change to the accepted proposal or an EFS release deadline.
 
 ## Current presentation, October 26
 
-[[Devcon/presentation/2026-10-26-concrete-examples/README]] is the current
+[[Devcon/presentation/2026-10-26-concept-first/README]] is the current
 30-slide revision, including transitions and the thank-you/Q&A page. It keeps
-James's official theme, latest edits and accepted title. Garden DAO is an
-explicitly illustrative recurring example that makes module composition and
-each layer's job concrete. Its 18:40 cue budget has not been rehearsed. The
-saved 29-slide before version includes James's latest Portable Data label and
-checklist edits.
+James's official theme, latest edits and accepted title. The audience's own
+existing app drives the story. Examples explain individual mechanisms rather
+than teach construction of a fictional DAO. Its 18:30 cue budget and 1,991
+spoken words have not been rehearsed. The saved 30-slide before version
+preserves the current cover, DNS slide edits and Data section label.
 
 | Slides | Role |
 | --- | --- |
 | 1-7 | Human stakes, benefits, a hyperstructure diagram, two walk-away scenarios and eight jobs. |
 | 8-12 | Interface: alternative entrances, runnable releases and recoverable access. |
-| 13-20 | Data: shared EAS/EFS records, DAO and social clients, retained copies, EFS verification, rebuildable views and a replacement executor. |
+| 13-20 | Data: documented formats for existing apps, two compatible clients, offchain retention versus chain state, EFS references, RPCs and indexes, replaceable submission services. |
 | 21-25 | Rules: immutable core contracts, user-chosen change, network recovery and community operation. |
-| 26-29 | Walk-away checklist, a worked Garden DAO failure and repair, one developer action and the hopeful closing. |
+| 26-29 | Walk-away checklist, one visible index failure and repair/retry, one developer action and the hopeful closing. |
 | 30 | Thank you and questions. |
 
-Maya's task is to find proposal 42, read its plan and cast a test vote. Two
-illustrative clients use the same EAS statement, EFS document revision and
-voting reference. Safe and Uniswap v2 remain real Ethereum examples. The
-DNS/ENS slide uses freshly checked lookup values, while retained operators
-are explicitly illustrative. Nostr and Teia are removed from the active
-deck. Detailed qualifications and sources remain in optional notes.
-[[presentation-concrete-revision-2026-10-26]] records the choices. The
+At every layer, reduce one operator's ability to stop the app or change its
+rules. Teach the job, failure, useful improvement and audience check. Existing
+databases can improve through documented exports, retained relationships and
+compatible readers. Shared ongoing writes need agreed authorization and sync.
+Safe, EAS, The Graph, Helios, Tornado Cash Classic and Uniswap each explain a
+specific mechanism. EFS remains the personal motivation and file-reference
+example. A generic composition diagram preserves the larger vision. The final
+illustrative task finds a note and opens its attachment after an index repair.
+Details and limits remain in optional notes. The DNS/ENS lookup basis remains
+the October 26 snapshot, not a new hosting test.
+[[presentation-concept-revision-2026-10-26]] records the choices. The
 October 20 flow below is preserved as history.
 
 ## Content revision, October 20

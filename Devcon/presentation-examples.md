@@ -2,7 +2,7 @@
 
 Source bank initially checked **2026-09-14** for [[presentation-spine]]. James's direction
 is to use non-EFS examples wherever they sharpen a point or reveal another
-design choice. EFS remains the running user journey. This bank supports
+design choice. EFS supplies the motivation and relevant mechanisms. This bank supports
 selection during drafting, not a promise to cover every project in 20 minutes.
 
 For each example, separate the source-supported fact from our proposed lesson.
@@ -10,18 +10,20 @@ None is a verdict on the whole project's decentralization or a claim that EFS
 solves the same problem. Refresh changing documentation and the relevant
 deployment configuration before using it on stage.
 
-## October 26 concrete-example selection
+## October 26 concept-first selection
 
-[[presentation-concrete-revision-2026-10-26]] is the current selection record.
+[[presentation-concept-revision-2026-10-26]] is the current selection record.
 James explicitly removed Nostr and requested Ethereum examples or invented
-records. The latest deck uses a clearly illustrative Garden DAO proposal to
-connect EAS/EFS shared records, two clients and the stack diagrams. Safe and
-Uniswap v2 remain real Ethereum examples. A public handoff diagram replaces
+records. The latest deck removes the recurring fictional DAO and teaches
+properties that developers can improve in existing apps. EAS illustrates
+schemas, EFS shared references, The Graph rebuildable views, Helios supported
+verified reads, and Tornado Cash Classic replaceable submission. Safe and
+Uniswap v2 remain examples. A public handoff diagram replaces
 the unfamiliar Hic et Nunc/Teia story. Earlier example research below remains
 history and reserve material, not a direction to restore those examples.
 
 The DNS/ENS diagram uses current lookup values, while the retained operators
-and Garden DAO are illustrative. No fictional integration or practice run is
+and mock interfaces are illustrative. No fictional integration or practice run is
 promoted into deployment evidence.
 
 ## October 20 integrated deck and fresh audit
