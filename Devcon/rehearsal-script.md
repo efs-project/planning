@@ -2,15 +2,19 @@
 
 ## Current script, October 26
 
-The current speaking draft is
-[[Devcon/presentation/2026-10-26-concept-first/slides-and-notes|the latest deck's native slide text and speaker notes]].
-It has 29 main slides including transitions and one thank-you/Q&A page. The
-cue budget is 18:30, but this revision has not been rehearsed. There is one
-spoken route. Read the opening narration in each note; the clearly marked
-optional detail and sources are for preparation and Q&A, not the timed route.
+The current bounded-polish speaking draft is
+[[Devcon/presentation/2026-10-26-polish/slides-and-notes|the latest deck's native slide text and speaker notes]].
+The preceding draft is preserved in
+[[Devcon/presentation/2026-10-26-concept-first/slides-and-notes]]. The current
+revision has 29 main slides including transitions and one thank-you/Q&A page.
+Main narration is 2,045 words; the 18:30 cue budget is planned, not measured.
+There is one spoken route. Read the opening narration in each note; the clearly
+marked optional detail and sources are for preparation and Q&A, not the timed route.
 Keep divider/question pairs brief and take time to explain the diagrams.
-The verification sequence is explanatory, not a fresh runtime result.
-There is no live demo or animation in this draft.
+The verification sequence is explanatory. Slide 18's July 29 EFS archive-results
+caption is historical evidence, not a screenshot or fresh retrieval.
+There is no live demo or animation in this draft. The organizer's deck stays
+outside this pass, and no public QR is added.
 
 The opening follows a person keeping their work, then connects dependable
 capabilities to CROPS and hyperstructures. The title's two walk-away scenarios
@@ -21,6 +25,13 @@ replaceable workers and handoff. Uniswap core supports the immutable-contract
 recommendation. After the checklist, slide 28 shows an unavailable list,
 the repair and a retry that restores the note and attachment. The closing
 returns to what users and future builders gain.
+
+For this polish pass, ask listeners to choose their own task on slide 6.
+Carry slide 10's hostile name redirect through to the retained release and
+stable contracts on slide 23. Keep privacy and encryption-key recovery
+distinct on slide 12; the attachment revision and author agree across slides
+15-16. Name Ethereum full nodes on slide 17, funding in the slide 25 handoff,
+and actual administrator powers in the slide 27 checklist.
 
 James's 17-minute first read applies to the earlier version preserved below.
 For today's practice, speak through slides 1-29 without stopping to edit.

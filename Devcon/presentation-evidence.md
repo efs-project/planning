@@ -6,7 +6,18 @@ should describe the actual deployment shown without EFS version labels.
 
 ## Evidence status
 
-**Current practice deck:** [[Devcon/presentation/2026-10-26-concept-first/README]]
+**Current bounded-polish deck:**
+[[Devcon/presentation/2026-10-26-polish/README]], using the same native rehearsal
+copy with 30 slides, three chapters and an 18:30 planned route, not measured
+timing. Slide 18's dated caption summarizes July 29 EFS archive results. It is
+historical evidence, not a screenshot, fresh retrieval or whole-app walk-away
+result. The other diagrams remain explanatory, including the hostile name
+redirect and retained-release/stable-contract callback. Privacy and
+encryption-key recovery are separate checks. The snapshot README and manifest
+record artifact verification; those checks do not establish runtime readiness or
+measured delivery. No organizer change, live demo or public QR is included.
+
+**Preceding concept-first deck:** [[Devcon/presentation/2026-10-26-concept-first/README]]
 has 30 slides and a planned 18:30 route. Its composition diagram, two-client
 mockups, storage operators and worked index test are illustrative. No deployed
 EAS/EFS integration is claimed. Primary-source checks for The Graph, Helios,

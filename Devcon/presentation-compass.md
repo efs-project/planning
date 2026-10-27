@@ -146,10 +146,30 @@ layer's job, the dependency that can stop it, an improvement and a check.
 Use the one worked test at the end to show a failed attempt, the repair and
 the retry. Keep technical limits in optional notes unless the action needs them.
 
-The latest implementation record is [[presentation-concept-revision-2026-10-26]].
+The concept-first basis is recorded in [[presentation-concept-revision-2026-10-26]].
 [[presentation-concrete-revision-2026-10-26]] and
 [[presentation-positive-revision-2026-10-26]] preserve the preceding revisions.
 The earlier refinements below remain history, not current slide numbering.
+
+## Bounded polish, October 26
+
+The current revision is saved in
+[[Devcon/presentation/2026-10-26-polish/README]] from the same native rehearsal
+copy. Keep its 30 slides, three chapters, owner theme and 18:30 planned route;
+no measured rehearsal is established. This is a clarity pass, not a new story.
+
+- Slide 6 asks listeners to choose their own important user task. The hostile
+  name redirect on slide 10 returns on slide 23 as a retained-release and
+  stable-contract choice. Slide 27 makes administrator powers explicit.
+- Slide 12 keeps privacy visible and separates account recovery from
+  encryption-key recovery. Slides 15-16 align attachment revision 2 and author
+  identity; slide 17 names Ethereum full nodes. Slide 25 includes funding in
+  the handoff, not just instructions and code.
+- Slide 18's July 29 EFS archive-results caption reports historical evidence.
+  It is not a screenshot, fresh retrieval or whole-app walk-away result.
+
+Keep the concept-first record and owner edits intact. No organizer change,
+live demo or public QR is included in this polish pass.
 
 ## Approved refinements implemented October 20
 

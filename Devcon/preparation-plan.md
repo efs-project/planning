@@ -7,7 +7,19 @@ The EFS attendance checklist retains earlier preparation targets and history.
 
 ## Where we stand
 
-- October 26: the current 30-slide revision is
+- October 26 bounded polish: the current revision is saved in
+  [[Devcon/presentation/2026-10-26-polish/README]]. The same native rehearsal
+  copy keeps 30 slides, three chapters and an 18:30 planned route, with 2,045
+  main spoken words; timing is not measured. Preserve James's theme and edits.
+  The pass sharpens the audience's own task, hostile-name/retained-release
+  callback, privacy and separate encryption-key recovery, consistent revision
+  and author examples, Ethereum full nodes, funding handoff and admin powers.
+  Slide 18 labels July 29 EFS archive results as historical evidence, not a
+  screenshot or fresh retrieval. The snapshot records the artifact checks.
+  No organizer changes, live demo or public QR are included.
+  Use [[rehearsal-script]] for the current route.
+
+- Earlier October 26 concept-first revision:
   [[Devcon/presentation/2026-10-26-concept-first/README]], with an 18:30
   planned route and 1,991 spoken words, not measured timing. It preserves
   James's official theme and latest edits, explains composed modules, and
@@ -16,8 +28,8 @@ The EFS attendance checklist retains earlier preparation targets and history.
   clients make the data chapter applicable without a rewrite. The checklist
   ends in one visible index failure, repair and retry. Technical qualifications
   stay in optional notes. The 30-slide owner-edited baseline
-  is saved too. Use [[rehearsal-script]] for current practice; the October 20
-  records below describe earlier arrangements.
+  is saved too. This record and the October 20 records below describe earlier
+  arrangements.
 
 - Accepted application preserved in [[application-draft]].
 - First written story and timed beats drafted in [[presentation-spine]].

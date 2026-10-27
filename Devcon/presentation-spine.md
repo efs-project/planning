@@ -6,21 +6,24 @@ preparation, not a change to the accepted proposal or an EFS release deadline.
 
 ## Current presentation, October 26
 
-[[Devcon/presentation/2026-10-26-concept-first/README]] is the current
-30-slide revision, including transitions and the thank-you/Q&A page. It keeps
+[[Devcon/presentation/2026-10-26-polish/README]] records the current
+bounded-polish revision in the same native rehearsal copy. Its 30
+slides include transitions and the thank-you/Q&A page. It keeps
 James's official theme, latest edits and accepted title. The audience's own
 existing app drives the story. Examples explain individual mechanisms rather
-than teach construction of a fictional DAO. Its 18:30 cue budget and 1,991
-spoken words have not been rehearsed. The saved 30-slide before version
-preserves the current cover, DNS slide edits and Data section label.
+than teach construction of a fictional DAO. Main narration is 2,045 words;
+the 18:30 cue budget is planned, not a measured rehearsal. The preceding
+concept-first version remains in
+[[Devcon/presentation/2026-10-26-concept-first/README]]. Preserve the owner-edited
+cover, DNS slide and Data section label.
 
 | Slides | Role |
 | --- | --- |
-| 1-7 | Human stakes, benefits, a hyperstructure diagram, two walk-away scenarios and eight jobs. |
-| 8-12 | Interface: alternative entrances, runnable releases and recoverable access. |
-| 13-20 | Data: documented formats for existing apps, two compatible clients, offchain retention versus chain state, EFS references, RPCs and indexes, replaceable submission services. |
-| 21-25 | Rules: immutable core contracts, user-chosen change, network recovery and community operation. |
-| 26-29 | Walk-away checklist, one visible index failure and repair/retry, one developer action and the hopeful closing. |
+| 1-7 | Human stakes, benefits, a hyperstructure diagram, two walk-away scenarios, the listener's own user task and eight jobs. |
+| 8-12 | Interface: alternative entrances, hostile name redirection, runnable releases, privacy and separate account/encryption-key recovery. |
+| 13-20 | Data: documented formats, two compatible clients with consistent author and attachment revision, offchain retention versus Ethereum full-node state, EFS references and historical archive results, RPCs and indexes, replaceable submission services. |
+| 21-25 | Rules: immutable core contracts, a retained-release/stable-contract callback, user-chosen change, network recovery and community handoff including funding. |
+| 26-29 | Walk-away checklist with explicit admin powers, one visible index failure and repair/retry, one developer action and the hopeful closing. |
 | 30 | Thank you and questions. |
 
 At every layer, reduce one operator's ability to stop the app or change its
@@ -33,7 +36,10 @@ example. A generic composition diagram preserves the larger vision. The final
 illustrative task finds a note and opens its attachment after an index repair.
 Details and limits remain in optional notes. The DNS/ENS lookup basis remains
 the October 26 snapshot, not a new hosting test.
-[[presentation-concept-revision-2026-10-26]] records the choices. The
+Slide 18's EFS archive-results caption is dated July 29 and is neither a
+screenshot nor a fresh retrieval. No organizer changes, live demo or public QR
+are part of this pass. [[presentation-concept-revision-2026-10-26]] records the
+preceding concept-first choices; the bounded polish preserves that history. The
 October 20 flow below is preserved as history.
 
 ## Content revision, October 20
