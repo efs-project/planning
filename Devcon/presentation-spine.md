@@ -4,9 +4,31 @@ Working story for **A Full Stack Walk Away Test**. Drafted 2026-09-14 for
 James's accepted 20-minute talk plus 5 minutes of Q&A. This is presentation
 preparation, not a change to the accepted proposal or an EFS release deadline.
 
-## Current presentation, October 27
+## Current presentation, October 27 recovery pass
 
-The current working deck is saved in
+[[Devcon/presentation/2026-10-27-recovery-pass/README]] preserves James's latest
+read-through edits and changes only visible slides 16, 19 and 28 and their notes.
+The three chapters, 30-slide order and theme remain intact. Slide 15 explains
+shared meaning, 16 explains recovering private data, 17 explains retained
+copies, 18 uses EFS to explain references and verification, and 19 explains
+reading file records and finding notes. Slide 28 demonstrates the test method:
+find an attachment still tied to the team's server, retain it in the export,
+and repeat the same task with the original app blocked.
+
+The privacy diagram is illustrative. It does not claim EFS implements
+encryption or recovery. RPC reads onchain metadata; storage supplies file
+bytes. The final import exercise is illustrative, not a fresh runtime result.
+James removed the CHECK band on slide 22 before this revision; preserve that
+choice. Fifteen TEST bands remain. The 18:30 cue budget is unmeasured, and the
+official organizer deck and proposal remain outside this revision.
+
+Next: review 15-19 for distinct purposes, then do an uninterrupted timed run
+of main notes 1-29, skipping optional detail and sources. The prior record below
+is historical.
+
+## October 27 test pass, preserved for comparison
+
+The preceding working deck is saved in
 [[Devcon/presentation/2026-10-27-test-pass/README]]. James authorized this pass
 after an untimed editorial dry run. The three chapters and 30-slide order are
 unchanged. TEST/CHECK bands on 16 teaching slides connect each concept to an

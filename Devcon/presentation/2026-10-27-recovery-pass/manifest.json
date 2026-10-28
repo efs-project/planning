@@ -1,0 +1,341 @@
+{
+  "snapshot": "2026-10-27-recovery-pass",
+  "captured_date": "2026-10-27",
+  "native_title": "Who Can Turn Off Your Ethereum App? | Devcon rehearsal draft",
+  "before_slide_count": 30,
+  "slide_count": 30,
+  "main_slides": 29,
+  "closing_qa_slide": 30,
+  "planned_seconds": 1110,
+  "main_spoken_words": 2015,
+  "timing_basis": "Retained native cue budget; main narration counted from current notes before optional detail and sources. Not measured.",
+  "measured_rehearsal": false,
+  "organizer_submission": false,
+  "edit_scope": {
+    "visibleChanged": [
+      16,
+      19,
+      28
+    ],
+    "notesChanged": [
+      16,
+      19,
+      28
+    ]
+  },
+  "visual_inspection_status": "Not asserted by the archive script; see the verification report for the checks actually recorded.",
+  "status_limitations": [
+    "This is a rehearsal snapshot, not a measured delivery or organizer submission.",
+    "The archive script verifies source fingerprints and structure; it does not visually inspect slides.",
+    "PPTX and PDF exports are preserved byte-for-byte. Native internal object names may remain in binary exports; generated text omits native identifiers and local paths while retaining the illustrative EFS file path."
+  ],
+  "verification": {
+    "status": "passed",
+    "checked_at": "2026-10-28T00:54:30.790012+00:00",
+    "before_count": 30,
+    "after_count": 30,
+    "visual_review": "separate manual responsibility",
+    "measured_rehearsal": false,
+    "organizer_submission": false,
+    "inputs_fingerprints": [
+      {
+        "name": "before-native.json",
+        "bytes": 2195232,
+        "sha256": "6bff6dd630d0f3ed69c34cce34fa2b7a32f39dce29cda72b3d73c059d6e32cf8"
+      },
+      {
+        "name": "final-native.json",
+        "bytes": 2139101,
+        "sha256": "8ac26ae823fb14f7dc91d47551f46880caa5e2c1eb35eeb654d23c423f5e1376"
+      },
+      {
+        "name": "expected-notes.json",
+        "bytes": 30799,
+        "sha256": "1b433449d85a05134dc9d72315210ec17da6c12a45d83809a3369a7d42a082d9"
+      },
+      {
+        "name": "before.pptx",
+        "bytes": 4504262,
+        "sha256": "5e3a63802160ab16b7e867577a3b39a5e3bd512819b1caed9c600446520864b4"
+      },
+      {
+        "name": "after.pptx",
+        "bytes": 4499712,
+        "sha256": "bd4d38f9806d859f60067476163eb710d660645d1cfdbb789cc877b5a1ec501d"
+      },
+      {
+        "name": "before.pdf",
+        "bytes": 2157421,
+        "sha256": "f971f6b62090115fbef05f52db1e041fc07f8f67b2ea52cfad4be61d2a7d962d"
+      },
+      {
+        "name": "after.pdf",
+        "bytes": 2156696,
+        "sha256": "37ab3f2cd5794431613bb199e4b9e356a876329cc488acac81672c38ed01cb87"
+      }
+    ],
+    "native": {
+      "baseline_slide_ids_preserved": 30,
+      "baseline_slide_order_preserved": true,
+      "native_notes_match_expected": 30,
+      "masters_layouts_notes_master_and_page_size_unchanged": true,
+      "source_backgrounds_unchanged": 30,
+      "source_slide_local_media_preserved": 7,
+      "visible_changed_slides": [
+        16,
+        19,
+        28
+      ],
+      "notes_changed_slides": [
+        16,
+        19,
+        28
+      ],
+      "other_visible_slides_unchanged": 27,
+      "other_speaker_notes_unchanged": 27,
+      "authorized_media_changes": [],
+      "no_new_raster_or_embedded_media": true,
+      "test_check_band_count": 15,
+      "test_check_band_slides": [
+        6,
+        10,
+        11,
+        12,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        23,
+        24,
+        25,
+        27,
+        28
+      ],
+      "test_check_band_basis": "Exact label inventory, native identities and label text derived from pinned owner baseline; 15 TEST bands, no CHECK band on slide 22.",
+      "walk_away_full_stack_terminology": "passed; URLs exempt only in notes",
+      "source_pptx_theme_parts_unchanged": true,
+      "source_pptx_embedded_media_bytes_preserved": 7
+    },
+    "before": {
+      "pptx_zip_integrity": "passed",
+      "pptx_slide_order_text_and_notes_match_native": 30,
+      "pptx_native_text_frames_matched": 202,
+      "pdf_pages": 30,
+      "pdf_native_text_frames_present_in_slide_order": 202,
+      "pdf_parser_warnings": [
+        "Object 2 0 not defined."
+      ],
+      "pdf_privacy_scan_scope": "Extracted page text and resolvable trailer object strings; unresolved-object warnings are retained above.",
+      "privacy_scan": "passed",
+      "pdf_no_extra_normalized_text": true
+    },
+    "after": {
+      "pptx_zip_integrity": "passed",
+      "pptx_slide_order_text_and_notes_match_native": 30,
+      "pptx_native_text_frames_matched": 189,
+      "pdf_pages": 30,
+      "pdf_native_text_frames_present_in_slide_order": 189,
+      "pdf_parser_warnings": [
+        "Object 2 0 not defined."
+      ],
+      "pdf_privacy_scan_scope": "Extracted page text and resolvable trailer object strings; unresolved-object warnings are retained above.",
+      "privacy_scan": "passed",
+      "pdf_no_extra_normalized_text": true
+    },
+    "planned_seconds": 1110,
+    "narrative_word_count": 2015,
+    "narration_by_slide": [
+      {
+        "slide": 1,
+        "words": 33,
+        "planned_seconds": 15
+      },
+      {
+        "slide": 2,
+        "words": 14,
+        "planned_seconds": 5
+      },
+      {
+        "slide": 3,
+        "words": 73,
+        "planned_seconds": 45
+      },
+      {
+        "slide": 4,
+        "words": 74,
+        "planned_seconds": 35
+      },
+      {
+        "slide": 5,
+        "words": 89,
+        "planned_seconds": 55
+      },
+      {
+        "slide": 6,
+        "words": 85,
+        "planned_seconds": 35
+      },
+      {
+        "slide": 7,
+        "words": 44,
+        "planned_seconds": 20
+      },
+      {
+        "slide": 8,
+        "words": 12,
+        "planned_seconds": 5
+      },
+      {
+        "slide": 9,
+        "words": 27,
+        "planned_seconds": 10
+      },
+      {
+        "slide": 10,
+        "words": 120,
+        "planned_seconds": 70
+      },
+      {
+        "slide": 11,
+        "words": 102,
+        "planned_seconds": 45
+      },
+      {
+        "slide": 12,
+        "words": 95,
+        "planned_seconds": 45
+      },
+      {
+        "slide": 13,
+        "words": 11,
+        "planned_seconds": 5
+      },
+      {
+        "slide": 14,
+        "words": 19,
+        "planned_seconds": 10
+      },
+      {
+        "slide": 15,
+        "words": 96,
+        "planned_seconds": 60
+      },
+      {
+        "slide": 16,
+        "words": 80,
+        "planned_seconds": 50
+      },
+      {
+        "slide": 17,
+        "words": 93,
+        "planned_seconds": 55
+      },
+      {
+        "slide": 18,
+        "words": 93,
+        "planned_seconds": 65
+      },
+      {
+        "slide": 19,
+        "words": 111,
+        "planned_seconds": 70
+      },
+      {
+        "slide": 20,
+        "words": 104,
+        "planned_seconds": 55
+      },
+      {
+        "slide": 21,
+        "words": 11,
+        "planned_seconds": 5
+      },
+      {
+        "slide": 22,
+        "words": 41,
+        "planned_seconds": 10
+      },
+      {
+        "slide": 23,
+        "words": 129,
+        "planned_seconds": 85
+      },
+      {
+        "slide": 24,
+        "words": 97,
+        "planned_seconds": 60
+      },
+      {
+        "slide": 25,
+        "words": 92,
+        "planned_seconds": 40
+      },
+      {
+        "slide": 26,
+        "words": 11,
+        "planned_seconds": 5
+      },
+      {
+        "slide": 27,
+        "words": 68,
+        "planned_seconds": 45
+      },
+      {
+        "slide": 28,
+        "words": 109,
+        "planned_seconds": 60
+      },
+      {
+        "slide": 29,
+        "words": 82,
+        "planned_seconds": 45
+      }
+    ],
+    "timing_basis": "Derived from contiguous Planned cue intervals on slides 1-29; not measured.",
+    "narrative_word_count_basis": "Whitespace-separated words in slides 1-29 after removing Planned cue and truncating at Optional detail or Sources; slide 30 Q&A excluded.",
+    "notes_in_pdf": "PDF pages do not carry speaker notes; native/PPTX notes checked.",
+    "pptx_soft_break_handling": "Explicit OOXML a:br elements retained as line breaks. Baseline and final slide 3 both have two native U+000B characters corresponding to two a:br elements between future. and Communities; source text is preserved, not repaired.",
+    "privacy_boundary": "Native text/notes, PPTX XML/relationships/text, PDF extractable text and resolvable metadata checked for private deck identifiers, private/signed links and local paths.",
+    "limits": [
+      "PDF checks extractable text, not pixels or raster text.",
+      "PPTX text comparison normalizes whitespace and common bullet glyphs.",
+      "Visual layout, clipping, overlap and raster text require separate visual inspection.",
+      "Only visible slides 16, 19 and 28 may differ; all existing media, other slide payloads and other note text remain checked.",
+      "Planned duration and narrative words are not a measured rehearsal or evidence of runtime recovery."
+    ]
+  },
+  "files": [
+    {
+      "name": "before-presentation.pdf",
+      "bytes": 2157421,
+      "sha256": "f971f6b62090115fbef05f52db1e041fc07f8f67b2ea52cfad4be61d2a7d962d"
+    },
+    {
+      "name": "before-presentation.pptx",
+      "bytes": 4504262,
+      "sha256": "5e3a63802160ab16b7e867577a3b39a5e3bd512819b1caed9c600446520864b4"
+    },
+    {
+      "name": "before-slides-and-notes.md",
+      "bytes": 36330,
+      "sha256": "e1e000432f375fdee5f1698f350f44a51f84bcff7d9216d1c366ccc5e158be04"
+    },
+    {
+      "name": "presentation.pdf",
+      "bytes": 2156696,
+      "sha256": "37ab3f2cd5794431613bb199e4b9e356a876329cc488acac81672c38ed01cb87"
+    },
+    {
+      "name": "presentation.pptx",
+      "bytes": 4499712,
+      "sha256": "bd4d38f9806d859f60067476163eb710d660645d1cfdbb789cc877b5a1ec501d"
+    },
+    {
+      "name": "slides-and-notes.md",
+      "bytes": 37152,
+      "sha256": "0cc5ae5270e77723361bc28bba17f9534a8f9d9cbd3d4d461bda0712e5ba5489"
+    }
+  ]
+}

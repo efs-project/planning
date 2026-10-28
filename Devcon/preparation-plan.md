@@ -7,7 +7,16 @@ The EFS attendance checklist retains earlier preparation targets and history.
 
 ## Where we stand
 
-- October 27 test and visual polish pass: the current working deck is saved in
+- October 27 private data recovery pass: the current working deck is saved in
+  [[Devcon/presentation/2026-10-27-recovery-pass/README]]. James's latest edits
+  are preserved. Only slides 16, 19 and 28 and their notes changed: private
+  file recovery, file-record/notebook queries, and a clearer failed import,
+  repair and retest. Thirty slides and the three chapters remain. Fifteen TEST
+  bands match the owner-edited baseline. No official deck or proposal edit.
+  Next: review those slides in context, then time an uninterrupted run of main
+  notes 1-29. The retained 18:30 cues are a plan, not measured delivery.
+
+- Earlier October 27 test and visual polish pass is saved in
   [[Devcon/presentation/2026-10-27-test-pass/README]]. It preserves 30 slides,
   the three chapters and James's theme. Sixteen teaching slides now have a
   concrete TEST or CHECK band. The editor/feed mockups, account-access example,

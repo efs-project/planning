@@ -2,15 +2,18 @@
 
 ## Current script, October 27
 
-Use [[Devcon/presentation/2026-10-27-test-pass/slides-and-notes|the current native slide text and speaker notes]].
+Use [[Devcon/presentation/2026-10-27-recovery-pass/slides-and-notes|the current native slide text and speaker notes]].
 It preserves the three chapters and 30-slide order. Speak the main narration
 on slides 1-29. Skip optional detail and sources; slide 30 is Thank you/Q&A.
 The 18:30 cue budget is retained, not measured. James's latest editorial dry
 run was untimed. This revision still needs an uninterrupted timed run.
 
-The TEST/CHECK bands make each teaching slide actionable. Explain the concept,
-then point to its check; avoid reading the same sentence twice. On slide 16,
-show how the same note and attachment work in an editor and a feed. On slide 25,
+The TEST bands connect concepts to actions. Explain the concept, then point to
+its check; avoid reading the same sentence twice. On slide 16, explain why
+private files need recoverable keys and a compatible reader as well as retained
+bytes. Keep account access on 12 distinct from private-file recovery on 16.
+On 19, distinguish reading a known onchain file record from finding notes in an
+index. Storage supplies the file bytes. On slide 25,
 the outsider succeeds only after completing the user's task without private
 help. Slide 28 is a practice outage: import a saved export, find a missing
 attachment, reconnect to improve the export, then block the original app and

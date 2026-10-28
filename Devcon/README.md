@@ -6,10 +6,11 @@ to ship v2 by Devcon.
 
 ## Current deck, October 27
 
-[[Devcon/presentation/2026-10-27-test-pass/README]] is the current working
-revision. It retains the 30-slide theme and three chapters, adds 16 practical
-TEST/CHECK bands, improves the editable app mockups and replaces the final
-index drill with a saved-export import/fix/retry. The deck and notes use
+[[Devcon/presentation/2026-10-27-recovery-pass/README]] is the current working
+revision. It preserves James's latest edits, the 30-slide theme and three
+chapters. Slide 16 now explains private data recovery, 19 uses file records
+and notebook lists, and 28 makes the failed import, fix and retest explicit.
+Fifteen TEST bands remain after James's removal of the band on 22. The deck and notes use
 "walk away" and "full stack" without hyphens. Accepted proposal text and
 historical snapshots are unchanged.
 

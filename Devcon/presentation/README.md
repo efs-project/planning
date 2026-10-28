@@ -12,9 +12,11 @@ stay outside this repository.
 ## Current rehearsal and delivery state
 
 The current working revision is
-[[Devcon/presentation/2026-10-27-test-pass/README]]. It retains 30 slides and
-three chapters, with recurring TEST/CHECK bands on 16 teaching slides, clearer
-editor/feed mockups and an illustrative export/import failure and retry.
+[[Devcon/presentation/2026-10-27-recovery-pass/README]]. It retains 30 slides and
+three chapters. Slide 16 covers private data recovery, 19 uses file records and
+notebook lists, and 28 shows a missing attachment, a repaired export and a retest.
+The latest owner edits are preserved, including removal of the band on slide 22.
+Fifteen TEST bands remain.
 The deck and notes use "walk away" and "full stack" without hyphens.
 The accepted proposal has not been changed.
 
@@ -33,7 +35,8 @@ Preserve all saved versions below.
 
 | Snapshot | What it records | Practice |
 | --- | --- | --- |
-| [October 27 test and visual polish pass](2026-10-27-test-pass/README.md) | Current working deck. Adds 16 TEST/CHECK bands, editable notes-editor and social-feed mockups, the original EFS logo, familiar RPC/index views, an outsider handoff exercise and saved-export import/fix/retry. Removes hyphens from walk away and full stack. Preserves the 30-slide order and theme. | Current revised deck not yet timed. Prior dry run was editorial and untimed. Retained 18:30 cue budget is a plan only. |
+| [October 27 private data recovery pass](2026-10-27-recovery-pass/README.md) | Current working deck. Preserves James's latest read-through edits. Replaces duplicate mockups on 16 with encrypted-copy/key/reader recovery, changes 19 to file records and notebook lists, and sharpens 28 into failure/fix/retest. Before and after versions included. | Revised deck not yet timed. Retained 18:30 cue budget is a plan only. |
+| [October 27 test and visual polish pass](2026-10-27-test-pass/README.md) | Preceding working deck. Adds 16 TEST/CHECK bands, editable notes-editor and social-feed mockups, the original EFS logo, familiar RPC/index views, an outsider handoff exercise and saved-export import/fix/retry. Removes hyphens from walk away and full stack. Preserves the 30-slide order and theme. | Prior dry run was editorial and untimed. Retained 18:30 cue budget is a plan only. |
 | [October 26 read-through](2026-10-26-readthrough/README.md) | Preceding rehearsal deck, separate from the official copy. Clarifies single points of failure/control, runnable clients, access without company login, editor/feed views of one record, Uniswap v2 core, independent handoff and an illustrative index rebuild/switch/retry. Preserves all 30 slides and the owner theme. | Main notes on slides 1-29: 2,097 words and 18:30 planned, not measured. Skip optional detail and source citations throughout; slide 30 is Thank you/Q&A. |
 | [October 26 polish](2026-10-26-polish/README.md) | Preceding saved rehearsal deck. Bounded clarity pass on the same 30 slides and three chapters: the listener's own task, hostile-control callback, privacy/key recovery, consistent shared records, dated historical EFS evidence, funding handoff and admin powers. Preserves the owner theme and concept-first history. | 18:30 planned, not measured. Main narration is 2,045 words. |
 | [October 26 concept-first](2026-10-26-concept-first/README.md) | Preceding saved rehearsal deck. Improves the audience's existing apps through layer concepts and local examples. Adds usable database exports, two-client mockups, clear storage/operator roles and one index repair/retry. Preserves the latest owner-edited 30-slide baseline. | 18:30 planned, not measured. Main narration is 1,991 words. |
