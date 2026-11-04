@@ -6,7 +6,23 @@ should describe the actual deployment shown without EFS version labels.
 
 ## Evidence status
 
-**Current read-through rehearsal deck:**
+**Current November 5 rehearsal deck:**
+[[Devcon/presentation/2026-11-05-final-polish/README]] preserves 29 slides and
+James's latest edits. Main narration is on 1-28; 29 is Q&A. Three independent
+review lanes checked technical accuracy, story/voice and visuals. The main
+route now scopes Uniswap to v2 core, Tornado Cash to Classic, and the L1
+submission example to OP Stack; Helios is described as verifying supported
+Ethereum RPC responses. Notes and slides distinguish file bytes, file
+records and indexed discovery. The diagrams are explanatory, not fresh
+runtime results. Historical EFS evidence is still historical.
+
+James reports reading the preceding notes in 16:56. The polished 2,135-word
+route is not yet timed. Native and exported slide text/notes match; all pages
+render and the changed pages were inspected. This establishes artifact
+consistency, not stage projection or organizer delivery. The organizer copy,
+accepted proposal and presentation method were not edited.
+
+**Earlier October 26 read-through rehearsal deck:**
 [[Devcon/presentation/2026-10-26-readthrough/README]], with 30 slides and an
 18:30 planned route, not a measured rehearsal. The revised runnable-client,
 company-login, shared-record, service-handoff and index-rebuild diagrams are

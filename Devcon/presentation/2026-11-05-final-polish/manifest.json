@@ -1,0 +1,50 @@
+{
+  "snapshot": "2026-11-05-final-polish",
+  "captured_date": "2026-11-05",
+  "slide_count": 29,
+  "main_slides": 28,
+  "qa_slide": 29,
+  "main_spoken_words": 2135,
+  "before_notes_read_seconds": 1016,
+  "before_timing_basis": "James reports reading the current speaker notes in 16:56 before this pass; not a natural-delivery rehearsal.",
+  "after_timing": "Not yet measured",
+  "organizer_copy_edited": false,
+  "accepted_proposal_edited": false,
+  "files": [
+    {
+      "name": "before-presentation.pdf",
+      "bytes": 2153496,
+      "sha256": "bf82053d8c3dd71c363ace9e9c2929ecc59936197bea210bc934c3a0b76904cf"
+    },
+    {
+      "name": "before-presentation.pptx",
+      "bytes": 4499196,
+      "sha256": "809d675f84f3ebbe046c2585602542cba2fe9046d83df664d88da6ee3adcdc73"
+    },
+    {
+      "name": "before-slides-and-notes.md",
+      "bytes": 35036,
+      "sha256": "f67c1c73b2efd455a953b23c3adb4733036cbc4ce7a1153ad3cd31822a97c14f"
+    },
+    {
+      "name": "presentation.pdf",
+      "bytes": 2152801,
+      "sha256": "7336d1dee20461c18603cf540a60ad5742967a127883e335973b19550f47a29b"
+    },
+    {
+      "name": "presentation.pptx",
+      "bytes": 4497052,
+      "sha256": "740cf0068ba528e12b182cc65218b8c19a649f6e3a9a32365177a517e463a02e"
+    },
+    {
+      "name": "slides-and-notes.md",
+      "bytes": 34612,
+      "sha256": "47e00c4612a457b50d0640041114ef5dd62f73474f4934b382a6f022ba613637"
+    },
+    {
+      "name": "verification.json",
+      "bytes": 2011,
+      "sha256": "1d2eb6f60613a74d6e880977209a7eb48da39a390a61c55eba5643f3e2b4d976"
+    }
+  ]
+}

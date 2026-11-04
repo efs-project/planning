@@ -1,6 +1,26 @@
 # Rehearsal script
 
-## Current script, October 27
+## Current script, November 5
+
+Use [[Devcon/presentation/2026-11-05-final-polish/slides-and-notes|the current slide text and speaker notes]].
+Speak slides 1-28; slide 29 is Thank you/Q&A. Skip optional detail and sources.
+The 2,135-word main route is 31 words longer than James's preceding 16:56
+note read. This version has not been timed. Old timing labels are removed;
+the accepted 20-minute speaking budget remains.
+
+Pause after the human problem and future vision. On diagrams, name the user
+task and follow the arrows. The TEST band is the practical takeaway, not a
+second script to read after saying the same thing. On 19, the top row reads
+one onchain file record; the bottom finds records through an index. Storage
+supplies the file itself. Helios checks supported Ethereum RPC responses.
+On 23, keep the example about Uniswap v2 core, not the entire surrounding app.
+On 27, return to the same task and fix one team dependency. Leave room for
+the hopeful closing on 28.
+
+Preserve the three chapters and do not add a live demo. The organizer copy
+was not edited. James approves and transfers the final version separately.
+
+## October 27 script, preserved for comparison
 
 Use [[Devcon/presentation/2026-10-27-recovery-pass/slides-and-notes|the current native slide text and speaker notes]].
 It preserves the three chapters and 30-slide order. Speak the main narration

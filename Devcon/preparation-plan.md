@@ -7,7 +7,16 @@ The EFS attendance checklist retains earlier preparation targets and history.
 
 ## Where we stand
 
-- October 27 private data recovery pass: the current working deck is saved in
+- November 5 final polish: [[Devcon/presentation/2026-11-05-final-polish/README]]
+  is the current working deck, preserving James's 29-slide baseline. Main
+  slides 1-28 have 2,135 spoken words; 29 is Q&A. James reports a **16:56** read
+  of the preceding notes, not natural delivery of this revision. Map 7 and
+  checklist 27 now align. Technical, story/voice and visual reviews are
+  complete; exports preserve notes and artwork. Obsolete timing labels were
+  removed. Next: one natural timed run, then the approved official copy.
+  No organizer deck, proposal, method field or private correspondence changed.
+
+- Earlier October 27 private data recovery pass: the working deck was saved in
   [[Devcon/presentation/2026-10-27-recovery-pass/README]]. James's latest edits
   are preserved. Only slides 16, 19 and 28 and their notes changed: private
   file recovery, file-record/notebook queries, and a clearer failed import,

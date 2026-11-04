@@ -4,7 +4,25 @@ Working story for **A Full Stack Walk Away Test**. Drafted 2026-09-14 for
 James's accepted 20-minute talk plus 5 minutes of Q&A. This is presentation
 preparation, not a change to the accepted proposal or an EFS release deadline.
 
-## Current presentation, October 27 recovery pass
+## Current presentation, November 5 final polish
+
+[[Devcon/presentation/2026-11-05-final-polish/README]] preserves James's latest
+29-slide sequence. The audience's existing app and one important task remain
+the subject. Slides 1-7 move from human harm to durable capabilities, CROPS,
+hyperstructures, single points of failure/control and a three-part map.
+Interface (8-12), Data (13-20) and Rules (21-25) explain the mechanisms.
+Slide 26 transitions to the practical checklist on 27, followed by the
+hopeful ending on 28 and Q&A on 29. EFS remains personal motivation and the
+file-reference example, not a required architecture or a live demonstration.
+
+Slide 7 names the jobs; 27 turns the same groups into concrete checks.
+Recoverable account access is distinct from recoverable file-decryption keys.
+RPCs, indexes and background work stay explicit. Main notes have 2,135 words,
+without obsolete timing labels. James's 16:56 read belongs to the preceding
+notes. The revised delivery is not yet timed; the 20-minute speaking budget
+plus 5-minute Q&A remains. No organizer copy or accepted-proposal edit.
+
+## October 27 recovery pass, preserved for comparison
 
 [[Devcon/presentation/2026-10-27-recovery-pass/README]] preserves James's latest
 read-through edits and changes only visible slides 16, 19 and 28 and their notes.

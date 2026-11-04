@@ -4,9 +4,23 @@ Application record and delivery control center for James's Devcon 8 talk. This
 folder is a conference-planning surface, not an EFS design ruling or a promise
 to ship v2 by Devcon.
 
-## Current deck, October 27
+## Current deck, November 5
 
-[[Devcon/presentation/2026-10-27-recovery-pass/README]] is the current working
+[[Devcon/presentation/2026-11-05-final-polish/README]] is the current rehearsal
+revision. It preserves James's 29-slide baseline and three chapters, aligns
+slide 7 with checklist 27, sharpens the examples and speaker notes, and has
+passed native/export and visual checks. Slides 1-28 are the main route; 29 is
+Q&A. James read the preceding speaker notes in **16:56**. The polished notes
+have 2,135 main spoken words and have not yet been timed in natural delivery.
+
+Next: one uninterrupted run with pauses and diagram explanations, then
+James's approved final copy through the organizer workflow. This pass did
+not edit the organizer deck, accepted proposal or presentation method.
+The accepted 20-minute talk plus 5-minute Q&A budget is unchanged.
+
+## October 27 deck record
+
+[[Devcon/presentation/2026-10-27-recovery-pass/README]] was the working
 revision. It preserves James's latest edits, the 30-slide theme and three
 chapters. Slide 16 now explains private data recovery, 19 uses file records
 and notebook lists, and 28 makes the failed import, fix and retest explicit.

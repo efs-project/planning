@@ -1,0 +1,78 @@
+{
+  "slide_count": 29,
+  "notes_count": 29,
+  "main_spoken_words": 2135,
+  "visible_changed_slides": [
+    7,
+    10,
+    12,
+    15,
+    16,
+    18,
+    19,
+    20,
+    23,
+    24,
+    25,
+    27
+  ],
+  "notes_changed_slides": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28
+  ],
+  "other_17_renders_byte_identical": true,
+  "slide_order_theme_layouts_backgrounds_and_media_preserved": true,
+  "expected_native_text_and_notes_match": true,
+  "output_issue_count": 0,
+  "exports": {
+    "before": {
+      "zip_integrity": "passed",
+      "ordered_pptx_slide_text_matches": 29,
+      "speaker_notes_match_native": 29,
+      "pdf_pages_and_text_checked": 29,
+      "xml_relationships_and_pdf_text_privacy_scan": "passed"
+    },
+    "after": {
+      "zip_integrity": "passed",
+      "ordered_pptx_slide_text_matches": 29,
+      "speaker_notes_match_native": 29,
+      "pdf_pages_and_text_checked": 29,
+      "xml_relationships_and_pdf_text_privacy_scan": "passed"
+    }
+  },
+  "preserved_embedded_media_count": 18,
+  "public_contact_slide": "James-added email and social handle remain on the public Q&A slide; not private organizer correspondence.",
+  "native_metadata_normalization": "Ignored refreshed temporary image contentUrl values only; source identifiers, layout properties and exported embedded media remain checked.",
+  "visual_review": "All before pages inspected; all 12 changed after pages inspected by root and visual reviewer. Other 17 page renders are byte-identical.",
+  "independent_review": "Technical accuracy and story/voice reviewers read all revised content; no remaining must-fix findings. Visual reviewer found no remaining must-fix defects.",
+  "limits": [
+    "Artifact checks are not a rehearsal, EFS runtime test or organizer submission.",
+    "No target PowerPoint application or organizer laptop was opened."
+  ]
+}
