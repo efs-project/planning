@@ -23,8 +23,8 @@
     },
     {
       "name": "before-slides-and-notes.md",
-      "bytes": 35036,
-      "sha256": "f67c1c73b2efd455a953b23c3adb4733036cbc4ce7a1153ad3cd31822a97c14f"
+      "bytes": 35034,
+      "sha256": "0e9d6b24c09d76067790cbeb9fad1e0fcc1e8931a797f5cebbef7f21b44bf26d"
     },
     {
       "name": "presentation.pdf",
@@ -38,8 +38,8 @@
     },
     {
       "name": "slides-and-notes.md",
-      "bytes": 34612,
-      "sha256": "47e00c4612a457b50d0640041114ef5dd62f73474f4934b382a6f022ba613637"
+      "bytes": 34610,
+      "sha256": "9e38e56baa6ee6ee0c3af15156b9d902b4a9337dfc3c25ad0629fad12e45ac5b"
     },
     {
       "name": "verification.json",
