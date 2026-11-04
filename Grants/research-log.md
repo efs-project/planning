@@ -15,6 +15,22 @@ Rows touched:
 Next check:
 ```
 
+## 2026-11-04 - NLnet intake rolled forward; no application sprint
+
+The freshly read [official intake](https://nlnet.nl/propose/) says submissions
+are currently unavailable and the next deadline is **January 3, 2027, 12:00
+CET / 05:00 Chicago CST**. The previously recorded November 3 cutoff is now
+historical, not an upcoming EFS obligation or evidence that James missed an
+adopted application commitment. Narrow relevant mail found no new NLnet/FUTO
+reply; this is not an exhaustive funding search.
+
+This check did not reassess fund-specific availability, European eligibility or
+the [v2.0 AI policy](https://nlnet.nl/foundation/policies/generativeAI/2.0/).
+The existing poor-workflow-fit recommendation remains; a new date does not
+authorize AI proposal drafting, a human-only funded scope, or an application.
+Keep statuses in [[proposals]]. Revisit funding fit after Devcon rather than
+turning January 3 into a new delivery deadline.
+
 ## 2026-10-27 - Deadline and office-hour watch
 
 Bounded weekly primary-source check, not an application or a new funding sweep.

@@ -1,20 +1,26 @@
 # ETHDenver 2027 speaker watch
 
-**Checked:** 2026-10-27 (America/Chicago)
-**Status:** monitoring. No official 2027 speaker form, submission deadline or
-event dates verified in this check. The freshly fetched homepage still describes
-ETHDenver 2026. The official Speakers & Content section was inaccessible in
-this run; its prior-cycle evidence below was checked October 12, not freshly
-reconfirmed today. Targeted official-domain and announcement searches found no
-verified 2027 CFP. This is
-a bounded coverage result, not proof that no announcement exists elsewhere.
+**Checked:** 2026-11-04 (Asia/Kolkata; also November 4 in Chicago)
+**Status:** official dates now announced: **March 24-25, 2027, Denver**, on the
+[organizer homepage](https://ethdenver.com/), independently fetched in this run.
+The homepage says full event details and registration information are coming
+soon. No official 2027 speaker form or submission deadline verified in this
+check. The Speakers & Content section and organizer X account returned 403;
+targeted official-domain search and narrow relevant mail found no verified CFP.
+This is a bounded coverage result, not proof that no announcement exists
+elsewhere. The prior-cycle evidence below remains historical.
 
-**Unverified announcement lead:** a secondary event directory links an
+**Safety notice:** the current organizer homepage says ETHDenver 2027 will not
+ask visitors to connect a wallet, sign a transaction or claim a token/NFT/airdrop.
+Use its own links for future registration; do not use an old application or
+third-party ticket offer merely because it appears in search.
+
+**Earlier announcement lead, retained for provenance:** a secondary event directory links an
 [organizer-account post](https://x.com/EthereumDenver/status/2105164333122789789)
 and reports more 2027 details expected in October plus a warning about
 unofficial ticket offers. Direct access to that post returned 403; neither
-its wording nor a CFP is verified here. Retain the source pointer for the next
-official-announcement check, not as adopted event dates or instructions.
+its wording nor a CFP is verified here. The fresh homepage, not that secondary
+report, is now the basis for the dates above.
 Narrow relevant Gmail search found no 2027 application message; this is not
 exhaustive mailbox coverage.
 
@@ -25,7 +31,7 @@ application, acceptance, dated delivery milestone or locked talk concept.
 ## Current action and monitoring
 
 - **Owner: PM.** Included explicitly in the existing Tuesday 08:30
-  America/Chicago project-management review; next check 2026-11-03. Check official
+  America/Chicago project-management review; next check 2026-11-10. Check official
   event, speaker-support and organizer-announcement surfaces, plus narrowly
   relevant email when available. Avoid a separate duplicate reminder.
 - **Nothing to submit yet on the verified public surfaces.** Notify James when
@@ -40,8 +46,9 @@ application, acceptance, dated delivery milestone or locked talk concept.
 - **After submission:** retain public-safe status and follow up on confirmation,
   decision, acceptance obligations and preparation deadlines. Keep private
   portal links, correspondence, travel and identity documents outside Git.
-- Third-party February 2027 dates surfaced in discovery but are not adopted as
-  organizer-confirmed dates or a basis for travel bookings.
+- Third-party February 2027 dates from earlier discovery are superseded by the
+  official March 24-25 announcement. No travel booking or attendance commitment
+  is authorized by this watch.
 
 ## Most recent official cycle — planning signal only
 
