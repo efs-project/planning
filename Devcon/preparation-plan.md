@@ -7,8 +7,14 @@ The EFS attendance checklist retains earlier preparation targets and history.
 
 ## Where we stand
 
+- November 5 approved follow-up: [[Devcon/presentation/2026-11-05-agreed-refinements/README]]
+  is current. Only the Data checklist on 27 and notes 3/5/10/19/23/27 changed.
+  James's opening edit is preserved. Main narration has 2,168 words and is
+  not yet timed. Exports and layout are checked. Next: natural timed practice
+  and James's approved organizer-copy transfer.
+
 - November 5 final polish: [[Devcon/presentation/2026-11-05-final-polish/README]]
-  is the current working deck, preserving James's 29-slide baseline. Main
+  records the preceding working deck, preserving James's 29-slide baseline. Main
   slides 1-28 have 2,135 spoken words; 29 is Q&A. James reports a **16:56** read
   of the preceding notes, not natural delivery of this revision. Map 7 and
   checklist 27 now align. Technical, story/voice and visual reviews are

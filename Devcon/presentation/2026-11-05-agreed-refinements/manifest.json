@@ -1,0 +1,50 @@
+{
+  "snapshot": "2026-11-05-agreed-refinements",
+  "captured_date": "2026-11-05",
+  "slide_count": 29,
+  "main_slides": 28,
+  "qa_slide": 29,
+  "main_spoken_words": 2168,
+  "before_notes_read_seconds": 1016,
+  "before_timing_basis": "James reported a 16:56 notes read before the earlier final-polish pass. Neither that revised deck nor this follow-up has been timed.",
+  "after_timing": "Not yet measured",
+  "organizer_copy_edited": false,
+  "accepted_proposal_edited": false,
+  "files": [
+    {
+      "name": "before-presentation.pdf",
+      "bytes": 2152801,
+      "sha256": "7336d1dee20461c18603cf540a60ad5742967a127883e335973b19550f47a29b"
+    },
+    {
+      "name": "before-presentation.pptx",
+      "bytes": 4488910,
+      "sha256": "f03562e56060812136450098a81daf5351d0477c97e77983e262e420fe248e00"
+    },
+    {
+      "name": "before-slides-and-notes.md",
+      "bytes": 34614,
+      "sha256": "e86193ff87f6a2f2b4b508eead28765435d78a6a1ee63d4eb23422d16e4de38e"
+    },
+    {
+      "name": "presentation.pdf",
+      "bytes": 2152810,
+      "sha256": "d3e90ba94629dd09e1afd45ed1d1ec37eb7de1aeff565982d57ce76920bf28a3"
+    },
+    {
+      "name": "presentation.pptx",
+      "bytes": 4488990,
+      "sha256": "055dda63e1fa7c05822a71b17da42428d0521fddc96831fcc0e1a6facb395542"
+    },
+    {
+      "name": "slides-and-notes.md",
+      "bytes": 34808,
+      "sha256": "d591486e79c7049d6d3612fddcfb0a5cc082ef3081015269610128b0be011719"
+    },
+    {
+      "name": "verification.json",
+      "bytes": 1766,
+      "sha256": "d7808ad00f97bc7f984c8e98ccdfd629ee0e20fe7dca25aeba81efc93da581b9"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "slide_count": 29,
+  "notes_count": 29,
+  "main_spoken_words": 2168,
+  "visible_changed_slides": [
+    27
+  ],
+  "notes_changed_slides": [
+    3,
+    5,
+    10,
+    19,
+    23,
+    27
+  ],
+  "other_28_renders_byte_identical": true,
+  "slide_order_theme_layouts_backgrounds_and_media_preserved": true,
+  "expected_native_text_and_notes_match": true,
+  "output_issue_count": 0,
+  "exports": {
+    "before": {
+      "zip_integrity": "passed",
+      "ordered_pptx_slide_text_matches": 29,
+      "speaker_notes_match_native": 29,
+      "pdf_pages_and_text_checked": 29,
+      "xml_relationships_and_pdf_text_privacy_scan": "passed"
+    },
+    "after": {
+      "zip_integrity": "passed",
+      "ordered_pptx_slide_text_matches": 29,
+      "speaker_notes_match_native": 29,
+      "pdf_pages_and_text_checked": 29,
+      "xml_relationships_and_pdf_text_privacy_scan": "passed"
+    }
+  },
+  "preserved_embedded_media_count": 18,
+  "public_contact_slide": "James-added email and social handle remain on the public Q&A slide; not private organizer correspondence.",
+  "native_metadata_normalization": "Ignored refreshed temporary image contentUrl values only; source identifiers, layout properties and exported embedded media remain checked.",
+  "visual_review": "Baseline visual structure matches the previously inspected final-polish deck. Slide 27 inspected at full size; other 28 page renders are byte-identical.",
+  "independent_review": "A separate reviewer checked the six approved refinements against the generated requests and notes. Root inspected checklist 27; no blocking findings.",
+  "limits": [
+    "Artifact checks are not a rehearsal, EFS runtime test or organizer submission.",
+    "No target PowerPoint application or organizer laptop was opened."
+  ]
+}

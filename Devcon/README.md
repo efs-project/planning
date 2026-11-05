@@ -6,7 +6,14 @@ to ship v2 by Devcon.
 
 ## Current deck, November 5
 
-[[Devcon/presentation/2026-11-05-final-polish/README]] is the current rehearsal
+The latest snapshot is [[Devcon/presentation/2026-11-05-agreed-refinements/README]]:
+six approved follow-ups to the checklist and notes, preserving all 29 slides
+and James's opening edit. Main narration is 2,168 words and is not yet timed.
+Organizer copy unchanged. Next: one natural timed practice and final transfer.
+
+### Earlier November 5 polish
+
+[[Devcon/presentation/2026-11-05-final-polish/README]] records the preceding rehearsal
 revision. It preserves James's 29-slide baseline and three chapters, aligns
 slide 7 with checklist 27, sharpens the examples and speaker notes, and has
 passed native/export and visual checks. Slides 1-28 are the main route; 29 is

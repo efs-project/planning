@@ -2,6 +2,15 @@
 
 ## Current script, November 5
 
+Use [[Devcon/presentation/2026-11-05-agreed-refinements/slides-and-notes|the approved follow-up notes]].
+Speak slides 1-28, with 2,168 words, not yet timed. Slide 29 is Q&A. The six
+refinements restore the concrete opening image, collective vision, correct
+diagram directions, known-record test, old-version usability and broader
+Data checklist. Skip optional detail and sources. Explain each concept,
+point to its TEST band, then move on rather than repeating the check twice.
+
+### Preceding November 5 polish
+
 Use [[Devcon/presentation/2026-11-05-final-polish/slides-and-notes|the current slide text and speaker notes]].
 Speak slides 1-28; slide 29 is Thank you/Q&A. Skip optional detail and sources.
 The 2,135-word main route is 31 words longer than James's preceding 16:56

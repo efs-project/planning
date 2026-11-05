@@ -4,7 +4,15 @@ Working story for **A Full Stack Walk Away Test**. Drafted 2026-09-14 for
 James's accepted 20-minute talk plus 5 minutes of Q&A. This is presentation
 preparation, not a change to the accepted proposal or an EFS release deadline.
 
-## Current presentation, November 5 final polish
+## Current presentation, November 5 agreed refinements
+
+[[Devcon/presentation/2026-11-05-agreed-refinements/README]] is current.
+The story, three chapters and 29-slide sequence below remain unchanged.
+Six approved refinements strengthen voice, correct slide 10 directions,
+restore old-version usability and broaden checklist 27. Main narration is
+2,168 words and has not been timed. Organizer copy unchanged.
+
+## Earlier November 5 final polish
 
 [[Devcon/presentation/2026-11-05-final-polish/README]] preserves James's latest
 29-slide sequence. The audience's existing app and one important task remain

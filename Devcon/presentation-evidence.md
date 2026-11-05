@@ -6,7 +6,14 @@ should describe the actual deployment shown without EFS version labels.
 
 ## Evidence status
 
-**Current November 5 rehearsal deck:**
+**Current November 5 approved follow-up:**
+[[Devcon/presentation/2026-11-05-agreed-refinements/README]] preserves the
+technical scope and sources below. Only one slide's visible text and six
+notes changed. Native/PDF/PPTX text, notes, artwork and layout checks pass.
+Main narration is 2,168 words, not yet timed. No new research, runtime result,
+organizer-copy or proposal change.
+
+**Earlier November 5 rehearsal deck:**
 [[Devcon/presentation/2026-11-05-final-polish/README]] preserves 29 slides and
 James's latest edits. Main narration is on 1-28; 29 is Q&A. Three independent
 review lanes checked technical accuracy, story/voice and visuals. The main

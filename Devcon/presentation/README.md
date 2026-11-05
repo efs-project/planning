@@ -12,14 +12,16 @@ stay outside this repository.
 ## Current rehearsal and delivery state
 
 The current working revision is
-[[Devcon/presentation/2026-11-05-final-polish/README]]. It preserves James's
+[[Devcon/presentation/2026-11-05-agreed-refinements/README]]. It preserves James's
 latest 29-slide deck, three chapters, theme and artwork. Main narration uses
 slides 1-28; Thank you/Q&A is 29. Slide 7's map and slide 27's checks align;
 private recovery, EFS references, RPC/index views and scoped Web3 examples
 have been reviewed. The deck uses "walk away" and "full stack" without hyphens.
 
-James reports reading the preceding notes in **16:56**. This revision has
-2,135 main spoken words, 31 more than before, and has not yet been timed.
+James read the notes before the first November 5 polish in **16:56**.
+The current revision has 2,168 main spoken words and has not yet been timed.
+The six approved follow-ups restore voice and checklist coverage, correct
+slide 10 directions, and preserve users' option to stay on an old version.
 Obsolete per-slide timing labels are removed. Skip optional detail and sources.
 The accepted 20-minute talk plus 5-minute Q&A budget is unchanged.
 
@@ -31,7 +33,8 @@ final copy through the organizer workflow. Preserve all versions below.
 
 | Snapshot | What it records | Practice |
 | --- | --- | --- |
-| [November 5 final polish](2026-11-05-final-polish/README.md) | Current working deck. Preserves James's 29-slide baseline and aligns map/checklist, notes, examples and data diagrams. Before and after versions included. | James read the preceding notes in 16:56. Revised 2,135-word main route not yet timed. |
+| [November 5 agreed refinements](2026-11-05-agreed-refinements/README.md) | Current deck. Six approved follow-ups to notes 3/5/10/19/23/27 and the Data checklist on 27. Preserves James's intervening opening edit and all 29 slides. | 2,168-word main route not yet timed. |
+| [November 5 final polish](2026-11-05-final-polish/README.md) | Preceding deck. Preserves James's 29-slide baseline and aligns map/checklist, notes, examples and data diagrams. Before and after versions included. | James read the preceding notes in 16:56. Revised 2,135-word main route not yet timed. |
 | [October 27 private data recovery pass](2026-10-27-recovery-pass/README.md) | Earlier working deck. Preserves James's latest read-through edits. Replaces duplicate mockups on 16 with encrypted-copy/key/reader recovery, changes 19 to file records and notebook lists, and sharpens 28 into failure/fix/retest. Before and after versions included. | Revised deck not yet timed. Retained 18:30 cue budget is a plan only. |
 | [October 27 test and visual polish pass](2026-10-27-test-pass/README.md) | Preceding working deck. Adds 16 TEST/CHECK bands, editable notes-editor and social-feed mockups, the original EFS logo, familiar RPC/index views, an outsider handoff exercise and saved-export import/fix/retry. Removes hyphens from walk away and full stack. Preserves the 30-slide order and theme. | Prior dry run was editorial and untimed. Retained 18:30 cue budget is a plan only. |
 | [October 26 read-through](2026-10-26-readthrough/README.md) | Preceding rehearsal deck, separate from the official copy. Clarifies single points of failure/control, runnable clients, access without company login, editor/feed views of one record, Uniswap v2 core, independent handoff and an illustrative index rebuild/switch/retry. Preserves all 30 slides and the owner theme. | Main notes on slides 1-29: 2,097 words and 18:30 planned, not measured. Skip optional detail and source citations throughout; slide 30 is Thank you/Q&A. |
