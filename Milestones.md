@@ -12,65 +12,23 @@ honest, but must not invent dates, requirements, or launch commitments.
 
 ---
 
-## Devcon presentation (2026-11)
-
-**Status:** talk accepted and participation confirmed 2026-09-02. The
-[official Pretalx calendar export](https://cfp.devcon.org/devcon8/talk/SPVJV8.ics),
-freshly read October 27, confirms **November 5, 15:30-15:55 Mumbai time
-(UTC+05:30), Lotus Stage 3**, subject to later schedule changes. Arrive by
-**15:10** under the recorded 20-minute check-in rule. This resolves the earlier
-source-timezone uncertainty; correcting personal calendar state remains a
-separate authorized action. [[Devcon/preparation-plan]] owns preparation;
-personal organizer administration belongs in the Personal tracker linked there.
-
-The presentation should describe and demonstrate whatever is genuinely coherent
-by Devcon. It must not turn an unfinished v2 design into a launch promise.
-
-### Current inputs
-
-- The speaker-application workspace is [[Devcon/README|Devcon/README.md]]. It
-  holds the submitted application, research, and follow-up record, not a
-  commitment to deliver every idea it explores.
-- The v1 Sepolia deployment and explorer are useful evidence about what worked,
-  what accumulated complexity, and why EFS is being redesigned.
-- The current v2 spine is
-  [[Designs/efsv2/README|Designs/efsv2/README.md]]. It is
-  separate from evidence of implementation or protocol promotion. October 27
-  Git inspection finds real contracts code on the published Fable branch;
-  [[Daily Notes/2026-10-27-pm-checkpoint]] records its exact revision and remaining
-  integrated-product gate. Code publication is not a protocol freeze or a
-  deployment/readiness claim.
-- The Client v2 design set is
-  [[Designs/clientv2/README|Designs/clientv2/README.md]]. Its exact app lane,
-  rendering ABI, and implementation target remain evidence-gated.
-
-### Accepted presentation shape - delivery details remain open
-
-- Identify centralized off switches across the full Ethereum app stack.
-- Use the public EFS Sepolia system as the working example.
-- Teach independent retrieval and verification, including corruption and
-  unavailability. James's October 13 delivery direction uses screenshots and
-  staged explanations inside the chapters, not a standalone or live demo;
-  [[Devcon/preparation-plan]] owns the current execution plan.
-- Give developers practical questions for testing their own applications.
-- Show only implementation details that remain accurate at presentation time.
-
-### Hard requirements
-
-- Deliver the accepted **20-minute talk plus 5 minutes of Q&A** in the
-  **Permissionless Networks** track unless Devcon requests a program change.
-- Keep the session educational and non-promotional, with EFS used as a working
-  case study rather than a sales pitch.
-- Keep November 3-6 available; the assigned slot remains subject to change.
-- Show only claims and visuals that remain accurate at presentation time;
-  retain offline presentation copies. The current screenshot-based plan does
-  not require producing a live-demo video. Verify any newly captured evidence
-  rather than treating an explanatory sequence as a new execution result.
-- Do not turn Devcon into a v2 implementation or mainnet launch deadline.
+No active dated delivery milestone. The next speaking opportunity is tracked
+in [[Devcon/ethdenver-2027-watch]]; its event dates are not an EFS delivery date.
 
 ---
 
 ## History
+
+### Devcon presentation (November 5, 2026)
+
+**Delivered; organizer recording verified November 10.** James presented
+“Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test.” The
+[Devcon Archive](https://archive.devcon.org/devcon8/who-can-turn-off-your-ethereum-app-a-full-stack-walk-away-test/)
+embeds the matching [Ethereum Foundation recording](https://www.youtube.com/watch?v=mOTi8iu3bfs).
+The [scheduled slot](https://cfp.devcon.org/devcon8/talk/SPVJV8.ics) was
+15:30–15:55 Mumbai time (UTC+05:30), Lotus Stage 3. Preparation and working
+deck records remain in [[Devcon/README|Devcon/README.md]]. This closes the
+conference milestone, not an EFS v2 implementation, deployment or cutover gate.
 
 ### The Forever Files / OnionDAO buildathon (June–July 2026)
 

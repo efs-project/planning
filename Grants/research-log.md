@@ -15,6 +15,15 @@ Rows touched:
 Next check:
 ```
 
+## 2026-11-10 - NLnet next call is open
+
+The [November 3 call announcement](https://nlnet.nl/news/2026/20261103-call.html)
+and [intake](https://nlnet.nl/propose/) now invite submissions through **January
+3, 2027, 12:00 CET / 05:00 Chicago CST**, superseding the temporary closure
+below. Restack and CodeSupply are named themes. This verifies intake, not EFS
+eligibility or adoption of a proposal. The existing human-workflow and European
+dimension concerns remain; no draft or application action was taken.
+
 ## 2026-11-04 - NLnet intake rolled forward; no application sprint
 
 The freshly read [official intake](https://nlnet.nl/propose/) says submissions

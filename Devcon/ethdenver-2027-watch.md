@@ -1,8 +1,8 @@
 # ETHDenver 2027 speaker watch
 
-**Checked:** 2026-11-04 (Asia/Kolkata; also November 4 in Chicago)
-**Status:** official dates now announced: **March 24-25, 2027, Denver**, on the
-[organizer homepage](https://ethdenver.com/), independently fetched in this run.
+**Checked:** 2026-11-10 (America/Chicago)
+**Status:** official dates **March 24-25, 2027, Denver**, first verified November
+4 and reconfirmed on the [organizer homepage](https://ethdenver.com/).
 The homepage says full event details and registration information are coming
 soon. No official 2027 speaker form or submission deadline verified in this
 check. The Speakers & Content section and organizer X account returned 403;
@@ -31,7 +31,7 @@ application, acceptance, dated delivery milestone or locked talk concept.
 ## Current action and monitoring
 
 - **Owner: PM.** Included explicitly in the existing Tuesday 08:30
-  America/Chicago project-management review; next check 2026-11-10. Check official
+  America/Chicago project-management review; next check 2026-11-17. Check official
   event, speaker-support and organizer-announcement surfaces, plus narrowly
   relevant email when available. Avoid a separate duplicate reminder.
 - **Nothing to submit yet on the verified public surfaces.** Notify James when
