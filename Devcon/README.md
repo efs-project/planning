@@ -4,7 +4,17 @@ Application record and delivery control center for James's Devcon 8 talk. This
 folder is a conference-planning surface, not an EFS design ruling or a promise
 to ship v2 by Devcon.
 
-## Current deck, November 5
+## Delivered talk and recording
+
+On November 10, 2026, James confirmed the talk was delivered and supplied the
+recording below.
+
+**Watch:** [Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test](https://youtu.be/mOTi8iu3bfs)
+
+The preparation and rehearsal notes below are historical. The talk has been
+delivered; saving this link does not constitute a review of the recording.
+
+## Final saved rehearsal deck, November 5
 
 The latest snapshot is [[Devcon/presentation/2026-11-05-agreed-refinements/README]]:
 six approved follow-ups to the checklist and notes, preserving all 29 slides
