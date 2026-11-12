@@ -14,6 +14,10 @@ recording below.
 The preparation and rehearsal notes below are historical. The talk has been
 delivered; saving this link does not constitute a review of the recording.
 
+Private follow-up material: [after-talk conversation debrief](../../../Personal/devcon-2026/after-talk-conversations-2026-11-05.md)
+contains the recording's topic map and clarification questions. Access requires
+James's private Personal repository; do not copy conversation details into public notes.
+
 ## Final saved rehearsal deck, November 5
 
 The latest snapshot is [[Devcon/presentation/2026-11-05-agreed-refinements/README]]:
