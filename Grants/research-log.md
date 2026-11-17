@@ -15,7 +15,17 @@ Rows touched:
 Next check:
 ```
 
-## 2026-11-10 - NLnet next call is open
+## 2026-11-17 - NLnet deadline confirmed, intake availability conflicts
+
+The [November 3 call announcement](https://nlnet.nl/news/2026/20261103-call.html)
+invites submissions by **January 3, 2027, 12:00 CET / 05:00 Chicago CST**.
+The [intake page](https://nlnet.nl/propose/) still lists that deadline and
+displays a form but also explicitly says submissions are not currently
+possible. Both statements were visible November 17. Treat actual intake
+availability as **CONFLICT**, not verified open; no submission was attempted.
+Existing EFS eligibility and workflow concerns remain.
+
+## 2026-11-10 - NLnet next call appeared open
 
 The [November 3 call announcement](https://nlnet.nl/news/2026/20261103-call.html)
 and [intake](https://nlnet.nl/propose/) now invite submissions through **January
