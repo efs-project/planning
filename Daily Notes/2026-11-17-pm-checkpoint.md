@@ -29,3 +29,16 @@
 
 Next broad and ETHDenver review: November 24. No specialist work reclaimed,
 no external correspondence, no design promotion, and no deployment.
+
+## November 24 follow-up
+
+- [SDK compat run 45237876857](https://github.com/efs-project/sdk-v2/actions/runs/45237876857),
+  scheduled November 23 on unchanged `af11602`, reports **Success**. The prior
+  failed installer cell no longer calls for a retry based on that old result.
+  This is scaffold compatibility evidence, not a completed SDK integration.
+- Remote contracts-v2 branch and all three successor mains remain unchanged
+  from the November 17 check. No new integrated Files result was found.
+- ETHDenver still has no verified CFP in the bounded check; next review is
+  December 1. [[Grants/research-log]] records resolved NLnet intake wording,
+  without changing the project's funding posture. No code or external-state
+  changes were made.

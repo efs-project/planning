@@ -15,6 +15,17 @@ Rows touched:
 Next check:
 ```
 
+## 2026-11-24 - NLnet closure wording removed
+
+The freshly fetched [intake](https://nlnet.nl/propose/) no longer says that
+submissions are unavailable. It advertises a proposal form and email-address
+validation before submission, consistent with the
+[call announcement](https://nlnet.nl/news/2026/20261103-call.html). The deadline
+remains **January 3, 2027, 12:00 CET / 05:00 Chicago CST**. This resolves the
+visible wording conflict recorded below, not end-to-end submission testing or
+EFS eligibility. Human-workflow and European-dimension gates remain; no
+application, drafting or new funding commitment was made.
+
 ## 2026-11-17 - NLnet deadline confirmed, intake availability conflicts
 
 The [November 3 call announcement](https://nlnet.nl/news/2026/20261103-call.html)
