@@ -18,6 +18,10 @@ What rulings have **retired**, and what replaced it. Input to `./scripts/needs-i
 
 | Retired phrase | Replacement | Ruling | Since |
 |---|---|---|---|
+| `The fixed Web Awesome Core / Fluent WC v3 / Lion bakeoff` | Web Awesome + Lit + Signals are the selected UI foundation; no control-pack bakeoff | 2026-11-24 client UI foundation | 2026-11-24 |
+| `It should not own the EFS root or guest critical path` | Web Awesome / `<wa-page>` may own the first page; native boot frame + static fallback + 250 KiB gate keep it resilient | 2026-11-24 client UI foundation (PM application) | 2026-11-24 |
+| `One scoped adapter maps them to` | use `--wa-*` tokens directly; EFS themes are a Web Awesome theme; stored settings stay vendor-neutral | 2026-11-24 client UI foundation | 2026-11-24 |
+| `contains no Lit or Web Awesome runtime` | the first page may load Lit + Web Awesome within the 250 KiB startup gate; the native boot frame and fallback stay | 2026-11-24 client UI foundation (PM application) | 2026-11-24 |
 
 ## Cleared
 

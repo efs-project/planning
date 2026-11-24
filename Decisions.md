@@ -16,6 +16,10 @@ Append-only one-line decisions log. Mirrors the pattern in `contracts/docs/decis
 
 ---
 
+## 2026-11
+
+- 2026-11-24 (@james, his MVP brief to @pm and the client dev, quoted verbatim in [[Reviews/2026-11-24-james-v2-mvp-brief]]; recorded by @pm): **The v2 client's UI foundation is Web Awesome + Lit + TC39 Signals, and nothing else.** In his words: *"It's the only library (besides Lit and Signals) we use… leaning into Web Awesome is my preference since WA is based on web components and other standards and should be safe"*, and for themes, *"feel free to use it unless we can layer on a generic one on top (but that needs to be clean and maintainable otherwise don't bother)"*. This supersedes, in `Designs/web-client-os/`: the Web Awesome / Fluent / Lion control-pack bakeoff and the Lit-must-earn-its-place fixture gates; and the separate `--efs-*` token vocabulary with its `--wa-*` adapter (the client uses `--wa-*` tokens directly; EFS themes are a Web Awesome theme; stored settings stay vendor-neutral). **@pm's application of that direction (reversible; @james may override):** Web Awesome and `<wa-page>` may own the first page, including the guest path, rather than building every control twice. The safety intent is kept a different way: a native boot frame, a static unsupported/load-error fallback that still works when Web Awesome's stylesheet or modules are blocked, a later rescue view, and a failing 250 KiB brotli startup gate. Recorded in client-v2 ADR 0002 and PR #7.
+
 ## 2026-09
 
 - 2026-09-21 (@james via chat, recorded by @pm 2026-09-23): **Use temporary `contracts-v2`, `sdk-v2`, and `client-v2` repository names while preserving the existing public names through Devcon; defer legacy repository renames until the owner-directed public-site v2 cutover.** This avoids disrupting existing links and automation while real implementation starts. Naming direction only, not proof of repository creation, protocol promotion or deployment authorization. See [[Onboarding/repo-map]].
