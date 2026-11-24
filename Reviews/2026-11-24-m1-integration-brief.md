@@ -1,0 +1,74 @@
+# M1 integration brief — contracts, SDK, client
+
+**Status:** draft, scope superseded the same day. Later on 2026-11-24 @james told the devs directly that the scope is basic EFS v1 functionality ("EFS SDK v0.1", no "v2" in public names, no half measures), not this thin M1 slice. The checkpoint order below (pinned release → guest read → write and recovery) still stands as the first integrated proof. A plan built on the SDK dev's v1-parity matrix will replace the rest.
+**Integration owner:** @pm (Claude Code session "Project Manager"), proposed as the answer to contracts-v2 Q15.
+**Verified:** 2026-11-24 against the remote heads below.
+
+#status/draft #kind/plan #repo/planning #repo/contracts #repo/sdk #repo/client
+
+## The goal
+
+M1 is one real workflow across all three repositories (contracts-v2 C2, [the PM's first milestone](./2026-10-20-contracts-v2-design-record/analysis/pm-requirements-release.md#12-milestones-m1m6-and-the-first-milestone-acceptance)):
+
+> Deploy locally → create a folder and a small file → read its verified contents through the packaged SDK in the built static client → update it → reload and recover the result. Include a tiny external Solidity consumer.
+
+The follow-ons are an Arweave/IPFS reference, the two-author Lens fallback, tags and a staged save. They come after M1 and aren't part of it.
+
+## Where things stand
+
+| Repo | Remote state | What exists | Open items |
+|---|---|---|---|
+| `contracts-v2` | `main` `90ddbf5`. [PR #2](https://github.com/efs-project/contracts-v2/pull/2) `fable/2026-10-13-core-contracts` `0d1bb80`: open, CI green, mergeable. | S1 and S1b are built: kernel, registry, index generation 1, controller and genesis, readers, Files rules, release surface. The fixture CLI (`pnpm fixture:up/verify/down`) runs one instance on the Anvil default key. `release/{release.json, efs-deployment.json, expected.json}`. | Two unresolved Codex review findings. **P1:** `viem ^2.57.7` must be an exact pin. **P2:** the index-floor quote omits matching digest-spec work, about 22,100 gas per spec, so the SDK's gas estimates and the enforced floor undercount. |
+| `sdk-v2` | `main` `af11602` | S0 scaffold only. The scheduled compat run on 11-23 passed. | F1–F14 have not been authorized. |
+| `client-v2` | `main` `060c9fd` | The C0 static frame. CSP `connect-src 'self'`. `AGENTS.md` rule 1 keeps guest boot network-free. | `.node-version` is 24.11.0; the other two repos use 24.21.0. |
+
+**Local checkouts.** All three repos live in `Code/EFS/<repo>` and are clean. `sdk-v2` and `client-v2` were moved to `main` on 2026-11-24; their old branches `chore/s0-scaffold` and `c0-bootstrap` are kept. The copies under `Documents/Codex/2026-10-06/task-2/` are not working locations.
+
+## Critical path
+
+| Checkpoint | Contracts | SDK | Client | Exit evidence |
+|---|---|---|---|---|
+| **J1 — pinned release** | Fix P1 and P2, then merge PR #2 once @james approves. Record the merge commit and `releaseDigest`. | F1: vendor and digest-lock that release. F5: `verifyDeployment` against `pnpm fixture:up`. | Align `.node-version` to 24.21.0. Prepare views against recorded SDK results; no protocol stand-in. | From a clean checkout, the SDK verifies a fixture deployment of the pinned release. |
+| **J2 — guest read** | Support the SDK's read needs. Any change to the release surface goes through @pm. | F2 codegen. F4 `createEfs` surface. F7 fixture integration. F8 Files reads: pages, open with verified bytes, `PARTIAL` never shown as empty. Hand over a packed tarball. | C2: `ReaderSession` and the folder and file views on the packed SDK. Widen `connect-src` to the configured RPC only. Evolve rule 1 to "wallet-free and storage-free; network only to the configured RPC". | The built static client, under a path prefix, opens a nested folder and a small file whose bytes verify. Zero wallet calls. `PARTIAL` and `UNKNOWN` render distinctly. RPC calls are counted. |
+| **J3 — write and recovery (= M1)** | Support the native lane and the fixture for writes. | F9: actions on the direct-EOA native lane, the journal and reconcile. F6: Solidity package plus `examples/foundry-consumer`. | Minimal C3: create a folder and a file, update the file, and a lost response plus reload reaches `COMMITTED` exactly once. | The M1 workflow runs end to end, and the Solidity consumer reads and writes. Gas, RPC calls, and cold versus warm reads are recorded. |
+
+## Deferred, to keep M1 small
+
+- Client C1's multi-worktree supervisor, gateway and lease registry. A single fixture instance is enough for M1, and the contracts fixture doesn't implement those asks (X1) yet.
+- The EIP-712 and ERC-1271 signed lanes. This puts off Q5 and Q6 (the `Intent` typehash).
+- SDK F10–F14: export and restore, CLI and MCP, npm publishing, the M2 completion rows.
+- Any persistent or public deployment, and with it the Q1, Q2, Q13, Q18 and Q22 one-way doors.
+- Branch protection, which @james deferred on 2026-10-26.
+
+## Working rules
+
+1. **One integration owner.** Any interface that another repo consumes (release files, fixture CLI, SDK exports, result shapes) changes only through @pm. Bounded internal work stays with each dev.
+2. **Pinning.** @james ruled on 2026-11-24, as relayed by the contracts dev to the SDK dev, that digest pinning waits until the MVP works. Until then the SDK builds against the contracts branch head, and the client consumes the SDK's per-checkpoint prerelease tarball.
+3. **Short PRs, one per slice.** CI is green and GitHub review findings are addressed before a PR asks for merge. Devs merge only after @pm's acceptance, and PR #2 also needs @james's approval.
+4. **Shared machine.** Use bounded tool runs (`perl -e 'alarm N; exec @ARGV'`) and end with `pgrep -x forge|solc|anvil` empty. Install pinned tools side by side and never change the global defaults. Give each fixture its own `--port`.
+5. **Evidence per checkpoint:** the commit, the command, the observed result, and any limitation.
+6. **Vault:** the devs don't commit to `planning/`. @pm records the checkpoints.
+
+## Agreed shared interfaces (ledger)
+
+These are recorded by @pm as the devs report them. A change to any row goes through @pm. *Source* names who reported the row; @pm hasn't independently verified it unless it says so.
+
+| Date | Interface | Agreement | Between | Source |
+|---|---|---|---|---|
+| 2026-11-24 | Fixture CLI (**draft until today's push**) | `up` takes `--name`, `--artifacts`, `--state-dir`, `--json`, `--port` or `--port-range`, and `--chain-id`. Also `status`, `list`, `reset`, `gc`. A lease registry library lives in `tools/fixture-registry.mjs`. Nothing an instance writes is a tracked file. `up --json` prints exactly one ready object, only after the `verify` checks pass inside `up`; a failure exits non-zero with a JSON error. The ready object carries the actual port and `rpcUrl`, plus `realmId`, `layoutId` and the seed's root, folder and file ids. The Anvil default key is fine for the MVP. The final CLI, exit codes and lease schema will be confirmed by contracts at push. | contracts → SDK, client | contracts dev, 11-24 |
+| 2026-11-24 | Solidity import prefix | `@efs/contracts/=src/`, package `efs-contracts`. The SDK's Solidity package re-exports the closure rather than forking it. | contracts ↔ SDK | contracts dev confirmed, 11-24 |
+| 2026-11-24 | Files Types (lands in today's push; spec `contracts-v2/docs/LARGE-FILES.md`) | Ten Files Types instead of nine; the new `files-span/1` stores chunked on-chain files. A revision body gains a `form` word: 0 is inline, 1 names a `files-content/1` or `files-external/1` record. `files-external/1` takes any RFC 3986 URI, with no scheme allowlist. | contracts → SDK, client | contracts dev |
+| 2026-11-24 | Key helpers | The eight pure key helpers move from `ILedgerCommitments` to a standalone `KeysView`. | contracts → SDK | contracts dev |
+| 2026-11-24 | Limits and lanes | `limits.maxActions` is capped at 64; the SDK splits larger saves, labelled non-atomic. Only capabilities b0 and b1 can be enabled, so the MVP has **no ERC-1271 (smart-wallet) lane**. | contracts → SDK, client | contracts dev |
+| 2026-11-24 | On-chain identity strings | `efs2/…` domain and typehash strings stay until @james rules on whether "no v2" covers them. The SDK generates these constants from the contracts artifacts and never hand-types them. | contracts ↔ SDK | SDK dev; question with @james |
+| 2026-11-24 | Contracts pin | The SDK builds against the contracts branch head after the 11-24 push, not `0d1bb80`. Digest pinning waits until the MVP works. | contracts → SDK | @james's ruling, relayed |
+| 2026-11-24 | SDK package surface | A single `@efs/sdk` with subpaths `.` and `./files` (guest), `./actions`, `./web`, `./web/journal` and `./testing`, plus `protocol-inputs.json`. | SDK → client | SDK dev, adopting the client dev's asks |
+| 2026-11-24 | Result shape | Results are structured-clone-safe. RPC and gateway lists are ordered, with per-attempt evidence and no mixed bases. Every call takes an `AbortSignal`. Errors are data, carrying `retry: never \| after-reconcile \| transient`. No Signals or UI dependencies. JSON codecs encode bigint as decimal. An `onRequest` metering hook. A failover mid-read restarts that read at a fresh basis and is reported, never stitched. | SDK → client | client dev, agreed with the SDK dev |
+| 2026-11-24 | Journal lock | Keyed by `(chainId, realmId, deploymentId, account)`. Taken **before** an attempt is created. The journal is re-read after the lock is acquired, to join or reconcile an existing attempt. | SDK → client | client dev, agreed with the SDK dev |
+| 2026-11-24 | Caches (offline seam) | The caller supplies `byteStore` (keyed by content digest / record id) and `resultStore` (keyed by deployment + basis + query), both async get/put. Eviction is a miss, never "absent". | SDK → client | client dev and SDK dev, refined |
+| 2026-11-24 | Byte reads | `files.open(ref)` returns plain data: metadata, size, media type, the byte plan (inline / content / external / span) and per-carrier availability. No stream inside it. `files.read(opened, {offset, length, signal})` returns a plain `ByteRange` graded VERIFIED / UNVERIFIED_RANGE / MISMATCH / UNAVAILABLE / …. `files.stream(opened, {signal})` returns a `ReadableStream<Uint8Array>` of verified chunks. Span files verify each chunk; a single-digest file emits nothing until the whole read verifies, unless the caller opts in to bytes labelled unverified. `bytes()` is a one-shot convenience with a size cap. | SDK → client | client dev and SDK dev, refined |
+| 2026-11-24 | Guest purity | `.` and `./files` pull in no actions, journal, Node, `process` or `Buffer`; `sideEffects: false`. Browser floor: Chrome/Edge 120, Firefox 124, Safari 17.4. No newer APIs without a fallback. | SDK → client | same |
+| 2026-11-24 | Names and links | The SDK owns `checkName` (VALID / INVALID / UNSUPPORTED_BY_PROFILE for `files-name/2`), NFC normalization, and path parsing and formatting in wire and display forms. The D-B folding function (NFC → lowercase → space-to-underscore) lands in the SDK together with tags. | SDK → client | same |
+| 2026-11-24 | RPC endpoints | The RPC list is user-configurable: defaults plus the user's own, including a local node. A settings store is in the MVP (a new client requirement from @james). The SDK takes an ordered list. The client's CSP widens to any HTTPS endpoint plus loopback, with a separate dev/test build for the local chain. UX note: an HTTPS-hosted client reaching a local node triggers the browser's local-network permission prompt. No contracts change. | client ↔ SDK | client dev, relaying @james |
+| 2026-11-24 | Client's SDK pin | One tarball per checkpoint, published as a GitHub prerelease asset, plus eleven recorded result fixtures. | SDK → client | same |
+| 2026-11-24 | Unruled data-model features | Tags beyond the 09-10 rulings, "attach files to addresses" and filter-by-Type. The SDK exposes slots for them that return `UNSUPPORTED`, with no invented semantics. | SDK, client | SDK dev and client dev; with @pm for @james |
