@@ -116,7 +116,9 @@ A tag has no name. The display name of a file shown in a topic is, in order: the
 
 ### 3.8 Remove and hide are different
 
-Removing your own entry releases it, so the next author in the lens shows through. Hiding masks it, which stops the search. At a shared place, removing your `pet.jpg` must not hide everyone else's (contracts design, finding 6). The client words them differently ("Remove mine", "Hide"), and after a removal says whose entry now shows.
+Removing your own entry releases it, so the next author in the lens shows through. Hiding masks it, which stops the search. At a shared place, removing your `pet.jpg` must not hide everyone else's (contracts design, finding 6). The SDK's folder operations already work this way (`sdk-v2` `74a4d5e`: remove releases, `hide: true` masks, a review carries what shows afterwards), and the client has "Remove" plus an owner-only "Remove and block this name".
+
+**The invariant** (contracts dev's wording): an author can always mask or release a binding of theirs that already exists, and no validator may refuse that. A validator may refuse an action that asserts something, and an action that creates a new position for its author, of either sign.
 
 ## 4. Homes
 
@@ -179,13 +181,13 @@ Removing your own entry releases it, so the next author in the lens shows throug
 |---|---|---|
 | One list per word, or a directory of paths per word | **settled: the directory.** Round one measured per-word item lists at about the cost of the roll-up lists again; the directory is the existing reference list and costs nothing extra | contracts dev, 2026-11-25 |
 | Number width | **settled:** −65,536 to 65,535 | contracts dev, 2026-11-25 |
-| Purposes for label, definition, "same as", "moved to", parent | contracts dev's proposal, agreed 2026-11-25: `property` (one value per author per key: a label per language, the definition, "moved to"), `same`, `broader`. `property` must work on any kind of subject (a topic, a home, a file, a folder); it is where an address's display name and inherited settings would live. Open: whether later relation kinds need a generic `relation` purpose now | contracts dev |
+| Purposes for label, definition, "same as", "moved to", parent | contracts dev's proposal, agreed 2026-11-25: `property` (one value per author per key: a label per language, the definition, "moved to"), `same`, `broader`. `property` must work on any kind of subject (a topic, a home, a file, a folder); it is where an address's display name and inherited settings would live. A later many-valued relation needs no release (a purpose is only a constant; the kernel and the per-author and "what points at this" lists accept any purpose), so no generic `relation` purpose is added | contracts dev, settled 2026-11-25 |
 | NFKC_Casefold or NFC plus lowercase | NFKC_Casefold | SDK dev evaluates; @james confirms |
 | Default view for topics: Mine or Everyone | Everyone, as the working default for building (client dev's proposal): lens tier first, public tier labelled, public-tier media not loaded until asked for | @james confirms before launch; it decides what a newcomer sees first |
 | What a newcomer's default lens contains | undecided | @james, before launch |
 | File name as its own mechanism or the last word of a path | parked | @james, later |
 | Settings that inherit down a path | parked in `Ideas.md` | later |
-| An all-authors list of everyone's versions of one file | defer if a later index generation can add and backfill it; otherwise keep it (36k gas per file) because view-all is ruled | contracts dev answers; then @james if it can't be deferred |
+| An all-authors list of everyone's versions of one file | **deferred.** A later index generation can add it and backfill it exactly from the kernel's record of statements. **Release gate:** the build-from-history step is specified but not written (generation 1's build refuses), and adding a generation is only possible until a Realm is frozen. It must be written and tested before any freeze | contracts dev, 2026-11-25; integration owner tracks the gate |
 
 ## 9. Work order
 

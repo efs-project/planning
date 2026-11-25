@@ -149,5 +149,5 @@ The design ends with five points for him, each with a "keep it" recommendation t
 1. **The number's range** is −65,536 to 65,535. Wider would cost extra storage on every tag that uses it.
 2. **A tag is filed under a topic or an address, nothing else.** An app that wants its own kind of link between its own things defines one, at the same cost.
 3. **No word may start with `~` or look like an address,** anywhere in a path.
-4. **Everyone's versions of one file are not listed on the chain.** Keeping that list costs about 36k gas for every file ever created. It may be free to add later; the contracts dev is checking, and if it isn't, @pm will bring it back as a real question, because view-all is ruled.
+4. **Everyone's versions of one file are not listed on the chain for now.** Keeping that list costs about 36k gas for every file ever created. The contracts dev confirmed it can be added later and filled in exactly from history, on one condition: the step that builds a new list from history is designed but not yet written, and it must exist before a Realm is ever frozen. @pm treats that as a release gate, so this is a deferral and not a loss.
 5. **Cost:** a tag is about half the price of creating a file, and a deep new path can take two or three transactions the first time.
