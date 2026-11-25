@@ -492,3 +492,48 @@ link-model comparison and the roll-up sketch).
   entry when several people have one, and the all-authors list that needs.
 
 — ruled by @james, 2026-11-25
+
+### Tags — the shared tag: paths tell tags apart, words connect them (refines T-2)
+
+Evidence: [[2026-11-25-tag-decision-sheet]] (the choice as put to James,
+with the assumptions it rests on) and the research corpus in
+`Reviews/2026-11-25-tag-prior-art/`.
+
+- **RULED: yes** to *"paths tell tags apart, and a word's page shows every
+  place that word is used."* James: *"I'll go ahead and say Yes. Hopefully
+  this works out."*
+  - A topic's identity is its path of words, as T-2 says: `/cars/tesla` and
+    `/people/tesla` are different tags. His reason for paths is
+    disambiguation: *"The path on tags in my mind was originally for
+    disambiguation."*
+  - The refinement: a word is shared across paths. Each word has a page
+    showing every place it is used, grouped by place and never merged.
+    Synonyms exist at word level and at path level.
+  - Bare-word tags with parents only as data (the booru shape) are not the
+    model. Booru-style parents remain an optional layer.
+  - Whether a word page is served by one list per word or by a directory of
+    the paths that use the word is engineering, to be settled by the
+    contracts measurement.
+  - Nothing is frozen until the first lasting deployment.
+- **RULED: no small depth limit.** *"A path should be more than 8 words
+  deep. I don't know the limit but I don't want to screw over future users
+  because we chose some random really low number … someone has a 64 word
+  path like a windows or linux file system path."*
+- **RULED: public lists are newest first.** *"Newest first is the only way
+  that makes sense otherwise data views are static and nearly useless."*
+- **Correction accepted by the PM:** EFS has curators. *"Everyone in EFS
+  curates things by tagging and choosing tag parents etc. Users just choose
+  their curation team via the lens feature."* What it lacks is one team
+  that everybody shares by default.
+- **Operating instruction** to the PM's side session that ran this
+  discussion (Fable 5.2): *"please try to update designs, think of edge
+  cases, figure out what pitfalls we will hit, etc then pass along
+  instructions to the other PM or even the devs directly if you have a good
+  reason. I'm trusting you to guide these agents well."*
+
+— ruled by @james, 2026-11-25
+
+- No `Retirements.md` row: the text this overrules is in other
+  repositories (contracts-v2 `docs/TAG-OPTIONS.md`, SDK draft PR #36, the
+  client's `tags.md`) and in Reviews, which the scanner skips. Updating
+  those is in the work order of [[2026-11-25-tag-model-spec]].

@@ -1,6 +1,6 @@
 # Tag decision sheet: the one page to read
 
-**Status:** reference: @pm's one-page summary for @james, 2026-11-25. It replaces nothing; it points at the longer records. The only ruling it waits on is the choice in "The one real choice".
+**Status:** reference: @pm's one-page summary for @james, 2026-11-25. **Decided the same day:** @james said yes to "paths tell tags apart, and a word's page shows every place that word is used" (recorded in `Designs/efsv2/owner-rulings.md`). Option 2 is out; options 1 and 3 are one model, and the contracts measurement picks the plumbing. The working spec is [[2026-11-25-tag-model-spec]].
 **Background, if wanted:** [[2026-11-25-tag-questions-explained]], [[2026-11-25-tag-discussion-round-2]], [[2026-11-25-tag-discussion-round-3]], and the research in `Reviews/2026-11-25-tag-prior-art/` (its README is the verdict).
 
 #status/reference #kind/brief #repo/planning #repo/contracts #repo/sdk #repo/client
@@ -108,4 +108,4 @@ No earlier system is shared, permanent and without an authority all at once.
 
 ## Waiting on @james
 
-A yes to the sentence above (which rules out option 2 and leaves 1 versus 3 to measurement), or a different pick.
+Nothing. He said yes on 2026-11-25.
