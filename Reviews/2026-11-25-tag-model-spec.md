@@ -207,6 +207,13 @@ After contracts step 3c (2026-11-25, branch head `28c6081`, the dev's own measur
 - **Turning a tag off or back on** costs about 15k more than before, for the yes count.
 - **Bringing an old thing back to the top with a new account** costs 683k for one thing, or 336k each when the new account does 64 things in one publication. That is about the price of any other junk row, and each account can do it once per thing.
 
+After contracts step 4, the readers (2026-11-25, branch head `b163514`, the dev's own measurements):
+
+- **A padded row costs a reader about 36k gas, whatever the lens size.** The first build cost 1.56M per padded row at a lens of 64, because it asked the lens before reading the yes count.
+- **Rows per call under a 10M gas cap:** page × lens up to 760 for Mine at one place and 312 for its roll-up; 688 and 320 for Everyone. At a lens of 64 that is 15 rows per call at one place and 5 for a roll-up. The roll-up is dear because each shown row asks the lens about the place being viewed. Two exact shortcuts are planned for the release step, so the SDK reads the bounds from the gas model and doesn't hard-code them.
+- **Lookups are flat:** "who has this name here" costs 363k for a page of 10 whether 3 or 300 people have it, and a count costs 85k on a place of 3 items or 2,000.
+- **The gateway does not yet serve a file by its permanent link** (it did not fit the contract's size budget), nor a revision link. Until it does, a file found through a topic is opened through the SDK's reads.
+
 ## 8. Open questions
 
 | Question | PM default | Who settles it |
