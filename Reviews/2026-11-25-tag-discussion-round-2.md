@@ -1,6 +1,6 @@
 # Tag discussion, round 2: @james's direction and @pm's reply
 
-**Status:** reference: a discussion record. Nothing here is a ruling until @james confirms it and it's recorded in `Designs/efsv2/owner-rulings.md`.
+**Status:** reference: a discussion record. **Outcome (same day):** @james answered, and T-1–T-5 are recorded in `Designs/efsv2/owner-rulings.md` under 2026-11-25. He chose path identity (S1) over @pm's recommendation. His second reply and the overnight work order are at the end.
 **Given:** 2026-11-25. @james replied to [[2026-11-25-tag-questions-explained]]; this is his reply and @pm's analysis of it (a side session of the "EFS v2 Dev PM" session, on Fable 5.2).
 **Sources checked:** [[owner-rulings]] (D-A, D-B, D-C, D-E of 2026-09-10); the September deep dive `Reviews/2026-09-09-files-browser-mvp/tag-system-2026-09-10.md` (planning commit `c833ecd`); contracts-v2 `docs/TAG-OPTIONS.md` and `docs/DESIGN.md` §4.3, §10.2, §11, §12 on main.
 
@@ -73,7 +73,7 @@ Three readings of `/cars/tesla`, with one example. Alice tags a photo `tesla`. B
 8. **Names when browsing a topic.** A file's name lives on its named link in a folder or home, and a tag link has no name. Proposed default: every file is created with a named spot in its author's home or a folder there, and tags go on top (Gmail's All Mail plus labels). A topic view then shows each file by that name.
 9. **Types.** A v2 Type is a schema plus a checking contract; every record has exactly one; anyone can register a new Type without permission. "Filter by type" uses the Type the chain enforced, which can't be spoofed. "Folder" is the Files app's Type (`files-directory/1`); a chess app registers its own Types and uses the same tag links. A `types/directory` tag isn't needed.
 
-## Proposed to record once @james confirms
+## Proposed to record (superseded by the outcome below)
 
 - **T-3:** cost is not the constraint; ship tags on the simple path and treat optimization as engineering ("I don't care about cost too much. Let's get tags right…").
 - **T-5:** yes; anyone can attach to any address ("yes anyone should be able to attach files to vitalik.eth/0x1827…").
@@ -81,8 +81,70 @@ Three readings of `/cars/tesla`, with one example. Alice tags a photo `tesla`. B
 - **T-1:** "tag is system, folder is app"; a folder is a Files Type, not the same thing as a topic.
 - **T-4:** implied yes by the signed-weight model; still to confirm.
 
-## Follow-ups for the integration owner (none started)
+## Follow-ups as first drafted (superseded by the work order below)
 
 - **Contracts:** price a strength byte on tag links before any persistent deployment (a spike like T-4's); name the smallest change set for word topics plus homes with folders kept as they are; say what index kind 6 costs per tag.
 - **SDK:** draft PR #36 assumed minted nested tags and a lens walk for paths; it needs revising to word topics resolved by hashing.
 - **Vault:** record the rulings above in `Designs/efsv2/owner-rulings.md` with Retirements rows once confirmed.
+
+## @james's second reply, verbatim
+
+> 1. They are different tags but like the booru tagging systems they can have metadata attached that form them into aliases or keep them separate. The meaning is kind of its own data which is subjective and dynamic. So a user typing 'tesla' into the search bar would show both tags in the autocomplete and maybe both tags separately in the search results. But if they are marked as synonyms then they merge together. This makes sense logically but could get... messy with lenses. But a lot of things do. I'd love to try our best to make this work in contracts but if truly needed we can say this is a The Graph only enhanced feature. But the hierarchy makes tags specific and their metadata determines the name shown to the user and how they are treated during searches etc.
+> 2. A number gives us flexibility and I think it's fine for the apps / clients to determine what the value means. If we want to treat NSFW like a boolean then >= 0 is true and < 0 is false. If an adult app wants to sort things by "how nsfw they are" then 3 might be slight areola showing and 99 would be full monty.
+> 3. We always use addresses as the ID for users / contracts. ENS was just an example and would likely be client only unless we can lookup via contracts and even then the address is what everything is attached to.
+>
+> Not sure if I missed stuff. I'm very tired. Just trying to get some ground truth so we can iterate more overnight.
+
+## Ground truth after this reply
+
+- **A topic is its path of words** (S1). `/cars/tesla`, `/companies/tesla` and `/tesla` are three topics. Nobody owns any of them.
+- **Meaning is metadata.** Display names per language, synonyms and aliases are statements about a topic, seen through the reader's lens. Synonyms merge at read time.
+- **Tag is system, folder is app.** A folder is a Files Type with a minted id.
+- **Every tag carries a signed number.** At or above 0 it applies; below 0 it doesn't. What the size means is up to each app.
+- **Homes are addresses.** Anyone can attach to any address. ENS is display only.
+- **Cost is not the constraint.**
+
+What path identity commits to (stated once, for the record):
+- A topic can never be renamed or moved. A new one is made and aliased.
+- Tagging `/cars/tesla` doesn't put a thing in `/cars` (D-A). The app shows sub-topics as entries to browse into.
+- A synonym never merges ids. Readers show two topics as one by reading both, so each synonym costs another read, and a contract checking a tag sees exactly one id unless it pins a set.
+
+## What can live in contracts, and what needs The Graph
+
+| Capability | In contracts? |
+|---|---|
+| Path → topic id | yes: fold and hash, no chain read |
+| Things tagged with exactly this topic, by the people in my lens | yes, as built |
+| Sub-topics listed under a topic, by the people in my lens | yes, once topics are registered and listed |
+| A topic's display name, definition and synonyms | yes: statements read through the lens |
+| Showing synonyms as one | yes for a handful (the reader reads each); large synonym webs need the Graph |
+| "Typing `tesla` shows every topic named tesla" (the exact word) | yes, if registration also adds the topic to a list keyed by its last word |
+| Type-ahead on partial words, fuzzy search, ranking, trending | no: the Graph, or a local cache |
+| Everything anyone tagged with a topic | not as built (index kind 6, pending D-D); it's also a spam view |
+| Sorting by the number | no: lists are in insertion order; the app sorts, or the Graph does for big sets |
+| A contract acting on a tag | exact topic id and named authors only; no synonym following inside a transaction |
+
+## Work order for the integration owner to hand out (none started by this session)
+
+**Contracts dev:** one design PR with a spike branch, measured on both fee schedules. Don't merge kernel changes before review.
+1. **Topic identity from a path.** Compare one hash of the whole folded string with a per-segment chain (`id(child) = H(id(parent), word)`), which makes "this word under that parent" checkable with one hash. Define the root and the reserved first segments (homes `0x…`, `~efs`).
+2. **Registration and listing.** What makes a sub-topic appear under its parent, per author or across authors, what spam costs, and whether the validator can refuse a listing whose id doesn't match its name.
+3. **Exact-word lookup:** a list keyed by the last word, giving every registered topic with that name.
+4. **Topic metadata as statements:** label per language, definition file, synonym, replaced-by; the read-time merge and its hop limit.
+5. **The number on a tag:** width (James's examples: −1, 0, 3, 75, 99), where it's stored (the head row has a reserved byte; the signed action has no field), sign and state (≥ 0 bound, < 0 masked, including from silent, which is the T-4 spike), list filtering, and cost.
+6. **Homes:** an address-derived parent for named links and tag links (parity ask C8).
+7. **Name what can't be done in contracts,** so it's assigned to the Graph on purpose.
+
+**SDK dev:** revise draft PR #36.
+- Topic paths resolve by folding and hashing, with no lens walk; folders and homes keep the walk.
+- The fold rule with vectors shared with the contracts: pin a Unicode version and refuse characters not assigned in it.
+- The tag number in the plan and read APIs, with the ≥ 0 / < 0 convention.
+- Synonym-aware reads with a bound.
+
+**Client dev:** a short design note, no code.
+- The topic view: everything tagged, a Type filter, sub-topics as entries to browse into.
+- The home view: the owner's entries first, others' behind a tab.
+- The search box: exact word from the chain; type-ahead needs the Graph or a local cache.
+- The number: a default of 0, and "not this" as a negative.
+- Naming: every file gets a named spot in its author's home, with tags on top.
+

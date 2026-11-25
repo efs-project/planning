@@ -372,3 +372,77 @@ Evidence: [Reviews/2026-09-09-files-browser-mvp/tag-system-2026-09-10](https://g
 - No `Retirements.md` row: none of these rulings reduces to a live phrase
   (the July path-derived tag identity is already superseded by the Files
   spine, and its remaining mentions are in demoted July documents).
+
+## 2026-11-25
+
+### Tags — rulings from the tag discussion (T-1 to T-5)
+
+Evidence: [[2026-11-25-tag-questions-explained]] (the questions as put to
+James) and [[2026-11-25-tag-discussion-round-2]] (his two replies verbatim,
+with the PM's analysis). The questions come from contracts-v2
+`docs/TAG-OPTIONS.md`.
+
+- **T-1 — Tag is the system primitive; folder is a Files-app concept.
+  RULED.** *"tag is system and folder is app. A chess game might have tagged
+  moved like beginner or expert but not have a concept of a folder."* Going
+  to a topic shows *"everything tagged with"* it *"regardless of type"*, with
+  a filter by Type; a folder is one Type of item. PM application: a folder
+  stays a Files Type with a minted id, named entries and renames; it is not
+  a topic.
+- **T-2 — A topic's identity is its path of words; topics are shared and
+  unowned. RULED.** *"names in paths are global and not owned by anyone …
+  The name or ID is the schelling point."* Asked whether the `tesla` in
+  `/cars/tesla` is the same tag as the one in `/companies/tesla`: *"They are
+  different tags but like the booru tagging systems they can have metadata
+  attached that form them into aliases or keep them separate. The meaning is
+  kind of its own data which is subjective and dynamic … the hierarchy makes
+  tags specific and their metadata determines the name shown to the user and
+  how they are treated during searches."* Words, not numbers: *"Readable
+  URIs seem like a good thing worth fighting for."*
+  - This extends D-B from one word to a path of words. Display names per
+    language, synonyms and aliases are metadata about a topic, never its
+    identity.
+  - A topic can't be renamed or moved; a new one is aliased to it. D-A
+    stands: tagging `/cars/tesla` doesn't make a thing answer `/cars`.
+  - The PM recommended flat word ids with the path as a route (readings
+    S2/S3 in the evidence); James chose path identity (S1).
+  - Synonym merging, search and autocomplete: *"I'd love to try our best to
+    make this work in contracts but if truly needed we can say this is a The
+    Graph only enhanced feature."*
+  - Not ruled: lowercase. James doubts it can be enforced (*"Maybe we try
+    for English and just hope the rest of the world follows the best
+    practices"*). D-B's folding stands as an SDK and link-resolution rule;
+    what the chain checks is engineering.
+- **T-3 — Cost is not the constraint. RULED:** *"I don't care about cost too
+  much. Let's get tags right and let optimization be an engineering
+  problem."* D-E's ≈ 50k per tag stays an engineering target, not a gate.
+- **T-4 — Every tag carries a signed number, and the sign is the stance.
+  RULED.** *"A number gives us flexibility and I think it's fine for the
+  apps / clients to determine what the value means. If we want to treat NSFW
+  like a boolean then >= 0 is true and < 0 is false. If an adult app wants
+  to sort things by 'how nsfw they are' then 3 might be slight … and 99
+  would be full monty."*
+  - This settles D-C's carrier as a signed number, and replaces the
+    2026-09-10 delegated default "drop `int256 weight`, keep unindexed
+    `confidence`".
+  - A negative number with no earlier positive one must be possible (the
+    "denial on its own" of TAG-OPTIONS).
+  - The number's width, where it is stored, and whether it is indexed or
+    sortable on chain are engineering.
+- **T-5 — Homes: anyone can attach to any address, and the address is the
+  id. RULED.** *"yes anyone should be able to attach files to
+  vitalik.eth/0x1827... regardless of whether he uses the chain."* *"We
+  always use addresses as the ID for users / contracts. ENS was just an
+  example and would likely be client only unless we can lookup via contracts
+  and even then the address is what everything is attached to."*
+
+— ruled by @james, 2026-11-25. He gave these as *"ground truth so we can
+iterate more overnight"*; engineering detail under each is open, and a later
+round may refine them.
+
+- No `Retirements.md` row: no live vault document carries a phrase these
+  retire. The text they overrule is outside the scanner's reach: contracts-v2
+  `docs/TAG-OPTIONS.md` ("Not path"; "minted for folders and hierarchical
+  tags"), SDK draft PR #36 (minted nested tags, a lens walk for paths), and
+  the 2026-09-10 deep dive's delegated default on weights. Those are
+  follow-ups for the dev sessions.
