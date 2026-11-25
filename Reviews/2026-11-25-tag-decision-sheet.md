@@ -50,11 +50,13 @@ The example for all three: Alice files a photo under cars > tesla. Bob files one
 - **Tag suggestions show counts across everyone,** not only the reader's view.
 - **A folder adds its creator to the view,** the same way an address does.
 - **When "public" is on and several people have a file with the same name in one place,** the app shows them as a list, oldest first.
+- **A bare path is a topic; folders and named files live under an address.** `/cars/tesla` is always topic words. `/0x1234…/photos/cat.jpg` is a folder path with file names, which keep their capitals. The realm's shared root folder gets no link of its own. First segments starting with `0x` (addresses) or `~` (system, such as `~efs`) are reserved. Files shown in a topic are opened by their permanent link.
 
 ## Can wait
 
 - Who is in a newcomer's default view.
 - Settings that inherit down a path (parked in `Ideas.md`).
+- Whether a file's name is its own mechanism (as built: a case-sensitive name on a folder entry) or simply the last word of a path, which is one reading of "a folder is a tag". Until this is settled, no link addresses a named file through a topic.
 
 ## Waiting on @james
 
