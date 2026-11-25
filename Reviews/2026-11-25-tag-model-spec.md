@@ -97,6 +97,8 @@ For a thing X in topic T, walk the lens in order. The first author with a stance
 ### 3.5 Synonyms and moves
 
 - **Two levels.** Word level (`car` = `cars`, `汽车` = `cars`) applies to every path using the word. Path level (`/cars/tesla` = `/companies/tesla_motors`) joins two specific places.
+- **How the two levels are told apart** (a word page is also a root-level topic): "same" between two word pages is the word-level synonym, and it also makes the two root places the same. Between two paths it joins those two places only. Between a word page and a path it joins the root place and that one path, with no word-level effect.
+- **The chain checks both ends.** A first "same" or "broader" statement is refused unless its subject and target are both topics and are different topics. `property` is not judged: any subject, and a value that is a record, a file or an address.
 - **They never merge ids.** The reader gathers the lists and merges them in time order, removing duplicates. Each synonym costs one more list read.
 - **Limits:** at most 4 hops, cycle-safe, and at most 16 lists per view (PM defaults).
 - **Finding them from either side** uses the "what points at this" list that exists today.
