@@ -47,7 +47,7 @@
   - A first statement may be negative (the T-4 spike's "first mask").
   - Width: settled by the contracts spike at −65,536 to 65,535. The protocol defines only the sign. Apps define the size.
 - **What can be tagged:** files, folders, topics, addresses, and any existing record or subject of any Type, including Types from other apps (T-1: tags are the system layer; a chess app tags its moves). Tagging an address ("this address is a phishing site") must work for addresses that have never transacted, so an address has to be a valid target without a record. Tagging a specific revision of a file must also be possible, for claims about content that an edit could change.
-- **An address is a target for tags only.** As the target of a file's current version or of a folder entry it would confirm and never be readable, so the chain refuses it with a named error. A named entry pointing at an address (a contacts list) can come later, with its reader.
+- **An address can't be the target of a file's current version or of a folder entry.** There it would confirm and never be readable, so the Files validator refuses it with a named error. It is allowed for tags. The validator does not judge purposes it doesn't name, so another app's own kind of link, and a `property` value, may point at an address. (Corrected 2026-11-25: this line first said "for tags only", which was too broad and was built that way in the kernel step's first draft.) A named folder entry pointing at an address (a contacts list) can come later, with its reader.
 
 ### 2.3 Lists the index keeps
 
