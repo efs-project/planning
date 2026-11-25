@@ -78,7 +78,7 @@ For a thing X in topic T, walk the lens in order. The first author with a stance
 
 ### 3.3 Roll-up and duplicates
 
-- A thing filed at `/cars/tesla` and at `/cars/ford` appears twice in `/cars`'s list. Readers remove duplicates by thing, across pages.
+- A thing filed at `/cars/tesla` and at `/cars/ford` appears twice in `/cars`'s list. Readers remove duplicates by thing, across pages. A resumable cursor can only remember a bounded number of things, so a result says whether its de-duplication is complete or bounded; an in-memory iterator for one scrolling view is always complete.
 - Roll-up follows the path only. "A Model Y is also electric" needs a second tag or the optional parent layer.
 
 ### 3.4 Word pages
@@ -115,6 +115,7 @@ A tag has no name. The display name of a file shown in a topic is, in order: the
 - The id derives from the address alone.
 - Named entries and tags both hang off a home. A home needs no record and no registration.
 - **Viewing a home** uses the lens `[reader, the home's address, …the rest, public]`.
+- **A contract's home:** a contract's author identity is derived differently from a key's. The lens must insert the right identity for the address, and both when an address could act as either. A Safe's home is a test case.
 - **Always show whose entry it is** when it isn't the home owner's. A reader's own `pet.jpg` at someone else's address will otherwise look like the owner's.
 - ENS names are display only and never part of an id or a permanent link.
 
@@ -137,6 +138,8 @@ A tag has no name. The display name of a file shown in a topic is, in order: the
 - **Pin one Unicode version and refuse characters not assigned in it.** A later version then can't change an existing id.
 - **Open, with a PM recommendation for the SDK dev to evaluate and bring to @james before any lasting deployment:** use Unicode's identifier case-folding (NFKC_Casefold) instead of NFC plus lowercase. It also folds full-width letters and ligatures, and Unicode guarantees it stays stable for assigned characters. D-B's wording says "NFC → lowercase", so this is a refinement he has to confirm.
 - **Vectors shared by the contracts and the SDK**, including words that must be refused.
+- **The same rule settles whitespace** (trim; a run of whitespace becomes one underscore) and **refuses zero-width and bidi control characters** rather than stripping them.
+- **JavaScript has no full case folding, and engines carry different Unicode versions** (SDK dev, 2026-11-25). Either rule needs pinned tables shipped in the SDK; the evaluation reports the size cost and keeps fold behind its own export.
 - Look-alike letters can't be prevented. The client warns on mixed scripts.
 
 ## 7. Pitfalls, in the order they are likely to bite
