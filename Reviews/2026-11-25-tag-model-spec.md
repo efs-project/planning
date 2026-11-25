@@ -47,6 +47,7 @@
 - **Statement:** a TAG bind on a registered topic or a home, targeting the thing, carrying the number.
 - **The role names the thing, and the target must equal it.** A "not this" has no target, so the role is what identifies the thing for both signs. A tag whose target differed from its role would be about one thing by one read and another thing by a different read, so the chain refuses it.
 - **A tag on an unregistered topic is refused with a named error.** Never a silent miss.
+- **A first "not this" must name something that exists** (requested of contracts step 3b, 2026-11-25): a record or a file already on the chain, or an address. A yes already has to. Since the shared lists arrived, a first "not this" writes a public row, and a row about a thing that isn't there can't be shown. The same holds for a first "hide this name" in a folder or home: the name must be a registered name and the place a real folder or home.
 - **Number:** signed, part of what is signed and of what a rebuild reads. Changing only the number is a normal update that keeps history.
   - `n ≥ 0` is the bound state; `n < 0` is the denied state; removing the statement returns to "said nothing".
   - A first statement may be negative (the T-4 spike's "first mask").
@@ -65,6 +66,10 @@ Every list holds statement sequence numbers, append-only, in time order. A reade
 | This word, anywhere | new, or derived | new, or a directory of paths per word |
 
 - An entry is appended at an author's **first** statement on (topic, thing), whatever its sign. A later sign flip then needs no list write.
+- **The all-authors lists of a place take every author's first yes** (requested of contracts step 3b, 2026-11-25; the first build took only the first statement by anyone). A place's list, and its roll-up at each topic above, gets an entry when a (place, thing) pair gets its first statement of either sign, and another for each author whose first statement on it is a yes. Readers remove duplicates. Two reasons:
+  - *Nobody can get in first.* With one entry per pair, whoever speaks first fixes where the row sits in "newest first", even with a "not this". A real tag made later would never appear as new.
+  - *A home works as an inbox.* If someone attached `hello.txt` to an address in 2026, a different person's `hello.txt` in 2028 must still show up as new in that address's public list.
+  - The lists per author, the list of authors per pair, and "which places hold this thing" keep one entry each. A place's count then counts filings, not distinct things.
 - **"Newest first" therefore means most recently first-stated.** Changing a number, or removing a tag and adding it back, does not move a thing to the top. This is deliberate (PM default, 2026-11-25): an author can't bump their own entry up a public view, paging stays stable, and no list is written on a change. "Recently active" ordering is a client or Graph feature. The client labels the order "recently added".
 - **Directories, written once at registration and the same for everyone:** the child topics of a topic, and the topics that use a word.
 - **"What points at this" is kept per kind of link** (contracts step 3a, 2026-11-25). A file's folder placements, its tags, and the `same` and `broader` statements that name a topic are separate lists, so junk of one kind can't bury another. Nothing on chain lists "everything pointing at this, of any kind"; a reader asks per kind, and indexers get the rest from events.
@@ -82,7 +87,7 @@ For a thing X in topic T, walk the lens in order. The first author with a stance
 ### 3.2 Denials
 
 - Only lens authors can hide things. A stranger's negative number never hides anything from anyone else.
-- **A public row exists because a statement exists.** Everyone and Raw never require finding a positive before showing a row. Otherwise someone who posts a few negatives on (topic, thing) before the first real tag would hide it from public views cheaply. The row shows the stances found ("3 say yes, 2 say no"), and says so if not every author was read.
+- **A stranger's "not this" can neither hide a row nor add one.** Raw shows every row. Everyone shows a row when someone says yes. A row where every author was read and none says yes is left out of Everyone. A row is never left out because the reader stopped reading authors early: it is shown, with the stances found ("3 say yes, 2 say no") and a mark that not every author was read. Otherwise a few negatives posted ahead of the first real tag would hide it cheaply. (Corrected 2026-11-25: this first said Everyone shows a row whatever its stances, which would let a "not this" put a thing into a topic's public view.)
 - In Everyone, a thing is hidden from a place when a lens author marks it below 0 **at that place or at the topic the entry was filed under**. A denial does not travel down to child topics.
 - A denial of `/cars/tesla` says nothing about `/cars`. The thing still shows under `/cars` if another statement puts it there.
 
@@ -116,6 +121,7 @@ Tagging a child topic into its parent curates the listing: a negative number hid
 
 - **Order:** children a lens author listed (by number), then children a lens author has filed something under (by lens count), then the rest by global count.
 - **Junk rule, an SDK default so clients agree:** a child with no statement from the lens needs tags from at least 2 different authors to be shown without "show all". Statement counts alone are too easy to inflate. How many rows to show is each client's choice (the EFS client uses 8).
+- **Hiding a child hides what is filed under it** (PM default, 2026-11-25). If a lens author marks `/cars/tesla` below 0 as a child of `/cars`, that reader's roll-up of `/cars` leaves out everything filed at or below `/cars/tesla`. The SDK applies this, because it already knows each entry's path. The chain's reader does not have to.
 - **A big directory can't be ranked in one read.** The children read scans a bounded number of entries and says so (PARTIAL), never implying it saw them all.
 
 ### 3.7 Names of things in a topic

@@ -98,6 +98,8 @@ No earlier system is shared, permanent and without an authority all at once.
 - **Tag suggestions show counts across everyone,** not only the reader's view.
 - **Opening a folder from a link shows its creator's files,** even when the creator isn't in the reader's view. Without this, a shared folder link would open empty. @james asked what the earlier wording meant; this is the case it covers.
 - **When "public" is on and several people have a file with the same name in one place,** the app shows them as a list, newest first (@james, 2026-11-25: oldest first would make public views static).
+- **Nobody can get in first and keep your tag out of "new"** (found in review of the tag lists, 2026-11-25). The first build listed a (topic, thing) pair once, when anyone first said anything about it, even "not this". Someone could say "not this" about a file early, and a real tag made later would never show up as new in the public view. A second person's `hello.txt` attached to an address would not show up as new either. Each person's first yes now gets its own entry and readers remove the duplicates. The cost is a little more gas for a later tagger of the same thing.
+- **A stranger's "not this" can't add a thing to a topic's public view,** and can't hide one. Only a yes puts it there.
 - **A bare path is a topic; folders and named files live under an address.** `/cars/tesla` is always topic words. `/0x1234…/photos/cat.jpg` is a folder path with file names, which keep their capitals. The realm's shared root folder gets no link of its own. First segments starting with `0x` (addresses) or `~` (system, such as `~efs`) are reserved. Files shown in a topic are opened by their permanent link.
 
 ## Can wait
