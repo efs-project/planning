@@ -45,8 +45,9 @@
 - **Number:** signed, part of what is signed and of what a rebuild reads. Changing only the number is a normal update that keeps history.
   - `n ≥ 0` is the bound state; `n < 0` is the denied state; removing the statement returns to "said nothing".
   - A first statement may be negative (the T-4 spike's "first mask").
-  - Width: PM default is the widest signed integer that fits the existing row words without a new storage slot; the contracts dev reports what fits (8 bits certainly, 16 if possible). The protocol defines only the sign. Apps define the size.
+  - Width: settled by the contracts spike at −65,536 to 65,535. The protocol defines only the sign. Apps define the size.
 - **What can be tagged:** files, folders, topics, and addresses. Tagging an address ("this address is a phishing site") must work for addresses that have never transacted, so an address has to be a valid target without a record. Tagging a specific revision of a file must also be possible, for claims about content that an edit could change.
+- **An address is a target for tags only.** As the target of a file's current version or of a folder entry it would confirm and never be readable, so the chain refuses it with a named error. A named entry pointing at an address (a contacts list) can come later, with its reader.
 
 ### 2.3 Lists the index keeps
 
@@ -61,7 +62,9 @@ Every list holds statement sequence numbers, append-only, in time order. A reade
 - An entry is appended at an author's **first** statement on (topic, thing), whatever its sign. A later sign flip then needs no list write.
 - **"Newest first" therefore means most recently first-stated.** Changing a number, or removing a tag and adding it back, does not move a thing to the top. This is deliberate (PM default, 2026-11-25): an author can't bump their own entry up a public view, paging stays stable, and no list is written on a change. "Recently active" ordering is a client or Graph feature. The client labels the order "recently added".
 - **Directories, written once at registration and the same for everyone:** the child topics of a topic, and the topics that use a word.
+- **Every statement is findable.** Each statement appears in at least one all-authors list reachable from its target, whatever its sign. A lone negative has no entry in today's "what points at this" list, so one more small list covers it, for every kind of target.
 - **Rebuild equals live.** Lists derive only from stored records and statements. A test must rebuild the index and compare.
+- **A topic must be registered strictly before a tag that uses it,** not merely in the same publication. The contracts spike caught a tag accepting a topic registered later in its publication, which would have missed its roll-up silently.
 - **Counts** are list lengths: cheap, but they count every statement ever made, including removed and negative ones. Treat them as "about".
 
 ## 3. Reading
@@ -158,12 +161,19 @@ A tag has no name. The display name of a file shown in a topic is, in order: the
 12. **Two SDKs, two fold tables** give two ids for one typed word. The shared vectors are the guard.
 13. **Everything said here is public and permanent,** including who tagged what. Private tags stay on the device.
 
+## 7a. First measurements (contracts spike, 2026-11-25, before its integration pass)
+
+- **Per-author roll-up:** 35k gas per level for a new list and 23.5k for an existing one today; about 133k and 38k after Glamsterdam.
+- **Depth:** a tag on a new 64-word path costs 4.7M today. Registering a brand-new 64-word path takes 2–3 transactions. No depth cap near 64 is needed.
+- **"Anyone's at this name"** is flat: 88k at 3 authors, 90k at 300.
+- **"My lens, this topic and below" grows with the lens:** 283k for a page of 10 with a lens of 1; 633k with a lens of 8; 4.1M with a lens of 64; 15M for a page of 50 with a lens of 64. The SDK adapts its page size to the endpoint's limit, and a call that runs out of gas is UNKNOWN or PARTIAL, never an empty page.
+
 ## 8. Open questions
 
 | Question | PM default | Who settles it |
 |---|---|---|
 | One list per word, or a directory of paths per word | **settled: the directory.** Round one measured per-word item lists at about the cost of the roll-up lists again; the directory is the existing reference list and costs nothing extra | contracts dev, 2026-11-25 |
-| Number width | widest that needs no new slot | contracts dev |
+| Number width | **settled:** −65,536 to 65,535 | contracts dev, 2026-11-25 |
 | Purposes for label, definition, "same as", "moved to", parent | name the smallest set before any lasting deployment | contracts dev proposes |
 | NFKC_Casefold or NFC plus lowercase | NFKC_Casefold | SDK dev evaluates; @james confirms |
 | Default view for topics: Mine or Everyone | Everyone, as the working default for building (client dev's proposal): lens tier first, public tier labelled, public-tier media not loaded until asked for | @james confirms before launch; it decides what a newcomer sees first |
