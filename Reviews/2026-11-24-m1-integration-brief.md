@@ -44,6 +44,7 @@ The follow-ons are an Arweave/IPFS reference, the two-author Lens fallback, tags
 - **The later-generation index build** must be written and tested. Today generation 1's build-from-history is specified but refuses, and a new index generation can be added only until a Realm is frozen. Every "add a list later" promise depends on it, including the deferred all-authors list of everyone's versions of one file (from the contracts tag design; tag PM session, 2026-11-25).
 - **@james confirms the fold rule** (NFKC_Casefold vs NFC + lowercase, joiners, the Unicode pin). Once a word's id exists on a lasting deployment, the rule can never change.
 - **@james confirms the default view for topics** (D11), since it decides what a newcomer sees first.
+- **One pinned Unicode version, through one generator,** for both the chain's refused-character table (which is part of the word Type's id, and is built from Unicode 15.1 today) and the SDK's fold tables (evaluated on 18.0). This depends on @james's fold answer, since the joiner class is provisional until then.
 - **The head's expiry field width is decided.** It is reserved and always zero, as 32-bit unix seconds (good until 2106-02-07), after the tag number took 16 bits. Widening it later is a layout change, so it must happen before a freeze.
 
 ## Working rules
