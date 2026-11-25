@@ -24,15 +24,18 @@
 
 ### 2.1 Topics
 
-- **Record:** `(parent, word)`. `parent` is 0 for a root-level topic. The id is the record id and must not depend on the author, the realm or the chain.
+- **Records** (the contracts dev's design, 2026-11-25, agreed): two Types. A **word page** has the word as its body and is also the root-level topic `/tesla`. A **path record** for two or more words holds exactly two references: its parent topic and its last word's page. Ids are record ids, computable from the words with no chain read, and must not depend on the author, the realm or the chain.
+- **References do the checking.** The kernel refuses a record whose reference doesn't exist, which gives "parent before child", "word page before use" and permanence. The reference lists that exist today are the two directories of 2.3.
+- **One sequence of words has exactly one record.** The reference Types are constrained at admission (first: a word page or a path record; second: a word page), and a reader treats a chain that doesn't end at a word page as INVALID.
 - **Registering** is publishing that record. It is permissionless and idempotent, and it happens in the same publication as the first tag, with no extra prompt.
-- **A parent must be registered before its child.** Registering a new deep path registers each missing ancestor, and each missing word page `(0, word)`.
+- **A parent must be registered before its child.** Registering a new deep path registers each missing ancestor and each missing word page.
 - **Permanent:** a withdrawal by the first registrant must not unregister a topic others use.
 - **Word rules checked on chain** (PM default, cheap and forever-stable):
   - 1 to 255 bytes of well-formed UTF-8;
   - no `/`, no ASCII control characters, no ASCII space, no ASCII `A–Z`;
   - not `.` or `..`;
-  - at root level, not starting with `~`, and not `0x` followed by 40 hex digits.
+  - not starting with `~`, and not `0x` followed by 40 hex digits. This applies to every word in a path, because every word has a root-level page; `/cars/~x` and `/people/0x…` can't exist.
+  - These run once per word, on its word page.
 - **Everything else about folding is the SDK's job** (section 6).
 
 ### 2.2 Tags
