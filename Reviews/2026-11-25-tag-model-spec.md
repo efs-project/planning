@@ -59,6 +59,7 @@ Every list holds statement sequence numbers, append-only, in time order. A reade
 | This word, anywhere | new, or derived | new, or a directory of paths per word |
 
 - An entry is appended at an author's **first** statement on (topic, thing), whatever its sign. A later sign flip then needs no list write.
+- **"Newest first" therefore means most recently first-stated.** Changing a number, or removing a tag and adding it back, does not move a thing to the top. This is deliberate (PM default, 2026-11-25): an author can't bump their own entry up a public view, paging stays stable, and no list is written on a change. "Recently active" ordering is a client or Graph feature. The client labels the order "recently added".
 - **Directories, written once at registration and the same for everyone:** the child topics of a topic, and the topics that use a word.
 - **Rebuild equals live.** Lists derive only from stored records and statements. A test must rebuild the index and compare.
 - **Counts** are list lengths: cheap, but they count every statement ever made, including removed and negative ones. Treat them as "about".
@@ -158,7 +159,7 @@ A tag has no name. The display name of a file shown in a topic is, in order: the
 
 | Question | PM default | Who settles it |
 |---|---|---|
-| One list per word, or a directory of paths per word | the directory: the word page's groups need nothing else (3.4), and it avoids up to d extra list entries per tag | contracts dev, with numbers |
+| One list per word, or a directory of paths per word | **settled: the directory.** Round one measured per-word item lists at about the cost of the roll-up lists again; the directory is the existing reference list and costs nothing extra | contracts dev, 2026-11-25 |
 | Number width | widest that needs no new slot | contracts dev |
 | Purposes for label, definition, "same as", "moved to", parent | name the smallest set before any lasting deployment | contracts dev proposes |
 | NFKC_Casefold or NFC plus lowercase | NFKC_Casefold | SDK dev evaluates; @james confirms |
