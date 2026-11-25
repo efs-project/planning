@@ -446,3 +446,27 @@ round may refine them.
   tags"), SDK draft PR #36 (minted nested tags, a lens walk for paths), and
   the 2026-09-10 deep dive's delegated default on weights. Those are
   follow-ups for the dev sessions.
+
+### Tags — view-all is a core use case (later the same day)
+
+Evidence: [[2026-11-25-tag-discussion-round-3]] (his message verbatim, the
+link-model comparison and the roll-up sketch).
+
+- **View everything anyone has tagged with a topic. RULED as a
+  requirement.** *"I do want 'view everything anyone has tagged' is a core
+  use case I want to support. View all /nsfw/ or /cypherpunk/ anyone has
+  every tagged is important for censorship resistance and UX. The lens
+  system keeps things sane but honestly a lot of people are going to want to
+  go to /my/specific/folder/ and just 'view all'."* This needs a list per
+  topic of every tag on it by anyone, which the contracts don't keep today
+  (the per-concept global posting in the D-D proposal). The rest of D-D
+  stays pending.
+- **Not ruled — roll-up.** James proposed that tagging `/cars/tesla` also
+  lists the item under `/cars`, done by the contract or, at worst, by The
+  Graph. The PM recommends it once measured. Adopting it would replace D-A
+  for path ancestors only.
+- **Not changed — T-2.** James asked for the alternatives to path identity
+  *"so I can make a more informed choice"*. The comparison is in the
+  evidence; T-2 stands unless he says otherwise.
+
+— ruled by @james, 2026-11-25 (view-all only)
