@@ -34,13 +34,18 @@
   - 1 to 255 bytes of well-formed UTF-8;
   - no `/`, no ASCII control characters, no ASCII space, no ASCII `A–Z`;
   - not `.` or `..`;
+  - no white space of any kind, ASCII or not (the fold turns every run of white space into one underscore, so a folded word never has any);
+  - no C1 controls, bidi controls, or invisible and format characters, at least as strictly as file names;
+  - joiners and variation selectors refused too, provisionally, until the fold rule is confirmed;
   - not starting with `~`, and not `0x` followed by 40 hex digits. This applies to every word in a path, because every word has a root-level page; `/cars/~x` and `/people/0x…` can't exist.
   - These run once per word, on its word page.
 - **Everything else about folding is the SDK's job** (section 6).
+- **Readers hide words that aren't canonical.** The chain can't check case outside ASCII, unassigned characters or compatibility forms, so a careless or hostile client could register a word the SDK's fold would never produce, such as a look-alike of an existing child. Every read that lists words (a topic's children, a word's places) folds each listed word again and skips any word that isn't its own fold, counting it as skipped.
 
 ### 2.2 Tags
 
 - **Statement:** a TAG bind on a registered topic or a home, targeting the thing, carrying the number.
+- **The role names the thing, and the target must equal it.** A "not this" has no target, so the role is what identifies the thing for both signs. A tag whose target differed from its role would be about one thing by one read and another thing by a different read, so the chain refuses it.
 - **A tag on an unregistered topic is refused with a named error.** Never a silent miss.
 - **Number:** signed, part of what is signed and of what a rebuild reads. Changing only the number is a normal update that keeps history.
   - `n ≥ 0` is the bound state; `n < 0` is the denied state; removing the statement returns to "said nothing".
@@ -150,6 +155,7 @@ Removing your own entry releases it, so the next author in the lens shows throug
 - **Pin one Unicode version and refuse characters not assigned in it.** A later version then can't change an existing id.
 - **Open, with a PM recommendation for the SDK dev to evaluate and bring to @james before any lasting deployment:** use Unicode's identifier case-folding (NFKC_Casefold) instead of NFC plus lowercase. It also folds full-width letters and ligatures, and Unicode guarantees it stays stable for assigned characters. D-B's wording says "NFC → lowercase", so this is a refinement he has to confirm.
 - **Vectors shared by the contracts and the SDK**, including words that must be refused.
+- **One Unicode version, one generator.** The chain's refused table is part of the word Type's id. It and the SDK's tables must be generated from the same pinned Unicode version by one tool before the first lasting deployment (the contracts' first table used 15.1, the SDK's evaluation 18.0).
 - **The same rule settles whitespace** (trim; a run of whitespace becomes one underscore) and **refuses zero-width and bidi control characters** rather than stripping them.
 - **JavaScript has no full case folding, and engines carry different Unicode versions** (SDK dev, 2026-11-25). Either rule needs pinned tables shipped in the SDK; the evaluation reports the size cost and keeps fold behind its own export.
 - Look-alike letters can't be prevented. The client warns on mixed scripts.
