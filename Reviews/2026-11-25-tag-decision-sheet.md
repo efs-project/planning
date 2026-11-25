@@ -52,6 +52,44 @@ The example for all three: Alice files a photo under cars > tesla. Bob files one
 
 So the sentence to confirm is: **paths tell tags apart, and a word's page shows every place that word is used.**
 
+## Why a yes is the safe side (asked by @james, 2026-11-25)
+
+**Where the complexity went.** It didn't vanish. About ten questions were ruled along the way (see "Already settled"), the research removed two options (numbers and bare words), options 1 and 3 turned out to behave the same, and the rest became defaults or measurements.
+
+**What a yes freezes, and when.** Only how a topic's id is computed: each word hashed with its parent, after lowercasing. Lists (roll-up, word pages, view-all) are built from stored data and can be added or rebuilt later. Nothing is frozen until the first lasting deployment; until then this is a build direction that can be tried in the browser and changed.
+
+**A yes records strictly more.** A tag with a path contains everything a bare-word tag does, plus where it was filed. A one-word path is a bare-word tag. The word page is the bare-word pool, with each item labelled by its place. Context can be ignored later; it can never be added back to tags that didn't record it.
+
+**EFS is most like:**
+
+| System | What EFS shares with it | What EFS doesn't have |
+|---|---|---|
+| Usenet group names | shared hierarchical names nobody owns | its backbone admins, who could reorganize |
+| Obsidian nested tags | a tag is a path; the parent includes its children | a single user who can rename everything |
+| Wikipedia disambiguation pages | one page per word listing every meaning | editors who write it by hand; here it is automatic |
+| Hydrus (booru client), Bluesky labelers | each reader ranks whose synonyms and parents apply | — |
+| AO3 | tags are never rewritten; meaning is layered on as data | its 400 volunteers curating one shared vocabulary |
+| ENS | ids hashed word by word; lowercasing done by apps | owners of names |
+
+No earlier system is shared, permanent and without an authority all at once.
+
+**The assumptions the choice rests on:**
+
+| Assumption | Why we hold it | If it were false |
+|---|---|---|
+| No authority everyone accepts will exist to rename, merge or split tags | EFS's purpose | bare words or numbers with a trusted curator would work (AO3, Wikidata) |
+| Nobody can retag another person's item | the ledger is permanent | mixed tags could be cleaned up later, as boorus do |
+| Anyone must be able to work out an id alone | Schelling points; readable links | numbers would be fine |
+| People won't agree on how to organize things | under 20% pick the same word; 16% the same compound heading; 30% of medical subjects have several parents | one tree would do, and the word page would be unnecessary |
+| It must work with no curators at all | a newcomer's view may have none | booru-style parents alone would be enough |
+| Cost per tag isn't the constraint | ruled 2026-11-25 | bare words would be cheaper |
+
+**What can still go wrong after a yes.**
+- The same idea gets filed under several paths (`/cars/tesla`, `/autos/tesla`). The word page and synonyms reconnect them; how messy this gets in practice is untested.
+- A popular path with a mistake in it is permanent; a "moved to" note is the only repair.
+- The lowercasing rule is frozen at the first lasting deployment and has to be right.
+- Whether a good default team of curators forms is a social question no design settles.
+
 ## Clear answers @pm will go with unless @james objects
 
 - **Roll-up along the path is automatic,** once the contracts dev's measurement is in.
