@@ -81,6 +81,11 @@ For a thing X in topic T, walk the lens in order. The first author with a stance
 
 `/tesla` lists every use of the word, grouped by place, with counts: `/cars/tesla`, `/people/tesla`, plain `/tesla`. The client must not show it as one undifferentiated list.
 
+- **A group is a place whose own word is the word.** `/cars/tesla/model_y` belongs to the group `/cars/tesla`, and that group shows the place's roll-up. (Client dev's call, 2026-11-25; agreed.)
+- **A place that lies below another group is not a second group.** `/tesla/cars/tesla` is already inside plain `/tesla`.
+- **Group order:** places the lens has used first (by lens count), then the rest by global count, largest first. Both counts are shown.
+- **Consequence for the plumbing:** these groups are exactly the directory "topics that use a word", and each group's contents are that place's roll-up list. No view needs a separate list of items per word. Prefer the directory unless the measurement shows the per-word item list is nearly free.
+
 ### 3.5 Synonyms and moves
 
 - **Two levels.** Word level (`car` = `cars`, `汽车` = `cars`) applies to every path using the word. Path level (`/cars/tesla` = `/companies/tesla_motors`) joins two specific places.
@@ -91,7 +96,11 @@ For a thing X in topic T, walk the lens in order. The first author with a stance
 
 ### 3.6 Curating a topic's children
 
-Tagging a child topic into its parent curates the listing: a negative number hides the child for readers who include that author, a positive number ranks it. Children with no statements from the lens are ordered by count.
+Tagging a child topic into its parent curates the listing: a negative number hides the child for readers who include that author, a positive number ranks it.
+
+- **Order:** children a lens author listed (by number), then children a lens author has filed something under (by lens count), then the rest by global count.
+- **Junk rule, an SDK default so clients agree:** a child with no statement from the lens needs tags from at least 2 different authors to be shown without "show all". Statement counts alone are too easy to inflate. How many rows to show is each client's choice (the EFS client uses 8).
+- **A big directory can't be ranked in one read.** The children read scans a bounded number of entries and says so (PARTIAL), never implying it saw them all.
 
 ### 3.7 Names of things in a topic
 
@@ -146,11 +155,11 @@ A tag has no name. The display name of a file shown in a topic is, in order: the
 
 | Question | PM default | Who settles it |
 |---|---|---|
-| One list per word, or a directory of paths per word | whichever the measurement favours; the user sees the same | contracts dev, with numbers |
+| One list per word, or a directory of paths per word | the directory: the word page's groups need nothing else (3.4), and it avoids up to d extra list entries per tag | contracts dev, with numbers |
 | Number width | widest that needs no new slot | contracts dev |
 | Purposes for label, definition, "same as", "moved to", parent | name the smallest set before any lasting deployment | contracts dev proposes |
 | NFKC_Casefold or NFC plus lowercase | NFKC_Casefold | SDK dev evaluates; @james confirms |
-| Default view for topics: Mine or Everyone | client dev proposes | PM, then @james if it is a product call |
+| Default view for topics: Mine or Everyone | Everyone, as the working default for building (client dev's proposal): lens tier first, public tier labelled, public-tier media not loaded until asked for | @james confirms before launch; it decides what a newcomer sees first |
 | What a newcomer's default lens contains | undecided | @james, before launch |
 | File name as its own mechanism or the last word of a path | parked | @james, later |
 | Settings that inherit down a path | parked in `Ideas.md` | later |
