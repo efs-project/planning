@@ -214,6 +214,11 @@ After contracts step 4, the readers (2026-11-25, branch head `b163514`, the dev'
 - **Lookups are flat:** "who has this name here" costs 363k for a page of 10 whether 3 or 300 people have it, and a count costs 85k on a place of 3 items or 2,000.
 - **The gateway does not yet serve a file by its permanent link** (it did not fit the contract's size budget), nor a revision link. Until it does, a file found through a topic is opened through the SDK's reads.
 
+After the contracts release step (2026-11-25, branch head `8fc2099`, the dev's own measurements; this replaces the roll-up bounds and the gateway line above):
+
+- **The roll-up check is nearly free now.** Two shortcuts that change no result skip it when nobody has said anything about the thing at the place being viewed, and for lens authors who have hidden nothing there. A roll-up page of 10 at a lens of 64 costs 4.80M gas and a page of 50 costs 11.9M, within 3% of the cost before the check existed. Roll-up bounds under a 10M cap rise to page × lens 416 for Mine and 408 for Everyone.
+- **The gateway serves a file by its permanent link and a revision by its link.** A file link shows its creator's current version unless `?lens=` says otherwise; a revision link gives exactly those bytes.
+
 ## 8. Open questions
 
 | Question | PM default | Who settles it |
