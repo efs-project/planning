@@ -134,3 +134,14 @@ When someone types a tag word, the app tidies it before working out its id, so t
 3. Which Unicode version: **the newest at release, with the tables shipped inside the SDK**, so no browser's version matters.
 
 This refines D-B's wording ("NFC → lowercase"), so it is his to confirm. "All recs" is a fine answer.
+
+### From the contracts design (no decision needed; here so he sees them)
+
+The contracts dev's measured design is reviewed and accepted as the basis for the build (`contracts-v2`, branch `spike/2026-11-25-tags`, `docs/TAG-DESIGN.md`).
+
+- **What a tag costs:** about 0.81M gas in an existing topic today, roughly half the cost of creating a file. The first use of a brand-new deep path costs more and can take two or three transactions.
+- **A 64-word path works.** No depth limit.
+- **The number on a tag** runs from −65,536 to 65,535 and costs nothing extra.
+- **"Remove" and "Hide" are different.** Removing your own `pet.jpg` at a shared place lets the next person's show through. Hiding stops anything showing there for you.
+- **Any app's things can be tagged,** not only files.
+- **Possibly for him later:** whether the chain keeps a list of everyone's versions of one file. It may be free to add later; the contracts dev is checking.

@@ -46,7 +46,7 @@
   - `n ≥ 0` is the bound state; `n < 0` is the denied state; removing the statement returns to "said nothing".
   - A first statement may be negative (the T-4 spike's "first mask").
   - Width: settled by the contracts spike at −65,536 to 65,535. The protocol defines only the sign. Apps define the size.
-- **What can be tagged:** files, folders, topics, and addresses. Tagging an address ("this address is a phishing site") must work for addresses that have never transacted, so an address has to be a valid target without a record. Tagging a specific revision of a file must also be possible, for claims about content that an edit could change.
+- **What can be tagged:** files, folders, topics, addresses, and any existing record or subject of any Type, including Types from other apps (T-1: tags are the system layer; a chess app tags its moves). Tagging an address ("this address is a phishing site") must work for addresses that have never transacted, so an address has to be a valid target without a record. Tagging a specific revision of a file must also be possible, for claims about content that an edit could change.
 - **An address is a target for tags only.** As the target of a file's current version or of a folder entry it would confirm and never be readable, so the chain refuses it with a named error. A named entry pointing at an address (a contacts list) can come later, with its reader.
 
 ### 2.3 Lists the index keeps
@@ -76,6 +76,7 @@ For a thing X in topic T, walk the lens in order. The first author with a stance
 ### 3.2 Denials
 
 - Only lens authors can hide things. A stranger's negative number never hides anything from anyone else.
+- **A public row exists because a statement exists.** Everyone and Raw never require finding a positive before showing a row. Otherwise someone who posts a few negatives on (topic, thing) before the first real tag would hide it from public views cheaply. The row shows the stances found ("3 say yes, 2 say no"), and says so if not every author was read.
 - In Everyone, a thing is hidden from a place when a lens author marks it below 0 **at that place or at the topic the entry was filed under**. A denial does not travel down to child topics.
 - A denial of `/cars/tesla` says nothing about `/cars`. The thing still shows under `/cars` if another statement puts it there.
 
@@ -112,6 +113,10 @@ Tagging a child topic into its parent curates the listing: a negative number hid
 ### 3.7 Names of things in a topic
 
 A tag has no name. The display name of a file shown in a topic is, in order: the name its tagger gave it in their own home or folders; the name its creator gave it; the first name from the lens; else its media type and a short id. Files in a topic open by permanent link.
+
+### 3.8 Remove and hide are different
+
+Removing your own entry releases it, so the next author in the lens shows through. Hiding masks it, which stops the search. At a shared place, removing your `pet.jpg` must not hide everyone else's (contracts design, finding 6). The client words them differently ("Remove mine", "Hide"), and after a removal says whose entry now shows.
 
 ## 4. Homes
 
@@ -174,12 +179,13 @@ A tag has no name. The display name of a file shown in a topic is, in order: the
 |---|---|---|
 | One list per word, or a directory of paths per word | **settled: the directory.** Round one measured per-word item lists at about the cost of the roll-up lists again; the directory is the existing reference list and costs nothing extra | contracts dev, 2026-11-25 |
 | Number width | **settled:** −65,536 to 65,535 | contracts dev, 2026-11-25 |
-| Purposes for label, definition, "same as", "moved to", parent | name the smallest set before any lasting deployment | contracts dev proposes |
+| Purposes for label, definition, "same as", "moved to", parent | contracts dev's proposal, agreed 2026-11-25: `property` (one value per author per key: a label per language, the definition, "moved to"), `same`, `broader`. `property` must work on any kind of subject (a topic, a home, a file, a folder); it is where an address's display name and inherited settings would live. Open: whether later relation kinds need a generic `relation` purpose now | contracts dev |
 | NFKC_Casefold or NFC plus lowercase | NFKC_Casefold | SDK dev evaluates; @james confirms |
 | Default view for topics: Mine or Everyone | Everyone, as the working default for building (client dev's proposal): lens tier first, public tier labelled, public-tier media not loaded until asked for | @james confirms before launch; it decides what a newcomer sees first |
 | What a newcomer's default lens contains | undecided | @james, before launch |
 | File name as its own mechanism or the last word of a path | parked | @james, later |
 | Settings that inherit down a path | parked in `Ideas.md` | later |
+| An all-authors list of everyone's versions of one file | defer if a later index generation can add and backfill it; otherwise keep it (36k gas per file) because view-all is ruled | contracts dev answers; then @james if it can't be deferred |
 
 ## 9. Work order
 
