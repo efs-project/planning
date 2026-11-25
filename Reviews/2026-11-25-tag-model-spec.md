@@ -76,7 +76,7 @@ Every list holds statement sequence numbers, append-only, in time order. A reade
 - **Every statement is findable.** Each statement appears in at least one all-authors list reachable from the thing it is about, whatever its sign. For a tag that thing is the one its role names, because a "not this" carries no target. A lone negative has no entry in today's "what points at this" list, so one more small list covers it, for every kind of target.
 - **Rebuild equals live.** Lists derive only from stored records and statements. A test must rebuild the index and compare.
 - **A topic must be registered strictly before a tag that uses it,** not merely in the same publication. The contracts spike caught a tag accepting a topic registered later in its publication, which would have missed its roll-up silently.
-- **Counts** are one read each (contracts step 3c, in build 2026-11-25). A place has two: filings, and distinct things ever filed there, so many people tagging one popular thing don't inflate "4,210 items". A (place, thing) pair has two: its authors, and how many of them currently say yes. The place counts include things nobody says yes to any more, and removed and negative statements. Treat them as "about".
+- **Counts** are one read each (contracts step 3c, built 2026-11-25). A place has two: filings, and distinct things ever filed there, so many people tagging one popular thing don't inflate "4,210 items". A (place, thing) pair has two: its authors, and how many of them currently say yes. The place counts include things nobody says yes to any more, and removed and negative statements. Treat them as "about". In a roll-up the distinct count is of (topic, thing) pairs below, so a thing filed under two child topics counts twice.
 
 ## 3. Reading
 
@@ -87,13 +87,15 @@ For a thing X in topic T, walk the lens in order. The first author with a stance
 ### 3.2 Denials
 
 - Only lens authors can hide things. A stranger's negative number never hides anything from anyone else.
-- **A stranger's "not this" can neither hide a row nor add one.** Raw shows every row. Everyone shows a row when someone says yes, and leaves it out when nobody does. The chain keeps, for each (place, thing) pair, the number of authors who currently say yes (contracts step 3c, in build 2026-11-25), so this is one read and no scan of authors decides it. A row must never be left out because a reader stopped reading authors early; otherwise a few negatives posted ahead of the first real tag would hide it cheaply. The row shows "1,000 say yes" from that count; the "no" side is read from the authors and marked when not all were read. (Corrected 2026-11-25: this first said Everyone shows a row whatever its stances, which would let a "not this" put a thing into a topic's public view.)
+- **A stranger's "not this" can neither hide a row nor add one.** Raw shows every row. Everyone shows a row when someone says yes, and leaves it out when nobody does. The chain keeps, for each (place, thing) pair, the number of authors who currently say yes (contracts step 3c, built 2026-11-25), so this is one read and no scan of authors decides it. A row must never be left out because a reader stopped reading authors early; otherwise a few negatives posted ahead of the first real tag would hide it cheaply. The row shows "1,000 say yes" from that count; the "no" side is read from the authors and marked when not all were read. (Corrected 2026-11-25: this first said Everyone shows a row whatever its stances, which would let a "not this" put a thing into a topic's public view.)
 - In Everyone, a thing is hidden from a place when a lens author marks it below 0 **at that place or at the topic the entry was filed under**. A denial does not travel down to child topics.
 - A denial of `/cars/tesla` says nothing about `/cars`. The thing still shows under `/cars` if another statement puts it there.
 
 ### 3.3 Roll-up and duplicates
 
 - A thing filed at `/cars/tesla` and at `/cars/ford` appears twice in `/cars`'s list. Readers remove duplicates by thing, across pages. A resumable cursor can only remember a bounded number of things, so a result says whether its de-duplication is complete or bounded; an in-memory iterator for one scrolling view is always complete.
+- **Check for a yes before removing duplicates.** If a thing is filed under two child topics, and nobody says yes at the newer filing but someone does at the older one, it still shows, through the older one. A reader that marks a thing as seen before checking it would drop it silently.
+- **A short page is not the end.** Rows nobody says yes to, and repeats, are skipped, so a page can come back with fewer rows than asked for, or none, while more remain. Every paged result says whether the list is finished and where to resume. A reader limits its work by entries read, not rows returned: anyone can pad a list with rows that get skipped, at about the price of a tag each.
 - Roll-up follows the path only. "A Model Y is also electric" needs a second tag or the optional parent layer.
 
 ### 3.4 Word pages
@@ -171,7 +173,7 @@ Removing your own entry releases it, so the next author in the lens shows throug
 
 1. **A lens view with roll-up is the default view and the expensive one.** Without per-author roll-up lists, "what did my people file under `/cars` and below" means filtering the all-authors list or walking every child topic. Price the per-author roll-up list first.
 2. **Depth multiplies everything.** A tag at depth d appends to up to 4d lists, and a new path registers up to 2d records. A first use of a deep new path may not fit one transaction. The SDK must split registration into earlier parts, which are harmless if the save is abandoned. If the deepest path that fits is under 64, the contracts dev comes back with options; never skip levels silently.
-3. **Silent absence.** Any path where a tag lands but a list misses it is the bug class EFS keeps hitting. Refuse, or list; test rebuild against live.
+3. **Silent absence.** Any path where a tag lands but a list misses it is the bug class EFS keeps hitting. Refuse, or list; test rebuild against live. Its newest form is a public page that comes back short because skipped rows used up the read. It must say "more to read" and never look like the end (3.3).
 4. **A root word that looks like an address or starts with `~`** would shadow a home or system link. Refuse on chain.
 5. **Fragmentation is certain.** `/cars/tesla`, `/autos/tesla` and `/vehicles/cars/tesla` will all exist. The defences are the tagging suggestions (existing places for the word, with counts across everyone), word pages and synonyms. Suggestions must use global counts; people who see only their own circle's choices don't converge (Centola and Baronchelli, 2015).
 6. **Counts can be gamed.** Global counts drive suggestions, and a spammer can inflate them at about one tag's gas per entry. Show the count from the reader's lens beside the global one.
@@ -189,6 +191,13 @@ Removing your own entry releases it, so the next author in the lens shows throug
 - **Depth:** a tag on a new 64-word path costs 4.7M today. Registering a brand-new 64-word path takes 2–3 transactions. No depth cap near 64 is needed.
 - **"Anyone's at this name"** is flat: 88k at 3 authors, 90k at 300.
 - **"My lens, this topic and below" grows with the lens:** 283k for a page of 10 with a lens of 1; 633k with a lens of 8; 4.1M with a lens of 64; 15M for a page of 50 with a lens of 64. The SDK adapts its page size to the endpoint's limit, and a call that runs out of gas is UNKNOWN or PARTIAL, never an empty page.
+
+After contracts step 3c (2026-11-25, branch head `28c6081`, the dev's own measurements):
+
+- **First tags in one publication.** At depth 64: 8 when the topic's lists already exist (the same after Glamsterdam), and 3 when each tag is on its own new path (5 after Glamsterdam). At depth 8: 35 and 18 today, 41 and 27 after Glamsterdam. The SDK splits a larger batch.
+- **A later person's first yes** on an existing (topic, thing) pair costs 313k today on a one-word topic. It now also pays the shared roll-up at each level above (15k where that list exists, 27k where it is new), on top of the person's own roll-up (23k or 35k).
+- **Turning a tag off or back on** costs about 15k more than before, for the yes count.
+- **Bringing an old thing back to the top with a new account** costs 683k for one thing, or 336k each when the new account does 64 things in one publication. That is about the price of any other junk row, and each account can do it once per thing.
 
 ## 8. Open questions
 
