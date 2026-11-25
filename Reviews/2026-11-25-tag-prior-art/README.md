@@ -64,6 +64,25 @@ Two things the sealed hypothesis got wrong or missed:
 - It treated prefix roll-up as central. The report's caution is right that roll-up along a path only finds what was filed under that exact path, so the word lists, not the path lists, have to be the main pool.
 - It underrated the curation cost of parent-as-data, which is the strongest reason not to choose pure flat words here.
 
+## Hierarchy as ownership and inherited settings (added the same day)
+
+@james, to the main PM session (relayed verbatim; he called it "not directly related to tags"):
+
+> Hierarchy as ownership reminds me that it's important for EFS. I know nobody "owns" names but /microsoft/windows/ means the microsoft organization owns the windows config / other stuff. So in the OS designs / my notes when we look up the 'config value' /microsoft/windows/logo we check if windows has a logo first and if not we check the parent and iterate until we get to root. This allows us to form organizations and communities and have them set specific settings while their parent configures more general things. Allows for specialization. Kinda like the US and states laws. Federal -> State -> County -> City. Except I just made a bad example... as in this case the City can make a law that overrides the Federal laws. But I hope you get the concept.
+
+The idea is parked in `Ideas.md` ("Settings inherit down a path") by the main PM session. What it means for this verdict:
+
+- **It corrects the sealed hypothesis, point D.** D said hierarchy-as-delegation is absent from EFS. It is absent from the *names* of shared topics, but EFS has two places where a subtree does belong to someone: a **home** (the tree under an address, where the address is the owner by construction) and **scoped trust** (a reader's lens saying "for this path and below, trust this author first").
+- **It needs a path to be a real place.** A settings lookup walks from a place to its parent until it finds a value. That needs each path to have a structural parent and to carry its own statements. The design above gives both: a path is an address made of words, its parent is its prefix, and statements can attach to it. So this is a second reason, besides roll-up, to keep paths as first-class places and not only as context on a tag.
+- **Settings attach to places, never to words.** A setting on `/microsoft/windows` must not leak to `/house/windows`. Statements about meaning (display names, synonyms) attach to words; settings attach to places (paths, folders, homes).
+- **"Microsoft owns `/microsoft`" can't come from the name.** Anyone can write a setting at an unowned path. Two ways to make it true: keep an organisation's settings under its home (`/0x…/windows`), with a readable name pointing to it; or have the reader's lens name whom it trusts for that subtree.
+- **Trust before nearness.** If a less trusted author sets a value on the child and a more trusted author sets one on the parent, the more trusted author should win. Within one author's own tree, the nearest value wins (the city overrides the federal default). This keeps the lens rule that the first trusted author with a stance decides.
+- **Three reader rules, as the main PM session noted:** an UNKNOWN read stops the walk and is never treated as "no value here"; a child can block inheritance explicitly (a masked value) as distinct from removing its override (a released value); and the order above has to be chosen once.
+
+Familiar systems with nearest-value-wins inheritance include CSS, DNS wildcards, `.editorconfig` files and Windows Group Policy. These are from memory and were not part of today's research.
+
+The recommendation is unchanged, and this strengthens the part of it that keeps paths as places.
+
 ## Waiting on @james
 
 One decision: adopt this design, which refines T-2 (the word, not the whole path, is the shared id) and includes path roll-up. If yes, it is recorded in `Designs/efsv2/owner-rulings.md` and the work order in round 3 gains: the per-word lists and their cost and abuse measurement (contracts), word-level synonym and label statements, and global counts in tag suggestions (SDK and client).
