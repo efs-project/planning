@@ -76,7 +76,7 @@ Every list holds statement sequence numbers, append-only, in time order. A reade
 - **Every statement is findable.** Each statement appears in at least one all-authors list reachable from the thing it is about, whatever its sign. For a tag that thing is the one its role names, because a "not this" carries no target. A lone negative has no entry in today's "what points at this" list, so one more small list covers it, for every kind of target.
 - **Rebuild equals live.** Lists derive only from stored records and statements. A test must rebuild the index and compare.
 - **A topic must be registered strictly before a tag that uses it,** not merely in the same publication. The contracts spike caught a tag accepting a topic registered later in its publication, which would have missed its roll-up silently.
-- **Counts** are list lengths: cheap, but they count every statement ever made, including removed and negative ones. Treat them as "about".
+- **Counts** are one read each (contracts step 3c, in build 2026-11-25). A place has two: filings, and distinct things ever filed there, so many people tagging one popular thing don't inflate "4,210 items". A (place, thing) pair has two: its authors, and how many of them currently say yes. The place counts include things nobody says yes to any more, and removed and negative statements. Treat them as "about".
 
 ## 3. Reading
 
@@ -87,7 +87,7 @@ For a thing X in topic T, walk the lens in order. The first author with a stance
 ### 3.2 Denials
 
 - Only lens authors can hide things. A stranger's negative number never hides anything from anyone else.
-- **A stranger's "not this" can neither hide a row nor add one.** Raw shows every row. Everyone shows a row when someone says yes. A row where every author was read and none says yes is left out of Everyone. A row is never left out because the reader stopped reading authors early: it is shown, with the stances found ("3 say yes, 2 say no") and a mark that not every author was read. Otherwise a few negatives posted ahead of the first real tag would hide it cheaply. (Corrected 2026-11-25: this first said Everyone shows a row whatever its stances, which would let a "not this" put a thing into a topic's public view.)
+- **A stranger's "not this" can neither hide a row nor add one.** Raw shows every row. Everyone shows a row when someone says yes, and leaves it out when nobody does. The chain keeps, for each (place, thing) pair, the number of authors who currently say yes (contracts step 3c, in build 2026-11-25), so this is one read and no scan of authors decides it. A row must never be left out because a reader stopped reading authors early; otherwise a few negatives posted ahead of the first real tag would hide it cheaply. The row shows "1,000 say yes" from that count; the "no" side is read from the authors and marked when not all were read. (Corrected 2026-11-25: this first said Everyone shows a row whatever its stances, which would let a "not this" put a thing into a topic's public view.)
 - In Everyone, a thing is hidden from a place when a lens author marks it below 0 **at that place or at the topic the entry was filed under**. A denial does not travel down to child topics.
 - A denial of `/cars/tesla` says nothing about `/cars`. The thing still shows under `/cars` if another statement puts it there.
 
