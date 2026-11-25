@@ -84,18 +84,22 @@ Every list holds statement sequence numbers, append-only, in time order. A reade
 
 For a thing X in topic T, walk the lens in order. The first author with a stance on (T, X) decides: a non-negative number shows X with that number, a negative number hides it. "Public" at the end means any author. An UNKNOWN read never counts as "said nothing".
 
+- **The views are one rule.** Mine is this walk over the lens alone. Everyone is the same walk with "public" at the end: when nobody in the lens has a stance, the row shows if anyone says yes. Raw applies no rule. So everything Mine shows, Everyone shows too.
+- **An earlier lens author always beats a later one** (PM ruling on the contracts readers, 2026-11-25). In a roll-up, where `/cars` shows a thing filed under `/cars/tesla`, each lens author is asked two things in turn: do you say "not this" for it at `/cars`, and what do you say where it was filed? The first answer found decides. Someone further down your lens can't hide what you filed yourself, and your own "not this" at `/cars` keeps a thing off that page even though you filed it below.
+- **Every public row says who decided it:** the lens author and their number, or nobody in the lens, which is the public tier. The client labels public-tier rows one by one.
+
 ### 3.2 Denials
 
 - Only lens authors can hide things. A stranger's negative number never hides anything from anyone else.
 - **A stranger's "not this" can neither hide a row nor add one.** Raw shows every row. Everyone shows a row when someone says yes, and leaves it out when nobody does. The chain keeps, for each (place, thing) pair, the number of authors who currently say yes (contracts step 3c, built 2026-11-25), so this is one read and no scan of authors decides it. A row must never be left out because a reader stopped reading authors early; otherwise a few negatives posted ahead of the first real tag would hide it cheaply. The row shows "1,000 say yes" from that count; the "no" side is read from the authors and marked when not all were read. (Corrected 2026-11-25: this first said Everyone shows a row whatever its stances, which would let a "not this" put a thing into a topic's public view.)
-- In Everyone, a thing is hidden from a place when a lens author marks it below 0 **at that place or at the topic the entry was filed under**. A denial does not travel down to child topics.
+- A lens author's "not this" counts **at the place being viewed and at the topic the entry was filed under**, in Mine and in Everyone, in the order of 3.1: it hides the thing unless an earlier lens author says yes where it was filed. A denial does not travel down to child topics.
 - A denial of `/cars/tesla` says nothing about `/cars`. The thing still shows under `/cars` if another statement puts it there.
 
 ### 3.3 Roll-up and duplicates
 
-- A thing filed at `/cars/tesla` and at `/cars/ford` appears twice in `/cars`'s list. Readers remove duplicates by thing, across pages. A resumable cursor can only remember a bounded number of things, so a result says whether its de-duplication is complete or bounded; an in-memory iterator for one scrolling view is always complete.
+- A thing filed at `/cars/tesla` and at `/cars/ford` appears twice in `/cars`'s list. Readers remove duplicates by thing, across pages, in Mine and in Everyone. The row shown is the newest filing that shows, and it names the topic it was filed under; "where is this filed" lists the rest. A resumable cursor can only remember a bounded number of things, so a result says whether its de-duplication is complete or bounded; an in-memory iterator for one scrolling view is always complete.
 - **Check for a yes before removing duplicates.** If a thing is filed under two child topics, and nobody says yes at the newer filing but someone does at the older one, it still shows, through the older one. A reader that marks a thing as seen before checking it would drop it silently.
-- **A short page is not the end.** Rows nobody says yes to, and repeats, are skipped, so a page can come back with fewer rows than asked for, or none, while more remain. Every paged result says whether the list is finished and where to resume. A reader limits its work by entries read, not rows returned: anyone can pad a list with rows that get skipped, at about the price of a tag each.
+- **A short page is not the end.** Rows nobody says yes to, and repeats, are skipped, so a page can come back with fewer rows than asked for, or none, while more remain. Every paged result says whether the list is finished and where to resume. A caller sets two limits, rows wanted and entries to read, and the read stops at whichever comes first. One number can't bound both, because skipping a padded stretch is cheap and a shown row with a large lens is not. Anyone can pad a list with rows that get skipped, at about the price of a tag each.
 - Roll-up follows the path only. "A Model Y is also electric" needs a second tag or the optional parent layer.
 
 ### 3.4 Word pages
