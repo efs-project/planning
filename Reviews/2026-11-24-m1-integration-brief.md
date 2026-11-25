@@ -41,12 +41,17 @@ The follow-ons are an Arweave/IPFS reference, the two-author Lens fallback, tags
 - Branch protection, which @james deferred on 2026-10-26.
 
 **Gates before any Realm freeze or lasting deployment** (tracked by @pm; each must be closed first):
-- **The later-generation index build** must be written and tested. Its shape is now known: a new index generation, which is its own contract and the only writer its fresh stores accept before they are attached, builds itself from history. DESIGN's "delegate of the index" shape is withdrawn, because activation's code scan refuses any delegatecall, and that scan stays (contracts step 3a). Today generation 1's build-from-history is specified but refuses, and a new index generation can be added only until a Realm is frozen. Every "add a list later" promise depends on it, including the deferred all-authors list of everyone's versions of one file (from the contracts tag design; tag PM session, 2026-11-25).
+- **The later-generation index build** must be written and tested. Its shape is now known: a new index generation, which is its own contract and the only writer its fresh stores accept before they are attached, builds itself from history. DESIGN's "delegate of the index" shape is withdrawn, because activation's code scan refuses any delegatecall, and that scan stays (contracts step 3a). Today generation 1's build-from-history is specified but refuses, and a new index generation can be added only until a Realm is frozen. Every "add a list later" promise depends on it, including the deferred all-authors list of everyone's versions of one file (from the contracts tag design; tag PM session, 2026-11-25). It must also reproduce the three counters (the backlink live count, the per-pair yes-count, and the per-place distinct count), not only list entries.
 - **@james confirms the fold rule** (NFKC_Casefold vs NFC + lowercase, joiners, the Unicode pin). Once a word's id exists on a lasting deployment, the rule can never change.
 - **@james confirms the default view for topics** (D11), since it decides what a newcomer sees first.
 - **One pinned Unicode version, through one committed generator,** for both the chain's refused-character table (part of the word Type's id, hand-written today and checked against Unicode 15.1 only by a throwaway script) and its JS copy, plus the SDK's fold tables and vectors (evaluated on 18.0, with a CI byte-for-byte check against the chain table). This depends on @james's fold answer, since the joiner class is provisional until then; until it closes, the word Type's id is provisional.
 - **@james rules on the session lane** (contracts-v2 `docs/QUESTIONS-FOR-JAMES.md` item 47; `docs/SESSION-LANE.md`, budgets added in `a517750`) before the signed-intent format freezes, because every user signs the meaning of the reserved `authorityId` and `authEpoch` fields once.
 - **The head's expiry field width is decided.** It is reserved and always zero, as 32-bit unix seconds (good until 2106-02-07), after the tag number took 16 bits. Widening it later is a layout change, so it must happen before a freeze.
+
+**Gates before the tag release reaches the SDK** (contracts step 5):
+- The kernel floor and the gas model agree: the SDK's split never plans a publication the floor refuses, and there's a test that a publication at the SDK's split limit is admitted. The 64-lone-negative proof is restored.
+- The final-phase reserve is measured for the worst case of code 15's check (a "not this" about a file, which costs two extra ledger reads).
+- CI time is trimmed (measurement suites in their own job, no double compile), after the 15-minute timeout on 3b.
 
 ## Working rules
 
