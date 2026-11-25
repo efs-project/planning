@@ -22,6 +22,10 @@ A lightweight parking lot for future ideas, "we should do X someday" drops, and 
 2. **A child can block inheritance.** "No logo here, and don't use my parent's" needs an explicit statement. T-4's negative number (it can stand alone with no earlier positive) is the primitive.
 3. **Path first or trust first.** Lens = [me, Microsoft]. I set `/microsoft/logo`; Microsoft sets `/microsoft/windows/logo`. Most-specific-first shows Microsoft's logo; trust-first shows mine. CSS checks origin (whose stylesheet) before specificity, which is trust-first. Choose per kind of setting before building.
 
+Two rules the tag prior-art verdict adds ([[Reviews/2026-11-25-tag-prior-art/README|verdict]], "Hierarchy as ownership and inherited settings"); recommendations, not rulings:
+- **Settings attach to places, never to words.** Places are paths, folders and homes. A setting on `/microsoft/windows` must not leak to `/house/windows`; display names and synonyms attach to words.
+- **Trust before nearness.** The verdict recommends trust-first for caution 3: a more trusted author's value on the parent beats a less trusted author's on the child, and within one author's tree the nearest value wins (the city overrides the federal default). "Microsoft owns `/microsoft`" then comes from a home (`/0x…/windows` with a readable name pointing to it) or from a lens that names whom to trust for that subtree.
+
 **Where it lands.** The Settings/Admin center and kernel policy in [[Designs/clientv2/system-surfaces|system surfaces]] (#14). It also answers the tag prior-art work's sealed hypothesis D ([[Reviews/2026-11-25-tag-prior-art/design-hypothesis-sealed|sealed hypothesis]]), which says hierarchy usually exists to delegate ownership and EFS topics have no owners. James's point is that per-subtree ownership still matters for configuration, through trust rather than through the name. No ruling, no work assigned.
 
 ### Shared public agent profiles, skills and knowledge — AGNTCY interoperability
