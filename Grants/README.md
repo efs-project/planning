@@ -28,6 +28,7 @@ Row graduation rule: a lead becomes a [[proposals]] row only when it has a plaus
 | [[proposals]] | Submitted, drafting, and watchlist proposals. Single source of truth for status. |
 | [[efs-grant-packet]] | Reusable EFS pitch, links, milestones, and budget snippets. |
 | [[research-log]] | Dated grant-specific research notes, rejected leads, and community/funder intel. |
+| [[funding-scan-2026-11-24]] | November decision brief: urgent individual grants, Ethereum precedents, Chicago partners and deadlines. |
 | [[funding-income]] | Personal development support, paid-work leads, service hypotheses and sponsorship mechanics; no duplicate status table. |
 | [[nouns-dao-funding]] | Point-in-time Nouns DAO funding research, purchase analysis, pilot hypothesis, and deep-dive prompt; not an application decision. |
 | [[futo-microgrant-application]] | Worksheet supporting the USD 5,000 walk-away file-proof proposal submitted 2026-07-29. |
@@ -103,7 +104,7 @@ Post-decision pass, within 48 hours:
 
 ## Open grant-ops tasks
 
-- [ ] Review the current eligibility and evidence gates in [[proposals]] before choosing another application. October 20 corrections retire the Arbitrum entry sprint and NLnet revision-pending advice; human-authorship restrictions also constrain agent help. Older broad research in [[funding-income]] is not a current submission queue.
+- [ ] Use [[funding-scan-2026-11-24]] for the November opportunity comparison and [[proposals]] for application status. Confirm the Ought deadline first; treat authorship policies as funder-specific.
 - [ ] Update the KarmaHQ page team section; it currently lists no team members.
 - [ ] Decide whether the KarmaHQ "Total Funds Raised" value should remain `0` until funds are received or include prior in-kind/self-funded work.
 - [ ] Replace the bare KarmaHQ "Path to Success" wording with a sharper sustainability path.

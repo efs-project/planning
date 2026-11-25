@@ -41,6 +41,8 @@ EFS v1 produced public code, a Sepolia implementation, and a working demo. EFS v
 
 ## External links
 
+- [Devcon public talk and recording](https://archive.devcon.org/devcon8/who-can-turn-off-your-ethereum-app-a-full-stack-walk-away-test/): a speaking/public-explanation sample, not a user count.
+- [Pinned v1 reproducibility record](https://github.com/efs-project/contracts/blob/e86e6e77fcb5cda31374e07c5f582b502455ba80/packages/walk-away-proof/EVIDENCE.md): exact bytes, signer, carriers, transactions and limits. See [[funding-scan-2026-11-24]] for the dated gateway recheck before promising a live demo.
 - [EFS KarmaHQ page](https://www.karmahq.xyz/project/ethereum-file-system/about)
 - [EFS website](https://efs.eth.limo)
 - Pitch deck: add exact URL from KarmaHQ quick link.

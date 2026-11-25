@@ -4,6 +4,10 @@ Active agents append once per work-session. One line per active card. Newest at 
 
 Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
+## 2026-11-24
+
+- @grants (harness codex, session november-funding-and-income-scan): Published [[funding-scan-2026-11-24]], reconciled grant intake and recorded paid-work evidence in [[funding-income]]. No applications, outreach or wallet actions. Next: James decides whether to pursue the November 26 media-provenance call.
+
 ## 2026-10-12
 
 - @pm (harness codex, session ethdenver-watch-20261012): James reaffirmed an EFS presentation goal for ETHDenver 2027. Refreshed [[Devcon/ethdenver-2027-watch]] from official event/support surfaces; no 2027 CFP, deadline or event dates verified. Adding this opportunity explicitly to the existing weekly PM review, preserving its Tuesday cadence and other duties. No application, organizer contact, booking, product deadline or design change. / next: October 13 official-source check, then alert for an opening/deadline or needed owner action.

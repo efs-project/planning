@@ -1,33 +1,29 @@
 # Funding EFS and Paying for Development Time
 
-Research checked 2026-09-11. These are options and working recommendations,
-not expected revenue, applications, customer commitments or new EFS scope.
-[[proposals]] is the sole grant/fellowship status tracker; [[programs]] and
-[[research-log]] hold the landscape and evidence. Keep personal finances and
-private employment correspondence out of the public vault.
+November 24, 2026. [[funding-scan-2026-11-24]] covers grants and competitions. [[proposals]] is the sole application tracker. Everything priced below is either a published rate, an explicitly historical precedent, or a proposed experiment. No buyer has agreed to pay James; keep private job and customer records out of this public vault.
 
-## Recommended order
+## What to sell first
 
-1. Arbitrum online entry has ended. Reconcile any final submission/outcome
-   evidence when available; do not restart signing or build a late entry.
-   Current status belongs in [[proposals]], not this strategic options note.
-2. Emergent Ventures requires James-authored application content; agents may
-   proofread, not generate its narrative or outline. Pursuit remains optional,
-   without a new chain integration requirement.
-3. Assess FUTO Fellows residency feasibility. It could fund focused EFS work
-   and living costs, but requires being in Austin. Coordinate any application
-   with the already-pending microgrant rather than sending duplicate requests.
-4. Qualify one paid engineering engagement in parallel. A signed, funded
-   milestone can provide a clearer payment path than waiting for grant awards.
-5. Keep EF routing separate from a paid grant. PM recommends deprioritizing
-   NLnet under its new policy unless James independently chooses compliant
-   human-only funded work. Sponsorship remains supplementary until donors exist.
+**Sell one successful handoff, not storage or a transaction.** Take a release or small public collection the client already publishes. Give its maintainer a portable copy, signed manifest and a short recovery procedure. The client disables the original URL and sees whether someone using their own tools can recover the exact bytes, identify their publisher and recognize changed or missing material. Record elapsed time, dependencies still required and any failures. No guarantee of perpetual storage, general security audit or paid EFS account.
 
-**October 20 correction to the September research:** NLnet's revised
-[v2.0 policy](https://nlnet.nl/foundation/policies/generativeAI/2.0) is now in
-force: no AI proposal writing or generated funded artefacts; read-only review
-is allowed. European eligibility remains unresolved. See [[proposals]] and
-[[research-log]] before any effort, not the old September 30 action.
+- **USD 750 test offer:** one public artifact, receipt and recorded restore. **USD 1,500:** add automated checks in the client's repository and one alternate-source recovery drill. **USD 3,000:** one rights-cleared archive collection, staff walkthrough and documented handoff. These are unvalidated price tests, not sourced market rates. At James's previously proposed USD 50/hour, those prices buy 15/30/60 hours before expenses; cap scope and reserve time for failures. Get a funded first milestone before custom engineering. No subscription needed to verify later.
+- **Best local discovery lead:** [Press Forward Chicago's Nov 16 decisions](https://www.cct.org/press-releases/press-forward-chicago-grants-2-8-million-to-help-chicago-newsrooms-share-resources-train-journalists-and-reach-more-residents/) award The Black Press USD 100k for newsroom legacy planning and Midway Broadcasting USD 100k for a Great Migration oral-history pilot. Ask whether either already needs to hand over a collection. These are **their grants**, not available subcontract budgets. For oral histories, get rights and consent first; no public upload or immutable storage of private material.
+- **Best Ethereum buyer test:** use a [Builder DAO Propdate](https://docs.nouns.build/contributors/attestations/) or one [CoW AppData](https://github.com/cowprotocol/cow-sdk/blob/main/packages/app-data/README.md) record. Ask which independent consumer has failed to restore it, what they use now and who controls a small engineering budget. A vote or contract would be required for payment. [eth.limo's approved ENS service proposal](https://docs.ens.domains/dao/proposals/6.13/) illustrates paid verification as part of a larger service, not an open subcontract.
+- **Buyer evidence outside crypto:** [Cook County's awarded digitization contract](https://opendocs.cookcountyil.gov/procurement/contracts/2208-10241.pdf) required independent future-system/standalone search. [FFDW's annual report](https://ffdweb.org/blog/ffdw-2024-annual-report) includes DocumentCloud/MuckRock as a preservation precedent. A [public USD 600 collectibles-verification brief](https://www.upwork.com/freelance-jobs/apply/NFT-Verification-Certificate-System-for-Physical-Collectibles_~022117893638171348256/) is a buyer's asking budget, not a completed transaction; current bid availability unverified. It wants more than a one-file pilot. Do not build the full product at that price.
+- **Why would anyone pay?** Ordinary hashes, [GitHub artifact attestations](https://docs.github.com/en/actions/concepts/security/artifact-attestations), [Woleet timestamping](https://woleet.io/EN/pricing-timestamping.html) and [Pinata storage](https://pinata.cloud/pricing) already solve pieces of this cheaply. Sell integration, a measured restore and staff handoff. If the client's existing signed manifest or backup restores just as well, tell them so. Only test a maintenance retainer once a customer wants recurring restore drills across named releases.
+- **One-week sales experiment, owner opt-in:** identify three maintainers with public artifacts and one budget holder. Ask how a previous migration, loss or provider outage was handled; ask permission to test one file. Offer one priced milestone only after they confirm the problem. Track consents, quotes, signed work and collected money separately and privately. Stop or change the offer if all three can already recover everything they need.
+
+For an archive, ask first whether it already uses [BagIt](https://www.rfc-editor.org/info/rfc8493/) for checksummed transfer or [signed WACZ](https://specs.webrecorder.net/wacz-auth/0.1.0/) for web captures. A paid exercise can preserve the institution's format and test an independent restore. Requiring an Ethereum dependency where an existing format already meets the acceptance test would weaken the offer.
+
+## Paid work outside grant cycles
+
+- **Small, priced OSS work:** Ubiquity's [open transaction-status UI issue](https://github.com/ubiquity/stake.ubq.fi/issues/44) carries a USD 75 label with a specific automated-test acceptance criterion. Its [plugin health monitor](https://github.com/ubiquity-os/.github/issues/12) is labeled USD 450 but has a long discussion. Check current assignee, competing PRs, payment asset and whether the maintainer will reserve the task. A label is neither a funded escrow nor permission to invoice; at these sizes, setup time can wipe out the fee.
+- **Freelance writing:** [Percona Community](https://percona.community/blog/2026/05/22/write-for-percona-community/) pays **USD 350 per published article**, after publication. [Pitch first](https://share.hsforms.com/2quoru-zrSli2l-89aiiJggg9e0), don't spend a week on an unsolicited article. Firsthand technical experience and human authorship required; copyright stays with the writer, published content defaults to CC BY 4.0. Not a paid order until accepted and published.
+- **Speaking and finding a host:** [Chi Hack Night](https://chihacknight.org/speaker-submissions) lists a **USD 100 eligible-speaker honorarium** and [reported USD 1,400 paid in 2025](https://chihacknight.org/blog/2026/02/24/2025-year-in-review). A useful route to find a partner, not an income plan by itself. Use the [Devcon recording](https://archive.devcon.org/devcon8/who-can-turn-off-your-ethereum-app-a-full-stack-walk-away-test/) as speaking evidence.
+- **Flexible non-EFS income:** [Handshake AI technical writing](https://joinhandshake.com/ai/opportunities/technical-writing-expert/) advertises **up to USD 100/hour**, typically 5-20 hours/week when a project is active, with no guaranteed assignments. Verify fit, actual pay and IP terms before investing time.
+- **US-remote engineering:** [OpenRouter developer products](https://jobs.ashbyhq.com/openrouter/dcc05e06-39fa-4860-a50c-5e2f8d57263a) posts **USD 215k-285k plus equity**, needs 5+ years building external developer products. [Coinbase Crypto Data Foundations](https://www.coinbase.com/careers/positions/8304038?gh_jid=8304038) posts **USD 152,405-179,300 base**, needs production distributed/data systems and quarterly in-person sessions. A Sepolia prototype can illustrate design judgment but not production experience.
+- **US-remote technical communication:** [Render developer documentation](https://jobs.ashbyhq.com/render/0ed7bac4-72f1-4d73-ab0c-e231af4ec06e) posts **USD 195k-239k plus equity**, wants 5+ years of developer documentation. [Chainguard Staff DevRel](https://job-boards.greenhouse.io/chainguard/jobs/4730616006) lists **USD 151k-178k**; [Backblaze Senior DevRel Manager](https://job-boards.greenhouse.io/backblaze/jobs/5424129008) **USD 172k-215k base**. Check actual level, Illinois eligibility, time, employer IP and outside-project carve-outs. An offer would fund James personally; it would not fund EFS engineering time by default. Listings can close without notice.
+- **Recurring support vs fiscal hosting:** existing GitHub Sponsors/Drips guidance below concerns collection mechanisms, not customers. [Software in the Public Interest](https://www.spi-inc.org/projects/associated-project-howto/) generally deducts 5% plus transaction costs and expects established projects. [Open Source Collective](https://docs.oscollective.org/welcome-and-introduction-to-osc/fees) charges 10% plus fees and is a 501(c)(6), which does not automatically meet a funder's 501(c)(3) requirement. No host or new account is necessary for the Ought or Mozilla individual applications.
 
 ## Fellowships and individual support
 
@@ -45,7 +41,7 @@ except proofreading. James must choose and write his own application; this
 note supplies no generated application scope or answers.
 [Application](https://mercatus.tfaforms.net/5099527).
 
-## A concrete part-time lead
+## Historical September part-time lead
 
 An [Upwork Safe SDK / Base frontend integration listing](https://www.upwork.com/freelance-jobs/apply/Web3-Developer-Embed-Safe-Core-SDK-Multi-Sig-Interface-Existing-Webpage-Base_~022091934531160130937/)
 was live, worldwide, posted about two weeks earlier and interviewing when
@@ -117,7 +113,7 @@ unawarded grants as money available for living costs.
 
 ## Higher-commitment or contingent alternatives
 
-**Uniswap Labs Senior Backend Engineer:** a current employer listing advertises
+**Uniswap Labs Senior Backend Engineer (September snapshot; not rechecked):** the employer listing advertised
 USD 180k-226k annual base plus separate token compensation. Full-time,
 6+ years and production cloud experience; location/remote metadata conflicts.
 Work authorization, location and outside-project/IP terms need confirmation.

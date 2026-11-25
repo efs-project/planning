@@ -15,6 +15,12 @@ Rows touched:
 Next check:
 ```
 
+## 2026-11-24 - Individual grants, Ethereum buyers and paid alternatives
+
+[[funding-scan-2026-11-24]] records the six-lane search across Ethereum, fellowships, storage, competitions, revenue and Chicago institutions. The November 26 Ought deadline has no official hour. Mozilla's LOI and separate personal stipend are confirmed. EF's three published grant routes have no active items; WEBCAT is a useful funded comparison. Giveth project 14994 exists but is presently ineligible. Filecoin Foundation now points to ProPGF's named RFPs, and Sia reopened for retroactive and operating awards. Updated the existing tables; discovery did not change any submission or award status.
+
+[[funding-income]] distinguishes named potential customers from confirmed buyers and verified posted pay from price tests. Arweave artifact bytes matched the July ledger in a new retrieval; tested IPFS gateways returned rate limits or timeout. No authenticated form, contact, transaction, funded engagement, or application.
+
 ## 2026-11-24 - NLnet closure wording removed
 
 The freshly fetched [intake](https://nlnet.nl/propose/) no longer says that
