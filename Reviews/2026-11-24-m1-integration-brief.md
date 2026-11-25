@@ -40,6 +40,11 @@ The follow-ons are an Arweave/IPFS reference, the two-author Lens fallback, tags
 - Any persistent or public deployment, and with it the Q1, Q2, Q13, Q18 and Q22 one-way doors.
 - Branch protection, which @james deferred on 2026-10-26.
 
+**Gates before any Realm freeze or lasting deployment** (tracked by @pm; each must be closed first):
+- **The later-generation index build** must be written and tested. Today generation 1's build-from-history is specified but refuses, and a new index generation can be added only until a Realm is frozen. Every "add a list later" promise depends on it, including the deferred all-authors list of everyone's versions of one file (from the contracts tag design; tag PM session, 2026-11-25).
+- **@james confirms the fold rule** (NFKC_Casefold vs NFC + lowercase, joiners, the Unicode pin). Once a word's id exists on a lasting deployment, the rule can never change.
+- **@james confirms the default view for topics** (D11), since it decides what a newcomer sees first.
+
 ## Working rules
 
 1. **One integration owner.** Any interface that another repo consumes (release files, fixture CLI, SDK exports, result shapes) changes only through @pm. Bounded internal work stays with each dev.
