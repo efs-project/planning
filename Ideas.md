@@ -8,6 +8,22 @@ A lightweight parking lot for future ideas, "we should do X someday" drops, and 
 
 ## Open
 
+### Settings inherit down a path: the most specific level wins
+*(James, 2026-11-25, during the tag discussion; he flagged it as "not directly related to tags")*
+
+> Hierarchy as ownership reminds me that it's important for EFS. I know nobody "owns" names but /microsoft/windows/ means the microsoft organization owns the windows config / other stuff. So in the OS designs / my notes when we look up the 'config value' /microsoft/windows/logo we check if windows has a logo first and if not we check the parent and iterate until we get to root. This allows us to form organizations and communities and have them set specific settings while their parent configures more general things. Allows for specialization. Kinda like the US and states laws. Federal -> State -> County -> City. Except I just made a bad example... as in this case the City can make a law that overrides the Federal laws. But I hope you get the concept.
+
+**The lookup.** For `/microsoft/windows/logo`: is `logo` set at `/microsoft/windows`? If not, try `/microsoft`, then the root. The first level that has a value wins, so a community overrides its parent only inside its own subtree. Familiar from CSS inheritance and from `.editorconfig` / `.gitconfig` searching up through parent directories.
+
+**How it fits the 2026-11-25 rulings** ([[Designs/efsv2/owner-rulings|owner-rulings]]). Topics are unowned paths (T-2), so "Microsoft owns `/microsoft/windows`" can't come from the name. It comes from trust: the reader's lens says whose values count in that subtree. Path identity makes the walk cheap: a path's parent is a fact, not a lookup ([[Reviews/2026-11-25-tag-discussion-round-3|round 3]]), so this is a few reads the SDK can do off chain.
+
+**Three things to design in when this is picked up:**
+1. **Unknown stops the walk.** If the `/microsoft/windows` level can't be read (RPC down, index incomplete), falling back to `/microsoft`'s logo shows a wrong answer as if it were right. That is EFS's dominant bug shape (a missing answer read as "none"). contracts-v2 reads already answer UNKNOWN; the walk must report it, not skip past it.
+2. **A child can block inheritance.** "No logo here, and don't use my parent's" needs an explicit statement. T-4's negative number (it can stand alone with no earlier positive) is the primitive.
+3. **Path first or trust first.** Lens = [me, Microsoft]. I set `/microsoft/logo`; Microsoft sets `/microsoft/windows/logo`. Most-specific-first shows Microsoft's logo; trust-first shows mine. CSS checks origin (whose stylesheet) before specificity, which is trust-first. Choose per kind of setting before building.
+
+**Where it lands.** The Settings/Admin center and kernel policy in [[Designs/clientv2/system-surfaces|system surfaces]] (#14). It also answers the tag prior-art work's sealed hypothesis D ([[Reviews/2026-11-25-tag-prior-art/design-hypothesis-sealed|sealed hypothesis]]), which says hierarchy usually exists to delegate ownership and EFS topics have no owners. James's point is that per-subtree ownership still matters for configuration, through trust rather than through the name. No ruling, no work assigned.
+
 ### Shared public agent profiles, skills and knowledge — AGNTCY interoperability
 *(James, 2026-09-03; extends the existing NANDA/Git agent-artifact idea)*
 
