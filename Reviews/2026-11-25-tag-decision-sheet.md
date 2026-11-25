@@ -125,6 +125,7 @@ When someone types a tag word, the app tidies it before working out its id, so t
 
 - **A** is small (1 to 10 KB in the SDK) and leaves look-alikes as separate tags.
 - **B** makes things that look the same to people the same tag. It costs about 27 KB in the SDK, loaded only by apps that use tags.
+- **A also lets through words that imitate reserved forms** (found by the SDK dev's vectors, `sdk-v2` main `64edb71`): `cars／tesla` with a full-width slash would be one valid word that looks like a path, `～efs` would look like a system link, and a full-width `０ｘ…` would look like an address. Under B these become the real characters and are refused.
 - Neither rule can merge look-alikes from different alphabets (a Cyrillic `а` in `tesla`). The app warns about those.
 
 **Three parts, with the SDK dev's and @pm's recommendation for each:**
