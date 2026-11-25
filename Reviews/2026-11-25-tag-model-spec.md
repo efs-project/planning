@@ -67,7 +67,8 @@ Every list holds statement sequence numbers, append-only, in time order. A reade
 - An entry is appended at an author's **first** statement on (topic, thing), whatever its sign. A later sign flip then needs no list write.
 - **"Newest first" therefore means most recently first-stated.** Changing a number, or removing a tag and adding it back, does not move a thing to the top. This is deliberate (PM default, 2026-11-25): an author can't bump their own entry up a public view, paging stays stable, and no list is written on a change. "Recently active" ordering is a client or Graph feature. The client labels the order "recently added".
 - **Directories, written once at registration and the same for everyone:** the child topics of a topic, and the topics that use a word.
-- **Every statement is findable.** Each statement appears in at least one all-authors list reachable from its target, whatever its sign. A lone negative has no entry in today's "what points at this" list, so one more small list covers it, for every kind of target.
+- **"What points at this" is kept per kind of link** (contracts step 3a, 2026-11-25). A file's folder placements, its tags, and the `same` and `broader` statements that name a topic are separate lists, so junk of one kind can't bury another. Nothing on chain lists "everything pointing at this, of any kind"; a reader asks per kind, and indexers get the rest from events.
+- **Every statement is findable.** Each statement appears in at least one all-authors list reachable from the thing it is about, whatever its sign. For a tag that thing is the one its role names, because a "not this" carries no target. A lone negative has no entry in today's "what points at this" list, so one more small list covers it, for every kind of target.
 - **Rebuild equals live.** Lists derive only from stored records and statements. A test must rebuild the index and compare.
 - **A topic must be registered strictly before a tag that uses it,** not merely in the same publication. The contracts spike caught a tag accepting a topic registered later in its publication, which would have missed its roll-up silently.
 - **Counts** are list lengths: cheap, but they count every statement ever made, including removed and negative ones. Treat them as "about".
@@ -106,7 +107,7 @@ For a thing X in topic T, walk the lens in order. The first author with a stance
 - **The chain checks both ends.** A first "same" or "broader" statement is refused unless its subject and target are both topics and are different topics. `property` is not judged: any subject, and a value that is a record, a file or an address.
 - **They never merge ids.** The reader gathers the lists and merges them in time order, removing duplicates. Each synonym costs one more list read.
 - **Limits:** at most 4 hops, cycle-safe, and at most 16 lists per view (PM defaults).
-- **Finding them from either side** uses the "what points at this" list that exists today.
+- **Finding them from either side** uses the topic's "what points at this" list for `same`, and the one for `broader`.
 - **Display name of a path segment:** a path-level label from the lens, else the word-level label in the reader's language, else the word.
 
 ### 3.6 Curating a topic's children
