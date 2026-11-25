@@ -155,11 +155,15 @@ Removing your own entry releases it, so the next author in the lens shows throug
 |---|---|
 | `/<word>/<word>/…` | a topic; words are folded before lookup |
 | `/<word>` | the word's page |
-| `/0x<40 hex>/<name>/…` | a home, then folder and file names, which keep their case |
-| `/~efs/…` | permanent object and revision links (as built) |
+| `/0x<40 hex>/<name>/…` | a home, then folder and file names, which keep their case. The lens defaults to the address; `?lens=` overrides it |
+| `/~efs/o/<id>`, `/~efs/v/<id>` | permanent object and revision links (as built) |
+| `/~efs/o/<folder id>/<name>/…` | names below any folder, reached by its permanent link. The folder's creator is in the lens unless `?lens=` says otherwise |
 
 - Trailing slashes are ignored. Empty segments are refused. Percent-decoding happens before folding.
 - First segments starting with `~` are reserved for the system.
+- **One grammar for the client's links and for `web3://` addresses** (2026-11-25). A link means the same thing in both. The contracts gateway used `/0x<address>/…` for "the shared root folder, seen through this author"; it now means the home there too.
+- **The realm's shared root folder has no link of its own** (decision sheet). It is reached like any folder, by its permanent link with names after it. A named shared root would be a second shared tree competing with topics.
+- **A path that starts with a plain word is a topic everywhere.** The gateway does not serve topics yet; it says so and never serves a folder at such a path, so no link made today changes meaning later.
 - Parked: whether a file name is its own mechanism or the last word of a path. Until then no link addresses a named file through a topic.
 
 ## 6. Folding (the rule that freezes)
