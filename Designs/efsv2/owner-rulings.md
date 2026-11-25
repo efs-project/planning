@@ -470,3 +470,25 @@ link-model comparison and the roll-up sketch).
   evidence; T-2 stands unless he says otherwise.
 
 — ruled by @james, 2026-11-25 (view-all only)
+
+### Homes follow the lens like any other place (later the same day)
+
+- **An address works like any other folder or tag. RULED.** *"Addresses
+  work just like other folders. /cars/ and address 0x1234... should both
+  list things attached to / tagged by it and follows lens rules. If I go to
+  (vitalik.eth or 0x1234)/pet.jpg with lenses of me, vitalik, public then I
+  should see my image of a dog first but if I don't have an image then
+  vitalik's image, then anyone's image if public / all data is turned on."*
+- **The one special case. RULED.** *"Addresses / users in the system are
+  just a special form of a folder / tag and shouldn't work differently
+  except a small edge case of us 'cheating' and being able to automatically
+  add vitalik to our lens list automatically in the middle because we should
+  see that address' data unless we overrode it."* When a reader views a
+  home, the client inserts that home's address into the lens after the
+  reader and before "public".
+- This replaces the PM's earlier suggestion that a home show its owner's
+  entries first with others' behind a tab.
+- Open detail, engineering and client: what "anyone's" returns for a named
+  entry when several people have one, and the all-authors list that needs.
+
+— ruled by @james, 2026-11-25
