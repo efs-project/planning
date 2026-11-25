@@ -108,4 +108,28 @@ No earlier system is shared, permanent and without an authority all at once.
 
 ## Waiting on @james
 
-Nothing. He said yes on 2026-11-25.
+The main choice is made (yes, 2026-11-25). One follow-up is ready for him, and it can wait until before the first lasting deployment.
+
+### The lowercasing rule
+
+When someone types a tag word, the app tidies it before working out its id, so that `Tesla` and `tesla` are the same tag. Whatever rule is used can never change once real tags exist. The SDK dev compared two rules on real Unicode data (`sdk-v2` main, `docs/design/fold-evaluation/README.md`).
+
+| What someone types | A: lowercase only (D-B as worded) | B: Unicode's full matching rule |
+|---|---|---|
+| `Tesla` | `tesla` | `tesla` |
+| `Ｔｅｓｌａ` (full-width letters, common on Asian keyboards) | a different tag from `tesla` | `tesla` |
+| `ﬁle` (with the "fi" ligature) | a different tag from `file` | `file` |
+| `Straße` | `straße` | `strasse` |
+| `❤️` and `❤` (same heart, one has an invisible marker) | two tags, or refused | one tag |
+| Persian words typed with or without their invisible joiner | two tags, or refused | one tag |
+
+- **A** is small (1 to 10 KB in the SDK) and leaves look-alikes as separate tags.
+- **B** makes things that look the same to people the same tag. It costs about 27 KB in the SDK, loaded only by apps that use tags.
+- Neither rule can merge look-alikes from different alphabets (a Cyrillic `а` in `tesla`). The app warns about those.
+
+**Three parts, with the SDK dev's and @pm's recommendation for each:**
+1. The rule: **B**.
+2. Invisible joiners and markers: **removed when working out the id**, so both typed forms meet; the display name keeps what was typed.
+3. Which Unicode version: **the newest at release, with the tables shipped inside the SDK**, so no browser's version matters.
+
+This refines D-B's wording ("NFC → lowercase"), so it is his to confirm. "All recs" is a fine answer.
