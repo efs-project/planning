@@ -110,7 +110,28 @@ No earlier system is shared, permanent and without an authority all at once.
 
 ## Waiting on @james
 
-The main choice is made (yes, 2026-11-25). The two follow-ups were answered on 2026-11-26: the Unicode rule for lowercasing, and yes to keeping a list of everyone's versions of each file (`Designs/efsv2/owner-rulings.md`). His answer on lowercasing came with a condition, and he answered the confirmation about it the same day (below). Nothing on this sheet now waits on him.
+The main choice is made (yes, 2026-11-25). The two follow-ups were answered on 2026-11-26: the Unicode rule for lowercasing, and yes to keeping a list of everyone's versions of each file (`Designs/efsv2/owner-rulings.md`). His answer on lowercasing came with a condition, and he answered the confirmation about it the same day (below). One choice is open, about characters Unicode adds in future. It can wait until before the first lasting deployment.
+
+### Letters and emoji that Unicode adds later (new 2026-11-26; one choice)
+
+**The fact behind it.** The contract's list of refused characters can never be updated once real tags exist. The list is part of the rule that gives every tag word its id, so changing it changes every tag's id (confirmed by the contracts dev). Unicode adds letters and emoji every year.
+
+| | (a) The contract lets not-yet-defined characters through | (b) The contract refuses anything not defined today |
+|---|---|---|
+| A new emoji or alphabet, a few years on | works as a tag word once apps update | can never be a tag word in that Realm |
+| Junk words | someone who bypasses the SDK can register one with such a character; apps built on the SDK never show it | none on chain |
+| Tag ids | never move | never move, because the list is never updated |
+
+- His two tests hold either way. The characters that matter in a URL are plain ASCII, and the contract checks those exactly.
+- Under (a) apps still refuse a character until their own Unicode data knows it, so nothing unknown gets in through an app.
+- Measured cost of the bigger list either way: about 480 gas more per non-ASCII character, and nothing for a plain ASCII word.
+
+**Recommendation: (a).** The tag side, the contracts dev and the integration owner recommend it. The SDK dev's evaluation recommended (b), before it was known that the list can't be updated. Until he answers, (a) is the working default.
+
+**Settled without him, from the same evaluation** (`sdk-v2` main `4eb1895`, `docs/design/word-characters/`; he can overrule any of them):
+- The flags of England, Scotland and Wales can't be tag words. The Unicode rule would quietly turn each into the same plain black flag, so the app refuses them and says why.
+- The rule keeps what some languages need inside a word: Catalan `col·lecció`, the name dots of Japanese and Chinese, Hebrew acronym marks, Tibetan. Apostrophes stay out (`don't` is `dont`).
+- A tag word can't start with `-`, which keeps `-word` free to mean "not" in a search.
 
 ### Which punctuation a tag word may contain (answered 2026-11-26)
 
