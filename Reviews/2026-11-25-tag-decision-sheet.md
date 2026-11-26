@@ -118,8 +118,8 @@ The main choice is made (yes, 2026-11-25). The two follow-ups were answered on 2
 
 **How it is applied.**
 - **Tag words:** the domain-name rule below, as written. One addition from his second test: a word can't end with a dot, because Windows can't hold such a name.
-- **File names:** his answer reads as covering them too, though he didn't say so separately. Today a file name may contain `#`, `?`, `%` and the characters Windows refuses (`< > : " | ? *`). The integration owner applies the rule there; the tag side's reading is to refuse those characters and a trailing dot, and to keep spaces, `&`, `(`, `)`, `'` and `,`, which every system accepts and links carry safely. The app would suggest a fixed name when someone uploads `Q&A #3.pdf`.
-- **Left out on purpose:** Windows' old reserved names (`con`, `aux`, `nul` and a few more). Refusing them would ban ordinary words as tags for good; an app that saves to disk can rename them. He can overrule.
+- **File names:** his answer reads as covering them too, though he didn't say so separately. Today a file name may contain `#`, `?`, `%` and the characters Windows refuses (`< > : " | ? *`). The integration owner applied it the same day: file names refuse those characters and a trailing dot, and also Windows' reserved device names (`con`, `aux.c`), since a file name is a real path component. Spaces, `&`, `(`, `)`, `'` and `,` stay, because every system accepts them and links carry them safely. The app suggests a fixed name when someone uploads `Q&A #3.pdf`.
+- **Left out on purpose, for tag words only:** Windows' old reserved names (`con`, `aux`, `nul` and a few more). Refusing them would ban ordinary words as tags for good; an app that saves topics to disk can rename them. He can overrule either choice.
 - **Not fixed by a character rule:** two files in one folder whose names differ only by capitals, which Windows and macOS can't hold together. That belongs to the open naming question.
 
 What was put to him:
