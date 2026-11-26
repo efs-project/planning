@@ -630,3 +630,36 @@ recommendation that they do because real file names carry these characters
 — ruled by @james, 2026-11-26
 
 - No `Retirements.md` row, for the reason given in the section above.
+
+### Names — Windows' reserved names are allowed; the tests are URI safety and free delimiters
+
+Corrects the section above. He had been told how his answer was applied:
+tag words still allowed Windows' reserved device names, and the
+integration owner had refused them for file names.
+
+- **RULED.** James: *"Don't refuse windows reserved names. I only care
+  about URI safety and us having some delimiters we can use for URL syntax
+  (maybe using < for outgoing edges and > for incoming edges and such for
+  searches or putting some cool core actions into the URL for core EFS
+  things instead of query string for everything)"*
+  - Windows' reserved device names (`con`, `aux`, `nul` and the rest) are
+    not refused, in file names or in tag words.
+  - The tests for a name are now two: it is safe in a URI, and it leaves
+    EFS delimiters free for URL syntax. This replaces "nothing that breaks
+    OS file paths" from the section above; a rule that rested only on an
+    operating system's limits has lost its reason.
+  - **Direction, not a ruling:** EFS links may carry syntax in the path
+    itself, not only in the query string. His examples: a mark for
+    outgoing and for incoming edges in searches, and core actions. He
+    offered `<` and `>` with "maybe".
+- **Application by the PM's side session (not his words):** the tag-word
+  rule stands (letters, digits, emoji, `-`, `_`, `.`), since it is URI
+  safe and leaves every other punctuation mark free for syntax. The "no
+  trailing dot" rule for words now rests only on links (a full stop after a
+  pasted link is trimmed), so it is a proposal of the side session and not
+  a consequence of a ruling. What the file-name rule keeps is the
+  integration owner's to re-apply.
+
+— ruled by @james, 2026-11-26
+
+- No `Retirements.md` row, for the reason given two sections above.
