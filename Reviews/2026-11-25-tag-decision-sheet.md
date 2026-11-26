@@ -110,9 +110,34 @@ No earlier system is shared, permanent and without an authority all at once.
 
 ## Waiting on @james
 
-The main choice is made (yes, 2026-11-25). Two follow-ups are ready for him: the lowercasing rule, and whether to keep a list of everyone's versions of each file (added 2026-11-26). Both can wait until before the first lasting deployment.
+The main choice is made (yes, 2026-11-25). The two follow-ups were answered on 2026-11-26: the Unicode rule for lowercasing, and yes to keeping a list of everyone's versions of each file (`Designs/efsv2/owner-rulings.md`). His answer on lowercasing came with a condition, and one confirmation about it is open. It can wait until before the first lasting deployment.
 
-### The lowercasing rule
+### Which punctuation a tag word may contain (new 2026-11-26; one confirmation)
+
+**Where it comes from.** When @james chose the Unicode rule he added that the contracts must make sure "no reserved URL characters and delimiters that we need are allowed in names".
+
+**What the contracts refuse in a tag word today.** `/` and `\`, spaces, capital letters, invisible characters, a word that is `.` or `..`, a word starting with `~`, and a word shaped like an address. Under the Unicode rule, full-width look-alikes of these become the real character and are refused too.
+
+**What they allow today.** Every other punctuation mark, including three that have a job inside a link: `#`, `?` and `%`. So `c#` is a valid tag today. Its link has to be written `/c%23`, and a link typed by hand as `/c#` opens the tag `/c` with no error.
+
+**The condition, taken as written.** Tag words work like domain names: letters and digits of any language, emoji, and `-`, `_` and `.`. No other punctuation.
+
+| Someone wants the tag | Word in the link | Shown as (its display name) |
+|---|---|---|
+| C++ | `cpp` | C++ |
+| C# | `csharp` | C# |
+| R&B | `rnb` | R&B |
+| Don't panic | `dont_panic` | Don't panic |
+| node.js, sci-fi, snake_case, 日本, ❤ | unchanged | |
+
+- **For:** a tag link never needs escaping and always means what it shows. A pasted link can't lose a trailing `)` or `!` and land on another tag. `#tesla` typed out of habit can safely be read as `tesla`. Every punctuation mark stays free for link features later, such as filters. Domain names, hashtags and GitHub topics work this way, and display names (already built) carry the real spelling.
+- **Against:** `c++` and `c#` can't be the word in the link. Whoever creates such a tag picks a plain word once.
+- Punctuation from other alphabets is treated the same way. That also closes look-alikes of `/` that the Unicode rule doesn't fold, such as the fraction slash.
+- This is about tag words. File names are a separate rule and keep ordinary file-name characters (`Q&A (final).pdf`); links escape them.
+
+**Recommendation: yes, as written.** It can't be changed after the first lasting deployment. Until he answers it is the working default for the build. The alternative is "keep punctuation": today's rule with only `#`, `?` and `%` removed, so `c++` stays a word and `c#` does not.
+
+### The lowercasing rule (answered 2026-11-26: B, the Unicode rule)
 
 When someone types a tag word, the app tidies it before working out its id, so that `Tesla` and `tesla` are the same tag. Whatever rule is used can never change once real tags exist. The SDK dev compared two rules on real Unicode data (`sdk-v2` main, `docs/design/fold-evaluation/README.md`).
 
@@ -137,7 +162,7 @@ When someone types a tag word, the app tidies it before working out its id, so t
 
 This refines D-B's wording ("NFC → lowercase"), so it is his to confirm. "All recs" is a fine answer.
 
-### Keep a list of everyone's versions of each file? (new 2026-11-26; @pm's recommendation has changed)
+### Keep a list of everyone's versions of each file? (answered 2026-11-26: yes)
 
 **What it is.** Alice creates `notes.md`, and Bob saves his own version of it. People who trust Bob see his; people who trust Alice see hers. The question is whether the chain also keeps, for each file, a list of everyone who has a version, so an app can show "3 other versions" without an outside indexer.
 

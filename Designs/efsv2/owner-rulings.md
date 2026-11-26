@@ -537,3 +537,56 @@ with the assumptions it rests on) and the research corpus in
   repositories (contracts-v2 `docs/TAG-OPTIONS.md`, SDK draft PR #36, the
   client's `tags.md`) and in Reviews, which the scanner skips. Updating
   those is in the work order of [[2026-11-25-tag-model-spec]].
+
+### Tags — the fold rule and the everyone's-versions list
+
+Evidence: [[2026-11-25-tag-decision-sheet]] "Waiting on @james" (the two
+asks as put to him), the SDK dev's fold evaluation (`sdk-v2` main,
+`docs/design/fold-evaluation/README.md`), and `contracts-v2`
+`docs/QUESTIONS-FOR-JAMES.md` Q52 and Q53. Each was put to him in chat as
+one line with a recommendation.
+
+- **RULED: the fold is Unicode's full matching rule** (rule B of the
+  evaluation, NFKC_Casefold). Asked as *"The lowercasing rule
+  (recommendation: Unicode's full matching rule)"*. James: *"I don't know
+  enough about this but the Unicode matching sounds good. Seems like a
+  client only thing but that's fine as long as the contracts ensure no
+  reserved URL characters and delimiters that we need are allowed in
+  names."*
+  - This refines D-B's wording (`NFC → lowercase → space→underscore`): the
+    fold step is NFKC_Casefold; white space to underscore stands.
+  - The sheet's parts 2 and 3 (invisible joiners and markers are removed
+    when the id is worked out; the newest Unicode version at release, with
+    the tables inside the SDK) were put to him as details of the
+    recommendation. He did not speak to them separately. They proceed as
+    recommended, as engineering under this ruling.
+  - **The condition is a requirement on the chain's word rule, and it is
+    not fully met as built.** At `contracts-v2` main `6d11858`
+    (`TopicProfile.wordRefusal`) a word refuses `/`, `\`, ASCII controls
+    and space, `A`–`Z`, Unicode white space, invisible, bidi and joiner
+    characters, `.` and `..`, a leading `~`, and `0x` plus 40 hex digits.
+    It admits every other ASCII punctuation mark, among them `#`, `?` and
+    `%`, which have a job inside a URL.
+  - **Not ruled: which characters the condition removes.** The PM's side
+    session read it as written (ASCII punctuation in a word is `-`, `_`
+    and `.` only, so `c++` and `c#` can't be words) and put that reading
+    back to him the same day for confirmation, with "keep punctuation
+    except `#`, `?`, `%`" as the alternative. Until he answers, the
+    reading is a working default for building, in
+    [[2026-11-25-tag-model-spec]] section 2.1. It is not a ruling.
+  - "Names" is read as tag words. File names (`files-name/2`, naming
+    question Q7) are a separate rule and are not changed by this.
+- **RULED: keep the everyone's-versions list from the start.** Asked as
+  *"Keep the everyone's-versions list from the start (recommendation:
+  yes)"*. James: *"Yes. Not sure on the cons but we definitely need a good
+  'show all' view from the start."* This is `contracts-v2` Q52 option (a):
+  the first index keeps, for each file, the list of every author with a
+  version of it, as a list of its own which a later index may drop.
+
+— ruled by @james, 2026-11-26
+
+- No `Retirements.md` row: the text this overrules ("NFC → lowercase" as
+  the fold; the list as "deferred") is in this file's history, in Reviews,
+  which the scanner skips, and in other repositories (`contracts-v2`
+  `docs/QUESTIONS-FOR-JAMES.md` Q52 and Q53, the SDK's interim fold).
+  Updating those is in the work order of [[2026-11-25-tag-model-spec]].
