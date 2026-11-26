@@ -124,11 +124,11 @@ The main choice is made (yes, 2026-11-25). The two follow-ups were answered on 2
 
 - His two tests hold either way. The characters that matter in a URL are plain ASCII, and the contract checks those exactly.
 - Under (a) apps still refuse a character until their own Unicode data knows it, so nothing unknown gets in through an app.
-- Measured cost of the bigger list either way: about 480 gas more per non-ASCII character, and nothing for a plain ASCII word.
+- Cost of the bigger list either way: about 600 gas more per non-ASCII character, and nothing for a plain ASCII word. (First given as 480; the final list is longer, so a lookup takes one more step.)
 
 **Recommendation: (a).** The tag side, the contracts dev and the integration owner recommend it. The SDK dev's evaluation recommended (b), before it was known that the list can't be updated. Until he answers, (a) is the working default.
 
-**Settled without him, from the same evaluation** (`sdk-v2` main `4eb1895`, `docs/design/word-characters/`; he can overrule any of them):
+**Settled without him, from the same evaluation** (`sdk-v2` main `cc348bf`, `docs/design/word-characters/`; he can overrule any of them):
 - The flags of England, Scotland and Wales can't be tag words. The Unicode rule would quietly turn each into the same plain black flag, so the app refuses them and says why.
 - The rule keeps what some languages need inside a word: Catalan `col·lecció`, the name dots of Japanese and Chinese, Hebrew acronym marks, Tibetan. Apostrophes stay out (`don't` is `dont`).
 - A tag word can't start with `-`, which keeps `-word` free to mean "not" in a search.
