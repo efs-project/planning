@@ -16,13 +16,17 @@ The follow-ons are an Arweave/IPFS reference, the two-author Lens fallback, tags
 
 ## Where things stand
 
-| Repo | Remote state | What exists | Open items |
-|---|---|---|---|
-| `contracts-v2` | `main` `90ddbf5`. [PR #2](https://github.com/efs-project/contracts-v2/pull/2) `fable/2026-10-13-core-contracts` `0d1bb80`: open, CI green, mergeable. | S1 and S1b are built: kernel, registry, index generation 1, controller and genesis, readers, Files rules, release surface. The fixture CLI (`pnpm fixture:up/verify/down`) runs one instance on the Anvil default key. `release/{release.json, efs-deployment.json, expected.json}`. | Two unresolved Codex review findings. **P1:** `viem ^2.57.7` must be an exact pin. **P2:** the index-floor quote omits matching digest-spec work, about 22,100 gas per spec, so the SDK's gas estimates and the enforced floor undercount. |
-| `sdk-v2` | `main` `af11602` | S0 scaffold only. The scheduled compat run on 11-23 passed. | F1–F14 have not been authorized. |
-| `client-v2` | `main` `060c9fd` | The C0 static frame. CSP `connect-src 'self'`. `AGENTS.md` rule 1 keeps guest boot network-free. | `.node-version` is 24.11.0; the other two repos use 24.21.0. |
+*Updated 2026-11-26 by @pm. The table from 2026-11-24 is kept in git history.*
 
-**Local checkouts.** All three repos live in `Code/EFS/<repo>` and are clean. `sdk-v2` and `client-v2` were moved to `main` on 2026-11-24; their old branches `chore/s0-scaffold` and `c0-bootstrap` are kept. The copies under `Documents/Codex/2026-10-06/task-2/` are not working locations.
+**The v1 basics from @james's brief are built on test chains:** create, rename, move, delete and restore files and folders; tag files (topics, "not this", numbers, labels); attach files to folders and to addresses; filter by kind; the File Browser (path bar, tree, a README / list / file column layout, upload, multi-select). Every save follows the outcome rules from three review rounds.
+
+| Repo | main | State |
+|---|---|---|
+| `contracts-v2` | `0fb4804` (CI green) | The tag release (`2462e54`) plus the statement-rows release: measured label/same/broader rows, the labelKey fold, `efs/bitmap-store/2`, refusal code 16. Next: build-from-history (INDEX-BUILD.md §2.6), one reviewed step at a time; started on `fable/2026-11-26-index-build-1`. |
+| `sdk-v2` | `d5e08cb` (CI green) | `@efs/sdk` (files, folders, homes, tags, labels, names, synonyms, lensTagsOf, displayOf, openObject/openPath, the floor planning rule, read bounds), with packs sdk `a7234b5a…` and fixture `f04666c3…`. Idle; not built: the fold rule (James), merged synonym reads, the children junk rule, definition/moved-to (no contract purposes). |
+| `client-v2` | `9d701db` | The File Browser with the v1 basics plus tag views (stages 1–4b: tag pages, word pages, tagging, names, tags on a file, homes with writes and Block). Next: re-pin `d5e08cb` with Block on "other" rows and its e2e. |
+
+**Waiting on @james:** the fold rule (also makes the Topics Type ids final), big-file storage (A recommended), the session lane (Q47), whether three unrecognized sessions are his, and optionally the anvil bug report. Gates before freeze and deployment are listed under "Deferred".
 
 ## Critical path
 
