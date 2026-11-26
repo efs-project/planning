@@ -49,7 +49,7 @@ Owner questions, routed to the tag PM, who asks James once: (1) the exceptions a
 - exceptions and numbers as the evaluation recommends, living in the SDK, not on chain (an SDK refusal can be loosened later without moving an id; IDNA's Catalan-only dot would lock out Occitan);
 - on chain, no leading `-` in a tag word, which keeps `-word` free for "not" in link syntax. It's an ASCII rule (code 8), so it rides the list release; file names keep a leading `-`.
 
-**One ask to James, from the tag PM:** admit unassigned code points (recommended by contracts, the tag PM and @pm; the working default) or refuse them (frozen at Unicode 18.0 for the Realm's life). Contracts may also refuse assigned code points the fold changes, at their cost call.
+**One ask to James, from the tag PM:** admit unassigned code points (recommended by contracts, the tag PM and @pm; the working default) or refuse them (frozen at Unicode 18.0 for the Realm's life). Contracts said yes to also refusing assigned code points the fold changes: about 940 ranges, TopicWordRule about 8.3 KB, the same +476 gas per character. It closes only the per-code-point part of the fold, not mark reordering or composition, and waits for James's answer. Code 8 (leading `-`, tag words only) is on the names branch with vectors, labelled as the tag PM's default applied by @pm, not James's words.
 
 The non-ASCII table stays out of the list release unless James answers before that branch is gated.
 
