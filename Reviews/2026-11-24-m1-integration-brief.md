@@ -44,7 +44,14 @@ Owner questions, routed to the tag PM, who asks James once: (1) the exceptions a
 - **Gas, measured:** +476 per non-ASCII character, nothing for an ASCII word if the table loads lazily, +44.6k for the worst 255-byte word.
 - **Refusal codes:** they fit (new: 8 leading hyphen, 9 a contextual character out of context, 10 mixed Arabic-Indic digits). "No leading combining mark" stays with the SDK.
 
-It stays out of the list release unless James answers before that branch is gated.
+**Tag PM's review (settled as PM defaults):**
+- the SDK refuses tag characters before the fold, so subdivision flags get a reason, never a silent `🏴`;
+- exceptions and numbers as the evaluation recommends, living in the SDK, not on chain (an SDK refusal can be loosened later without moving an id; IDNA's Catalan-only dot would lock out Occitan);
+- on chain, no leading `-` in a tag word, which keeps `-word` free for "not" in link syntax. It's an ASCII rule (code 8), so it rides the list release; file names keep a leading `-`.
+
+**One ask to James, from the tag PM:** admit unassigned code points (recommended by contracts, the tag PM and @pm; the working default) or refuse them (frozen at Unicode 18.0 for the Realm's life). Contracts may also refuse assigned code points the fold changes, at their cost call.
+
+The non-ASCII table stays out of the list release unless James answers before that branch is gated.
 
 **Waiting on @james** (each with a recommendation; "all recs" works): (1) optional: overrule the trailing-dot refusal for files and tag words (@pm: keep it; chat apps trim a trailing dot off a pasted link); (2) the session lane, Q47 (five rulings); (3) whether three unrecognized sessions are his; (4) optional: the amsterdam CI cadence (default: once per regenerated release, about 13 runner minutes, plus manual); big-file storage beyond D13's link-elsewhere default. **Can wait (before any lasting deployment):** the expiry field's width (default keep 32-bit seconds, to 2106). Gates before freeze and deployment are listed under "Deferred".
 
