@@ -110,9 +110,19 @@ No earlier system is shared, permanent and without an authority all at once.
 
 ## Waiting on @james
 
-The main choice is made (yes, 2026-11-25). The two follow-ups were answered on 2026-11-26: the Unicode rule for lowercasing, and yes to keeping a list of everyone's versions of each file (`Designs/efsv2/owner-rulings.md`). His answer on lowercasing came with a condition, and one confirmation about it is open. It can wait until before the first lasting deployment.
+The main choice is made (yes, 2026-11-25). The two follow-ups were answered on 2026-11-26: the Unicode rule for lowercasing, and yes to keeping a list of everyone's versions of each file (`Designs/efsv2/owner-rulings.md`). His answer on lowercasing came with a condition, and he answered the confirmation about it the same day (below). Nothing on this sheet now waits on him.
 
-### Which punctuation a tag word may contain (new 2026-11-26; one confirmation)
+### Which punctuation a tag word may contain (answered 2026-11-26)
+
+**His answer:** "? # etc shouldn't be allowed as they are literally urlencode protected params. Nothing that breaks URLs. Nothing that breaks OS file paths."
+
+**How it is applied.**
+- **Tag words:** the domain-name rule below, as written. One addition from his second test: a word can't end with a dot, because Windows can't hold such a name.
+- **File names:** his answer reads as covering them too, though he didn't say so separately. Today a file name may contain `#`, `?`, `%` and the characters Windows refuses (`< > : " | ? *`). The integration owner applies the rule there; the tag side's reading is to refuse those characters and a trailing dot, and to keep spaces, `&`, `(`, `)`, `'` and `,`, which every system accepts and links carry safely. The app would suggest a fixed name when someone uploads `Q&A #3.pdf`.
+- **Left out on purpose:** Windows' old reserved names (`con`, `aux`, `nul` and a few more). Refusing them would ban ordinary words as tags for good; an app that saves to disk can rename them. He can overrule.
+- **Not fixed by a character rule:** two files in one folder whose names differ only by capitals, which Windows and macOS can't hold together. That belongs to the open naming question.
+
+What was put to him:
 
 **Where it comes from.** When @james chose the Unicode rule he added that the contracts must make sure "no reserved URL characters and delimiters that we need are allowed in names".
 

@@ -590,3 +590,43 @@ one line with a recommendation.
   which the scanner skips, and in other repositories (`contracts-v2`
   `docs/QUESTIONS-FOR-JAMES.md` Q52 and Q53, the SDK's interim fold).
   Updating those is in the work order of [[2026-11-25-tag-model-spec]].
+
+### Names — nothing that breaks URLs, nothing that breaks OS file paths
+
+Answers the open point of the section above. He was asked two things in
+one message: whether a tag word's punctuation should be `-`, `_` and `.`
+only ("yes, as written") or today's rule less `#`, `?` and `%` ("keep
+punctuation"); and whether file names stay as built, with the
+recommendation that they do because real file names carry these characters
+(the example shown was `Q&A #3.pdf`).
+
+- **RULED.** James: *"? # etc shouldn't be allowed as they are literally
+  urlencode protected params. Nothing that breaks URLs. Nothing that breaks
+  OS file paths."*
+  - `?` and `#` are not allowed in a name, with the other characters URL
+    encoding has to protect.
+  - Two tests for any name: it must not break a URL, and it must not break
+    a file path on an operating system.
+- **Applied to tag words (the PM's side session's application, not his
+  words):** the reading already put to him stands. After the fold, the
+  ASCII of a word is `a–z`, `0–9`, `-`, `_` and `.`; letters and digits of
+  every script and emoji stay, since he ruled the Unicode fold the same
+  day. A word can't end with `.` (Windows can't hold such a name). Detail
+  in [[2026-11-25-tag-model-spec]] section 2.1.
+- **File names: he gave no separate answer, and the reply reads as
+  covering them.** He was shown the recommendation to leave file names
+  alone, with an example containing `#`, and answered that `?` and `#`
+  shouldn't be allowed and named OS file paths. `files-name/2` as built
+  admits printable ASCII less `/` and `\`, so it admits `#`, `?`, `%` and
+  the characters Windows refuses (`< > : " | ? *`). What the file-name rule
+  becomes is the integration owner's to apply (file names are outside the
+  tag design); the side session's reading was passed on the same day and
+  told to James so that he can correct it.
+- **Not settled by this:** Windows' reserved device names (`con`, `aux`,
+  `nul` and the rest), which also break a Windows path; and two file names
+  in one folder that differ only by capitals, which Windows and macOS can't
+  hold together (naming question Q7).
+
+— ruled by @james, 2026-11-26
+
+- No `Retirements.md` row, for the reason given in the section above.
