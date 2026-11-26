@@ -147,14 +147,19 @@ This refines D-B's wording ("NFC → lowercase"), so it is his to confirm. "All 
 - Adding the list later means reading the Realm's whole history back. It costs about 478k gas per file, 9.3 times the cost of keeping it from the start. After the Glamsterdam fee change it is 576k per file and 3.8 times. (Re-measured at the contracts final step; the first measurement was 485k and 9.5 times.)
 - For 10,000 files that is about 286 full transactions (about 4.8 ETH at 1 gwei). For a million files it is about 28,500 full transactions (about 478 ETH), which nobody would pay.
 - So "later" works only while a Realm is small. For a Realm that succeeds, leaving the list out is permanent, and the list could then only come from an indexer.
-- Keeping it costs each new file about 2% more gas: about 30k on the 1.68M of creating a file today, and about 118k on 6.04M after Glamsterdam. That is the storage alone, which is what the first index would pay in the store it already writes to (the contracts dev's estimate; to be measured). In the test's dearer layout, a separate store, it measured 51k and 150k.
+- Keeping it costs each new file under 2% more gas: about 26k on the 1.72M of creating a file today, and about 114k on about 6M after Glamsterdam. Editing a file costs nothing extra. (Measured 2026-11-26 in trial copies of the contracts, not yet built in; the estimate before that was 30k and 118k. In the first test's dearer layout, a separate store, it measured 51k and 150k.)
 - Keeping it can be undone. A later index can stop keeping a list (tested in step 3b). Leaving it out can't be undone once the Realm is large.
 
 **How it sits with an earlier ruling.** On 2026-07-15 @james ruled that anything written on chain through EFS is indexed automatically, so nothing is on chain yet unfindable. Bob's version of Alice's file can be found from Bob and from the version itself, but not from the file.
 
 **Recommendation: keep the list from the start.** It is the choice that can be reversed, it is cheap, and it fits the 2026-07-15 ruling. The contracts dev recommended leaving it out before the measurement and now recommends keeping it too (`contracts-v2`, `docs/QUESTIONS-FOR-JAMES.md` Q52, which says the same as this section; checked again at the final step, branch `fable/2026-11-26-final`, head `9004ed6`). The case against is unchanged: every file pays for a list that few people may read.
 
-**If yes:** the contracts dev adds it to the first index as a list of its own, which a later index may drop. Three things get measured before it is built: that it costs about the 30k above; that it fits the index contract, which has about 830 bytes of room and would use an estimated 150 to 300; and how much more gas other statements must reserve (expected to be small). No file's id or link changes. "Yes" or "no" is enough.
+**If yes:** the contracts dev adds it to the first index as a list of its own, which a later index may drop. No file's id or link changes. "Yes" or "no" is enough.
+
+The three things this sheet said would be measured first have been measured (2026-11-26, in trial copies for a contracts design proposal: `contracts-v2`, branch `fable/2026-11-26-formula-v3-design`, head `c11c47b`, `docs/WORK-MODEL-V3.md`; a document, nothing built yet). None changes the recommendation.
+- **Cost:** as above, about 26k gas per new file today and about 114k after Glamsterdam.
+- **Fit:** as a list of its own it needs 620 bytes of the index contract, more than the 150 to 300 estimated. It fits once a planned slimming of that contract is done (it frees 511 bytes), with about 700 bytes left. Putting it inside an existing list would need only 179 bytes, but then a later index could not drop it cleanly, so @pm and the tag side keep it as its own list.
+- **Effect on everything else:** none on tags. The same proposal changes how gas is reserved so that only file-version statements pay for this list. The largest publication shrinks by one in two cases: 9 new files in one publication today (10 without the list), and 27 edits after Glamsterdam (28 without).
 
 ### From the contracts design (no decision needed; here so he sees them)
 
