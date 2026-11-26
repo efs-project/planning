@@ -16,15 +16,15 @@ The follow-ons are an Arweave/IPFS reference, the two-author Lens fallback, tags
 
 ## Where things stand
 
-*Updated 2026-11-26 by @pm. The table from 2026-11-24 is kept in git history.*
+*Updated 2026-11-26 (late) by @pm. The table from 2026-11-24 is kept in git history.*
 
 **The v1 basics from @james's brief are built on test chains:** create, rename, move, delete and restore files and folders; tag files (topics, "not this", numbers, labels); attach files to folders and to addresses; filter by kind; the File Browser (path bar, tree, a README / list / file column layout, upload, multi-select). Every save follows the outcome rules from three review rounds.
 
 | Repo | main | State |
 |---|---|---|
-| `contracts-v2` | `0fb4804` (CI green) | The tag release (`2462e54`) plus the statement-rows release: measured label/same/broader rows, the labelKey fold, `efs/bitmap-store/2`, refusal code 16. Next: build-from-history (INDEX-BUILD.md §2.6), one reviewed step at a time; started on `fable/2026-11-26-index-build-1`. |
-| `sdk-v2` | `d5e08cb` (CI green) | `@efs/sdk` (files, folders, homes, tags, labels, names, synonyms, lensTagsOf, displayOf, openObject/openPath, the floor planning rule, read bounds), with packs sdk `a7234b5a…` and fixture `f04666c3…`. Idle; not built: the fold rule (James), merged synonym reads, the children junk rule, definition/moved-to (no contract purposes). |
-| `client-v2` | `9d701db` | The File Browser with the v1 basics plus tag views (stages 1–4b: tag pages, word pages, tagging, names, tags on a file, homes with writes and Block). Next: re-pin `d5e08cb` with Block on "other" rows and its e2e. |
+| `contracts-v2` | `d2d3943` (CI green) | The tag release (`2462e54`), the statement-rows release (`0fb4804`), and build-from-history step 1 (carried-store readiness). Step 2 (a budgeted walk into fresh stores) is in progress; steps 3–4 and the liveness fix follow, each reviewed. |
+| `sdk-v2` | `f631922` (CI green) | `@efs/sdk`: files, folders, homes, tags, labels, same/broader with direction, topicBroader, names, synonyms, lensTagsOf, displayOf, openObject/openPath, the floor planning rule, read bounds. Pack sdk `32e77e96…`. Idle; not built: the fold rule (James), merged synonym reads, the children junk rule, definition/moved-to. |
+| `client-v2` | `2a2f648` (CI green) | The File Browser with the v1 basics plus every tag feature the SDK offers (tag and word pages, tagging, names, tags on a file, homes with writes and Block, synonyms, Same as and Under), `pnpm demo` with seeded data, view budgets about 3× under, and 320 px checks. Idle. |
 
 **Waiting on @james:** the fold rule (also makes the Topics Type ids final), big-file storage (A recommended), the session lane (Q47), whether three unrecognized sessions are his, and optionally the anvil bug report. Gates before freeze and deployment are listed under "Deferred".
 
