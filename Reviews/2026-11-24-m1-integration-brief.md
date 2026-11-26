@@ -38,7 +38,13 @@ The table is 982 ranges, about 5.9 KB.
 
 Owner questions, routed to the tag PM, who asks James once: (1) the exceptions and numbers; (2) refuse-unassigned. Before that ask, the contracts dev states whether a later pin update moves existing word ids. (3) The ruled fold turns the England, Scotland and Wales flags into plain `🏴`. @pm's input is to refuse tag characters loudly rather than change meaning silently.
 
-Contracts are asked about the table's home, size and per-character gas, and the refusal codes. It stays out of the list release unless James answers before that branch is gated.
+**Contracts answered:**
+- **A pin update moves EVERY existing word id as built:** the table is in TopicWordRule's code, so it's in the word Type id and every word, path and topic id. So refusing unassigned characters ON CHAIN means a new namespace at each upgrade.
+- **Their recommendation, which @pm backs as the ask to James:** (i) the chain keeps a fixed deny-list that admits unassigned code points (483 ranges, about 4.9 KB in TopicWordRule's code), and the SDK refuses them at its own pin. Ids never move, new scripts need only an SDK release, and the chain already leaves the non-ASCII fold to the SDK. It fits James's "client only thing … as long as the contracts ensure" URI safety.
+- **Gas, measured:** +476 per non-ASCII character, nothing for an ASCII word if the table loads lazily, +44.6k for the worst 255-byte word.
+- **Refusal codes:** they fit (new: 8 leading hyphen, 9 a contextual character out of context, 10 mixed Arabic-Indic digits). "No leading combining mark" stays with the SDK.
+
+It stays out of the list release unless James answers before that branch is gated.
 
 **Waiting on @james** (each with a recommendation; "all recs" works): (1) optional: overrule the trailing-dot refusal for files and tag words (@pm: keep it; chat apps trim a trailing dot off a pasted link); (2) the session lane, Q47 (five rulings); (3) whether three unrecognized sessions are his; (4) optional: the amsterdam CI cadence (default: once per regenerated release, about 13 runner minutes, plus manual); big-file storage beyond D13's link-elsewhere default. **Can wait (before any lasting deployment):** the expiry field's width (default keep 32-bit seconds, to 2106). Gates before freeze and deployment are listed under "Deferred".
 
