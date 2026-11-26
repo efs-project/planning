@@ -147,14 +147,14 @@ This refines D-B's wording ("NFC → lowercase"), so it is his to confirm. "All 
 - Adding the list later means reading the Realm's whole history back. It costs about 485k gas per file, 9.5 times the cost of keeping it from the start. After the Glamsterdam fee change it is 582k per file and 3.9 times.
 - For 10,000 files that is about 290 full transactions (about 4.85 ETH at 1 gwei). For a million files it is about 29,000 full transactions (about 485 ETH), which nobody would pay.
 - So "later" works only while a Realm is small. For a Realm that succeeds, leaving the list out is permanent, and the list could then only come from an indexer.
-- Keeping it costs each new file 2 to 3% more gas: about 30k to 51k on the 1.68M of creating a file today, and about 118k to 150k on 6.04M after Glamsterdam. The higher figure was measured in the test's layout; the lower is the storage alone, which is what the first index would pay in its own store. The dev would measure the exact figure.
+- Keeping it costs each new file about 2% more gas: about 30k on the 1.68M of creating a file today, and about 118k on 6.04M after Glamsterdam. That is the storage alone, which is what the first index would pay in the store it already writes to (the contracts dev's estimate; to be measured). In the test's dearer layout, a separate store, it measured 51k and 150k.
 - Keeping it can be undone. A later index can stop keeping a list (tested in step 3b). Leaving it out can't be undone once the Realm is large.
 
 **How it sits with an earlier ruling.** On 2026-07-15 @james ruled that anything written on chain through EFS is indexed automatically, so nothing is on chain yet unfindable. Bob's version of Alice's file can be found from Bob and from the version itself, but not from the file.
 
-**Recommendation: keep the list from the start.** It is the choice that can be reversed, it is cheap, and it fits the 2026-07-15 ruling. The contracts dev's written recommendation is still "leave it out", because every file would pay for a list few people read.
+**Recommendation: keep the list from the start.** It is the choice that can be reversed, it is cheap, and it fits the 2026-07-15 ruling. The contracts dev recommended leaving it out before the measurement and now recommends keeping it too (`contracts-v2` main `726993e`, `docs/QUESTIONS-FOR-JAMES.md` Q52, which says the same as this section). The case against is unchanged: every file pays for a list that few people may read.
 
-**If yes:** the contracts dev adds it to the first index as a list of its own and measures the exact price. No file's id or link changes. "Yes" or "no" is enough.
+**If yes:** the contracts dev adds it to the first index as a list of its own, which a later index may drop. Three things get measured before it is built: that it costs about the 30k above; that it fits the index contract, which has about 970 bytes of room and would use an estimated 150 to 300; and how much more gas other statements must reserve (expected to be small). No file's id or link changes. "Yes" or "no" is enough.
 
 ### From the contracts design (no decision needed; here so he sees them)
 
