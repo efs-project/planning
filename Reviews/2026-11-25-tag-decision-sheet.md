@@ -110,7 +110,7 @@ No earlier system is shared, permanent and without an authority all at once.
 
 ## Waiting on @james
 
-The main choice is made (yes, 2026-11-25). One follow-up is ready for him, and it can wait until before the first lasting deployment.
+The main choice is made (yes, 2026-11-25). Two follow-ups are ready for him: the lowercasing rule, and whether to keep a list of everyone's versions of each file (added 2026-11-26). Both can wait until before the first lasting deployment.
 
 ### The lowercasing rule
 
@@ -137,6 +137,25 @@ When someone types a tag word, the app tidies it before working out its id, so t
 
 This refines D-B's wording ("NFC → lowercase"), so it is his to confirm. "All recs" is a fine answer.
 
+### Keep a list of everyone's versions of each file? (new 2026-11-26; @pm's recommendation has changed)
+
+**What it is.** Alice creates `notes.md`, and Bob saves his own version of it. People who trust Bob see his; people who trust Alice see hers. The question is whether the chain also keeps, for each file, a list of everyone who has a version, so an app can show "3 other versions" without an outside indexer.
+
+**What this sheet said before.** Leave the list out and add it later if it's wanted: "a deferral and not a loss". The contracts dev has now built and measured "add it later" (`contracts-v2`, build steps 3b and 4), and that sentence no longer holds.
+
+**What the measurement shows.**
+- Adding the list later means reading the Realm's whole history back. It costs about 485k gas per file, 9.5 times the cost of keeping it from the start. After the Glamsterdam fee change it is 582k per file and 3.9 times.
+- For 10,000 files that is about 290 full transactions (about 4.85 ETH at 1 gwei). For a million files it is about 29,000 full transactions (about 485 ETH), which nobody would pay.
+- So "later" works only while a Realm is small. For a Realm that succeeds, leaving the list out is permanent, and the list could then only come from an indexer.
+- Keeping it costs each new file 2 to 3% more gas: about 30k to 51k on the 1.68M of creating a file today, and about 118k to 150k on 6.04M after Glamsterdam. The higher figure was measured in the test's layout; the lower is the storage alone, which is what the first index would pay in its own store. The dev would measure the exact figure.
+- Keeping it can be undone. A later index can stop keeping a list (tested in step 3b). Leaving it out can't be undone once the Realm is large.
+
+**How it sits with an earlier ruling.** On 2026-07-15 @james ruled that anything written on chain through EFS is indexed automatically, so nothing is on chain yet unfindable. Bob's version of Alice's file can be found from Bob and from the version itself, but not from the file.
+
+**Recommendation: keep the list from the start.** It is the choice that can be reversed, it is cheap, and it fits the 2026-07-15 ruling. The contracts dev's written recommendation is still "leave it out", because every file would pay for a list few people read.
+
+**If yes:** the contracts dev adds it to the first index as a list of its own and measures the exact price. No file's id or link changes. "Yes" or "no" is enough.
+
 ### From the contracts design (no decision needed; here so he sees them)
 
 The contracts dev's measured design is reviewed and accepted as the basis for the build (`contracts-v2`, branch `spike/2026-11-25-tags`, `docs/TAG-DESIGN.md`).
@@ -147,9 +166,9 @@ The contracts dev's measured design is reviewed and accepted as the basis for th
 - **"Remove" and "Hide" are different.** Removing your own `pet.jpg` at a shared place lets the next person's show through. Hiding stops anything showing there for you.
 - **Any app's things can be tagged,** not only files.
 
-The design ends with five points for him, each with a "keep it" recommendation that @pm shares. No reply is needed unless he disagrees:
+The design ends with five points for him. Four have a "keep it" recommendation that @pm shares, and need no reply unless he disagrees. Point 4 has become a decision (above):
 1. **The number's range** is −65,536 to 65,535. Wider would cost extra storage on every tag that uses it.
 2. **A tag is filed under a topic or an address, nothing else.** An app that wants its own kind of link between its own things defines one, at the same cost.
 3. **No word may start with `~` or look like an address,** anywhere in a path.
-4. **Everyone's versions of one file are not listed on the chain for now.** Keeping that list costs about 36k gas for every file ever created. The contracts dev confirmed it can be added later and filled in exactly from history, on one condition: the step that builds a new list from history is designed but not yet written, and it must exist before a Realm is ever frozen. @pm treats that as a release gate, so this is a deferral and not a loss. **Added 2026-11-26: adding it later has a price.** The contracts dev's design for that step estimates (not measured) that building this list from history for a Realm of a million files would take about 290B gas, roughly eight to nine times what keeping it from the start would have cost in total. After the Glamsterdam fee change the gap narrows to about three times (390B against 128B), because storage gets dearer and reading history does not. Whoever runs the build pays it, not each person saving a file. So waiting is cheaper only if the list turns out not to be wanted. A file's creator's version can always be found without the list; the list is only needed to find other people's versions of the same file. @pm's recommendation is unchanged: leave it out for now.
+4. **Everyone's versions of one file are not listed on the chain as built.** This is now a decision for him, under "Waiting on @james" above, because the measured price of adding the list later (2026-11-26) overturned what this point said before: that leaving it out was a deferral and not a loss. A file's creator's version can always be found without the list; the list is only needed to find other people's versions of the same file.
 5. **Cost:** a tag is about half the price of creating a file, and a deep new path can take two or three transactions the first time.
