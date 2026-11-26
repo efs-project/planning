@@ -167,6 +167,18 @@ Removing your own entry releases it, so the next author in the lens shows throug
 
 **The invariant** (contracts dev's wording): an author can always mask or release a binding of theirs that already exists, and no validator may refuse that. A validator may refuse an action that asserts something, and an action that creates a new position for its author, of either sign.
 
+### 3.9 Everyone's versions of a file
+
+Ruled by @james on 2026-11-26 ("we definitely need a good 'show all' view from the start"). Built in the contracts' list release as a list of its own (`head-authors`, family 22), checked from the tag side before its gated head (index change 6ff6762, `test/index/EveryonesVersions.t.sol`).
+
+- **What the list holds.** For each file, one entry per author's first version statement of either sign, in the order those were made. `count` is the authors who ever made one; `live` is the authors whose version stands now. An edit writes nothing.
+- **How it is read:** three existing calls, with no reader contract in between: the list's head at the index, a slice of its entries, then each entry's author and that author's current version (`LedgerViews.authorHeads`).
+- **The caller checks coverage** (SDK). The first call reports whether the list is COMPLETE. Anything else is answered as unknown, never as "no other versions". A later index may stop keeping this list, and a client that skipped the check would then show an empty list as fact.
+- **"N versions" is `live`, not `count`** (SDK). `count` includes authors who only said no and authors whose version is hidden or removed.
+- **The order is each author's first version, not their latest edit** (client). "Most recently edited first" can't be read from the list. A view reads from the end for "newest author first" and can sort the page it fetched.
+- **It is a public-tier list** (client). Anyone can add an entry to any file's list with one statement from a new account, at about the price of any junk row. Lens authors' versions come first and the rest is labelled public, as in a topic's Everyone view.
+- **Cost, as built:** 26,054 gas per new file today; 16,154 of execution plus 97,920 of state gas after Glamsterdam; one fewer new file in a publication today (9, not 10). An edit costs nothing extra. These are the list branch's figures and are confirmed when its gated head arrives.
+
 ## 4. Homes
 
 - The id derives from the address alone.
