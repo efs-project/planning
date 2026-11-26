@@ -159,7 +159,7 @@ This refines D-B's wording ("NFC → lowercase"), so it is his to confirm. "All 
 The three things this sheet said would be measured first have been measured (2026-11-26, in trial copies for a contracts design proposal: `contracts-v2`, branch `fable/2026-11-26-formula-v3-design`, head `c11c47b`, `docs/WORK-MODEL-V3.md`; a document, nothing built yet). None changes the recommendation.
 - **Cost:** as above, about 26k gas per new file today and about 114k after Glamsterdam.
 - **Fit:** as a list of its own it needs 620 bytes of the index contract, more than the 150 to 300 estimated. It fits once a planned slimming of that contract is done (it frees 511 bytes), with about 700 bytes left. Putting it inside an existing list would need only 179 bytes, but then a later index could not drop it cleanly, so @pm and the tag side keep it as its own list.
-- **Effect on everything else:** none on tags. The same proposal changes how gas is reserved so that only file-version statements pay for this list. The largest publication shrinks by one in two cases: 9 new files in one publication today (10 without the list), and 27 edits after Glamsterdam (28 without).
+- **Effect on everything else:** none on tags. The same proposal changes how gas is reserved so that only file-version statements pay for this list. The largest publication shrinks by about one in two cases: new files in one publication today (9 against 10 without the list), and edits after Glamsterdam. The exact batch figures are being re-measured with the formula's final values.
 
 ### From the contracts design (no decision needed; here so he sees them)
 
