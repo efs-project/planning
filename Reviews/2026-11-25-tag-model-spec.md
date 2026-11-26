@@ -118,7 +118,11 @@ For a thing X in topic T, walk the lens in order. The first author with a stance
 - **How the two levels are told apart** (a word page is also a root-level topic): "same" between two word pages is the word-level synonym, and it also makes the two root places the same. Between two paths it joins those two places only. Between a word page and a path it joins the root place and that one path, with no word-level effect.
 - **The chain checks both ends.** A first "same" or "broader" statement is refused unless its subject and target are both topics and are different topics. `property` is not judged: any subject, and a value that is a record, a file or an address.
 - **They never merge ids.** The reader gathers the lists and merges them in time order, removing duplicates. Each synonym costs one more list read.
-- **Limits:** at most 4 hops, cycle-safe, and at most 16 lists per view (PM defaults).
+- **Synonyms come only from the lens,** never from the public tier. A stranger can't merge another topic into everyone's view. With an empty lens there are none.
+- **A word-level synonym reaches multi-word paths one swap at a time** (answer to the SDK dev, 2026-11-26). `/car/tesla` joins `/cars/tesla`'s view when `car` = `cars`. One swapped word is one hop, like one path-level synonym, so `/car/tesla_motors` is two hops away. Only registered paths count, and the last word is tried first when the cap forces a choice.
+- **Limits:** at most 4 hops, cycle-safe, and at most 16 lists per view (PM defaults). A view that was cut says so.
+- **"Not this" in a merged view** (answer to the SDK dev, 2026-11-26). Each synonym's list is decided at its own place, so a lens author's "not this" at another synonym hides only that synonym's row. A lens author's "not this" at the place being viewed hides the thing from that page wherever it was filed, in the lens order of 3.1. If I marked a photo "not this" at `/cars`, it stays off my `/cars` page even when someone tags it at `/autos`. The SDK applies this to rows that come from synonym lists, because the chain's reader for a synonym doesn't know which page is being viewed.
+- **A synonym list that can't be read** makes the page partial and is named as missing. It never blanks the view and never passes as complete.
 - **Finding them from either side** uses the topic's "what points at this" list for `same`, and the one for `broader`.
 - **Display name of a path segment:** a path-level label from the lens, else the word-level label in the reader's language, else the word.
 
