@@ -25,9 +25,23 @@ aliases: [For-James]
     audit could not publish because no remote exists; creating one requires an
     explicit visibility choice.
 
+- **FJ-6 — Are these three sessions yours?** "client-v2-writes-0a", "EFS Sepolia default" and the cloud session "EFS v2 design coherence and MVP readiness" were not started by the v2 PM and aren't in its team.
+  - **a.** Yes, mine: leave them.
+  - **b.** Not mine: the PM stops them (it asks you again before stopping each).
+- **FJ-7 — Post the anvil bug report upstream?** The write-up is `sdk-v2/tools/anvil-blockhash-repro/README.md` (anvil 1.8.3 answers one block hash from two states; 43 of 1,893 pairs; it ships a repro script). Nothing is posted yet. Posting to Foundry's public GitHub is a public act.
+  - **a. Recommended:** yes. Say which GitHub account posts it.
+  - **b.** Not now.
+- **FJ-8 — Delete the client-v2 repo's merged remote branches?** 52 are merged into main. One, `feat/external-files` `70ad381`, is unmerged but superseded by main's `a69b5a3`.
+  - **a. Recommended:** delete the 52 merged ones and keep (or tag) `70ad381`.
+  - **b.** Leave them all.
+
 ## 🕐 WHEN YOU HAVE TIME
 
 - **EFS 2.0 consolidation is in engineering review** — the phone-readable README points to the detailed draft constitution and Core candidate; the old P/LP packet is superseded as a live queue. Nothing needs your answer until the evidence gates return a real fork. Start at [the EFS 2.0 README](./Designs/efsv2/README.md) only when you want the current model.
+- **The two client themes, cypher and paper, are waiting for your reaction.** The screenshots are in `client-v2-writes/shots/themes/` (light and dark, desktop and 320 px). Nobody changes a theme until you say what to change. Brief: [[Reviews/2026-11-24-m1-integration-brief]].
+- **A version other people can use** needs a v2 testnet deployment (contracts) and a default RPC list. It stays local-only until you ask.
+- **Bigger SDK features** (export and restore, a CLI, an MCP connector) aren't in your MVP list, so they wait for your word.
+- **The amsterdam CI cadence** defaults to once per release (about 39 minutes a run). Say if you want it more often.
 - **Other design queues are held for evidence.** The old Client `OS1`/`OS2` and root `R1` packets are not live James decisions. See [Open-Decisions.md](./Open-Decisions.md) for the generated held/evidence inventory.
 - Frame-review the proposed design process → [[Brainstorms/2026-05-28-pm-design-process-synthesis]] (then I formalize it)
 
